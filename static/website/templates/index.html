@@ -1,0 +1,12 @@
+{% extends 'website/templates/base.html' %}
+{% block content %}
+{% for category in categories %}
+    <div class="col-lg-4 col-">
+        <a href="{% url 'website:fetch_tutorials' category %}">{{ category }}</a>
+        <br>
+        {% load count_tags %}
+        Count = {% category_post_count category %}
+    </div>
+{% endfor %}
+<div class="clear"></div>
+{% endblock %}

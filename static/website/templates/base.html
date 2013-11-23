@@ -1,0 +1,74 @@
+{% load static %}
+<html>
+    <head>
+        <title>Spoken-Tutorial Forums</title>
+        <link rel="stylesheet" href="{% static 'website/css/bootstrap.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+        <link rel="stylesheet" href="{% static 'website/css/main.css' %}" type="text/css" media="screen" charset="utf-8" />
+    </head>
+    <body>
+        <div id="header-wrapper">
+            <div id="header-inner">
+                <nav class="navbar navbar-default" role="navigation">
+                    <div class="container">
+                        <!-- Brand and toggle get grouped for better mobile display -->
+                        <div class="navbar-header">
+                            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                              <span class="sr-only">Toggle navigation</span>
+                              <span class="icon-bar"></span>
+                              <span class="icon-bar"></span>
+                              <span class="icon-bar"></span>
+                            </button>
+                            <a class="navbar-brand" href="{% url 'website:home' %}">Spoken Tutorial Forums</a>
+                        </div> <!-- /.navbar-header -->
+
+                        <!-- Collect the nav links, forms, and other content for toggling -->
+                        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                            <ul class="nav navbar-nav navbar-right">
+                              <li><a href="#">Home</a></li>
+                              <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                  <li><a href="#">Action</a></li>
+                                  <li><a href="#">Another action</a></li>
+                                  <li><a href="#">Something else here</a></li>
+                                  <li class="divider"></li>
+                                  <li><a href="#">Separated link</a></li>
+                                </ul>
+                              </li>
+                            </ul>
+                        </div> <!-- /.navbar-collapse -->
+                  </div> <!-- /.container -->
+                </nav>
+            </div> <!-- /#header-inner -->
+        </div> <!-- /#header-wrapper -->
+        
+        <div id="content-wrapper">
+            <div id="content-inner" class="container">
+                <div id="content" class="col-lg-10 col-md-10 col-sm-10">
+                    {% block content %}
+                    {% endblock %}
+                </div> <!-- /#content -->
+                
+                <div id="sidebar" class="col-lg-2 col-md-2 col-sm-2">
+                    {% block sidebar %}
+                        <h4>Recent Posts</h4>
+                        {% load sidebar_tags %}
+                        {% recent_posts %}
+                    {% endblock %}
+                </div> <!-- /#sidebar -->
+            </div> <!-- /#content-inner -->
+        </div> <!-- /#content-wrapper -->
+        
+        <div id="footer-wrapper">
+            <div id="footer-inner" class="container">
+                <div class="pull-left">
+                </div> 
+                <div class="pull-right">
+                </div>
+            </div> <!-- /#footer-inner -->
+        </div> <!-- /#footer-wrapper -->
+        
+        <script src="{% static 'website/js/jquery.min.js' %}"></script>
+        <script src="{% static 'website/js/bootstrap.min.js' %}"></script>
+    </body>
+</html>
