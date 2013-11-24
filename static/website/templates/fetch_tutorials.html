@@ -1,9 +1,10 @@
 {% extends 'website/templates/base.html' %}
 {% block content %}
 {% for tut in tutorials %}
-    <a href="{% url 'website:fetch_posts' category tut.tutorial_name %}">
-        {{tut.tutorial_name}}
-    </a>
-    <br>
+    <div class="tutorial">
+        <a href="{% url 'website:fetch_posts' category tut.tutorial_name %}">
+            {{tut.tutorial_name}}
+        </a>
+    </div>
 {% endfor %}
 {% endblock %}
