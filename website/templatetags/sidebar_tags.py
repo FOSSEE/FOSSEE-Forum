@@ -1,12 +1,11 @@
 from django import template
 
-from website.models import Post, Reply
+from website.models import Question, Reply
 
 register = template.Library()
 
-def recent_posts():
-    recent_posts = Post.objects.all().order_by('-id')[:5]
-    return {'recent_posts': recent_posts}
+def recent_questions():
+    recent_questions = Question.objects.all().order_by('-id')[:5]
+    return {'recent_questions': recent_questions}
 
-register.inclusion_tag('website/templates/recent_posts.html')(recent_posts)
-
+register.inclusion_tag('website/templates/recent_questions.html')(recent_questions)

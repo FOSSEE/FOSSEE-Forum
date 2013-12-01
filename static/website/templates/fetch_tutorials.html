@@ -2,7 +2,7 @@
 {% block content %}
 {% for tut in tutorials %}
     <div class="tutorial">
-        <a href="{% url 'website:fetch_posts' category tut.tutorial_name %}">
+        <a href="{% url 'website:fetch_questions' category tut.tutorial_name %}">
             {{tut.tutorial_name}}
         </a>
     </div>

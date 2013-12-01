@@ -20,6 +20,9 @@ def get_video_info(path):
     total += 60 * minutes
     total += seconds
 
+    info_m['hours'] = hours
+    info_m['minutes'] = minutes
+    info_m['seconds'] = seconds
     info_m['duration'] = total
     info_m['width'] = int(info_m['width'])
     info_m['height'] = int(info_m['height'])

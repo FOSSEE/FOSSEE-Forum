@@ -1,10 +1,14 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-class Post(models.Model):
+class Question(models.Model):
     user  = models.ForeignKey(User)
     category = models.CharField(max_length=200)
     tutorial = models.CharField(max_length=200)
+    minute_start = models.IntegerField()
+    minute_end = models.IntegerField()
+    second_start = models.IntegerField()
+    second_end = models.IntegerField()
     title = models.CharField(max_length=200)
     body = models.TextField()
     date_created = models.DateTimeField(auto_now_add=True)
@@ -12,7 +16,7 @@ class Post(models.Model):
 
 class Reply(models.Model):
     user  = models.ForeignKey(User)
-    post = models.ForeignKey(Post)
+    question = models.ForeignKey(Question)
     title = models.CharField(max_length=200)
     body = models.TextField()
     date_created = models.DateTimeField(auto_now_add=True)

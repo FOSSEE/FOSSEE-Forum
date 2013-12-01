@@ -1,0 +1,9 @@
+{% extends 'website/templates/base.html' %}
+{% block content %}
+{{ category }}, {{ tutorial }}
+<br>
+Number of questions: {{ questions|length }} <br>
+{% for question in questions %}
+    <a href="{% url 'website:get_question' question.id %}"> {{ question.title }}</a>
+{% endfor %}
+{% endblock %}

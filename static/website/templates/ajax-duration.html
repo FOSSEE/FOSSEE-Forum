@@ -1,0 +1,16 @@
+{% load count_tags %}
+<div>
+<div id="minutes">
+    <option value="None">min</option>
+    {% for i in minutes|inc|get_range %}
+        <option value="{{ i }}-{{ i|inc }}">{{ i }}-{{ i|inc }} </option>
+    {% endfor %}
+</div> <!-- /#minutes -->
+
+<div id="seconds">
+    <option value="None">sec</option>
+    {% for i in seconds|get_range:"0,10" %}
+        <option value="{{ i }}">{{ i }}-{{ i|add:"10" }} </option>
+    {% endfor %}
+</div> <!-- /#seconds -->
+</div> <!-- /required for ajax -->

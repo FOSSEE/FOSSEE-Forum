@@ -5,11 +5,11 @@
         <a href="{% url 'website:fetch_tutorials' category %}">{{ category }}</a>
         <br>
         {% load count_tags %}
-        <span class="posts">
-            {% category_post_count category %} posts, 
+        <span class="questions">
+            {% category_question_count category %} questions, 
         </span>
         <span class="replies">
-            {% category_post_count category %} replies
+            {% category_question_count category %} replies
         </span>
         <span class="helper">
             A

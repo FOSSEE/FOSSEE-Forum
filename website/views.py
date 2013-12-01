@@ -1,9 +1,11 @@
-import math
-
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
+from django.core.context_processors import csrf
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
 
-from website.models import Post, Reply, TutorialDetails, TutorialResources
+from website.models import Question, Reply, TutorialDetails, TutorialResources
+from website.forms import NewQuestionForm
 from website.helpers import get_video_info
 
 categories = [
@@ -37,48 +39,68 @@ def fetch_tutorials(request, category=None):
     }
     return render_to_response('website/templates/fetch_tutorials.html', context)
 
-def fetch_posts(request, category=None, tutorial=None):
-    posts = Post.objects.filter(category=category).filter(tutorial=tutorial)
+def fetch_questions(request, category=None, tutorial=None):
+    questions = Question.objects.filter(category=category).filter(tutorial=tutorial)
     context = {
         'category': category,
         'tutorial': tutorial,
-        'posts': posts
+        'questions': questions
     }
-    return render_to_response('website/templates/fetch_posts.html', context)
+    return render_to_response('website/templates/fetch_questions.html', context)
 
 
-def get_post(request, post_id=None):
-    post = get_object_or_404(Post, id=post_id)
-    replies = post.reply_set.all()
+def get_question(request, question_id=None):
+    question = get_object_or_404(Question, id=question_id)
+    replies = question.reply_set.all()
     context = {
-        'post': post,
+        'question': question,
         'replies': replies
     }
-    return render_to_response('website/templates/get_post.html', context)
+    return render_to_response('website/templates/get_question.html', context)
 
-def new_post(request):
-    video_info = get_video_info('/home/cheese/test-video.ogv')
-    duration = math.ceil(video_info['duration']/60) #assuming the video is less than an hour
-    return HttpResponse(duration)
+@login_required
+def new_question(request):
+    if request.method == 'POST':
+        form = NewQuestionForm(request.POST)
+        if form.is_valid():
+            return HttpResponse("valid")
+    else:
+        form = NewQuestionForm()
 
+    context = {
+        'form': form
+    }
+    context.update(csrf(request))
+    return render_to_response('website/templates/new-question.html', context)
 
+@csrf_exempt
+def ajax_tutorials(request):
+    if request.method == 'POST':
+        category = request.POST.get('category')
+        tutorials = TutorialDetails.objects.using('spoken').filter(foss_category=category)
+        context = {
+            'tutorials': tutorials
+        }
+        return render_to_response('website/templates/ajax-tutorials.html', context)
 
+@csrf_exempt
+def ajax_duration(request):
+    if request.method == 'POST':
+        category = request.POST['category']
+        tutorial =request.POST['tutorial']
+        video_info = get_video_info('/home/cheese/test-video.ogv')
 
+        # convert minutes to 1 if less than 0
+        # convert seconds to nearest upper 10th number eg(23->30)
+        minutes = video_info['minutes']
+        seconds = video_info['seconds']
+        if minutes < 0: 
+            minutes = 1
+        seconds = int(seconds - (seconds % 10 - 10))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        print minutes, seconds
+        context = {
+            'minutes': minutes,
+            'seconds':seconds,
+        }
+        return render_to_response('website/templates/ajax-duration.html', context)
