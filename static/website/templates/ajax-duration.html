@@ -10,7 +10,7 @@
 <div id="seconds">
     <option value="None">sec</option>
     {% for i in seconds|get_range:"0,10" %}
-        <option value="{{ i }}">{{ i }}-{{ i|add:"10" }} </option>
+        <option value="{{ i }}-{{ i|add:"10" }}">{{ i }}-{{ i|add:"10" }}</option>
     {% endfor %}
 </div> <!-- /#seconds -->
 </div> <!-- /required for ajax -->

@@ -2,9 +2,11 @@ from django.conf.urls import patterns, include, url
 
 urlpatterns = patterns('',
     url(r'^$', 'website.views.home', name='home'),
-    url(r'^category/(?P<category>.+)/$', 'website.views.fetch_tutorials', name='fetch_tutorials'),
-    url(r'^tutorial/(?P<category>.+)/(?P<tutorial>.+)/$', 'website.views.fetch_questions', name='fetch_questions'),
-    url(r'^question/(?P<question_id>\d+)$', 'website.views.get_question', name='get_question'),
+    url(r'^question/(?P<question_id>\d+)/$', 'website.views.get_question', name='get_question'),
+    url(r'^filter/(?P<category>[^/]+)/$', 'website.views.filter', name='filter'),
+    url(r'^filter/(?P<category>[^/]+)/(?P<tutorial>[^/]+)/$', 'website.views.filter', name='filter'),
+    url(r'^filter/(?P<category>[^/]+)/(?P<tutorial>[^/]+)/(?P<minute_range>[^/]+)/$', 'website.views.filter', name='filter'),
+    url(r'^filter/(?P<category>[^/]+)/(?P<tutorial>[^/]+)/(?P<minute_range>[^/]+)/(?P<second_range>[^/]+)/$', 'website.views.filter', name='filter'),
     url(r'^new-question/$', 'website.views.new_question', name='new_question'),
     
     # Ajax helpers

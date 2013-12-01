@@ -26,28 +26,11 @@ categories = [
 ] 
 
 def home(request):
+    questions = Question.objects.all()
     context = {
-        'categories': categories
-    }
-    return render_to_response('website/templates/index.html', context)
-
-def fetch_tutorials(request, category=None):
-    tutorials = TutorialDetails.objects.using('spoken').filter(foss_category=category)
-    context = {
-        'category': category,
-        'tutorials': tutorials
-    }
-    return render_to_response('website/templates/fetch_tutorials.html', context)
-
-def fetch_questions(request, category=None, tutorial=None):
-    questions = Question.objects.filter(category=category).filter(tutorial=tutorial)
-    context = {
-        'category': category,
-        'tutorial': tutorial,
         'questions': questions
     }
-    return render_to_response('website/templates/fetch_questions.html', context)
-
+    return render_to_response('website/templates/index.html', context)
 
 def get_question(request, question_id=None):
     question = get_object_or_404(Question, id=question_id)
@@ -58,12 +41,26 @@ def get_question(request, question_id=None):
     }
     return render_to_response('website/templates/get_question.html', context)
 
+def filter(request,  category='', tutorial='', minute_range='', second_range=''):
+    res = category + '<br>' + tutorial + '<br>' + minute_range + '<br>' + second_range
+    return HttpResponse(res)
+
 @login_required
 def new_question(request):
     if request.method == 'POST':
         form = NewQuestionForm(request.POST)
         if form.is_valid():
-            return HttpResponse("valid")
+            cleaned_data = form.cleaned_data
+            question = Question()
+            question.user = request.user
+            question.category = cleaned_data['category']
+            question.tutorial = cleaned_data['tutorial']
+            question.minute_range = cleaned_data['minute_range']
+            question.second_range = cleaned_data['second_range']
+            question.title = cleaned_data['title']
+            question.body = cleaned_data['body']
+            question.save()
+            return HttpResponse('atlast :>')
     else:
         form = NewQuestionForm()
 

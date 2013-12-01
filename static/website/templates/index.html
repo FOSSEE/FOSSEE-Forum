@@ -1,20 +1,27 @@
 {% extends 'website/templates/base.html' %}
 {% block content %}
-{% for category in categories %}
-    <div class="category col-lg-4">
-        <a href="{% url 'website:fetch_tutorials' category %}">{{ category }}</a>
-        <br>
-        {% load count_tags %}
-        <span class="questions">
-            {% category_question_count category %} questions, 
-        </span>
-        <span class="replies">
-            {% category_question_count category %} replies
-        </span>
-        <span class="helper">
-            A
-        </span>
-    </div>
-{% endfor %}
-<div class="clear"></div>
+<h4>Recent Questions</h4>
+    {% for question in questions %}
+        <div class="question">
+            <div class="title">
+                <a href="">{{ question.title }}</a>
+            </div> 
+
+            <span class="category">
+                <small>{{ question.category }}</small>
+            </span>
+
+            <span class="tutorial">
+                <small>{{ question.tutorial}}</small>
+            </span>
+
+            <span class="minute_range">
+                <small>{{ question.minute_range }} min</small>
+            </span>
+
+            <span class="second_range">
+                <small>{{ question.second_range }} sec</small>
+            </span>
+        </div>
+    {% endfor %}
 {% endblock %}
