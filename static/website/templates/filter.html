@@ -1,0 +1,86 @@
+{% extends 'website/templates/base.html' %}
+{% block content %}
+
+{% if question %}
+    <div class="question">
+            <div class="title">
+                <a href="{% url 'website:get_question' question.id %}">{{ question.title }}</a>
+            </div> 
+
+            <span class="category">
+                <small>
+                    <a href="{% url 'website:filter' question.category %}?qid={{ question.id }}">
+                        {{ question.category }}
+                    </a>
+                </small>
+            </span>
+
+            <span class="tutorial">
+                <small>
+                    <a href="{% url 'website:filter' question.category question.tutorial %}?qid={{ question.id }}">
+                        {{ question.tutorial}}
+                    </a>
+                </small>
+            </span>
+
+            <span class="minute_range">
+                <small>
+                    <a href="{% url 'website:filter' question.category question.tutorial question.minute_range %}?qid={{ question.id }}">
+                        {{ question.minute_range }} min
+                    </a>
+                </small>
+            </span>
+
+            <span class="second_range">
+                <small>
+                    <a href="{% url 'website:filter' question.category question.tutorial question.minute_range question.second_range%}?qid={{ question.id }}">
+                        {{ question.second_range }} sec
+                    </a>
+                </small>
+            </span>
+        </div>
+{% endif %}
+
+<h5>You might also want to take a look at:</h5>
+{% if questions %}
+    {% for question in questions %}
+     <div class="question">
+            <div class="title">
+                <a href="{% url 'website:get_question' question.id %}">{{ question.title }}</a>
+            </div> 
+
+            <span class="category">
+                <small>
+                    <a href="{% url 'website:filter' question.category %}?qid={{ question.id }}">
+                        {{ question.category }}
+                    </a>
+                </small>
+            </span>
+
+            <span class="tutorial">
+                <small>
+                    <a href="{% url 'website:filter' question.category question.tutorial %}?qid={{ question.id }}">
+                        {{ question.tutorial}}
+                    </a>
+                </small>
+            </span>
+
+            <span class="minute_range">
+                <small>
+                    <a href="{% url 'website:filter' question.category question.tutorial question.minute_range %}?qid={{ question.id }}">
+                        {{ question.minute_range }} min
+                    </a>
+                </small>
+            </span>
+
+            <span class="second_range">
+                <small>
+                    <a href="{% url 'website:filter' question.category question.tutorial question.minute_range question.second_range%}?qid={{ question.id }}">
+                        {{ question.second_range }} sec
+                    </a>
+                </small>
+            </span>
+        </div>       
+    {% endfor %}
+{% endif %}
+{% endblock %}

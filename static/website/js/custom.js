@@ -41,4 +41,12 @@ $(document).ready(function() {
             }
         });
     });
+
+    $(document).ajaxStart(function() {
+        $("#ajax-loader").show();
+    });
+
+    $(document).ajaxStop(function() {
+        $("#ajax-loader").hide();
+    });
 });

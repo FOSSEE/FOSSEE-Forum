@@ -3,9 +3,10 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.core.context_processors import csrf
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 
 from website.models import Question, Reply, TutorialDetails, TutorialResources
-from website.forms import NewQuestionForm
+from website.forms import NewQuestionForm, ReplyQuesitionForm
 from website.helpers import get_video_info
 
 categories = [
@@ -26,7 +27,7 @@ categories = [
 ] 
 
 def home(request):
-    questions = Question.objects.all()
+    questions = Question.objects.all().order_by('date_created').reverse()[:10]
     context = {
         'questions': questions
     }
@@ -35,15 +36,49 @@ def home(request):
 def get_question(request, question_id=None):
     question = get_object_or_404(Question, id=question_id)
     replies = question.reply_set.all()
+    form = ReplyQuesitionForm()
     context = {
         'question': question,
-        'replies': replies
+        'replies': replies,
+        'form': form
     }
-    return render_to_response('website/templates/get_question.html', context)
+    context.update(csrf(request))
+    return render_to_response('website/templates/get-question.html', context)
 
-def filter(request,  category='', tutorial='', minute_range='', second_range=''):
-    res = category + '<br>' + tutorial + '<br>' + minute_range + '<br>' + second_range
-    return HttpResponse(res)
+def question_reply(request):
+    if request.method == 'POST':
+        form = ReplyQuesitionForm(request.POST)
+        if form.is_valid():
+            cleaned_data = form.cleaned_data
+            qid = cleaned_data['question']
+            body = cleaned_data['body']
+            question = get_object_or_404(Question, id=qid)
+            reply = Reply()
+            reply.user = request.user
+            reply.question = question
+            reply.body = body
+            reply.save()
+    return HttpResponseRedirect('/question/'+str(qid))
+
+def filter(request,  category=None, tutorial=None, minute_range=None, second_range=None):
+    context = {}
+    if category and tutorial and minute_range and second_range:
+        questions = Question.objects.filter(category=category).filter(tutorial=tutorial).filter(minute_range=minute_range).filter(second_range=second_range)
+    elif tutorial is None:
+        questions = Question.objects.filter(category=category)
+    elif minute_range is None:
+        questions = Question.objects.filter(category=category).filter(tutorial=tutorial)
+    else:  #second_range is None
+        questions = Question.objects.filter(category=category).filter(tutorial=tutorial).filter(minute_range=minute_range)
+
+    if 'qid' in request.GET:
+        qid = request.GET['qid']
+        question = get_object_or_404(Question, id=qid)
+        context['question'] = question
+        questions = questions.filter(~Q(id=qid))
+
+    context['questions'] = questions
+    return render_to_response('website/templates/filter.html', context)
 
 @login_required
 def new_question(request):
@@ -60,7 +95,7 @@ def new_question(request):
             question.title = cleaned_data['title']
             question.body = cleaned_data['body']
             question.save()
-            return HttpResponse('atlast :>')
+            return HttpResponseRedirect('/')
     else:
         form = NewQuestionForm()
 

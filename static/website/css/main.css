@@ -16,55 +16,52 @@
     padding: 15px 0 15px 0;
     border-bottom: 1px solid #f5f5f5;
 }
-#content .question .title {
+#content .question .title a{
     padding: 0 0 7px 0;
     font-size: 1.3em;
     color: #424242;
 }
-#content .question .title a {
-    color: #424242;
-}
-#content .question .category {
-    padding: 2px 5px;
+#content .question .category a,
+#content .question .tutorial a,
+#content .question .minute_range a,
+#content .question .second_range a {
+    padding: 3px 5px;
     margin: 0 10px 0 0;
+    -webkit-border-radius: 3px;
+       -moz-border-radius: 3px;
+         -o-border-radius: 3px;
+            border-radius: 3px;
+}
+#content .question .category a {
     background: #a26dc8;
     color: #ffffff;
-    -webkit-border-radius: 3px;
-       -moz-border-radius: 3px;
-         -o-border-radius: 3px;
-            border-radius: 3px;
 }
-#content .question .tutorial {
-    padding: 2px 5px;
-    margin: 0 10px 0 0;
+#content .question .tutorial a {
     background: #424242;
     color: #ffffff;
-    -webkit-border-radius: 3px;
-       -moz-border-radius: 3px;
-         -o-border-radius: 3px;
-            border-radius: 3px;
 }
-#content .question .minute_range {
-    padding: 2px 5px;
-    margin: 0 10px 0 0;
+#content .question .minute_range a {
     background: #f5f5f5;
     color: #424242;
-    -webkit-border-radius: 3px;
-       -moz-border-radius: 3px;
-         -o-border-radius: 3px;
-            border-radius: 3px;
 }
-#content .question .second_range {
-    padding: 2px 5px;
-    margin: 0 10px 0 0;
+#content .question .second_range a {
     background: #f5f5f5;
     color: #424242;
-    -webkit-border-radius: 3px;
-       -moz-border-radius: 3px;
-         -o-border-radius: 3px;
-            border-radius: 3px;
 }
-
+#content .reply {
+    position: relative;
+    border-bottom: 1px solid #f5f5f5;
+    padding: 25px 0;
+}
+#content .reply .body {
+}
+#content .reply .user {
+    position: absolute;
+    right: 0px;
+    bottom: 0px;
+    padding: 2px 7px;
+    background: #f5f5f5;
+}
 #footer-wrapper {
     background-color: #2d2d2d;
     min-height: 60px;

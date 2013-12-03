@@ -1,0 +1,74 @@
+{% extends 'website/templates/base.html' %}
+{% load widget_tweaks %}
+{% block content %}
+<div class="question">
+    <div class="title">
+       <a href=""> {{ question.title }} </a>
+    </div>
+
+    <div class="body">
+        {{ question.body }}
+    </div>
+    <br>
+    <span class="category">
+    <small>
+            <a href="{% url 'website:filter' question.category %}">
+                {{ question.category }}
+            </a>
+        </small>
+    </span>
+
+    <span class="tutorial">
+        <small>
+            <a href="{% url 'website:filter' question.category question.tutorial %}">
+                {{ question.tutorial}}
+            </a>
+        </small>
+    </span>
+
+    <span class="minute_range">
+        <small>
+            <a href="{% url 'website:filter' question.category question.tutorial question.minute_range %}">
+                {{ question.minute_range }} min
+            </a>
+        </small>
+    </span>
+
+    <span class="second_range">
+        <small>
+            <a href="{% url 'website:filter' question.category question.tutorial question.minute_range question.second_range%}">
+                {{ question.second_range }} sec
+            </a>
+        </small>
+    </span>
+    
+</div>
+
+{% for reply in replies %}
+    <div class="reply">
+        <span class="body">
+            {{ reply.body }}
+        </span>
+
+        <span class="user">
+            {{ reply.user }}
+        </span>
+    </div>
+{% endfor %}
+
+<form action="{% url 'website:question_reply' %}" method="POST"> {% csrf_token %}
+    {% with WIDGET_ERROR_CLASS='field_error' %}
+        <div class="row"> 
+            <div class="col-lg-12">
+                <div class="form-group">
+                    {% render_field form.question value=question.id %}
+                    <label for="id_body">Reply</label>
+                    {% render_field form.body class+='form-control' %}
+                </div>
+            </div>
+        </div>
+    {% endwith %}
+    <input class="btn btn-info" type="submit" value="Submit Reply">
+</form>
+
+{% endblock %}

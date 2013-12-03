@@ -15,7 +15,6 @@ class Question(models.Model):
 class Reply(models.Model):
     user  = models.ForeignKey(User)
     question = models.ForeignKey(Question)
-    title = models.CharField(max_length=200)
     body = models.TextField()
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)

@@ -3,6 +3,7 @@ from django.conf.urls import patterns, include, url
 urlpatterns = patterns('',
     url(r'^$', 'website.views.home', name='home'),
     url(r'^question/(?P<question_id>\d+)/$', 'website.views.get_question', name='get_question'),
+    url(r'^question-reply/$', 'website.views.question_reply', name='question_reply'),
     url(r'^filter/(?P<category>[^/]+)/$', 'website.views.filter', name='filter'),
     url(r'^filter/(?P<category>[^/]+)/(?P<tutorial>[^/]+)/$', 'website.views.filter', name='filter'),
     url(r'^filter/(?P<category>[^/]+)/(?P<tutorial>[^/]+)/(?P<minute_range>[^/]+)/$', 'website.views.filter', name='filter'),
