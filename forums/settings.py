@@ -174,3 +174,6 @@ LOGGING = {
         },
     }
 }
+
+AUTHENTICATION_BACKENDS = ( 'drupal_auth.backend.DrupalAuthBackend', )
+AUTH_USER_MODEL = 'website.Test'

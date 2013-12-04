@@ -1,8 +1,14 @@
+from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib.auth.models import (
+    BaseUserManager, AbstractBaseUser
+)
+
+from website.managers import DrupalUserManager
 
 class Question(models.Model):
-    user  = models.ForeignKey(User)
+    user  = models.ForeignKey(settings.AUTH_USER_MODEL)
     category = models.CharField(max_length=200)
     tutorial = models.CharField(max_length=200)
     minute_range = models.CharField(max_length=10)
@@ -13,7 +19,7 @@ class Question(models.Model):
     date_modified = models.DateTimeField(auto_now=True)
 
 class Reply(models.Model):
-    user  = models.ForeignKey(User)
+    user  = models.ForeignKey(settings.AUTH_USER_MODEL)
     question = models.ForeignKey(Question)
     body = models.TextField()
     date_created = models.DateTimeField(auto_now_add=True)
@@ -53,3 +59,10 @@ class TutorialResources(models.Model):
     request_exception = models.TextField()
     class Meta:
         db_table = 'tutorial_resources'
+
+class Test(AbstractBaseUser):
+    username = models.CharField(max_length=40, unique=True, db_index=True)
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = []
+
+    objects = DrupalUserManager()
