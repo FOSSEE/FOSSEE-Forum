@@ -144,6 +144,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     'website',
     'widget_tweaks',
+    'drupal_auth',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -175,5 +176,6 @@ LOGGING = {
     }
 }
 
-AUTHENTICATION_BACKENDS = ( 'drupal_auth.backend.DrupalAuthBackend', )
-AUTH_USER_MODEL = 'website.Test'
+AUTH_USER_MODEL = 'drupal_auth.Users'
+AUTHENTICATION_BACKENDS = ( 'drupal_auth.backends.DrupalAuthBackend', )
+DATABASE_ROUTERS = ['drupal_auth.routers.DrupalAuthRouter']

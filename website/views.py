@@ -29,7 +29,8 @@ categories = [
 def home(request):
     questions = Question.objects.all().order_by('date_created').reverse()[:10]
     context = {
-        'questions': questions
+        'questions': questions,
+        'user': request.user
     }
     return render_to_response('website/templates/index.html', context)
 

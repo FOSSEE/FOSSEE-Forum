@@ -1,6 +1,7 @@
 {% extends 'website/templates/base.html' %}
 {% block content %}
 <h4>Recent Questions</h4>
+{{ user.name }}
     {% for question in questions %}
         <div class="question">
             <div class="title">
