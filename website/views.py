@@ -1,5 +1,5 @@
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render, get_object_or_404
 from django.core.context_processors import csrf
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
@@ -8,6 +8,7 @@ from django.db.models import Q
 from website.models import Question, Reply, TutorialDetails, TutorialResources
 from website.forms import NewQuestionForm, ReplyQuesitionForm
 from website.helpers import get_video_info
+
 
 categories = [
     'Advanced-C++', 'BASH', 'Blender', 
@@ -32,7 +33,7 @@ def home(request):
         'questions': questions,
         'user': request.user
     }
-    return render_to_response('website/templates/index.html', context)
+    return render(request, 'website/templates/index.html', context)
 
 def get_question(request, question_id=None):
     question = get_object_or_404(Question, id=question_id)
@@ -44,8 +45,12 @@ def get_question(request, question_id=None):
         'form': form
     }
     context.update(csrf(request))
-    return render_to_response('website/templates/get-question.html', context)
+    # updating views count
+    question.views += 1
+    question.save()
+    return render(request, 'website/templates/get-question.html', context)
 
+@login_required
 def question_reply(request):
     if request.method == 'POST':
         form = ReplyQuesitionForm(request.POST)
@@ -55,7 +60,7 @@ def question_reply(request):
             body = cleaned_data['body']
             question = get_object_or_404(Question, id=qid)
             reply = Reply()
-            reply.user = request.user
+            reply.uid = request.user.id
             reply.question = question
             reply.body = body
             reply.save()
@@ -79,7 +84,7 @@ def filter(request,  category=None, tutorial=None, minute_range=None, second_ran
         questions = questions.filter(~Q(id=qid))
 
     context['questions'] = questions
-    return render_to_response('website/templates/filter.html', context)
+    return render(request, 'website/templates/filter.html', context)
 
 @login_required
 def new_question(request):
@@ -88,13 +93,14 @@ def new_question(request):
         if form.is_valid():
             cleaned_data = form.cleaned_data
             question = Question()
-            question.user = request.user
+            question.uid = request.user.id
             question.category = cleaned_data['category']
             question.tutorial = cleaned_data['tutorial']
             question.minute_range = cleaned_data['minute_range']
             question.second_range = cleaned_data['second_range']
             question.title = cleaned_data['title']
             question.body = cleaned_data['body']
+            question.views= 1 
             question.save()
             return HttpResponseRedirect('/')
     else:
@@ -104,7 +110,7 @@ def new_question(request):
         'form': form
     }
     context.update(csrf(request))
-    return render_to_response('website/templates/new-question.html', context)
+    return render(request, 'website/templates/new-question.html', context)
 
 @csrf_exempt
 def ajax_tutorials(request):
@@ -114,7 +120,7 @@ def ajax_tutorials(request):
         context = {
             'tutorials': tutorials
         }
-        return render_to_response('website/templates/ajax-tutorials.html', context)
+        return render(request, 'website/templates/ajax-tutorials.html', context)
 
 @csrf_exempt
 def ajax_duration(request):
@@ -136,4 +142,16 @@ def ajax_duration(request):
             'minutes': minutes,
             'seconds':seconds,
         }
-        return render_to_response('website/templates/ajax-duration.html', context)
+        return render(request, 'website/templates/ajax-duration.html', context)
+
+@csrf_exempt
+def ajax_question_update(request):
+    if request.method == 'POST':
+        qid = request.POST['question_id']
+        body = request.POST['question_body']
+        question = get_object_or_404(Question, pk=qid)
+        if question:
+            if question.uid == request.user.id:
+                question.body = body
+                question.save()
+        return HttpResponse("saved")

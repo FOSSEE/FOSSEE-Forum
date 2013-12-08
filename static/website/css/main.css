@@ -1,3 +1,6 @@
+.container {
+    max-width: 970px;
+}
 #header-wrapper {
 
 }
@@ -13,13 +16,22 @@
 #content{
 }
 #content .question {
+    position: relative;
     padding: 15px 0 15px 0;
     border-bottom: 1px solid #f5f5f5;
+}
+#content .editable {
+    padding: 15px 5px 15px 5px;
+    background: lightyellow;
 }
 #content .question .title a{
     padding: 0 0 7px 0;
     font-size: 1.3em;
     color: #424242;
+}
+#content .question .body {
+    padding: 10px;
+    background: #fafafa;
 }
 #content .question .category a,
 #content .question .tutorial a,
@@ -48,10 +60,31 @@
     background: #f5f5f5;
     color: #424242;
 }
+#content .question .user {
+    position: absolute;
+    right: 0px;
+    bottom: 0px;
+    padding: 2px 7px;
+    background: #f5f5f5;
+}
+#questionNicPanel {
+    display: none;
+}
+.modify {
+    display: none;
+    position: absolute;
+    top: 0;
+    right:0;
+}
+.modify a.edit {
+}
+.modify a.save {
+    display: none;
+}
 #content .reply {
     position: relative;
     border-bottom: 1px solid #f5f5f5;
-    padding: 25px 0;
+    padding: 20px 0;
 }
 #content .reply .body {
 }

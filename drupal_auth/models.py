@@ -7,22 +7,32 @@ from django.contrib.auth.models import (
 from drupal_auth.managers import DrupalUserManager
 
 class Users(models.Model):
-    name = models.CharField(max_length=60L, unique=True, primary_key=True)
-    pass_field = models.CharField(max_length=32L, db_column='pass') # Field renamed because it was a Python reserved word.
+    id = models.IntegerField(primary_key=True, db_column='uid')
+    username = models.CharField(max_length=60L, unique=True, db_column='name')
+    password = models.CharField(max_length=32L, db_column='pass') # Field renamed because it was a Python reserved word.
     last_login = models.DateTimeField(auto_now_add=True)
 
-    USERNAME_FIELD = 'name'
+    USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = []
     objects = DrupalUserManager()
+
+    def __unicode__(self):
+        return self.username
 
     class Meta:
         db_table = 'users'
 
     def is_authenticated(self):
         return True
-#class Test(AbstractBaseUser):
-#    username = models.CharField(max_length=40, unique=True, db_index=True)
-#    USERNAME_FIELD = 'username'
-#    REQUIRED_FIELDS = []
-#
-#    objects = DrupalUserManager()
+
+    def is_active(self):
+        return True
+
+    def is_staff(self):
+        return True
+
+    def has_perm(self, perm, obj=None):
+        return True
+
+    def has_module_perms(self, app_label):
+        return True

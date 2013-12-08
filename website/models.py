@@ -2,8 +2,11 @@ from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
 
+from django.contrib.auth import get_user_model
+User = get_user_model()
+
 class Question(models.Model):
-    user  = models.ForeignKey(settings.AUTH_USER_MODEL)
+    uid  = models.IntegerField()
     category = models.CharField(max_length=200)
     tutorial = models.CharField(max_length=200)
     minute_range = models.CharField(max_length=10)
@@ -12,16 +15,25 @@ class Question(models.Model):
     body = models.TextField()
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
+    views = models.IntegerField()
+
+    def user(self):
+        user = User.objects.get(id=self.uid)
+        return user.username
+
 
 class Reply(models.Model):
-    user  = models.ForeignKey(settings.AUTH_USER_MODEL)
+    uid  = models.IntegerField()
     question = models.ForeignKey(Question)
     body = models.TextField()
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
 
-# CDEEP database created using inspectdb arg of manage.py
+    def user(self):
+        user = User.objects.get(id=self.uid)
+        return user.username
 
+# CDEEP database created using inspectdb arg of manage.py
 class TutorialDetails(models.Model):
     id = models.IntegerField(primary_key=True)
     foss_category = models.CharField(max_length=255L)

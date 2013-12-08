@@ -1,4 +1,4 @@
-import md5
+import hashlib
 
 from django.db import models
 from django.contrib.auth.models import (
@@ -15,10 +15,11 @@ class DrupalUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
     
-    def create_superuser(self, name, password):
+    def create_superuser(self, username, password):
         user = self.model()
-        user.name= name
-        p = md5.new()
+        user.id = 1
+        user.username= username
+        p = hashlib.md5()
         p.update(password)
         user.pass_field= p.hexdigest()
         user.is_admin = True

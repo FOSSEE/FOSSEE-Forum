@@ -1,7 +1,6 @@
 {% extends 'website/templates/base.html' %}
 {% block content %}
-<h4>Recent Questions</h4>
-{{ user.name }}
+<h4><u>Recent Questions</u></h4>
     {% for question in questions %}
         <div class="question">
             <div class="title">
@@ -38,6 +37,10 @@
                         {{ question.second_range }} sec
                     </a>
                 </small>
+            </span>
+            
+            <span class="user">
+                {{ question.user }}
             </span>
         </div> <!-- /.question -->
     {% endfor %}

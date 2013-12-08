@@ -5,6 +5,7 @@
     <h4>
         <span class="glyphicon glyphicon-pencil">
         </span> Create a new question . . .
+        user is {{ user }}
     </h4>
     <hr>
     <form role="form" action="" method="POST">{% csrf_token %}
@@ -46,4 +47,14 @@
     <input class="btn btn-success" type="submit" value="Submit Question"> 
     {% endwith %}
     </form>
+
+<script src="{% static 'website/js/nicEdit.js' %}" type="text/javascript"></script>
+<script type="text/javascript">
+bkLib.onDomLoaded(function() {
+	new nicEditor({
+        iconsPath: "{% static 'website/js/nicEditorIcons.gif' %}",
+        buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image']
+    }).panelInstance('id_body');
+});
+</script>
 {% endblock %}
