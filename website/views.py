@@ -155,3 +155,19 @@ def ajax_question_update(request):
                 question.body = body
                 question.save()
         return HttpResponse("saved")
+
+@csrf_exempt
+def ajax_similar_questions(request):
+    if request.method == 'POST':
+        category = request.POST['category']
+        tutorial = request.POST['tutorial']
+        minute_range = request.POST['minute_range']
+        second_range = request.POST['second_range']
+
+        # add more filtering when the forum grows
+        questions = Question.objects.filter(category=category).filter(tutorial=tutorial)
+        context = {
+            'questions': questions
+        }
+        return render(request, 'website/templates/ajax-similar-questions.html', context);
+

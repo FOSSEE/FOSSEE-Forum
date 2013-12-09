@@ -14,4 +14,5 @@ urlpatterns = patterns('',
     url(r'^ajax-tutorials/$', 'website.views.ajax_tutorials', name='ajax_tutorials'),
     url(r'^ajax-duration/$', 'website.views.ajax_duration', name='ajax_duration'),
     url(r'^ajax-question-update/$', 'website.views.ajax_question_update', name='ajax_question_update'),
+    url(r'^ajax-similar-questions/$', 'website.views.ajax_similar_questions', name='ajax_similar_questions'),
 )

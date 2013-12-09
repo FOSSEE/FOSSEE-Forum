@@ -18,23 +18,42 @@
                               <span class="icon-bar"></span>
                               <span class="icon-bar"></span>
                             </button>
-                            <a class="navbar-brand" href="{% url 'website:home' %}">Spoken Tutorial Forums</a>
+                            <a class="navbar-brand" href="{% url 'website:home' %}">
+                                Spoken Tutorial Forums
+                            </a>
                         </div> <!-- /.navbar-header -->
 
                         <!-- Collect the nav links, forms, and other content for toggling -->
                         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                             <ul class="nav navbar-nav navbar-right">
-                              <li><a href="{% url 'website:new_question' %}">Ask Question</a></li>
+                              <li>
+                                <a href="{% url 'website:new_question' %}">
+                                    <span class="glyphicon glyphicon-pencil"></span> 
+                                    Ask Question
+                                </a>
+                              </li>
+                              {% if user.is_authenticated %}
                               <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                   <span class="glyphicon glyphicon-user"></span> 
+                                   {{ user }}<b class="caret"></b>
+                                </a>
                                 <ul class="dropdown-menu">
-                                  <li><a href="#">Action</a></li>
-                                  <li><a href="#">Another action</a></li>
-                                  <li><a href="#">Something else here</a></li>
+                                  <li><a href="#">My Questions</a></li>
+                                  <li><a href="#">My Replies</a></li>
+                                  <li><a href="#">Notifications</a></li>
                                   <li class="divider"></li>
-                                  <li><a href="#">Separated link</a></li>
+                                  <li><a href="{% url 'user_logout' %}">Logout</a></li>
                                 </ul>
                               </li> <!-- /li.dropdown -->
+                              {% else %}
+                              <li>
+                                <a href="{% url 'user_login' %}">
+                                    <span class="glyphicon glyphicon-user"></span> 
+                                    Login
+                                </a>
+                              </li>
+                              {% endif %}
                             </ul>
                         </div> <!-- /.navbar-collapse -->
                   </div> <!-- /.container -->
@@ -62,7 +81,6 @@
         
         <script src="{% static 'website/js/jquery.min.js' %}"></script>
         <script src="{% static 'website/js/bootstrap.min.js' %}"></script>
-        <script src="{% static 'website/js/custom.js' %}"></script>
         {% block javascript %}
             <!-- overide with custom javascript -->
         {% endblock %}

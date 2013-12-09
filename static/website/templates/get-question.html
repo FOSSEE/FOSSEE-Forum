@@ -59,16 +59,29 @@
 </div> <!-- /.question -->
 
 <h4><u>Answers:</u></h4>
+
+<div id="replyPanelWrapper" style="display:none;">
+    <div id="replyNicPanel" style="display:none;"></div>
+</div>
+
 {% for reply in replies %}
-    <div class="reply">
-        <span class="body">
+    <div class="reply {% ifequal reply.uid|stringformat:'s' user.id|stringformat:'s' %}editable{% endifequal %}">
+        
+        <div class="body" id="body{{ reply.id }}">
             {{ reply.body|safe }}
-        </span>
+        </div>
 
         <span class="user">
             {{ reply.user }}
         </span>
-    </div>
+
+        {% ifequal reply.uid|stringformat:'s' user.id|stringformat:'s' %}
+        <span class="modify" style="display:block">
+            <a class="edit btn btn-xs btn-info vs" href="#body{{ reply.id}}" data-target="body{{ reply.id }}">Edit</a>
+            <a id="save-{{ question.id }}" class="save btn btn-xs btn-success vs" href="#" data-target="body{{ reply.id }}">Save</a>
+        </span>
+        {% endifequal %}
+    </div> <!-- /.reply -->
 {% endfor %}
 
 <form action="{% url 'website:question_reply' %}" method="POST"> {% csrf_token %}
@@ -102,6 +115,7 @@
         {% ifequal question.user|stringformat:"s" user|stringformat:"s" %}
             <script src="{% static 'website/js/thread-user.js' %}"></script>
         {% else %}
+        <script src="{% static 'website/js/thread-user.js' %}"></script>
         <script type="text/javascript">
             $(document).ready(function() {
                 $(".question .body").removeAttr("id");

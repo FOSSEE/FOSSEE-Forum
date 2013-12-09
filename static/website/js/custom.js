@@ -5,6 +5,7 @@ $(document).ready(function() {
     $second_range = $("#id_second_range");
 
     $category.change(function() {
+        $("#similar-link").hide();
         var category = $(this).val();
         $.ajax({
             url: "/ajax-tutorials/",
@@ -38,6 +39,27 @@ $(document).ready(function() {
                 $minute_range.removeAttr("disabled");
                 $second_range.html($response.find("#seconds").html())
                 $second_range.removeAttr("disabled");
+            }
+        });
+    });
+    
+    $second_range.change(function() {
+        $.ajax({
+            url: "/ajax-similar-questions/",
+            type: "POST",
+            data: {
+                category: $category.val(),
+                tutorial: $tutorial.val(),
+                minute_range: $minute_range.val(),
+                second_range: $second_range.val()
+            },
+            dataType: "html",
+            success: function(data) {
+                console.log(data);
+                $response = $(data);
+                var similar_count= $response.find("#similar-count").text();
+                $("#similar-link").show().html(similar_count);
+                $(".modal-body").html(data);
             }
         });
     });
