@@ -39,9 +39,17 @@
                                    {{ user }}<b class="caret"></b>
                                 </a>
                                 <ul class="dropdown-menu">
-                                  <li><a href="#">My Questions</a></li>
-                                  <li><a href="#">My Replies</a></li>
-                                  <li><a href="#">Notifications</a></li>
+                                  <li><a href="{% url 'website:user_questions' user.id %}">My Questions</a></li>
+                                  <li><a href="{% url 'website:user_replies' user.id %}">My Replies</a></li>
+                                  <li>
+                                    <a href="{% url 'website:user_notifications' user.id %}">
+                                        Notifications  
+                                        <span class="badge" style="background:#a26dc8; color:#ffffff;">
+                                            {% load notify %}
+                                            {% notification_count user.id %}
+                                        </span>
+                                    </a>
+                                  </li>
                                   <li class="divider"></li>
                                   <li><a href="{% url 'user_logout' %}">Logout</a></li>
                                 </ul>

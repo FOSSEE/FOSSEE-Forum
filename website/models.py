@@ -33,6 +33,13 @@ class Reply(models.Model):
         user = User.objects.get(id=self.uid)
         return user.username
 
+class Notification(models.Model):
+    uid = models.IntegerField()
+    pid = models.IntegerField()
+    qid = models.IntegerField()
+    rid = models.IntegerField()
+    date_created = models.DateTimeField(auto_now_add=True)
+
 # CDEEP database created using inspectdb arg of manage.py
 class TutorialDetails(models.Model):
     id = models.IntegerField(primary_key=True)

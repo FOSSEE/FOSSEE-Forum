@@ -21,7 +21,7 @@ $(document).ready(function() {
     $questionInstance = $("#questionInstance");
 
     /* make the question editable and show modify */
-    $question.addClass("editable");
+    //$question.addClass("editable");
     $question_modify.show();
 
     /* edit and save click events */
@@ -43,8 +43,9 @@ $(document).ready(function() {
         $(this).prev().css("display", "block");
 
         /* make the ajax call */
-        var id_length = $question_save.attr("id").length;
-        var question_id = parseInt($question_save.attr("id").substr(id_length-1));
+        //var id_length = $question_save.attr("id").length;
+        //var question_id = parseInt($question_save.attr("id").substr(id_length-1));
+        var question_id = parseInt($question_save.data("qid"));
         console.log(question_id);
         var question_body = $questionInstance.html();
         $.ajax({
@@ -76,9 +77,9 @@ $(document).ready(function() {
     replyNicEditor.panelInstance('replyNicPanel');
 
     $reply_edit.click(function() {
-        var reply_body = $(this).data("target");
-        console.log(reply_body);
-        replyNicEditor.addInstance(reply_body);
+        var target = $(this).data("target");
+        console.log(target);
+        replyNicEditor.addInstance(target);
         $(this).parents("div.reply").prepend($replyPanelWrapper);
         $replyPanelWrapper.show();
         $('#replyPanelWrapper .nicEdit-panelContain').parent().width('100%');
@@ -88,12 +89,27 @@ $(document).ready(function() {
     });
 
     $reply_save.click(function() {
-        var reply_body = $(this).data("target");
-        replyNicEditor.removeInstance(reply_body);
+        var target = $(this).data("target");
+        replyNicEditor.removeInstance(target);
         $replyPanelWrapper.hide();
         $('#replyPanelWrapper .nicEdit-panelContain').parent().width('100%');
         $(this).hide();
         $(this).prev().show();
+        
+        var reply_id = parseInt($(this).data("rid"));
+        var reply_body = $("#"+target).html();
+
+        $.ajax({
+            url: "/ajax-reply-update/",
+            type: "POST",
+            data: {
+                reply_id: reply_id,
+                reply_body: reply_body
+            },
+            success: function(data) {
+                console.log(data);
+            }
+        });
     });
 });
 

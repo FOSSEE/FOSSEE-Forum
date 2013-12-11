@@ -1,5 +1,6 @@
 {% extends 'website/templates/base.html' %}
 {% block content %}
+{% load count_tags %}
 <h4><u>Recent Questions</u></h4>
     {% for question in questions %}
         <div class="question">
@@ -39,9 +40,34 @@
                 </small>
             </span>
             
-            <span class="user">
-                {{ question.user }}
+            <span class="meta">
+                <small>
+                        <i>
+                            {{ question.date_created }}
+                        </i>
+                </small>
+
+                <span class="user">
+                    {{ question.user }}
+                </span>
             </span>
         </div> <!-- /.question -->
     {% endfor %}
+
+    {% if total > 10 %}
+        <ul class="pagination pull-right">
+            {% for i in total|get_range:"0,10" %}
+                <li>
+                    <a href="{% url 'website:home' %}?marker={{ i }}">
+                        {% if i == marker %}
+                            <strong>{{ i|div:"10"|inc }}</strong>
+                        {% else %}
+                            {{ i|div:"10"|inc }}
+                        {% endif %}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
 {% endblock %}

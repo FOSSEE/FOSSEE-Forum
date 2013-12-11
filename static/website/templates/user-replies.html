@@ -1,0 +1,36 @@
+{% extends 'website/templates/base.html' %}
+{% load count_tags %}
+{% block content %}
+    <h4>My Replies</h4>
+    {% for reply in replies%}
+        <div class="my-reply">
+            <span class="body">
+                {{ reply.body|safe }}
+            </span>
+            <br>
+            <span class="date">
+                <small>
+                Replied on:
+                {{ reply.date_created }}
+                </small>
+            </span>
+        </div>
+    {% endfor %}
+    
+    {% if total > 10 %}
+        <ul class="pagination pull-right">
+            {% for i in total|get_range:"0,10" %}
+                <li>
+                    <a href="{% url 'website:user_replies' user.id %}?marker={{ i }}">
+                        {% if i == marker %}
+                            <strong>{{ i|div:"10"|inc }}</strong>
+                        {% else %}
+                            {{ i|div:"10"|inc }}
+                        {% endif %}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+{% endblock %}

@@ -5,7 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 
-from website.models import Question, Reply, TutorialDetails, TutorialResources
+from website.models import Question, Reply, Notification, TutorialDetails, TutorialResources
 from website.forms import NewQuestionForm, ReplyQuesitionForm
 from website.helpers import get_video_info
 
@@ -28,10 +28,17 @@ categories = [
 ] 
 
 def home(request):
-    questions = Question.objects.all().order_by('date_created').reverse()[:10]
+    marker = 0
+    if 'marker' in request.GET:
+        marker = int(request.GET['marker'])
+
+    total = Question.objects.all().count()
+    total = int(total - (total % 10 - 10))
+    questions = Question.objects.all().order_by('date_created').reverse()[marker:marker+10]
     context = {
         'questions': questions,
-        'user': request.user
+        'total': total,
+        'marker': marker
     }
     return render(request, 'website/templates/index.html', context)
 
@@ -64,6 +71,13 @@ def question_reply(request):
             reply.question = question
             reply.body = body
             reply.save()
+            if question.uid != request.user.id:
+                notification = Notification()
+                notification.uid = question.uid
+                notification.pid = request.user.id
+                notification.qid = qid
+                notification.rid = reply.id
+                notification.save()
     return HttpResponseRedirect('/question/'+str(qid))
 
 def filter(request,  category=None, tutorial=None, minute_range=None, second_range=None):
@@ -112,6 +126,58 @@ def new_question(request):
     context.update(csrf(request))
     return render(request, 'website/templates/new-question.html', context)
 
+@login_required
+def user_questions(request, user_id):
+    marker = 0
+    if 'marker' in request.GET:
+        marker = int(request.GET['marker'])
+
+    if str(user_id) == str(request.user.id):
+        total = Question.objects.filter(uid=user_id).count()
+        total = int(total - (total % 10 - 10))
+        questions = Question.objects.filter(uid=user_id).order_by('date_created').reverse()[marker:marker+10]
+
+        context = {
+            'questions': questions,
+            'total': total,
+            'marker': marker
+        }
+        return render(request, 'website/templates/user-questions.html', context)
+    return HttpResponse("go away")
+
+@login_required
+def user_replies(request, user_id):
+    marker = 0
+    if 'marker' in request.GET:
+        marker = int(request.GET['marker'])
+
+    if str(user_id) == str(request.user.id):
+        total = Reply.objects.filter(uid=user_id).count()
+        total = int(total - (total % 10 - 10))
+        replies =Reply.objects.filter(uid=user_id).order_by('date_created').reverse()[marker:marker+10]
+        context = {
+            'replies': replies,
+            'total': total,
+            'marker': marker
+        }
+        return render(request, 'website/templates/user-replies.html', context)
+    return HttpResponse("go away")
+
+@login_required
+def user_notifications(request, user_id):
+    if str(user_id) == str(request.user.id):
+        notifications = Notification.objects.filter(uid=user_id).order_by('date_created').reverse()
+        context = {
+            'notifications': notifications
+        }
+        return render(request, 'website/templates/notifications.html', context)
+    return HttpResponse("go away ...")
+
+@login_required
+def clear_notifications(request):
+    Notification.objects.filter(uid=request.user.id).delete()
+    return HttpResponseRedirect("/user/{}/notifications/".format(request.user.id))
+
 @csrf_exempt
 def ajax_tutorials(request):
     if request.method == 'POST':
@@ -157,6 +223,18 @@ def ajax_question_update(request):
         return HttpResponse("saved")
 
 @csrf_exempt
+def ajax_reply_update(request):
+    if request.method == 'POST':
+        rid = request.POST['reply_id']
+        body = request.POST['reply_body']
+        reply= get_object_or_404(Reply, pk=rid)
+        if reply:
+            if reply.uid == request.user.id:
+                reply.body = body
+                reply.save()
+        return HttpResponse("saved")
+
+@csrf_exempt
 def ajax_similar_questions(request):
     if request.method == 'POST':
         category = request.POST['category']
@@ -171,3 +249,13 @@ def ajax_similar_questions(request):
         }
         return render(request, 'website/templates/ajax-similar-questions.html', context);
 
+@csrf_exempt
+def ajax_notification_remove(request):
+    if request.method == "POST":
+        nid = request.POST["notification_id"]
+        notification = Notification.objects.get(pk=nid)
+        if notification:
+            if notification.uid == request.user.id:
+                notification.delete()
+                return HttpResponse("removed")
+    return HttpResponse("failed")

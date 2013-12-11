@@ -2,13 +2,13 @@
 {% load static %}
 {% load widget_tweaks %}
 {% block content %}
-<div class="question">
+<div class="question {% ifequal question.user|stringformat:'s' user|stringformat:'s' %}editable{% endifequal %}">
     <div class="title">
        <a href=""> {{ question.title }} </a>
     </div>
 
     <div id="questionNicPanel"></div>
-    <div id="questionInstance" class="body">
+    <div id="{% ifequal question.user|stringformat:'s' user|stringformat:'s' %}questionInstance{% endifequal %}" class="body">
         {{ question.body|safe }}
     </div>
     <br>
@@ -48,7 +48,7 @@
     <span class="modify">
         {% ifequal question.uid|stringformat:'s' user.id|stringformat:'s' %}
             <a class="edit btn btn-xs btn-info" href="#">Edit</a>
-            <a id="save-{{ question.id }}" class="save btn btn-xs btn-success" href="#">Save</a>
+            <a class="save btn btn-xs btn-success" data-qid="{{ question.id }}" href="#">Save</a>
         {% endifequal %}
     </span>
 
@@ -65,7 +65,7 @@
 </div>
 
 {% for reply in replies %}
-    <div class="reply {% ifequal reply.uid|stringformat:'s' user.id|stringformat:'s' %}editable{% endifequal %}">
+    <div class="reply {% ifequal reply.uid|stringformat:'s' user.id|stringformat:'s' %}editable{% endifequal %}" id="reply{{reply.id}}">
         
         <div class="body" id="body{{ reply.id }}">
             {{ reply.body|safe }}
@@ -78,7 +78,7 @@
         {% ifequal reply.uid|stringformat:'s' user.id|stringformat:'s' %}
         <span class="modify" style="display:block">
             <a class="edit btn btn-xs btn-info vs" href="#body{{ reply.id}}" data-target="body{{ reply.id }}">Edit</a>
-            <a id="save-{{ question.id }}" class="save btn btn-xs btn-success vs" href="#" data-target="body{{ reply.id }}">Save</a>
+            <a class="save btn btn-xs btn-success vs"  data-target="body{{ reply.id }}" data-rid="{{ reply.id }}" href="#">Save</a>
         </span>
         {% endifequal %}
     </div> <!-- /.reply -->
@@ -111,16 +111,5 @@
 {% endblock %}
 
 {% block javascript %}
-    {% if user.is_authenticated %}
-        {% ifequal question.user|stringformat:"s" user|stringformat:"s" %}
-            <script src="{% static 'website/js/thread-user.js' %}"></script>
-        {% else %}
-        <script src="{% static 'website/js/thread-user.js' %}"></script>
-        <script type="text/javascript">
-            $(document).ready(function() {
-                $(".question .body").removeAttr("id");
-            });
-        </script>
-        {% endifequal %}
-    {% endif %}
+    <script src="{% static 'website/js/thread-user.js' %}"></script>
 {% endblock %}

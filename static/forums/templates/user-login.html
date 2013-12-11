@@ -1,4 +1,39 @@
-<form action="/accounts/login/" method="POST"> {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Login">
-</form>
+{% extends "website/templates/base.html" %}
+{% load widget_tweaks %}
+{% block content %}
+<br><br><br>
+<div class="row">
+    <div class="col-lg-6" style="border-right: 1px dashed #424242;">
+        <h4>Please login with your <br>Spoken-Tutorial.org account.</h4>
+        <form action="/accounts/login/" method="POST"> {% csrf_token %}
+            {% with WIDGET_ERROR_CLASS='field_error' %} 
+                <div class="form-group">
+                    <label for="id_username">Username:</label>
+                    {% render_field form.username class+="form-control" %}
+                </div>
+
+                <div class="form-group">
+                    <label for="id_username">Password:</label>
+                    {% render_field form.password class+="form-control" %}
+                </div>
+
+                <input class="btn btn-sm btn-primary" type="submit" value="Login">
+            {% endwith %}
+        </form>
+    </div> <!-- /.col -->
+
+    <div class="col-lg-6">
+        <h4>Rules and Regulations</h4>
+        <ul>
+            <li>This forum is a place to discuss questions and doubts related to the Spoken-Tutorial's</li>
+            <li>Please restrain yourself from using abusive language.</li>
+            <li>This is not a place for self promotion.</li>
+            <li>Any violation of the above may lead to the permanent account deletion.</li>
+        </ul>
+        <h4>Dont have a Spoken-Tutorial.org account yet ?</h4>
+        <p>
+            <a class="btn  btn-sm btn-success" href="#">Register</a>
+        </p>
+    </div> <!-- /.col -->
+</div> <!-- /.row -->
+{% endblock %}
