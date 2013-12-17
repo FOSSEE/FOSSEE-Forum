@@ -1,3 +1,5 @@
+import re
+
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.core.context_processors import csrf
@@ -178,6 +180,14 @@ def clear_notifications(request):
     Notification.objects.filter(uid=request.user.id).delete()
     return HttpResponseRedirect("/user/{}/notifications/".format(request.user.id))
 
+def search(request):
+    context = {
+        'categories': categories
+    }
+    return render(request, 'website/templates/search.html', context)
+
+# Ajax Section
+# All the ajax views go below
 @csrf_exempt
 def ajax_tutorials(request):
     if request.method == 'POST':
@@ -259,3 +269,49 @@ def ajax_notification_remove(request):
                 notification.delete()
                 return HttpResponse("removed")
     return HttpResponse("failed")
+
+@csrf_exempt
+def ajax_keyword_search(request):
+    if request.method == "POST":
+        key = request.POST['key']
+        questions = Question.objects.filter(title__icontains=key)
+        context = {
+            'questions': questions
+        }
+        return render(request, 'website/templates/ajax-keyword-search.html', context)
+
+@csrf_exempt
+def ajax_time_search(request):
+    if request.method == "POST":
+        key = request.POST['key']
+        questions = Question.objects.filter(title__icontains=key)
+        context = {
+            'questions': questions
+        }
+        return render(request, 'website/templates/ajax-keyword-search.html', context)
+
+@csrf_exempt
+def ajax_time_search(request):
+    if request.method == "POST":
+        category = request.POST.get('category')
+        tutorial = request.POST.get('tutorial')
+        minute_range= request.POST.get('minute_range')
+        second_range = request.POST.get('second_range')
+        
+        if category != 'None':
+            questions = Question.objects.filter(category=category)
+        
+        if tutorial != 'None':
+            questions = questions.filter(tutorial=tutorial)
+
+        if minute_range != 'None':
+            questions = questions.filter(minute_range=minute_range)
+
+        if second_range != 'None':
+            questions = questions.filter(second_range=second_range)
+
+        context = {
+            'questions': questions
+        }
+
+        return render(request, 'website/templates/ajax-time-search.html', context)

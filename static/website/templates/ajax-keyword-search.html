@@ -1,0 +1,55 @@
+{% if questions %}
+    {% for question in questions %}
+        <div class="question">
+                    <div class="title">
+                        <a href="{% url 'website:get_question' question.id %}">{{ question.title }}</a>
+                    </div> 
+                    <br>
+                    <span class="category">
+                        <small>
+                            <a href="{% url 'website:filter' question.category %}?qid={{ question.id }}">
+                                {{ question.category }}
+                            </a>
+                        </small>
+                    </span>
+
+                    <span class="tutorial">
+                        <small>
+                            <a href="{% url 'website:filter' question.category question.tutorial %}?qid={{ question.id }}">
+                                {{ question.tutorial}}
+                            </a>
+                        </small>
+                    </span>
+
+                    <span class="minute_range">
+                        <small>
+                            <a href="{% url 'website:filter' question.category question.tutorial question.minute_range %}?qid={{ question.id }}">
+                                {{ question.minute_range }} min
+                            </a>
+                        </small>
+                    </span>
+
+                    <span class="second_range">
+                        <small>
+                            <a href="{% url 'website:filter' question.category question.tutorial question.minute_range question.second_range%}?qid={{ question.id }}">
+                                {{ question.second_range }} sec
+                            </a>
+                        </small>
+                    </span>
+                    
+                    <span class="meta">
+                        <small>
+                                <i>
+                                    {{ question.date_created }}
+                                </i>
+                        </small>
+
+                        <span class="user">
+                            {{ question.user }}
+                        </span>
+                    </span>
+                </div> <!-- /.question -->
+    {% endfor %}
+{% else %}
+<h4>No results found . . .</h4>
+{% endif %}

@@ -6,6 +6,7 @@
         <link rel="stylesheet" href="{% static 'website/css/main.css' %}" type="text/css" media="screen" charset="utf-8" />
     </head>
     <body>
+        <div id="page-wrapper">
         <div id="header-wrapper">
             <div id="header-inner">
                 <nav class="navbar navbar-default" role="navigation">
@@ -26,6 +27,12 @@
                         <!-- Collect the nav links, forms, and other content for toggling -->
                         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                             <ul class="nav navbar-nav navbar-right">
+                              <li>
+                                <a href="{% url 'website:search' %}">
+                                    <span class="glyphicon glyphicon-search"></span>
+                                    Search
+                                </a>
+                              </li>
                               <li>
                                 <a href="{% url 'website:new_question' %}">
                                     <span class="glyphicon glyphicon-pencil"></span> 
@@ -86,9 +93,11 @@
                 </div>
             </div> <!-- /#footer-inner -->
         </div> <!-- /#footer-wrapper -->
-        
+    </div> <!-- /#page-wrapper -->
+
         <script src="{% static 'website/js/jquery.min.js' %}"></script>
         <script src="{% static 'website/js/bootstrap.min.js' %}"></script>
+
         {% block javascript %}
             <!-- overide with custom javascript -->
         {% endblock %}
