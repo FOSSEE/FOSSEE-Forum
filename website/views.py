@@ -203,7 +203,18 @@ def ajax_duration(request):
     if request.method == 'POST':
         category = request.POST['category']
         tutorial =request.POST['tutorial']
-        video_info = get_video_info('/home/cheese/test-video.ogv')
+        video_detail = TutorialDetails.objects.using('spoken').get(
+            Q(foss_category=category),
+            Q(tutorial_name=tutorial)
+        )
+        video_resource = TutorialResources.objects.using('spoken').get(
+            Q(tutorial_detail_id=video_detail.id),
+            Q(language='English')
+        )
+        video_path = '/Sites/spoken_tutorial_org/sites/default/files/{}'.format(
+            video_resource.tutorial_video
+        )
+        video_info = get_video_info(video_path)
 
         # convert minutes to 1 if less than 0
         # convert seconds to nearest upper 10th number eg(23->30)
