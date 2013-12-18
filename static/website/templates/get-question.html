@@ -52,11 +52,18 @@
         {% endifequal %}
     </span>
 
-    <span class="user">
-            <img id="ajax-loader" src="/static/website/images/ajax-loader.gif" style="display:none;">
+    <span class="meta">
+        <small>
+                <i>
+                    {{ question.date_created }}
+                </i>
+        </small>
+
+        <span class="user">
             {{ question.user }}
+        </span>
     </span>
-</div> <!-- /.question -->
+    </div> <!-- /.question -->
 
 <h4><u>Answers:</u></h4>
 
