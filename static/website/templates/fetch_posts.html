@@ -1,9 +1,0 @@
-{% extends 'website/templates/base.html' %}
-{% block content %}
-{{ category }}, {{ tutorial }}
-<br>
-Number of posts: {{ posts|length }} <br>
-{% for post in posts %}
-    <a href="{% url 'website:get_post' post.id %}"> {{ post.title }}</a>
-{% endfor %}
-{% endblock %}
