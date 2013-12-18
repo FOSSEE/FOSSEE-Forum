@@ -1,4 +1,7 @@
 /* override bootstrap */
+.container>.navbar-header {
+    height: 45px;
+}
 .navbar>.container .navbar-brand {
     margin-left: 0;
 }
@@ -25,6 +28,10 @@ body {
 }
 #header-inner {
     
+}
+#logo {
+    width: 25px;
+    margin-top: -3px;
 }
 #content-wrapper {
     position: relative;
@@ -134,10 +141,14 @@ body {
     max-width: 970px;
     margin:0 auto;
     background-color: #2d2d2d;
-    min-height: 60px;
+    color: #ffffff;
 }
 #footer-inner {
-    
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+#footer-inner a{
+    color: #ffffff;
 }
 .field_error {
     border: 1px solid red;
@@ -168,14 +179,3 @@ body {
     right: 5px;
     bottom: 5px;
 }
-#search-bar {
-    display: none;
-    min-height: 50px;
-    padding-top: 15px;
-    padding-bottom: 15px;
-    background: #ffffff;
-    border-bottom: 2px solid #f5f5f5;
-    width: 970px;
-    margin: 0 auto;
-}
-

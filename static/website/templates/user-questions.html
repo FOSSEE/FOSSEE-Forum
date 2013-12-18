@@ -5,7 +5,7 @@
     {% for question in questions %}
         <div class="my-question">
             <span class="title">
-                {{ question.title }}
+                <a href="{% url 'website:get_question' question.id %}">{{ question.title }}</a>
             </span>
             <br>
             <span class="date">
