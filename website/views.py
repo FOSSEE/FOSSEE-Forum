@@ -223,8 +223,7 @@ def ajax_duration(request):
         if minutes < 0: 
             minutes = 1
         seconds = int(seconds - (seconds % 10 - 10))
-
-        print minutes, seconds
+        seconds = 60
         context = {
             'minutes': minutes,
             'seconds':seconds,
