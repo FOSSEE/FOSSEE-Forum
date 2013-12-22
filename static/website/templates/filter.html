@@ -85,7 +85,7 @@
         <tr>
             <td>
                 <span href="#" class="category" data-toggle="tooltip" data-placement="top" title="{{ question.category}}">
-                    {{ question.category|truncatechars:15 }} 
+                    {{ question.category|truncatechars:12 }} 
                 </span>
                 <a class="pull-right" href="{% url 'website:filter' question.category %}?qid={{ question.id }}">
                     <span class="glyphicon glyphicon-search"></span>
@@ -94,7 +94,7 @@
 
             <td>
                 <span class="tutorial" data-toggle="tooltip" data-placement="top" title="{{ question.tutorial}}">
-                    {{ question.tutorial|truncatechars:15 }}
+                    {{ question.tutorial|truncatechars:12 }}
                 </span>
                 <a class="pull-right" href="{% url 'website:filter' question.category question.tutorial %}?qid={{ question.id }}">
                     <span class="glyphicon glyphicon-search"></span>
@@ -119,7 +119,7 @@
 
             <td>
                 <span class="title" data-toggle="tooltip" data-placement="top" title="{{ question.title }}">
-                    <a href="{% url 'website:get_question' question.id %}">{{ question.title|truncatechars:45 }}</a>
+                    <a href="{% url 'website:get_question' question.id %}">{{ question.title|truncatechars:40 }}</a>
                 </span>            
             </td>
 
