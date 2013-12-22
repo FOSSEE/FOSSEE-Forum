@@ -1,3 +1,4 @@
+@import url(http://fonts.googleapis.com/css?family=Varela+Round);
 /* override bootstrap */
 .container>.navbar-header {
     height: 45px;
@@ -12,6 +13,7 @@
 body {
     background: #fafafa;
     box-shadow: 4px 0 10px #cccccc,  -4px 0 10px #cccccc; 
+    font-family: 'Varela Round', sans-serif;
 }
 #page-wrapper {
     max-width: 970px;
@@ -56,7 +58,7 @@ body {
 }
 #content .question .title a{
     padding: 0 0 7px 0;
-    font-size: 1.3em;
+    font-size: 1.1em;
     color: #424242;
 }
 #content .question .body {
@@ -68,7 +70,7 @@ body {
 #content .question .minute_range a,
 #content .question .second_range a {
     padding: 3px 5px;
-    margin: 0 10px 0 0;
+    margin: 0 5px 0 0;
     -webkit-border-radius: 3px;
        -moz-border-radius: 3px;
          -o-border-radius: 3px;
@@ -81,6 +83,8 @@ body {
 #content .question .tutorial a {
     background: #424242;
     color: #ffffff;
+    width: 100px;
+    overflow: hidden;
 }
 #content .question .minute_range a {
     background: #f5f5f5;
@@ -98,6 +102,18 @@ body {
 #content .question .user{
     background: #f5f5f5;
     padding: 2px 7px;
+}
+table .category {
+    color:#7395d9; 
+    font-weight:bold;
+}
+table .tutorial {
+    color:#a26dc8; 
+    font-weight:bold;
+}
+table .title a {
+    font-size: 1.1em;
+    color: #424242;
 }
 #similar-link {
     display: none;

@@ -55,7 +55,7 @@
     <span class="meta">
         <small>
                 <i>
-                    {{ question.date_created }}
+                    {{ question.date_created|date:"y-d-m" }}, {{ question.date_created|time }}
                 </i>
         </small>
 
@@ -91,20 +91,26 @@
     </div> <!-- /.reply -->
 {% endfor %}
 
-<form action="{% url 'website:question_reply' %}" method="POST"> {% csrf_token %}
-    {% with WIDGET_ERROR_CLASS='field_error' %}
-        <div class="row"> 
-            <div class="col-lg-12">
-                <div class="form-group">
-                    {% render_field form.question value=question.id %}
-                    <label for="id_body">Reply</label>
-                    {% render_field form.body class+='form-control' %}
+{% if user.is_authenticated %}
+    <form action="{% url 'website:question_reply' %}" method="POST"> {% csrf_token %}
+        {% with WIDGET_ERROR_CLASS='field_error' %}
+            <div class="row"> 
+                <div class="col-lg-12">
+                    <div class="form-group">
+                        {% render_field form.question value=question.id %}
+                        <label for="id_body">Reply</label>
+                        {% render_field form.body class+='form-control' %}
+                    </div>
                 </div>
             </div>
-        </div>
-    {% endwith %}
-    <input class="btn btn-info" type="submit" value="Submit Reply">
-</form>
+        {% endwith %}
+        <input class="btn btn-info" type="submit" value="Submit Reply">
+    </form>
+{% else %}
+    <h4>
+        <a class="btn btn-xs btn-success" href="{% url 'user_login'%}"><b>Log-in</b></a> to reply to this question.
+    </h4> 
+{% endif %}
 
 <script src="{% static 'website/js/nicEdit.js' %}" type="text/javascript"></script>
 <script type="text/javascript">

@@ -83,7 +83,12 @@ def question_reply(request):
     return HttpResponseRedirect('/question/'+str(qid))
 
 def filter(request,  category=None, tutorial=None, minute_range=None, second_range=None):
-    context = {}
+    context = {
+        'category': category,
+        'tutorial': tutorial,
+        'minute_range': minute_range,
+        'second_range': second_range
+    }
     if category and tutorial and minute_range and second_range:
         questions = Question.objects.filter(category=category).filter(tutorial=tutorial).filter(minute_range=minute_range).filter(second_range=second_range)
     elif tutorial is None:

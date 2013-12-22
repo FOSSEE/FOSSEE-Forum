@@ -1,12 +1,10 @@
 {% extends 'website/templates/base.html' %}
 {% block content %}
-
 {% if question %}
     <div class="question">
-            <div class="title">
+            <div class="title" style="margin-bottom: 10px;">
                 <a href="{% url 'website:get_question' question.id %}">{{ question.title }}</a>
             </div> 
-
             <span class="category">
                 <small>
                     <a href="{% url 'website:filter' question.category %}?qid={{ question.id }}">
@@ -38,49 +36,118 @@
                     </a>
                 </small>
             </span>
+
+            <span class="meta">
+                <small>
+                        <i>
+                            {{ question.date_created|date:"y-d-m" }}, {{ question.date_created|time }}
+                        </i>
+                </small>
+
+                <span class="user">
+                    {{ question.user }}
+                </span>
+            </span>
+
         </div>
 {% endif %}
 
-<h5>You might also want to take a look at:</h5>
 {% if questions %}
-    {% for question in questions %}
-     <div class="question">
-            <div class="title">
-                <a href="{% url 'website:get_question' question.id %}">{{ question.title }}</a>
-            </div> 
+<h5>
+    These are the similar questions in:
+    {% if category %}
+        {{ category }}
+    {% endif %}
+    {% if tutorial %}
+       <b> &gt; </b>
+       {{ tutorial }}
+    {% endif %}
+    {% if minute_range %}
+       <b> &gt; </b>
+       {{ minute_range }} min
+    {% endif %}
+    {% if second_range %}
+       <b> &gt; </b>
+       {{ second_range }} sec
+    {% endif %}
+</h5>
 
-            <span class="category">
-                <small>
-                    <a href="{% url 'website:filter' question.category %}?qid={{ question.id }}">
-                        {{ question.category }}
-                    </a>
-                </small>
-            </span>
+    <table class="table table-striped table-bordered">
+        <th> FOSS </th>
+        <th> ST</th>
+        <th> MIN</th>
+        <th> SEC </th>
+        <th> QUESTION</th>
+        <th> DATE</th>
+        <th>VIEWS</th>
+        <th> USER</th>
+        {% for question in questions %}
+        <tr>
+            <td>
+                <span href="#" class="category" data-toggle="tooltip" data-placement="top" title="{{ question.category}}">
+                    {{ question.category|truncatechars:15 }} 
+                </span>
+                <a class="pull-right" href="{% url 'website:filter' question.category %}?qid={{ question.id }}">
+                    <span class="glyphicon glyphicon-search"></span>
+                </a>
+            </td>
 
-            <span class="tutorial">
-                <small>
-                    <a href="{% url 'website:filter' question.category question.tutorial %}?qid={{ question.id }}">
-                        {{ question.tutorial}}
-                    </a>
-                </small>
-            </span>
+            <td>
+                <span class="tutorial" data-toggle="tooltip" data-placement="top" title="{{ question.tutorial}}">
+                    {{ question.tutorial|truncatechars:15 }}
+                </span>
+                <a class="pull-right" href="{% url 'website:filter' question.category question.tutorial %}?qid={{ question.id }}">
+                    <span class="glyphicon glyphicon-search"></span>
+                </a>
+            </td>
 
-            <span class="minute_range">
-                <small>
+            <td>
+                <span>
                     <a href="{% url 'website:filter' question.category question.tutorial question.minute_range %}?qid={{ question.id }}">
-                        {{ question.minute_range }} min
+                        {{ question.minute_range }}
                     </a>
-                </small>
-            </span>
+                </span>
+            </td>
 
-            <span class="second_range">
-                <small>
+            <td>        
+                <span>
                     <a href="{% url 'website:filter' question.category question.tutorial question.minute_range question.second_range%}?qid={{ question.id }}">
-                        {{ question.second_range }} sec
+                        {{ question.second_range }}
                     </a>
-                </small>
-            </span>
-        </div>       
-    {% endfor %}
+                </span>
+            </td>
+
+            <td>
+                <span class="title" data-toggle="tooltip" data-placement="top" title="{{ question.title }}">
+                    <a href="{% url 'website:get_question' question.id %}">{{ question.title|truncatechars:45 }}</a>
+                </span>            
+            </td>
+
+            <td>    
+                <span>
+                    <i>
+                        {{ question.date_created|date:"y-d-m" }}
+                    </i>
+                </span>
+            </td>
+                    
+            <td>
+                {{ question.views}}
+            </td>
+
+            <td>
+                    {{ question.user }}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+{% else %}
+<h4>There are no similar questions.</h4>
 {% endif %}
+{% endblock %}
+
+{% block javascript %}
+<script>
+    $('span').tooltip();
+</script>
 {% endblock %}
