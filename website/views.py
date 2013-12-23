@@ -6,7 +6,7 @@ from django.core.context_processors import csrf
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from django.core.mail import EmailMessage
+from django.core.mail import EmailMultiAlternatives
 
 from website.models import Question, Reply, Notification, TutorialDetails, TutorialResources
 from website.forms import NewQuestionForm, ReplyQuesitionForm
@@ -340,7 +340,7 @@ def test(request):
         Tutorial: Tokens <br>
         <a href="http://google.com" target="_blank">http://google.com</a> <br>
     """
-    email = EmailMessage(subject, message, 'forums', ['rush2jrp@gmail.com'], headers={"Content-type":"text/html;charset=iso-8859-1"})
+    email = EmailMultiAlternatives(subject, message, 'forums', ['rush2jrp@gmail.com'], headers={"Content-type":"text/html;charset=iso-8859-1"})
     email.attach_alternative(message, "text/html")
     email.send()
     return HttpResponse("done")
