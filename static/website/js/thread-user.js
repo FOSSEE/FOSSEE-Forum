@@ -1,7 +1,7 @@
 bkLib.onDomLoaded(function() {
 
     var questionNicEditor = new nicEditor({
-        buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image'],
+        buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link'],
         iconsPath: "/static/website/js/nicEditorIcons.gif",
     });
     questionNicEditor.setPanel('questionNicPanel');
@@ -71,7 +71,7 @@ $(document).ready(function() {
     $replyPanelWrapper = $("#replyPanelWrapper");
 
     var replyNicEditor = new nicEditor({
-        buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image'],
+        buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link'],
         iconsPath: "/static/website/js/nicEditorIcons.gif",
     });
     replyNicEditor.panelInstance('replyNicPanel');

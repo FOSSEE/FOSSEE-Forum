@@ -40,7 +40,7 @@
             <span class="meta">
                 <small>
                         <i>
-                            {{ question.date_created|date:"y-m-d" }}, {{ question.date_created|time }}
+                            {{ question.date_created|date:"d-m-y" }}, {{ question.date_created|time }}
                         </i>
                 </small>
 
@@ -74,13 +74,14 @@
 
     <table class="table table-striped table-bordered">
         <th> FOSS </th>
-        <th> ST</th>
-        <th> MIN</th>
-        <th> SEC </th>
-        <th> QUESTION</th>
-        <th> DATE</th>
-        <th>VIEWS</th>
-        <th> USER</th>
+        <th> Tutorial</th>
+        <th> Min </th>
+        <th> Sec </th>
+        <th> Question</th>
+        <th> Date</th>
+        <th> Views</th>
+        <th> Replies</th>
+        <th> User</th>
         {% for question in questions %}
         <tr>
             <td>
@@ -126,7 +127,7 @@
             <td>    
                 <span>
                     <i>
-                        {{ question.date_created|date:"y-d-m" }}
+                        {{ question.date_created|date:"d-m-y" }}
                     </i>
                 </span>
             </td>
@@ -136,8 +137,15 @@
             </td>
 
             <td>
-                    {{ question.user }}
+                {{ question.reply_set.count }}
             </td>
+
+            <td>
+                    <span class="title" data-toggle="tooltip" data-placement="top" title="{{ question.user }}">
+                    {{ question.user|truncatechars:10 }}
+                </span>
+            </td>
+
         </tr>
         {% endfor %}
     </table>
