@@ -24,6 +24,4 @@ urlpatterns = patterns('',
     url(r'^ajax-notification-remove/$', 'website.views.ajax_notification_remove', name='ajax_notification_remove'),
     url(r'^ajax-keyword-search/$', 'website.views.ajax_keyword_search', name='ajax_keyword_search'),
     url(r'^ajax-time-search/$', 'website.views.ajax_time_search', name='ajax_time_search'),
-
-    url(r'^test/$', 'website.views.test', name='test'),
 )
