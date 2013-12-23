@@ -333,5 +333,13 @@ def ajax_time_search(request):
         return render(request, 'website/templates/ajax-time-search.html', context)
 
 def test(request):
-    send_mail('sub', 'message', 'hello', ['rush2jrp@gmail.com'], fail_silently=True)
+    subject = 'New Forum Question'
+    message = """
+        A new question has been posted in the Spoken-Tutorial Forum. <br>
+        Category: OpenFOAM <br>
+        Tutorial: Tokens <br>
+        <a href="http://google.com" target="_blank">http://google.com</a> <br>
+    """
+    send_mail(subject, message, 'forums', ['rush2jrp@gmail.com'], 
+    headers={"Content-type":"text/html;charset=iso-8859-1"}, fail_silently=True)
     return HttpResponse("done")
