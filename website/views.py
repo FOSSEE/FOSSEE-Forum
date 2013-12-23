@@ -124,6 +124,30 @@ def new_question(request):
             question.body = cleaned_data['body']
             question.views= 1 
             question.save()
+
+            # Sending email when a new question is asked
+            subject = 'New Forum Question'
+            message = """
+                A new question has been posted in the Spoken-Tutorial Forum. <br>
+                Category: <b>{0}</b><br>
+                Tutorial: <b>{1}</b><br>
+                Link: <a href="{2}">{2}</a><br>
+            """.format(
+                question.category, 
+                question.tutorial, 
+                'http://forums.spoken-tutorial.org/question/'+str(question.id)
+            )
+
+            email = EmailMultiAlternatives(
+                subject,'', 'forums', 
+                ['team@spoken-tutorial.org', 'team@fossee.in'],
+                headers={"Content-type":"text/html;charset=iso-8859-1"}
+            )
+
+            email.attach_alternative(message, "text/html")
+            email.send(fail_silently=True)
+            # End of email send
+
             return HttpResponseRedirect('/')
     else:
         form = NewQuestionForm()
@@ -331,20 +355,3 @@ def ajax_time_search(request):
         }
 
         return render(request, 'website/templates/ajax-time-search.html', context)
-
-def test(request):
-    subject = 'New Forum Question'
-    message = """
-        A new question has been posted in the Spoken-Tutorial Forum. <br>
-        Category: {0}<br>
-        Tutorial: {1}<br>
-        <a href="{2}">{2}</a> <br>
-    """.format('Test Cat', 'Test Tut', 'http://spoken-tutorial.org')
-    email = EmailMultiAlternatives(
-        subject,'', 'forums', 
-        ['rush2jrp@gmail.com', 'vishnukraj007@gmail.com'], 
-        headers={"Content-type":"text/html;charset=iso-8859-1"}
-    )
-    email.attach_alternative(message, "text/html")
-    email.send(fail_silently=True)
-    return HttpResponse("done")
