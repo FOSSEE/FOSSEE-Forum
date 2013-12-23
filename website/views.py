@@ -6,6 +6,7 @@ from django.core.context_processors import csrf
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
+from django.core.mail import send_mail
 
 from website.models import Question, Reply, Notification, TutorialDetails, TutorialResources
 from website.forms import NewQuestionForm, ReplyQuesitionForm
@@ -330,3 +331,7 @@ def ajax_time_search(request):
         }
 
         return render(request, 'website/templates/ajax-time-search.html', context)
+
+def test(request):
+    send_mail('sub', 'message', 'hello', ['rush2jrp@gmail.com'], fail_silently=True)
+    return HttpResponse("done")
