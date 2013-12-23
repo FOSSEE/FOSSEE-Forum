@@ -336,11 +336,15 @@ def test(request):
     subject = 'New Forum Question'
     message = """
         A new question has been posted in the Spoken-Tutorial Forum. <br>
-        Category: OpenFOAM <br>
-        Tutorial: Tokens <br>
-        <a href="http://google.com" target="_blank">http://google.com</a> <br>
-    """
-    email = EmailMultiAlternatives(subject, message, 'forums', ['rush2jrp@gmail.com'], headers={"Content-type":"text/html;charset=iso-8859-1"})
+        Category: {0}<br>
+        Tutorial: {1}<br>
+        <a href="{2}">{2}</a> <br>
+    """.format('Test Cat', 'Test Tut', 'http://spoken-tutorial.org')
+    email = EmailMultiAlternatives(
+        subject,'', 'forums', 
+        ['rush2jrp@gmail.com', 'vishnukraj007@gmail.com'], 
+        headers={"Content-type":"text/html;charset=iso-8859-1"}
+    )
     email.attach_alternative(message, "text/html")
-    email.send()
+    email.send(fail_silently=True)
     return HttpResponse("done")
