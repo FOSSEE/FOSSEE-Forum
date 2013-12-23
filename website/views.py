@@ -341,4 +341,5 @@ def test(request):
         <a href="http://google.com" target="_blank">http://google.com</a> <br>
     """
     email = EmailMessage(subject, message, 'forums', ['rush2jrp@gmail.com'], headers={"Content-type":"text/html;charset=iso-8859-1"})
+    email.send()
     return HttpResponse("done")
