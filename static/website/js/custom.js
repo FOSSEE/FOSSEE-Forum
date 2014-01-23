@@ -7,6 +7,8 @@ $(document).ready(function() {
     $category.change(function() {
         $("#similar-link").hide();
         var category = $(this).val();
+        /* see thread-user.js */
+        $("#question-details-ok").show();
         $.ajax({
             url: "/ajax-tutorials/",
             type: "POST",
@@ -59,7 +61,7 @@ $(document).ready(function() {
                 $response = $(data);
                 var similar_count= $response.find("#similar-count").text();
                 $("#similar-link").show().html(similar_count);
-                $(".modal-body").html(data);
+                $("#modal-body").html(data);
             }
         });
     });

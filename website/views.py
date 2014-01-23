@@ -12,8 +12,11 @@ from website.models import Question, Reply, Notification, TutorialDetails, Tutor
 from website.forms import NewQuestionForm, ReplyQuesitionForm
 from website.helpers import get_video_info
 
+admins = (
+    99999,
+)
 
-categories = [
+categories = (
     'Advanced-C++', 'BASH', 'Blender', 
     'C-and-C++', 'CellDesigner', 'Digital-Divide', 
     'Drupal', 'Firefox', 'GChemPaint', 'Geogebra', 
@@ -28,7 +31,7 @@ categories = [
     'QCad', 'R', 'Ruby', 'Scilab', 'Selenium', 
     'Single-Board-Heater-System', 'Spoken-Tutorial-Technology', 
     'Step', 'Thunderbird', 'Tux-Typing', 'What-is-Spoken-Tutorial', 'Xfig'
-] 
+) 
 
 def home(request):
     marker = 0
@@ -219,6 +222,13 @@ def search(request):
 # Ajax Section
 # All the ajax views go below
 @csrf_exempt
+def ajaX_category(request):
+    context = {
+        'categories': categories
+    }
+    return render(request, 'website/templates/ajax_categories.html', context)
+
+@csrf_exempt
 def ajax_tutorials(request):
     if request.method == 'POST':
         category = request.POST.get('category')
@@ -241,9 +251,10 @@ def ajax_duration(request):
             Q(tutorial_detail_id=video_detail.id),
             Q(language='English')
         )
-        video_path = '/Sites/spoken_tutorial_org/sites/default/files/{0}'.format(
-            video_resource.tutorial_video
-        )
+        #video_path = '/Sites/spoken_tutorial_org/sites/default/files/{0}'.format(
+        #    video_resource.tutorial_video
+        #)
+        video_path = '/home/cheese/test-video.ogv'
         video_info = get_video_info(video_path)
 
         # convert minutes to 1 if less than 0
@@ -264,13 +275,33 @@ def ajax_duration(request):
 def ajax_question_update(request):
     if request.method == 'POST':
         qid = request.POST['question_id']
+        title = request.POST['question_title']
         body = request.POST['question_body']
         question = get_object_or_404(Question, pk=qid)
         if question:
-            if question.uid == request.user.id:
+            if question.uid == request.user.id or request.user.id in admins:
+                question.title = title
                 question.body = body
                 question.save()
         return HttpResponse("saved")
+
+@csrf_exempt
+def ajax_details_update(request):
+    if request.method == 'POST':
+        qid = request.POST['qid']
+        category = request.POST['category']
+        tutorial = request.POST['tutorial']
+        minute_range = request.POST['minute_range']
+        second_range = request.POST['second_range']
+        question = get_object_or_404(Question, pk=qid)
+        if question:
+            if question.uid == request.user.id or request.user.id in admins:
+                question.category = category
+                question.tutorial = tutorial
+                question.minute_range = minute_range
+                question.second_range = second_range
+                question.save()
+            return HttpResponse("saved")
 
 @csrf_exempt
 def ajax_reply_update(request):
@@ -279,7 +310,7 @@ def ajax_reply_update(request):
         body = request.POST['reply_body']
         reply= get_object_or_404(Reply, pk=rid)
         if reply:
-            if reply.uid == request.user.id:
+            if reply.uid == request.user.id or request.user.id in admins:
                 reply.body = body
                 reply.save()
         return HttpResponse("saved")

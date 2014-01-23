@@ -1,6 +1,7 @@
 #Custom settings
 from os.path import *
 from config import *
+from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS
 
 PROJECT_DIR = abspath(dirname(__file__) + '/../')
 
@@ -139,7 +140,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
-    'django.contrib.admin',
+    #'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     'website',
@@ -179,3 +180,4 @@ LOGGING = {
 AUTH_USER_MODEL = 'drupal_auth.Users'
 AUTHENTICATION_BACKENDS = ( 'drupal_auth.backends.DrupalAuthBackend', )
 DATABASE_ROUTERS = ['drupal_auth.routers.DrupalAuthRouter']
+TEMPLATE_CONTEXT_PROCESSORS += ('website.context_processors.admin_processor', )
