@@ -100,7 +100,7 @@ $(document).ready(function() {
     $question_second_range = $('#id_second_range');
     
     $question_details_ok.click(function() {
-        console.log($(this).data("qid"));
+        $saving.show();
         var category = $question_category.val();
         var tutorial = $question_tutorial.val();
         var minute_range = $question_minute_range.val();
@@ -141,7 +141,9 @@ $(document).ready(function() {
                 } else {
                     $(".second_range").hide()
                 }
-                console.log(data);
+                $saving.hide();
+                $saved.show();
+                $saved.fadeOut("slow");
             }
         });
     });
