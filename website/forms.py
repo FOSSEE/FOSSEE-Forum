@@ -35,6 +35,7 @@ categories = (
     ('Ngspice', 'Ngspice'),
     ('OpenFOAM', 'OpenFOAM'),
     ('Orca', 'Orca'),
+    ('Oscad', 'Oscad'),
     ('PERL', 'PERL'),
     ('PHP-and-MySQL', 'PHP-and-MySQL'),
     ('Python', 'Python'),
