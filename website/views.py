@@ -26,7 +26,7 @@ categories = (
     'LibreOffice-Suite-Base', 'LibreOffice-Suite-Calc', 
     'LibreOffice-Suite-Draw', 'LibreOffice-Suite-Impress', 
     'LibreOffice-Suite-Math', 'LibreOffice-Suite-Writer', 
-    'Linux', 'Netbeans', 'Ngspice', 'OpenFOAM', 'Orca', 
+    'Linux', 'Netbeans', 'Ngspice', 'OpenFOAM', 'Orca', 'Oscad',
     'PERL', 'PHP-and-MySQL', 'Python', 'Python-Old-Version', 
     'QCad', 'R', 'Ruby', 'Scilab', 'Selenium', 
     'Single-Board-Heater-System', 'Spoken-Tutorial-Technology', 
