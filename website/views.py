@@ -40,7 +40,8 @@ def home(request):
 
     total = Question.objects.all().count()
     total = int(total - (total % 10 - 10))
-    questions = Question.objects.all().order_by('date_created').reverse()[marker:marker+10]
+    #questions = Question.objects.all().order_by('date_created').reverse()[marker:marker+10]
+    questions = Question.objects.all().order_by('date_created').reverse()
     context = {
         'questions': questions,
         'total': total,
