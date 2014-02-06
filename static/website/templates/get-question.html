@@ -94,8 +94,16 @@
             {{ reply.body|safe }}
         </div>
 
-        <span class="user">
-            {{ reply.user }}
+        <span class="meta">
+            <small>
+                <i>
+                    {{ reply.date_created|date:"d-m-y" }}, {{ reply.date_created|time }}
+                </i>
+            </small>
+
+            <span class="user">
+                {{ reply.user }}
+            </span>
         </span>
 
         {% if user|can_edit:reply  %}

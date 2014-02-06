@@ -109,6 +109,11 @@ body {
     right: 0px;
     bottom: 0px;
 }
+#content .reply .meta{
+    position: absolute;
+    right: 0px;
+    bottom: 0px;
+}
 #content .question .user{
     background: #f5f5f5;
     padding: 2px 7px;
@@ -180,9 +185,6 @@ table .title a {
 #content .reply .body {
 }
 #content .reply .user {
-    position: absolute;
-    right: 0px;
-    bottom: 0px;
     padding: 2px 7px;
     background: #f5f5f5;
 }
