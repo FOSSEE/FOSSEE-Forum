@@ -1,4 +1,5 @@
 {% extends 'website/templates/base.html' %}
+{% load static %}
 {% block content %}
 {% load count_tags %}
 <h4><u>Recent Questions</u></h4>
@@ -101,4 +102,5 @@
 <script>
     $('span').tooltip();
 </script>
+<script src="{% static 'website/js/nice-bar.js' %}"></script>
 {% endblock %}
