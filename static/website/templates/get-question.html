@@ -9,17 +9,7 @@
 <span class="saved hideme">saved</span>
 
 <div class="row">
-    <div class="question-critic col-lg-1 lead">
-        <span class="vote upvote" data-qid="{{ question.id }}" data-vote="1"> 
-            <span class="glyphicon glyphicon-circle-arrow-up"></span> 
-        </span>
-        <div class="votes">34</div>
-        <span class="vote downvote" data-qid="{{ question.id }}" data-vote="-1"> 
-            <span class="glyphicon glyphicon-circle-arrow-down"></span> 
-        </span>
-    </div> 
-
-    <div class="col-lg-11 question-wrapper">
+    <div class="col-lg-12 question-wrapper">
     <div class="question {% if user|can_edit:question %}editable{% endif %}">
         <div class="title {% if user|can_edit:question %}title-editable{% endif %}">
            {{ question.title }}
@@ -106,17 +96,8 @@
 
 {% for answer in answers %}
 <div class="row">
-    <div class="answer-critic col-lg-1">
-        <span class="vote upvote" data-aid="{{ answer.id }}" data-vote="1"> 
-            <span class="glyphicon glyphicon-circle-arrow-up"></span>
-        </span>
-        <div class="votes">34</div>
-        <span class="vote downvote" href="#" data-aid="{{ answer.id }}" data-vote="-1"> 
-            <span class="glyphicon glyphicon-circle-arrow-down"></span>
-        </span>
-    </div> 
 
-    <div class="col-lg-11 answer-wrapper">
+    <div class="col-lg-12 answer-wrapper">
         <div class="answer {% if user|can_edit:answer  %}editable{% endif %}" id="answer{{answer.id}}">
             
             <div class="body" id="body{{ answer.id }}">

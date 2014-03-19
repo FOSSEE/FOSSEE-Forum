@@ -75,9 +75,9 @@ body {
 .voted {
     color: orange;
 }
-.question-wrapper {
-    padding-left: 0;
-}
+/* .question-wrapper { */
+/*     padding-left: 0; */
+/* } */
 #content .question {
     position: relative;
     padding: 15px 0 15px 0;
@@ -197,9 +197,9 @@ table .title a {
 .saved {
     background: lightgreen;
 }
-.answer-wrapper {
-    padding-left: 0px;
-}
+/* .answer-wrapper { */
+/*     padding-left: 0px; */
+/* } */
 #content .answer {
     position: relative;
     border-bottom: 1px solid #f5f5f5;
