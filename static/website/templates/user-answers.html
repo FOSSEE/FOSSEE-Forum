@@ -1,17 +1,17 @@
 {% extends 'website/templates/base.html' %}
 {% load count_tags %}
 {% block content %}
-    <h4>My Replies</h4>
-    {% for reply in replies%}
-        <div class="my-reply">
+    <h4>My Answers</h4>
+    {% for answer in answers%}
+        <div class="my-answer">
             <span class="body">
-                <a href="{% url 'website:get_question' reply.question.id %}#reply{{ reply.id }}">{{ reply.body|safe }}</a>
+                <a href="{% url 'website:get_question' answer.question.id %}#answer{{ answer.id }}">{{ answer.body|safe }}</a>
             </span>
             <br>
             <span class="date">
                 <small>
                 Replied on:
-                {{ reply.date_created }}
+                {{ answer.date_created }}
                 </small>
             </span>
         </div>
@@ -21,7 +21,7 @@
         <ul class="pagination pull-right">
             {% for i in total|get_range:"0,10" %}
                 <li>
-                    <a href="{% url 'website:user_replies' user.id %}?marker={{ i }}">
+                    <a href="{% url 'website:user_answers' user.id %}?marker={{ i }}">
                         {% if i == marker %}
                             <strong>{{ i|div:"10"|inc }}</strong>
                         {% else %}

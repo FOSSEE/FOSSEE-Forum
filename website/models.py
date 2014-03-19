@@ -15,23 +15,46 @@ class Question(models.Model):
     body = models.TextField()
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
-    views = models.IntegerField()
+    views = models.IntegerField(default=1)
+    votes = models.IntegerField(default=0)
 
     def user(self):
         user = User.objects.get(id=self.uid)
         return user.username
 
+class QuestionVote(models.Model):
+    uid = models.IntegerField()
+    question = models.ForeignKey(Question)
 
-class Reply(models.Model):
-    uid  = models.IntegerField()
+class QuestionComment(models.Model):
+    uid = models.IntegerField()
     question = models.ForeignKey(Question)
     body = models.TextField()
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
 
+class Answer(models.Model):
+    uid  = models.IntegerField()
+    question = models.ForeignKey(Question)
+    body = models.TextField()
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_modified = models.DateTimeField(auto_now=True)
+    votes = models.IntegerField(default=0)
+
     def user(self):
         user = User.objects.get(id=self.uid)
         return user.username
+
+class AnswerVote(models.Model):
+    uid = models.IntegerField()
+    answer = models.ForeignKey(Answer)
+
+class AnswerComment(models.Model):
+    uid = models.IntegerField()
+    answer = models.ForeignKey(Answer)
+    body = models.TextField()
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_modified = models.DateTimeField(auto_now=True)
 
 class Notification(models.Model):
     uid = models.IntegerField()
@@ -47,6 +70,7 @@ class TutorialDetails(models.Model):
     tutorial_name = models.CharField(max_length=600L)
     tutorial_level = models.CharField(max_length=400L)
     order_code = models.IntegerField()
+
     class Meta:
         db_table = 'tutorial_details'
 
@@ -72,5 +96,6 @@ class TutorialResources(models.Model):
     cvideo_version = models.IntegerField()
     hit_count = models.BigIntegerField()
     request_exception = models.TextField()
+
     class Meta:
         db_table = 'tutorial_resources'

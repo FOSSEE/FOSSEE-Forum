@@ -10,7 +10,7 @@
     <th> Question</th>
     <th> Date</th>
     <th> Views</th>
-    <th> Replies</th>
+    <th> Answers</th>
     <th> User</th>
     {% for question in questions %}
     <tr>
@@ -67,7 +67,7 @@
         </td>
 
         <td>
-            {{ question.reply_set.count }}
+            {{ question.answer_set.count }}
         </td>
        
         <td>
@@ -79,7 +79,7 @@
     {% endfor %}
 
 </table>
-    {% if total > 20 %}
+    {% if total > 25 %}
         <ul class="pagination pull-right">
             {% for i in total|get_range:"0,10" %}
                 <li>

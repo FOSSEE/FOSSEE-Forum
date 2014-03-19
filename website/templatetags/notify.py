@@ -1,17 +1,17 @@
 from django import template
 
-from website.models import Question, Reply, Notification
+from website.models import Question, Answer, Notification
 
 register = template.Library()
 
 def get_notification(nid):
     notification =  Notification.objects.get(pk=nid)
     question = Question.objects.get(pk=notification.qid);
-    reply = Reply.objects.get(pk=notification.rid)
+    answer = Answer.objects.get(pk=notification.rid)
     context = {
         'notification': notification,
         'question': question,
-        'reply': reply,
+        'answer': answer,
     }
     return context 
 register.inclusion_tag('website/templates/notify.html')(get_notification)

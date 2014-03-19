@@ -1,9 +1,12 @@
+{% load compress %}
 {% load static %}
 <html>
     <head>
         <title>Spoken-Tutorial Forums</title>
+        {% compress css %}
         <link rel="stylesheet" href="{% static 'website/css/bootstrap.min.css' %}" type="text/css" media="screen" charset="utf-8" />
         <link rel="stylesheet" href="{% static 'website/css/main.css' %}" type="text/css" media="screen" charset="utf-8" />
+        {% endcompress %}
     </head>
     <body>
         <div id="page-wrapper">
@@ -48,7 +51,7 @@
                                 </a>
                                 <ul class="dropdown-menu">
                                   <li><a href="{% url 'website:user_questions' user.id %}">My Questions</a></li>
-                                  <li><a href="{% url 'website:user_replies' user.id %}">My Replies</a></li>
+                                  <li><a href="{% url 'website:user_answers' user.id %}">My Answers</a></li>
                                   <li>
                                     <a href="{% url 'website:user_notifications' user.id %}">
                                         Notifications  
@@ -102,12 +105,14 @@
             </div> <!-- /#footer-inner -->
         </div> <!-- /#footer-wrapper -->
     </div> <!-- /#page-wrapper -->
-
+        
+    {% compress js %}
         <script src="{% static 'website/js/jquery.min.js' %}"></script>
         <script src="{% static 'website/js/bootstrap.min.js' %}"></script>
 
         {% block javascript %}
             <!-- overide with custom javascript -->
         {% endblock %}
+    {% endcompress %}
     </body>
 </html>

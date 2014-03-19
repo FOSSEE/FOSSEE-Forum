@@ -80,7 +80,6 @@ $(document).ready(function() {
             type: "POST",
             dataType: "html",
             success: function(data){
-                console.log(data);
                 $saving.hide();
                 $saved.show();
                 $saved.fadeOut("slow");
@@ -147,58 +146,156 @@ $(document).ready(function() {
             }
         });
     });
+
     /*
-     * reply edit section
+     * answer edit section
      * set the dom variables
     */
-    $reply_edit = $('.reply .edit');
-    $reply_save = $(".reply .save");
-    $replyPanelWrapper = $("#replyPanelWrapper");
+    $answer_edit = $('.answer .edit');
+    $answer_save = $(".answer .save");
+    $answerPanelWrapper = $("#answerPanelWrapper");
 
-    var replyNicEditor = new nicEditor({
+    var answerNicEditor = new nicEditor({
         buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link'],
         iconsPath: "/static/website/js/nicEditorIcons.gif",
     });
-    replyNicEditor.panelInstance('replyNicPanel');
+    answerNicEditor.panelInstance('answerNicPanel');
 
-    $reply_edit.click(function() {
+    $answer_edit.click(function(e) {
         var target = $(this).data("target");
-        console.log(target);
-        replyNicEditor.addInstance(target);
-        $(this).parents("div.reply").prepend($replyPanelWrapper);
-        $replyPanelWrapper.show();
-        $('#replyPanelWrapper .nicEdit-panelContain').parent().width('100%');
-        $('#replyPanelWrapper .nicEdit-panelContain').parent().next().width('100%');
+        answerNicEditor.addInstance(target);
+        $(this).parents("div.answer").prepend($answerPanelWrapper);
+        $answerPanelWrapper.show();
+        $('#answerPanelWrapper .nicEdit-panelContain').parent().width('100%');
+        $('#answerPanelWrapper .nicEdit-panelContain').parent().next().width('100%');
         $(this).hide();
         $(this).next().show();
+        $("#"+target).focus();
+        e.preventDefault();
     });
 
-    $reply_save.click(function() {
+    $answer_save.click(function() {
         $saving.show();
         var target = $(this).data("target");
-        replyNicEditor.removeInstance(target);
-        $replyPanelWrapper.hide();
-        $('#replyPanelWrapper .nicEdit-panelContain').parent().width('100%');
+        answerNicEditor.removeInstance(target);
+        $answerPanelWrapper.hide();
+        $('#answerPanelWrapper .nicEdit-panelContain').parent().width('100%');
         $(this).hide();
         $(this).prev().show();
         
-        var reply_id = parseInt($(this).data("rid"));
-        var reply_body = $("#"+target).html();
+        var answer_id = parseInt($(this).data("aid"));
+        var answer_body = $("#"+target).html();
 
         $.ajax({
-            url: "/ajax-reply-update/",
+            url: "/ajax-answer-update/",
             type: "POST",
             data: {
-                reply_id: reply_id,
-                reply_body: reply_body
+                answer_id: answer_id,
+                answer_body: answer_body
             },
             success: function(data) {
-                console.log(data);
                 $saving.hide();
                 $saved.show();
                 $saved.fadeOut("slow");
             }
         });
     });
-});
 
+    /*
+     * comment edit section
+     * set the dom variables
+     */
+    $comment_edit = $(".comment .edit");
+    $comment_save = $(".comment .save");
+    $commentPanelWrapper = $("#commentPanelWrapper");
+
+    var commentNicEditor = new nicEditor({
+        buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link'],
+        iconsPath: "/static/website/js/nicEditorIcons.gif",
+    });
+    commentNicEditor.panelInstance('commentNicPanel');
+    
+    $comment_edit.click(function(e) {
+        var target = $(this).data("target");
+        commentNicEditor.addInstance(target);
+        $(this).parents("div.comment").prepend($commentPanelWrapper);
+        $commentPanelWrapper.show();
+        $('#commentPanelWrapper .nicEdit-panelContain').parent().width('100%');
+        $('#commentPanelWrapper .nicEdit-panelContain').parent().next().width('100%');
+        $(this).hide();
+        $(this).next().show();
+        $("#"+target).focus();
+        e.preventDefault();
+    });
+
+    $comment_save.click(function() {
+        $saving.show();
+        var target = $(this).data("target");
+        commentNicEditor.removeInstance(target);
+        $commentPanelWrapper.hide();
+        $('#commentPanelWrapper .nicEdit-panelContain').parent().width('100%');
+        $(this).hide();
+        $(this).prev().show();
+        
+        var comment_id = parseInt($(this).data("cid"));
+        var comment_body = $("#"+target).html();
+        $.ajax({
+            url: "/ajax-answer-comment-update/",
+            type: "POST",
+            data: {
+                comment_id: comment_id,
+                comment_body: comment_body
+            },
+            success: function(data) {
+                $saving.hide();
+                $saved.show();
+                $saved.fadeOut("slow");
+            }
+        });
+    });
+    
+    /*
+     * add a new comment
+     * set the dom variables
+    */
+    var nics = {};
+    $add_comment = $(".add-comment");
+    $cancel_commment = $(".cancel-comment");
+    $post_comment = $(".post-comment");
+
+    $add_comment.click(function(e) {
+        $(this).hide();
+        $(this).siblings(".cancel-comment").show();
+        $(this).siblings(".post-comment").show();
+
+        var target = $(this).data("target");
+        $("#"+target).show();
+        nics[target] = new nicEditor({
+            buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link'],
+            iconsPath: "/static/website/js/nicEditorIcons.gif",
+        }).panelInstance(target, {hasPanel : true});
+        e.preventDefault();
+    });
+
+    $cancel_commment.click(function(e) {
+        $(this).hide();
+        $(this).siblings(".post-comment").hide();
+        $(this).siblings(".add-comment").show();
+        
+        var target = $(this).data("target");
+        nics[target].removeInstance(target);
+        nics[target] = null;
+        $("#"+target).hide();
+        e.preventDefault();
+    });
+
+    $post_comment.click(function(e) {
+        var target = $(this).data("target");
+        var answer_id = $(this).data("aid");
+        var form = $(this).data("form");
+        $form = $("#"+form);
+        nics[target].instanceById(target).saveContent();
+        $form.submit();
+        e.preventDefault;
+    });
+});

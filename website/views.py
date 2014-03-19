@@ -8,8 +8,8 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.core.mail import EmailMultiAlternatives
 
-from website.models import Question, Reply, Notification, TutorialDetails, TutorialResources
-from website.forms import NewQuestionForm, ReplyQuesitionForm
+from website.models import Question, Answer, Notification, TutorialDetails, TutorialResources, AnswerComment
+from website.forms import NewQuestionForm, AnswerQuesitionForm
 from website.helpers import get_video_info
 
 admins = (
@@ -50,11 +50,11 @@ def home(request):
 
 def get_question(request, question_id=None):
     question = get_object_or_404(Question, id=question_id)
-    replies = question.reply_set.all()
-    form = ReplyQuesitionForm()
+    answers = question.answer_set.all()
+    form = AnswerQuesitionForm()
     context = {
         'question': question,
-        'replies': replies,
+        'answers': answers,
         'form': form
     }
     context.update(csrf(request))
@@ -64,27 +64,40 @@ def get_question(request, question_id=None):
     return render(request, 'website/templates/get-question.html', context)
 
 @login_required
-def question_reply(request):
+def question_answer(request):
     if request.method == 'POST':
-        form = ReplyQuesitionForm(request.POST)
+        form = AnswerQuesitionForm(request.POST)
         if form.is_valid():
             cleaned_data = form.cleaned_data
             qid = cleaned_data['question']
             body = cleaned_data['body']
             question = get_object_or_404(Question, id=qid)
-            reply = Reply()
-            reply.uid = request.user.id
-            reply.question = question
-            reply.body = body
-            reply.save()
+            answer = Answer()
+            answer.uid = request.user.id
+            answer.question = question
+            answer.body = body
+            answer.save()
             if question.uid != request.user.id:
                 notification = Notification()
                 notification.uid = question.uid
                 notification.pid = request.user.id
                 notification.qid = qid
-                notification.rid = reply.id
+                notification.aid = answer.id
                 notification.save()
     return HttpResponseRedirect('/question/'+str(qid))
+
+@login_required
+def answer_comment(request):
+    if request.method == 'POST':
+        answer_id = request.POST['answer_id'];
+        body = request.POST['body']
+        answer = Answer.objects.get(pk=answer_id)
+        comment = AnswerComment()
+        comment.uid = request.user.id
+        comment.answer = answer
+        comment.body = body
+        comment.save()
+        return HttpResponseRedirect("/question/" + str(answer.question.id) + "#")
 
 def filter(request,  category=None, tutorial=None, minute_range=None, second_range=None):
     context = {
@@ -93,6 +106,7 @@ def filter(request,  category=None, tutorial=None, minute_range=None, second_ran
         'minute_range': minute_range,
         'second_range': second_range
     }
+
     if category and tutorial and minute_range and second_range:
         questions = Question.objects.filter(category=category).filter(tutorial=tutorial).filter(minute_range=minute_range).filter(second_range=second_range)
     elif tutorial is None:
@@ -127,7 +141,7 @@ def new_question(request):
             question.body = cleaned_data['body']
             question.views= 1 
             question.save()
-
+            
             # Sending email when a new question is asked
             subject = 'New Forum Question'
             message = """
@@ -140,27 +154,28 @@ def new_question(request):
                 question.tutorial, 
                 'http://forums.spoken-tutorial.org/question/'+str(question.id)
             )
-
+            
             email = EmailMultiAlternatives(
                 subject,'', 'forums', 
                 ['team@spoken-tutorial.org', 'team@fossee.in'],
                 headers={"Content-type":"text/html;charset=iso-8859-1"}
             )
-
+            
             email.attach_alternative(message, "text/html")
             email.send(fail_silently=True)
             # End of email send
-
+            
             return HttpResponseRedirect('/')
     else:
         form = NewQuestionForm()
-
+        
     context = {
         'form': form
     }
     context.update(csrf(request))
     return render(request, 'website/templates/new-question.html', context)
 
+# Notification Section
 @login_required
 def user_questions(request, user_id):
     marker = 0
@@ -171,7 +186,7 @@ def user_questions(request, user_id):
         total = Question.objects.filter(uid=user_id).count()
         total = int(total - (total % 10 - 10))
         questions = Question.objects.filter(uid=user_id).order_by('date_created').reverse()[marker:marker+10]
-
+        
         context = {
             'questions': questions,
             'total': total,
@@ -181,21 +196,21 @@ def user_questions(request, user_id):
     return HttpResponse("go away")
 
 @login_required
-def user_replies(request, user_id):
+def user_answers(request, user_id):
     marker = 0
     if 'marker' in request.GET:
         marker = int(request.GET['marker'])
 
     if str(user_id) == str(request.user.id):
-        total = Reply.objects.filter(uid=user_id).count()
+        total = Answer.objects.filter(uid=user_id).count()
         total = int(total - (total % 10 - 10))
-        replies =Reply.objects.filter(uid=user_id).order_by('date_created').reverse()[marker:marker+10]
+        answers =Answer.objects.filter(uid=user_id).order_by('date_created').reverse()[marker:marker+10]
         context = {
-            'replies': replies,
+            'answers': answers,
             'total': total,
             'marker': marker
         }
-        return render(request, 'website/templates/user-replies.html', context)
+        return render(request, 'website/templates/user-answers.html', context)
     return HttpResponse("go away")
 
 @login_required
@@ -222,7 +237,7 @@ def search(request):
 # Ajax Section
 # All the ajax views go below
 @csrf_exempt
-def ajaX_category(request):
+def ajax_category(request):
     context = {
         'categories': categories
     }
@@ -251,12 +266,12 @@ def ajax_duration(request):
             Q(tutorial_detail_id=video_detail.id),
             Q(language='English')
         )
-        video_path = '/Sites/spoken_tutorial_org/sites/default/files/{0}'.format(
-            video_resource.tutorial_video
-        )
-        #video_path = '/home/cheese/test-video.ogv'
+        #video_path = '/Sites/spoken_tutorial_org/sites/default/files/{0}'.format(
+        #    video_resource.tutorial_video
+        #)
+        video_path = '/home/cheese/test-video.ogv'
         video_info = get_video_info(video_path)
-
+        
         # convert minutes to 1 if less than 0
         # convert seconds to nearest upper 10th number eg(23->30)
         minutes = video_info['minutes']
@@ -304,16 +319,29 @@ def ajax_details_update(request):
             return HttpResponse("saved")
 
 @csrf_exempt
-def ajax_reply_update(request):
+def ajax_answer_update(request):
     if request.method == 'POST':
-        rid = request.POST['reply_id']
-        body = request.POST['reply_body']
-        reply= get_object_or_404(Reply, pk=rid)
-        if reply:
-            if reply.uid == request.user.id or request.user.id in admins:
-                reply.body = body
-                reply.save()
+        aid = request.POST['answer_id']
+        body = request.POST['answer_body']
+        answer= get_object_or_404(Answer, pk=aid)
+        if answer:
+            if answer.uid == request.user.id or request.user.id in admins:
+                answer.body = body
+                answer.save()
         return HttpResponse("saved")
+
+@csrf_exempt
+def ajax_answer_comment_update(request):
+    if request.method == "POST":
+        comment_id = request.POST["comment_id"]
+        comment_body = request.POST["comment_body"]
+        comment = get_object_or_404(AnswerComment, pk=comment_id)
+        if comment:
+            if comment.uid == request.user.id or request.user.id in admins:
+                comment.body = comment_body
+                comment.save()
+        return HttpResponse("saved")
+
 
 @csrf_exempt
 def ajax_similar_questions(request):
@@ -322,7 +350,7 @@ def ajax_similar_questions(request):
         tutorial = request.POST['tutorial']
         minute_range = request.POST['minute_range']
         second_range = request.POST['second_range']
-
+        
         # add more filtering when the forum grows
         questions = Question.objects.filter(category=category).filter(tutorial=tutorial)
         context = {
@@ -371,18 +399,18 @@ def ajax_time_search(request):
         
         if category != 'None':
             questions = Question.objects.filter(category=category)
-        
         if tutorial != 'None':
             questions = questions.filter(tutorial=tutorial)
-
         if minute_range != 'None':
             questions = questions.filter(minute_range=minute_range)
-
         if second_range != 'None':
             questions = questions.filter(second_range=second_range)
-
+        
         context = {
             'questions': questions
         }
-
         return render(request, 'website/templates/ajax-time-search.html', context)
+
+@csrf_exempt
+def ajax_vote(request):
+    pass

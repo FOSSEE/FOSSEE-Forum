@@ -1,6 +1,6 @@
 <div class="notification">
-    <a href=""><strong>{{ reply.user }}</strong> replies to <strong>{{ question.title }}</strong></a> /
-    {{ reply.body|safe }}
+    <a href=""><strong>{{ answer.user }}</strong> answers to <strong>{{ question.title }}</strong></a> /
+    {{ answer.body|safe }}
     <a class="remove" data-nid="{{ notification.id }}" href="#">
         <span class="glyphicon glyphicon-remove-circle"></span>
     </a>

@@ -1,6 +1,6 @@
 from django import template
 
-from website.models import Question, Reply
+from website.models import Question, Answer
 
 register = template.Library()
 
