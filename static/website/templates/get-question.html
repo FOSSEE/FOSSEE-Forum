@@ -73,7 +73,7 @@
         <span class="meta">
             <small>
                 <i>
-                    {{ question.date_created|date:"y-d-m" }}, {{ question.date_created|time }}
+                    {{ question.date_created|date:"d-m-y" }}, {{ question.date_created|time }}
                 </i>
             </small>
             
@@ -125,15 +125,31 @@
                         {{ comment.body|safe }}
                     </div>
                     
-                    <span class="modify" style="display:block">
-                        <a class="edit btn btn-xs btn-info vs" href="#cbody{{ comment.id }}" data-target="cbody{{ comment.id }}">Edit</a>
-                        <a class="save btn btn-xs btn-success vs"  data-target="cbody{{ comment.id }}" data-cid="{{ comment.id }}" href="#">Save</a>
+                    <span class="meta">
+                        <small>
+                            <i>
+                                {{ question.date_created|date:"d-m-y" }}, {{ question.date_created|time }}
+                            </i>
+                        </small>
+                        
+                        <span class="user">
+                            {{ question.user }}
+                        </span>
                     </span>
+                    {% if user|can_edit:comment %}
+                    <div class="modify-wrapper">
+                        <span class="modify" style="display:block">
+                            <a class="edit btn btn-xs btn-info vs" href="#cbody{{ comment.id }}" data-target="cbody{{ comment.id }}">Edit</a>
+                            <a class="save btn btn-xs btn-success vs"  data-target="cbody{{ comment.id }}" data-cid="{{ comment.id }}" href="#">Save</a>
+                        </span>
+                    </div>
+                    {% endif %}
                 </div> <!-- /.comment -->
                 {% endfor %}
                 
                 
                 <!-- form to add comment -->
+                {% if user.is_authenticated %}
                 <form id="form{{ answer.id }}" method="post" action="/answer-comment/"> {% csrf_token %}
                     <input type="hidden" name="answer_id" value="{{answer.id}}">
                     <textarea name="body" class="new-comment form-control" id="comment{{ answer.id }}" rows="2"></textarea>
@@ -147,6 +163,12 @@
                 <a class="cancel-comment" href="#" data-target="comment{{ answer.id }}">
                     <small>cancel comment</small>
                 </a>
+                {% else %}
+                <br>
+                <a class="btn btn-xs btn-success vs" href="/accounts/login">
+                    Login to add comment
+                </a>
+                {% endif %}
             </div> <!-- comments -->
         </div> <!-- /.row -->
         <br> <hr>
@@ -246,6 +268,7 @@
                         <option value="Tux-Typing">Tux-Typing</option>
                         <option value="What-is-Spoken-Tutorial">What-is-Spoken-Tutorial</option>
                         <option value="Xfig">Xfig</option>
+                        <option value="General">General FOSS</option>
                     </select>
                 </div>
                 <div class="col-lg-4 col-md-4 col-sm-4">

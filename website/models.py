@@ -56,6 +56,10 @@ class AnswerComment(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
 
+    def user(self):
+        user = User.objects.get(id=self.uid)
+        return user.username
+
 class Notification(models.Model):
     uid = models.IntegerField()
     pid = models.IntegerField()

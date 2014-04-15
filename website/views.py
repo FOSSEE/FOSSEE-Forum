@@ -7,10 +7,11 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.core.mail import EmailMultiAlternatives
-
 from website.models import Question, Answer, Notification, TutorialDetails, TutorialResources, AnswerComment
 from website.forms import NewQuestionForm, AnswerQuesitionForm
 from website.helpers import get_video_info
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 admins = (
     9, 4376, 4915, 14595, 12329, 22467, 5518
@@ -34,6 +35,12 @@ categories = (
 ) 
 
 def home(request):
+    context = {
+        'categories': categories
+    }
+    return render(request, "website/templates/index.html", context)
+
+def recent_questions(request):
     marker = 0
     if 'marker' in request.GET:
         marker = int(request.GET['marker'])
@@ -84,6 +91,9 @@ def question_answer(request):
                 notification.qid = qid
                 notification.aid = answer.id
                 notification.save()
+    #CONTINUE continue
+    # foo = User.objects.get(pk=)
+    return HttpResponse(foo)
     return HttpResponseRedirect('/question/'+str(qid))
 
 @login_required

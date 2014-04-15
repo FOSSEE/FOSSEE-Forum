@@ -119,6 +119,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'htmlmin.middleware.HtmlMinifyMiddleware',
+    'htmlmin.middleware.MarkRequestMiddleware',
 )
 
 ROOT_URLCONF = 'forums.urls'
@@ -186,3 +188,4 @@ DATABASE_ROUTERS = ['drupal_auth.routers.DrupalAuthRouter']
 TEMPLATE_CONTEXT_PROCESSORS += ('website.context_processors.admin_processor', )
 
 COMPRESS_ENABLED = True
+HTML_MINIFY = True

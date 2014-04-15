@@ -34,13 +34,13 @@ $(document).ready(function() {
     function modify(thisObj){
         thisObj.hide();
         thisObj.next().css("display", "block");
-
+        
         $question_title.hide();
         $question_title_edit_input.val($.trim($($question_title).text()));
         $question_title_edit.show();
         $question_edit.hide();
         $question_save.show();
-
+        
         $questionNicPanel.show();
         $questionInstance.focus();
         $question_details_edit.show();
@@ -63,7 +63,7 @@ $(document).ready(function() {
         $questionNicPanel.hide();
         $question_details_edit.hide();
         $(this).prev().css("display", "block");
-
+        
         /* make the ajax call */
         //var id_length = $question_save.attr("id").length;
         //var question_id = parseInt($question_save.attr("id").substr(id_length-1));
@@ -104,7 +104,7 @@ $(document).ready(function() {
         var tutorial = $question_tutorial.val();
         var minute_range = $question_minute_range.val();
         var second_range = $question_second_range.val();
-
+        
         $.ajax({
             url: "/ajax-details-update/",
             data: {
@@ -185,7 +185,7 @@ $(document).ready(function() {
         
         var answer_id = parseInt($(this).data("aid"));
         var answer_body = $("#"+target).html();
-
+        
         $.ajax({
             url: "/ajax-answer-update/",
             type: "POST",
@@ -205,10 +205,17 @@ $(document).ready(function() {
      * comment edit section
      * set the dom variables
      */
+    $comment = $(".comment");
     $comment_edit = $(".comment .edit");
     $comment_save = $(".comment .save");
     $commentPanelWrapper = $("#commentPanelWrapper");
 
+    $comment.mouseover(function(){
+        $(this).find(".modify-wrapper").show();
+    });
+    $comment.mouseout(function(){
+        $(this).find(".modify-wrapper").hide();
+    });
     var commentNicEditor = new nicEditor({
         buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link'],
         iconsPath: "/static/website/js/nicEditorIcons.gif",
@@ -267,7 +274,7 @@ $(document).ready(function() {
         $(this).hide();
         $(this).siblings(".cancel-comment").show();
         $(this).siblings(".post-comment").show();
-
+        
         var target = $(this).data("target");
         $("#"+target).show();
         nics[target] = new nicEditor({

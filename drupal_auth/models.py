@@ -10,6 +10,7 @@ class Users(models.Model):
     id = models.IntegerField(primary_key=True, db_column='uid')
     username = models.CharField(max_length=60L, unique=True, db_column='name')
     password = models.CharField(max_length=32L, db_column='pass') # Field renamed because it was a Python reserved word.
+    email = models.CharField(max_length=200L, db_column='mail')
     last_login = models.DateTimeField(auto_now_add=True)
 
     USERNAME_FIELD = 'username'
