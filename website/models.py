@@ -16,7 +16,7 @@ class Question(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
     views = models.IntegerField(default=1)
-    votes = models.IntegerField(default=0)
+    # votes = models.IntegerField(default=0)
 
     def user(self):
         user = User.objects.get(id=self.uid)
@@ -39,7 +39,7 @@ class Answer(models.Model):
     body = models.TextField()
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
-    votes = models.IntegerField(default=0)
+    # votes = models.IntegerField(default=0)
 
     def user(self):
         user = User.objects.get(id=self.uid)
@@ -64,8 +64,13 @@ class Notification(models.Model):
     uid = models.IntegerField()
     pid = models.IntegerField()
     qid = models.IntegerField()
-    rid = models.IntegerField()
+    aid = models.IntegerField(default=0)
+    cid = models.IntegerField(default=0)
     date_created = models.DateTimeField(auto_now_add=True)
+    
+    def poster(self):
+        user = User.objects.get(id=self.pid)
+        return user.username
 
 # CDEEP database created using inspectdb arg of manage.py
 class TutorialDetails(models.Model):

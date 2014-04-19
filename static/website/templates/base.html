@@ -5,6 +5,7 @@
         <title>Spoken-Tutorial Forums</title>
         {% compress css %}
         <link rel="stylesheet" href="{% static 'website/css/bootstrap.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+        <link rel="stylesheet" href="{% static 'website/slick/slick.css' %}" type="text/css" media="screen" charset="utf-8" />
         <link rel="stylesheet" href="{% static 'website/css/main.css' %}" type="text/css" media="screen" charset="utf-8" />
         {% endcompress %}
     </head>
@@ -27,7 +28,7 @@
                                 Spoken Tutorial Forums
                             </a>
                         </div> <!-- /.navbar-header -->
-
+                        
                         <!-- Collect the nav links, forms, and other content for toggling -->
                         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                             <ul class="nav navbar-nav navbar-right">
@@ -109,7 +110,7 @@
     {% compress js %}
         <script src="{% static 'website/js/jquery.min.js' %}"></script>
         <script src="{% static 'website/js/bootstrap.min.js' %}"></script>
-
+        <script src="{% static 'website/slick/slick.min.js' %}"></script>
         {% block javascript %}
             <!-- overide with custom javascript -->
         {% endblock %}

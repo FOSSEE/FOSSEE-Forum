@@ -35,8 +35,10 @@ categories = (
 ) 
 
 def home(request):
+    questions = Question.objects.all().order_by('date_created').reverse()[:10]
     context = {
-        'categories': categories
+        'categories': categories,
+        'questions': questions
     }
     return render(request, "website/templates/index.html", context)
 
@@ -91,10 +93,33 @@ def question_answer(request):
                 notification.qid = qid
                 notification.aid = answer.id
                 notification.save()
-    #CONTINUE continue
-    # foo = User.objects.get(pk=)
-    return HttpResponse(foo)
-    return HttpResponseRedirect('/question/'+str(qid))
+                
+                user = User.objects.get(id=question.uid)
+                # Sending email when an answer is posted
+                subject = 'Question has been answered'
+                message = """
+                    Dear {0}<br><br>
+                    Your question titled <b>"{1}"</b> has been answered.<br>
+                    Link: {2}<br><br>
+                    Regards,<br>
+                    Spoken Tutorial Forums
+                """.format(
+                    user.username, 
+                    question.title, 
+                    'http://forums.spoken-tutorial.org/question/' + str(question.id) + "#answer" + str(answer.id)
+                )
+                
+                email = EmailMultiAlternatives(
+                    subject,'', 'forums', 
+                    [user.email],
+                    headers={"Content-type":"text/html;charset=iso-8859-1"}
+                )
+                
+                email.attach_alternative(message, "text/html")
+                email.send(fail_silently=True)
+                # End of email send
+                
+    return HttpResponseRedirect('/question/'+str(qid) + "#answer" + str(answer.id)) 
 
 @login_required
 def answer_comment(request):
@@ -107,7 +132,60 @@ def answer_comment(request):
         comment.answer = answer
         comment.body = body
         comment.save()
-        return HttpResponseRedirect("/question/" + str(answer.question.id) + "#")
+        
+        # notifying the answer owner
+        if answer.uid != request.user.id:
+            notification = Notification()
+            notification.uid = answer.uid
+            notification.pid = request.user.id
+            notification.qid = answer.question.id
+            notification.aid = answer.id
+            notification.cid = comment.id
+            notification.save()
+            
+            user = User.objects.get(id=answer.uid)
+            subject = 'Comment for your answer'
+            message = """
+                Dear {0}<br><br>
+                A comment has been posted on your answer.<br>
+                Link: {1}<br><br>
+                Regards,<br>
+                Spoken Tutorial Forums
+            """.format(
+                user.username,
+                "http://forums.spoken-tutorial.org/question/" + str(answer.question.id) + "#answer" + str(answer.id)
+            )
+            forums_mail(user.email, subject, message)
+
+        # notifying other users in the comment thread
+        uids = answer.answercomment_set.filter(answer=answer).values_list('uid', flat=True)
+        #getting distinct uids
+        uids = set(uids) 
+        uids.remove(request.user.id)
+        for uid in uids:
+            notification = Notification()
+            notification.uid = uid
+            notification.pid = request.user.id
+            notification.qid = answer.question.id
+            notification.aid = answer.id
+            notification.cid = comment.id
+            notification.save()
+            
+            user = User.objects.get(id=uid)
+            subject = 'Comment has a reply'
+            message = """
+                Dear {0}<br><br>
+                A reply has been posted on your comment.<br>
+                Link: {1}<br><br>
+                Regards,<br>
+                Spoken Tutorial Forums
+            """.format(
+                user.username,
+                "http://forums.spoken-tutorial.org/question/" + str(answer.question.id) + "#answer" + str(answer.id)
+            )
+            forums_mail(user.email, subject, message)
+            return HttpResponse(message)
+    return HttpResponseRedirect("/question/" + str(answer.question.id) + "#")
 
 def filter(request,  category=None, tutorial=None, minute_range=None, second_range=None):
     context = {
@@ -423,4 +501,16 @@ def ajax_time_search(request):
 
 @csrf_exempt
 def ajax_vote(request):
+    #for future use
     pass
+
+def forums_mail(to = '', subject='', message=''):
+    # Start of email send
+    email = EmailMultiAlternatives(
+        subject,'', 'forums', 
+        [to],
+        headers={"Content-type":"text/html;charset=iso-8859-1"}
+    )
+    email.attach_alternative(message, "text/html")
+    email.send(fail_silently=True)
+    # End of email send

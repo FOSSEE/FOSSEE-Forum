@@ -1,6 +1,14 @@
 <div class="notification">
-    <a href=""><strong>{{ answer.user }}</strong> answers to <strong>{{ question.title }}</strong></a> /
-    {{ answer.body|safe }}
+    {% if notification.cid != 0 and notification.aid != 0 %}
+    <small>
+        <a href="">New <strong>Comment</strong> on "{{ question.title }}"</a>
+    </small>
+    {% elif notification.cid == 0  %}
+        <a href="">New <strong>Answer</strong> on "{{ question.title }}"</a>
+    {% endif %}
+
+
+    <!-- <a href=""><strong>{{ answer.user }}</strong> answers to <strong>{{ question.title }}</strong></a> -->
     <a class="remove" data-nid="{{ notification.id }}" href="#">
         <span class="glyphicon glyphicon-remove-circle"></span>
     </a>

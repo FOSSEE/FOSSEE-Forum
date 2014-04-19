@@ -7,7 +7,7 @@ register = template.Library()
 def get_notification(nid):
     notification =  Notification.objects.get(pk=nid)
     question = Question.objects.get(pk=notification.qid);
-    answer = Answer.objects.get(pk=notification.rid)
+    answer = Answer.objects.get(pk=notification.aid)
     context = {
         'notification': notification,
         'question': question,
@@ -20,4 +20,3 @@ def notification_count(user_id):
     count = Notification.objects.filter(uid=user_id).count()
     return count
 register.simple_tag(notification_count)
-

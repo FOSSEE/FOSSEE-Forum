@@ -59,3 +59,15 @@ register.filter('mul', mul)
 def div(value, arg=1):
     return value / int(arg)
 register.filter('div', div)
+
+# retriving total number of questions
+def total_question_count():
+    count = Question.objects.all().count()
+    return count
+register.simple_tag(total_question_count)
+
+# retriving total number of answers
+def total_answer_count():
+    count = Answer.objects.all().count()
+    return count
+register.simple_tag(total_answer_count)
