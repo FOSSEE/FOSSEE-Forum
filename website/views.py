@@ -355,10 +355,10 @@ def ajax_duration(request):
             Q(tutorial_detail_id=video_detail.id),
             Q(language='English')
         )
-        #video_path = '/Sites/spoken_tutorial_org/sites/default/files/{0}'.format(
-        #    video_resource.tutorial_video
-        #)
-        video_path = '/home/cheese/test-video.ogv'
+        video_path = '/Sites/spoken_tutorial_org/sites/default/files/{0}'.format(
+           video_resource.tutorial_video
+        )
+        # video_path = '/home/cheese/test-video.ogv'
         video_info = get_video_info(video_path)
         
         # convert minutes to 1 if less than 0

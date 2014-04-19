@@ -103,10 +103,17 @@
                 {{ answer.body|safe }}
             </div>
             
-            <span class="user">
-                {{ answer.user }}
+            <span class="meta">
+                <small>
+                    <i>
+                        {{ answer.date_created|date:"d-m-y" }}, {{ answer.date_created|time }}
+                    </i>
+                </small>
+                
+                <span class="user">
+                    {{ answer.user }}
+                </span>
             </span>
-            
             {% if user|can_edit:answer  %}
             <span class="modify" style="display:block">
                 <a class="edit btn btn-xs btn-info vs" href="#body{{ answer.id}}" data-target="body{{ answer.id }}">Edit</a>
@@ -127,7 +134,7 @@
                     <span class="meta">
                         <small>
                             <i>
-                                {{ comment.date_created|date:"d-m-y" }}, {{ question.date_created|time }}
+                                {{ comment.date_created|date:"d-m-y" }}, {{ comment.date_created|time }}
                             </i>
                         </small>
                         
