@@ -315,7 +315,7 @@ def user_notifications(request, user_id):
 @login_required
 def clear_notifications(request):
     Notification.objects.filter(uid=request.user.id).delete()
-    return HttpResponseRedirect("/user/{}/notifications/".format(request.user.id))
+    return HttpResponseRedirect("/user/{0}/notifications/".format(request.user.id))
 
 def search(request):
     context = {
