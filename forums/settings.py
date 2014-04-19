@@ -187,5 +187,6 @@ AUTHENTICATION_BACKENDS = ( 'drupal_auth.backends.DrupalAuthBackend', )
 DATABASE_ROUTERS = ['drupal_auth.routers.DrupalAuthRouter']
 TEMPLATE_CONTEXT_PROCESSORS += ('website.context_processors.admin_processor', )
 
+COMPRESS_ROOT = PROJECT_DIR + "/CACHE/"
 COMPRESS_ENABLED = True
 HTML_MINIFY = True
