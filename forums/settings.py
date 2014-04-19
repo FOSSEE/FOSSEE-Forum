@@ -98,6 +98,7 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    'compressor.finders.CompressorFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -118,6 +119,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'htmlmin.middleware.HtmlMinifyMiddleware',
+    'htmlmin.middleware.MarkRequestMiddleware',
 )
 
 ROOT_URLCONF = 'forums.urls'
@@ -146,6 +149,8 @@ INSTALLED_APPS = (
     'website',
     'widget_tweaks',
     'drupal_auth',
+    'compressor',
+    'debug_toolbar',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -181,3 +186,6 @@ AUTH_USER_MODEL = 'drupal_auth.Users'
 AUTHENTICATION_BACKENDS = ( 'drupal_auth.backends.DrupalAuthBackend', )
 DATABASE_ROUTERS = ['drupal_auth.routers.DrupalAuthRouter']
 TEMPLATE_CONTEXT_PROCESSORS += ('website.context_processors.admin_processor', )
+
+COMPRESS_ENABLED = False
+HTML_MINIFY = False

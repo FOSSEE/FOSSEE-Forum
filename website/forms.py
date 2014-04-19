@@ -71,6 +71,6 @@ class NewQuestionForm(forms.Form):
     title = forms.CharField(max_length=200)
     body = forms.CharField(widget=forms.Textarea())
 
-class ReplyQuesitionForm(forms.Form):
+class AnswerQuesitionForm(forms.Form):
     question = forms.IntegerField(widget=forms.HiddenInput())
     body = forms.CharField(widget=forms.Textarea())

@@ -1,20 +1,15 @@
+{% load compress %}
 {% load static %}
 <html>
     <head>
         <title>Spoken-Tutorial Forums</title>
+        {% compress css %}
         <link rel="stylesheet" href="{% static 'website/css/bootstrap.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+        <link rel="stylesheet" href="{% static 'website/slick/slick.css' %}" type="text/css" media="screen" charset="utf-8" />
         <link rel="stylesheet" href="{% static 'website/css/main.css' %}" type="text/css" media="screen" charset="utf-8" />
-        <link rel="stylesheet" href="{% static 'website/css/nice-bar.css' %}" type="text/css" media="screen" charset="utf-8" />
+        {% endcompress %}
     </head>
     <body>
-        <div class="nice-bar">
-            <p class="nice-text">
-                One day CFD workshop on 22<sup>nd</sup> March 2014.
-                <a class="nice-button" href="http://cfd.fossee.in/workshop">View more</a> details about the workshop.
-                <a class="nice-button" href="http://cfdworkshop.doattend.com">Click here</a> for registration.
-                <span class="nice-close">x</span>
-            </p>
-        </div>
         <div id="page-wrapper">
         <div id="header-wrapper">
             <div id="header-inner">
@@ -29,11 +24,11 @@
                               <span class="icon-bar"></span>
                             </button>
                             <a class="navbar-brand" href="{% url 'website:home' %}">
-                                <img id="logo" src="http://spoken-tutorial.org/sites/all/themes/spoken/images/logo.png">
+                                <img id="logo" src="{% static 'website/images/logo.png' %}">
                                 Spoken Tutorial Forums
                             </a>
                         </div> <!-- /.navbar-header -->
-
+                        
                         <!-- Collect the nav links, forms, and other content for toggling -->
                         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                             <ul class="nav navbar-nav navbar-right">
@@ -57,7 +52,7 @@
                                 </a>
                                 <ul class="dropdown-menu">
                                   <li><a href="{% url 'website:user_questions' user.id %}">My Questions</a></li>
-                                  <li><a href="{% url 'website:user_replies' user.id %}">My Replies</a></li>
+                                  <li><a href="{% url 'website:user_answers' user.id %}">My Answers</a></li>
                                   <li>
                                     <a href="{% url 'website:user_notifications' user.id %}">
                                         Notifications  
@@ -111,12 +106,14 @@
             </div> <!-- /#footer-inner -->
         </div> <!-- /#footer-wrapper -->
     </div> <!-- /#page-wrapper -->
-
+        
+    {% compress js %}
         <script src="{% static 'website/js/jquery.min.js' %}"></script>
         <script src="{% static 'website/js/bootstrap.min.js' %}"></script>
-
+        <script src="{% static 'website/slick/slick.min.js' %}"></script>
         {% block javascript %}
             <!-- overide with custom javascript -->
         {% endblock %}
+    {% endcompress %}
     </body>
 </html>

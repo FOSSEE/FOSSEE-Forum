@@ -66,6 +66,7 @@ $(document).ready(function() {
         });
     });
 
+
     $(document).ajaxStart(function() {
         $("#ajax-loader").show();
     });

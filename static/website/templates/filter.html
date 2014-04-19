@@ -80,7 +80,7 @@
         <th> Question</th>
         <th> Date</th>
         <th> Views</th>
-        <th> Replies</th>
+        <th> Answers</th>
         <th> User</th>
         {% for question in questions %}
         <tr>
@@ -137,7 +137,7 @@
             </td>
 
             <td>
-                {{ question.reply_set.count }}
+                {{ question.answer_set.count }}
             </td>
 
             <td>
