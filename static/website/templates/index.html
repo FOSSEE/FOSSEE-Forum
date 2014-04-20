@@ -60,7 +60,12 @@
     <br>
     <div class="panel panel-default">
         <div class="panel-heading">
-            Recent Questions
+            Recent questions
+            <a class="pull-right" href="{% url 'website:questions' %}">
+                <small>
+                    View all questions
+                </small>
+            </a>
         </div>
         <div class="panel-body">
             <table class="table table-bordered table-hover">

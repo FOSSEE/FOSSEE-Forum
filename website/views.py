@@ -7,11 +7,13 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.core.mail import EmailMultiAlternatives
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.contrib.auth import get_user_model
+User = get_user_model()
+
 from website.models import Question, Answer, Notification, TutorialDetails, TutorialResources, AnswerComment
 from website.forms import NewQuestionForm, AnswerQuesitionForm
 from website.helpers import get_video_info
-from django.contrib.auth import get_user_model
-User = get_user_model()
 
 admins = (
     9, 4376, 4915, 14595, 12329, 22467, 5518
@@ -42,21 +44,21 @@ def home(request):
     }
     return render(request, "website/templates/index.html", context)
 
-def recent_questions(request):
-    marker = 0
-    if 'marker' in request.GET:
-        marker = int(request.GET['marker'])
-
-    total = Question.objects.all().count()
-    total = int(total - (total % 10 - 10))
-    #questions = Question.objects.all().order_by('date_created').reverse()[marker:marker+10]
+def questions(request):
     questions = Question.objects.all().order_by('date_created').reverse()
+    paginator = Paginator(questions, 20)
+    page = request.GET.get('page')
+
+    try:
+        questions = paginator.page(page)
+    except PageNotAnInteger:
+        questions = paginator.page(1)
+    except EmptyPage:
+        questions = paginator.page(paginator.num_pages)
     context = {
-        'questions': questions,
-        'total': total,
-        'marker': marker
+        'questions': questions
     }
-    return render(request, 'website/templates/index.html', context)
+    return render(request, 'website/templates/questions.html', context)
 
 def get_question(request, question_id=None):
     question = get_object_or_404(Question, id=question_id)

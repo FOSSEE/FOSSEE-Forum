@@ -3,7 +3,11 @@
 {% load count_tags %}
 
 {% block content %}
-    <h4><u>Recent Questions</u></h4>
+    <h4> 
+        <h5>
+            Showing {{ questions.start_index }} - {{ questions.end_index }} of {{ questions.paginator.count }} questions.
+        </h5>
+    </h4>
     <table class="table table-bordered table-hover">
         <th> FOSS </th>
         <th> Tutorial</th>
@@ -81,21 +85,28 @@
         {% endfor %}
 
     </table>
-    {% if total > 10 %}
-        <ul class="pagination pull-right">
-            {% for i in total|get_range:"0,10" %}
-                <li>
-                    <a href="{% url 'website:all_questions' %}?marker={{ i }}">
-                        {% if i == marker %}
-                            <strong>{{ i|div:"10"|inc }}</strong>
-                        {% else %}
-                            {{ i|div:"10"|inc }}
-                        {% endif %}
-                    </a>
-                </li>
-            {% endfor %}
-        </ul>
-    {% endif %}
+
+    <ul class="pagination pull-right">
+        {% if questions.has_previous %}
+            <li><a href="?page={{ questions.previous_page_number }}">&laquo; <small>Prev</small></a></li>
+        {% else %}
+            <li class="disabled"><a href="#">&laquo;</a></li>
+        {% endif %}
+        
+        {% for num in questions.paginator.page_range %}
+            {% ifequal num questions.number %}
+                <li class="active"><a href="#">{{ num }}<span class="sr-only">(current)</span></a></li>
+            {% else %}
+                <li><a href="?page={{ num }}">{{ num }}</a></li>
+            {% endifequal %}
+        {% endfor %}
+        
+        {% if questions.has_next %}
+            <li><a href="?page={{ questions.next_page_number }}"><small>Next</small>&raquo;</a></li>
+        {% else %}
+            <li class="disabled"><a href="#">&raquo;</a></li>
+        {% endif %}
+    <ul>
 
 {% endblock %}
 

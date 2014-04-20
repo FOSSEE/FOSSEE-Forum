@@ -1,6 +1,6 @@
 bkLib.onDomLoaded(function() {
     var questionNicEditor = new nicEditor({
-        buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link'],
+        buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link', 'forecolor', 'bgcolor'],
         iconsPath: "/static/website/js/nicEditorIcons.gif",
     });
     questionNicEditor.setPanel('questionNicPanel');
@@ -156,7 +156,7 @@ $(document).ready(function() {
     $answerPanelWrapper = $("#answerPanelWrapper");
 
     var answerNicEditor = new nicEditor({
-        buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link'],
+        buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link', 'forecolor', 'bgcolor'],
         iconsPath: "/static/website/js/nicEditorIcons.gif",
     });
     answerNicEditor.panelInstance('answerNicPanel');
@@ -217,7 +217,7 @@ $(document).ready(function() {
         $(this).find(".modify-wrapper").hide();
     });
     var commentNicEditor = new nicEditor({
-        buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link'],
+        buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link', 'forecolor', 'bgcolor'],
         iconsPath: "/static/website/js/nicEditorIcons.gif",
     });
     commentNicEditor.panelInstance('commentNicPanel');
