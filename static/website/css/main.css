@@ -36,6 +36,11 @@ hr {
 #filter-form {
     margin-bottom: 0;
 }
+.table .glyphicon {
+    margin-top: 2px;
+    font-size: .8em;
+    float: right;
+}
 /* override nicEditor */
 #questionInstance {
     background: #ffffff !important;
