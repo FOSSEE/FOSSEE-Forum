@@ -24,8 +24,8 @@ sys.path.append('/Sites/venv/forums/')
 # os.environ["DJANGO_SETTINGS_MODULE"] = "forums.settings"
 os.environ["DJANGO_SETTINGS_MODULE"] = "forums.settings"
 
-# activate_this = '/Sites/venv/bin/activate_this.py'
-# execfile(activate_this, dict(__file__=activate_this))
+activate_this = '/Sites/venv/bin/activate_this.py'
+execfile(activate_this, dict(__file__=activate_this))
 
 # This application object is used by any WSGI server configured to use this
 # file. This includes Django's development server, if the WSGI_APPLICATION
