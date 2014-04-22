@@ -187,7 +187,6 @@ def answer_comment(request):
                 "http://forums.spoken-tutorial.org/question/" + str(answer.question.id) + "#answer" + str(answer.id)
             )
             forums_mail(user.email, subject, message)
-            return HttpResponse(message)
     return HttpResponseRedirect("/question/" + str(answer.question.id) + "#")
 
 def filter(request,  category=None, tutorial=None, minute_range=None, second_range=None):
