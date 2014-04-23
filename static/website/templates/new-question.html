@@ -11,7 +11,7 @@
     {% with WIDGET_ERROR_CLASS='field_error' %}
 
     <p>
-        Please enter the tutorial details. 
+    Please enter the tutorial details.  {{ category }}
         <img id="ajax-loader" src="{% static 'website/images/ajax-loader.gif' %}" style="display:none;">
     </p>
     <div class="row">
@@ -19,7 +19,11 @@
             {% render_field form.category class+="form-control"%} 
         </div>
         <div class="col-lg-3 col-md-3 col-sm-3">
-            {% render_field form.tutorial class+="form-control" disabled="disabled" %} 
+            {% if category %}
+                {% render_field form.tutorial class+="form-control" %} 
+            {% else %}
+                {% render_field form.tutorial class+="form-control" disabled="disabled" %} 
+            {% endif %}
         </div>
         <div class="col-lg-2 col-md-2 col-sm-2">
             {% render_field form.minute_range class+="form-control" disabled="disabled" %} 

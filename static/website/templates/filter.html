@@ -70,7 +70,10 @@
        <b> &gt; </b>
        {{ second_range }} sec
     {% endif %}
+    <a class="btn btn-xs btn-success pull-right" href="{% url 'website:new_question' %}?category={{ category|urlencode }}">Ask a new question.</a>
 </h5>
+<br>
+<div class="clearfix"></div>
 
     <table class="table table-striped table-bordered">
         <th> FOSS </th>

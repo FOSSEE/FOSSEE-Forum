@@ -14,6 +14,9 @@ def user_login(request):
             if user is not None:
                 if user.is_active:
                     login(request, user)
+                    if 'next' in request.POST:
+                        next_url = request.POST.get('next')
+                        return HttpResponseRedirect(next_url)
                     return HttpResponseRedirect('/')
                 else:
                     return HttpResponse('you are blocked')
@@ -21,8 +24,10 @@ def user_login(request):
                 return HttpResponse('Invalid username or password')
         else:
             form = UserLoginForm()
+            next_url = request.GET.get('next')
             context = {
-                'form': form
+                'form': form,
+                'next': next_url
             }
             context.update(csrf(request))
             return render_to_response('forums/templates/user-login.html', context)

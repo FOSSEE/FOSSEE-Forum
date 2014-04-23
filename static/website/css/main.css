@@ -12,23 +12,6 @@ hr {
 .navbar-default {
     margin-bottom: 0;
 }
-.carousel, .slick-list {
-    height: 100px;
-    margin-right: -2px;
-}
-.carousel .item {
-    border: 1px solid #333333;
-    position: relative;
-}
-.carousel .thumb {
-    text-align: center;
-    height: 75px;
-}
-.carousel .descp {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-}
 #filter-container {
     background: #f5f5f5;
     padding: 15px;
@@ -339,4 +322,35 @@ table .title a {
 .slick-next:after,
 .slick-prev:after {
     color: #a26dc8;
+}
+.carousel, .slick-list {
+    height: 245px;
+    margin-right: -2px;
+}
+.carousel .thumbnail {
+    width: 97%;
+    height: 245px;
+    border: 1px solid #cccccc;
+}
+.carousel .thumbnail img {
+    height: 100px;
+}
+.carousel .caption .category {
+    display: block;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-align: center;
+}
+.carousel .caption .latest {
+    display: block;
+    padding: 5px 0 5px 0;
+    border-top: 1px solid #cccccc;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-align: center;
+}
+.carousel .caption .btn {
+    margin-top: 7px;
 }

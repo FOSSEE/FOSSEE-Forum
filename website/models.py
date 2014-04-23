@@ -22,6 +22,9 @@ class Question(models.Model):
         user = User.objects.get(id=self.uid)
         return user.username
 
+    class Meta:
+        get_latest_by = "date_created"
+
 class QuestionVote(models.Model):
     uid = models.IntegerField()
     question = models.ForeignKey(Question)

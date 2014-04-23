@@ -1,6 +1,6 @@
 from django import forms
 
-from website.models import Question
+from website.models import *
 
 categories = (
     ("None", "Select a Category"),
@@ -64,8 +64,24 @@ seconds= (
 )
 
 class NewQuestionForm(forms.Form):
-    category = forms.CharField(widget=forms.Select(choices=categories))
-    tutorial = forms.CharField(widget=forms.Select(choices=tutorials))
+    #fix dirty code
+    def __init__(self, *args, **kwargs):
+        category = kwargs.pop('category')
+        super(NewQuestionForm, self).__init__(*args, **kwargs)
+        self.fields['category'] = forms.CharField(widget=forms.Select(choices=categories))
+        self.fields['category'].initial = category
+        
+        tutorial_choices = (
+            ("None", "Select a Tutorial"),
+        )
+        if (category, category) in categories:
+            tutorials = TutorialDetails.objects.using('spoken').filter(foss_category=category)
+            for tutorial in tutorials:
+                tutorial_choices += ((tutorial.tutorial_name, tutorial.tutorial_name),)
+            self.fields['tutorial'] = forms.CharField(widget=forms.Select(choices=tutorial_choices))
+        else:
+            self.fields['tutorial'] = forms.CharField(widget=forms.Select(choices=tutorial_choices))
+
     minute_range = forms.CharField(widget=forms.Select(choices=minutes))
     second_range = forms.CharField(widget=forms.Select(choices=seconds))
     title = forms.CharField(max_length=200)

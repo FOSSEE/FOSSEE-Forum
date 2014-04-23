@@ -16,7 +16,9 @@
                     <label for="id_username">Password:</label>
                     {% render_field form.password class+="form-control" %}
                 </div>
-
+                {% if next %}
+                    <input type="hidden" name="next" value="{{ next }}">
+                {% endif %}
                 <input class="btn btn-sm btn-primary" type="submit" value="Login">
             {% endwith %}
         </form>

@@ -5,7 +5,7 @@ from django.shortcuts import render, get_object_or_404
 from django.core.context_processors import csrf
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
+from django.db.models import Q, Max
 from django.core.mail import EmailMultiAlternatives
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth import get_user_model
@@ -217,6 +217,7 @@ def filter(request,  category=None, tutorial=None, minute_range=None, second_ran
 
 @login_required
 def new_question(request):
+    context = {}
     if request.method == 'POST':
         form = NewQuestionForm(request.POST)
         if form.is_valid():
@@ -257,11 +258,12 @@ def new_question(request):
             
             return HttpResponseRedirect('/')
     else:
-        form = NewQuestionForm()
-        
-    context = {
-        'form': form
-    }
+        #fix dirty code
+        category = request.GET.get('category')
+        form = NewQuestionForm(category=category)
+        context['category'] = category
+    
+    context['form'] = form
     context.update(csrf(request))
     return render(request, 'website/templates/new-question.html', context)
 
