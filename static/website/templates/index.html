@@ -135,7 +135,8 @@
 {% block javascript %}
 <script>
     $(document).ready(function(){
-        $('.carousel').slick({
+        
+        $carousel = $('.carousel').slick({
             lazyLoad: 'ondemand',
             dots: false,
             touchMove: false,
@@ -145,8 +146,25 @@
             speed: 2000,
             autoplay: true,
             autoplaySpeed: 2000,
+            infinite: true,
         });
+        $(".slick-prev").unbind();
+        $(".slick-next").unbind();
         
+        $(".slick-prev").bind("click", function(e) {
+            var current_slide = $carousel.slickCurrentSlide();
+            $carousel.slickSetOption("slidesToScroll",3);
+            $carousel.slickGoTo(current_slide + 3);
+            $carousel.slickSetOption("slidesToScroll",1);
+            e.stopPropagation();
+        });
+        $(".slick-next").bind("click", function(e) {
+            var current_slide = $carousel.slickCurrentSlide();
+            $carousel.slickSetOption("slidesToScroll",3);
+            $carousel.slickGoTo(current_slide - 3);
+            $carousel.slickSetOption("slidesToScroll",1);
+            e.stopPropagation();
+        });
         $("#filter-form").submit(function(e) {
             var category = $("#filter-select").val();
             if(category != -1) {

@@ -188,5 +188,5 @@ DATABASE_ROUTERS = ['drupal_auth.routers.DrupalAuthRouter']
 TEMPLATE_CONTEXT_PROCESSORS += ('website.context_processors.admin_processor', )
 
 COMPRESS_ROOT = PROJECT_DIR + "/static/"
-COMPRESS_ENABLED = False
-HTML_MINIFY = False
+COMPRESS_ENABLED = True
+HTML_MINIFY = True
