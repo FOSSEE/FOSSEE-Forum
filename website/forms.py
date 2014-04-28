@@ -66,7 +66,7 @@ seconds= (
 class NewQuestionForm(forms.Form):
     #fix dirty code
     def __init__(self, *args, **kwargs):
-        category = kwargs.pop('category')
+        category = kwargs.pop('category', None)
         super(NewQuestionForm, self).__init__(*args, **kwargs)
         self.fields['category'] = forms.CharField(widget=forms.Select(choices=categories))
         self.fields['category'].initial = category
