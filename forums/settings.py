@@ -185,7 +185,10 @@ LOGGING = {
 AUTH_USER_MODEL = 'drupal_auth.Users'
 AUTHENTICATION_BACKENDS = ( 'drupal_auth.backends.DrupalAuthBackend', )
 DATABASE_ROUTERS = ['drupal_auth.routers.DrupalAuthRouter']
-TEMPLATE_CONTEXT_PROCESSORS += ('website.context_processors.admin_processor', )
+TEMPLATE_CONTEXT_PROCESSORS += (
+    'django.core.context_processors.request',
+    'website.context_processors.admin_processor', 
+)
 
 COMPRESS_ROOT = PROJECT_DIR + "/static/"
 COMPRESS_ENABLED = True

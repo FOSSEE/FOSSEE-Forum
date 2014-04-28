@@ -1,8 +1,8 @@
 .nice-bar {
     display: none;
     width: 100%;
-    background: #70a865;
-    border-bottom: 3px solid #27ae60;
+    background: #0074D9;
+    border-bottom: 3px solid #ffffff;
     font-size: 0.85em;
 }
 .nice-bar .nice-text {

@@ -7,9 +7,21 @@
         <link rel="stylesheet" href="{% static 'website/css/bootstrap.min.css' %}" type="text/css" media="screen" charset="utf-8" />
         <link rel="stylesheet" href="{% static 'website/slick/slick.css' %}" type="text/css" media="screen" charset="utf-8" />
         <link rel="stylesheet" href="{% static 'website/css/main.css' %}" type="text/css" media="screen" charset="utf-8" />
+        <link rel="stylesheet" href="{% static 'website/css/nice-bar.css' %}" type="text/css" media="screen" charset="utf-8" />
         {% endcompress %}
     </head>
     <body>
+        {% load nice_bar %}
+        {% if request|is_nice_bar_visible %}
+            <div class="nice-bar">
+                <p class="nice-text">
+                One day Oscad workshop on 10<sup>th</sup> May 2014.
+                    <a class="nice-button" href="http://oscad.in/one-day-workshop">View more</a> details about the workshop.
+                    <a class="nice-button" href="http://pesit-oscad-workshop.doattend.com">Click here</a> for registration.
+                    <span class="nice-close">x</span>
+                </p>
+            </div>
+        {% endif %}
         <div id="page-wrapper">
         <div id="header-wrapper">
             <div id="header-inner">
@@ -111,6 +123,7 @@
         <script src="{% static 'website/js/jquery.min.js' %}"></script>
         <script src="{% static 'website/js/bootstrap.min.js' %}"></script>
         <script src="{% static 'website/slick/slick.min.js' %}"></script>
+        <script src="{% static 'website/js/nice-bar.js' %}"></script>
         {% block javascript %}
             <!-- overide with custom javascript -->
         {% endblock %}
