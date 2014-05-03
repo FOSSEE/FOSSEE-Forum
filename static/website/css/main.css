@@ -354,3 +354,7 @@ table .title a {
 .carousel .caption .btn {
     margin-top: 7px;
 }
+.parent-filter {
+    background: #FDF5E6;
+    transition: background 2.5s ease;
+}

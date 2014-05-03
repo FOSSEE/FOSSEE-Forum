@@ -207,12 +207,9 @@ def filter(request,  category=None, tutorial=None, minute_range=None, second_ran
         questions = Question.objects.filter(category=category).filter(tutorial=tutorial).filter(minute_range=minute_range)
 
     if 'qid' in request.GET:
-        qid = request.GET['qid']
-        question = get_object_or_404(Question, id=qid)
-        context['question'] = question
-        questions = questions.filter(~Q(id=qid))
+        context['qid']  = int(request.GET['qid'])
 
-    context['questions'] = questions
+    context['questions'] = questions.order_by('date_created').reverse()
     return render(request, 'website/templates/filter.html', context)
 
 @login_required

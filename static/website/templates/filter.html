@@ -1,57 +1,5 @@
 {% extends 'website/templates/base.html' %}
 {% block content %}
-{% if question %}
-    <div class="question">
-            <div class="title" style="margin-bottom: 10px;">
-                <a href="{% url 'website:get_question' question.id %}">{{ question.title }}</a>
-            </div> 
-            <span class="category">
-                <small>
-                    <a href="{% url 'website:filter' question.category %}?qid={{ question.id }}">
-                        {{ question.category }}
-                    </a>
-                </small>
-            </span>
-
-            <span class="tutorial">
-                <small>
-                    <a href="{% url 'website:filter' question.category question.tutorial %}?qid={{ question.id }}">
-                        {{ question.tutorial}}
-                    </a>
-                </small>
-            </span>
-
-            <span class="minute_range">
-                <small>
-                    <a href="{% url 'website:filter' question.category question.tutorial question.minute_range %}?qid={{ question.id }}">
-                        {{ question.minute_range }} min
-                    </a>
-                </small>
-            </span>
-
-            <span class="second_range">
-                <small>
-                    <a href="{% url 'website:filter' question.category question.tutorial question.minute_range question.second_range%}?qid={{ question.id }}">
-                        {{ question.second_range }} sec
-                    </a>
-                </small>
-            </span>
-
-            <span class="meta">
-                <small>
-                        <i>
-                            {{ question.date_created|date:"d-m-y" }}, {{ question.date_created|time }}
-                        </i>
-                </small>
-
-                <span class="user">
-                    {{ question.user }}
-                </span>
-            </span>
-
-        </div>
-{% endif %}
-
 {% if questions %}
 <h5>
     These are the similar questions in:
@@ -75,7 +23,7 @@
 <br>
 <div class="clearfix"></div>
 
-    <table class="table table-striped table-bordered">
+    <table class="table table-bordered">
         <th> FOSS </th>
         <th> Tutorial</th>
         <th> Min </th>
@@ -86,7 +34,7 @@
         <th> Answers</th>
         <th> User</th>
         {% for question in questions %}
-        <tr>
+        <tr {% if question.id == qid %}class="parent-filter"{% endif %}>
             <td>
                 <span href="#" class="category" data-toggle="tooltip" data-placement="top" title="{{ question.category}}">
                     {{ question.category|truncatechars:12 }} 
@@ -159,6 +107,9 @@
 
 {% block javascript %}
 <script>
-    $('span').tooltip();
+    $(document).ready(function() {
+        $('span').tooltip();
+        $('.parent-filter').css("background", "#ffffe0");
+    });
 </script>
 {% endblock %}
