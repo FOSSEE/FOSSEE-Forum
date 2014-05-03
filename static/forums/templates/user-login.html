@@ -6,6 +6,12 @@
     <div class="col-lg-6" style="border-right: 1px dashed #424242;">
         <h4>Please login with your <br>Spoken-Tutorial.org account.</h4>
         <form action="/accounts/login/" method="POST"> {% csrf_token %}
+            {% if form.errors %}
+            <div class="alert alert-danger">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                Invalid username or password
+            </div>
+            {% endif %}
             {% with WIDGET_ERROR_CLASS='field_error' %} 
                 <div class="form-group">
                     <label for="id_username">Username:</label>
@@ -38,4 +44,8 @@
         </p>
     </div> <!-- /.col -->
 </div> <!-- /.row -->
+{% endblock %}
+
+{% block javascript %}
+    $(".alert").alert();
 {% endblock %}

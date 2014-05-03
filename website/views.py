@@ -245,13 +245,11 @@ def new_question(request):
                 question.tutorial, 
                 'http://forums.spoken-tutorial.org/question/'+str(question.id)
             )
-            
             email = EmailMultiAlternatives(
                 subject,'', 'forums', 
                 ['team@spoken-tutorial.org', 'team@fossee.in'],
                 headers={"Content-type":"text/html;charset=iso-8859-1"}
             )
-            
             email.attach_alternative(message, "text/html")
             email.send(fail_silently=True)
             # End of email send

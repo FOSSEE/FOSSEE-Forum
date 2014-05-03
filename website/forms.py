@@ -4,6 +4,7 @@ from website.models import *
 
 categories = (
     ("None", "Select a Category"),
+    ("General", "General"),
     ('Advanced-C++', 'Advanced-C++'),
     ('BASH', 'BASH'),
     ('Blender', 'Blender'),
