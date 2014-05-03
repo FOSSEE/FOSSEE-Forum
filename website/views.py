@@ -24,7 +24,7 @@ categories = (
     'C-and-C++', 'CellDesigner', 'Digital-Divide', 
     'Drupal', 'Firefox', 'GChemPaint', 'Geogebra', 
     'GeoGebra-for-Engineering-drawing', 'GIMP', 'GNS3', 
-    'GSchem', 'Java', 'Java-Business-Application', 
+    'GSchem', 'Inkscape', 'Java', 'Java-Business-Application', 
     'KiCad', 'KTouch', 'KTurtle', 'LaTeX', 
     'LibreOffice-Suite-Base', 'LibreOffice-Suite-Calc', 
     'LibreOffice-Suite-Draw', 'LibreOffice-Suite-Impress', 

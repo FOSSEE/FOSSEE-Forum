@@ -18,6 +18,7 @@ categories = (
     ('GIMP', 'GIMP'),
     ('GNS3', 'GNS3'),
     ('GSchem', 'GSchem'),
+    ('Inkscape', 'Inkscape'),
     ('Java', 'Java'),
     ('Java-Business-Application', 'Java-Business-Application'),
     ('KiCad', 'KiCad'),
