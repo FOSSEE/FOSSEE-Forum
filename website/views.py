@@ -233,11 +233,13 @@ def new_question(request):
             # Sending email when a new question is asked
             subject = 'New Forum Question'
             message = """
-                A new question has been posted in the Spoken-Tutorial Forum. <br>
-                Category: <b>{0}</b><br>
-                Tutorial: <b>{1}</b><br>
-                Link: <a href="{2}">{2}</a><br>
+                The following new question has been posted in the Spoken Tutorial Forum: <br>
+                Title: <b>{0}</b><br>
+                Category: <b>{1}</b><br>
+                Tutorial: <b>{2}</b><br>
+                Link: <a href="{3}">{3}</a><br>
             """.format(
+                question.title,
                 question.category, 
                 question.tutorial, 
                 'http://forums.spoken-tutorial.org/question/'+str(question.id)
