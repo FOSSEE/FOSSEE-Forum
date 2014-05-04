@@ -8,15 +8,16 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Max
 from django.core.mail import EmailMultiAlternatives
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
 from website.models import Question, Answer, Notification, TutorialDetails, TutorialResources, AnswerComment
 from website.forms import NewQuestionForm, AnswerQuesitionForm
-from website.helpers import get_video_info
+from website.helpers import get_video_info, prettify
 
 admins = (
-    9, 4376, 4915, 14595, 12329, 22467, 5518
+    9, 4376, 4915, 14595, 12329, 22467, 5518, 30705
 )
 
 categories = (
@@ -60,8 +61,11 @@ def questions(request):
     }
     return render(request, 'website/templates/questions.html', context)
 
-def get_question(request, question_id=None):
+def get_question(request, question_id=None, pretty_url=None):
     question = get_object_or_404(Question, id=question_id)
+    pretty_title = prettify(question.title)
+    if pretty_url != pretty_title:
+        return HttpResponseRedirect('/question/'+ question_id + '/' + pretty_title)
     answers = question.answer_set.all()
     form = AnswerQuesitionForm()
     context = {
@@ -121,8 +125,8 @@ def question_answer(request):
                 email.attach_alternative(message, "text/html")
                 email.send(fail_silently=True)
                 # End of email send
-                
-    return HttpResponseRedirect('/question/'+str(qid) + "#answer" + str(answer.id)) 
+        return HttpResponseRedirect('/question/'+ str(qid) + "#answer" + str(answer.id)) 
+    return HttpResponseRedirect('/') 
 
 @login_required
 def answer_comment(request):

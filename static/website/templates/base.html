@@ -2,7 +2,11 @@
 {% load static %}
 <html>
     <head>
-        <title>Spoken-Tutorial Forums</title>
+        <title>
+            {% block title %}
+            Spoken Tutorial Forums
+            {% endblock %}
+        </title>
         {% compress css %}
         <link rel="stylesheet" href="{% static 'website/css/bootstrap.min.css' %}" type="text/css" media="screen" charset="utf-8" />
         <link rel="stylesheet" href="{% static 'website/slick/slick.css' %}" type="text/css" media="screen" charset="utf-8" />

@@ -1,3 +1,5 @@
+import re
+
 def get_video_info(path):
     """Uses ffmpeg to determine information about a video. This has not been broadly
     tested and your milage may vary"""
@@ -27,3 +29,12 @@ def get_video_info(path):
     info_m['width'] = int(info_m['width'])
     info_m['height'] = int(info_m['height'])
     return info_m
+
+def prettify(string):
+    string = string.lower()
+    string = string.replace('-', ' ')
+    string = string.strip()
+    string = string.replace(' ', '-')
+    string = re.sub('[^A-Za-z0-9\-]+', '', string)
+    string = re.sub('-+', '-', string)
+    return string

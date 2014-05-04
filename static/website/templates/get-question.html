@@ -4,6 +4,10 @@
 
 {% load permission_tags %}
 
+{% block title %}
+    {{ question.category }} - {{ question.title }} - Spoken Tutorial Forums
+{% endblock %}
+
 {% block content %}
 <span class="saving hideme">saving . . .</span>
 <span class="saved hideme">saved</span>

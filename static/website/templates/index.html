@@ -2,6 +2,7 @@
 {% load static %}
 {% load count_tags %}
 {% load notify %}
+{% load helpers %}
 
 {% block content %}
     <div id="carousel-container">
@@ -99,7 +100,7 @@
                     
                     <td>
                         <span class="title" data-toggle="tooltip" data-placement="top" title="{{ question.title }}">
-                            <a href="{% url 'website:get_question' question.id %}">{{ question.title|truncatechars:40 }}</a>
+                            <a href="{% url 'website:get_question' question.id %}{% prettify question.title %}">{{ question.title|truncatechars:40 }}</a>
                         </span>            
                     </td>
                     
@@ -173,6 +174,7 @@
             e.preventDefault();
         });
     });
+    $('span').tooltip();
 </script>
 <script src="{% static 'website/js/nice-bar.js' %}"></script>
 {% endblock %}
