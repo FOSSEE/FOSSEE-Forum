@@ -155,14 +155,14 @@
         $(".slick-prev").bind("click", function(e) {
             var current_slide = $carousel.slickCurrentSlide();
             $carousel.slickSetOption("slidesToScroll",3);
-            $carousel.slickGoTo(current_slide + 3);
+            $carousel.slickGoTo(current_slide - 3);
             $carousel.slickSetOption("slidesToScroll",1);
             e.stopPropagation();
         });
         $(".slick-next").bind("click", function(e) {
             var current_slide = $carousel.slickCurrentSlide();
             $carousel.slickSetOption("slidesToScroll",3);
-            $carousel.slickGoTo(current_slide - 3);
+            $carousel.slickGoTo(current_slide + 3);
             $carousel.slickSetOption("slidesToScroll",1);
             e.stopPropagation();
         });
