@@ -91,7 +91,7 @@ def question_answer(request):
             answer = Answer()
             answer.uid = request.user.id
             answer.question = question
-            answer.body = body
+            answer.body = body.encode('unicode_escape')
             answer.save()
             if question.uid != request.user.id:
                 notification = Notification()
@@ -137,7 +137,7 @@ def answer_comment(request):
         comment = AnswerComment()
         comment.uid = request.user.id
         comment.answer = answer
-        comment.body = body
+        comment.body = body.encode('unicode_escape')
         comment.save()
         
         # notifying the answer owner
@@ -230,7 +230,7 @@ def new_question(request):
             question.minute_range = cleaned_data['minute_range']
             question.second_range = cleaned_data['second_range']
             question.title = cleaned_data['title']
-            question.body = cleaned_data['body']
+            question.body = cleaned_data['body'].encode('unicode_escape')
             question.views= 1 
             question.save()
             
@@ -389,7 +389,7 @@ def ajax_question_update(request):
         if question:
             if question.uid == request.user.id or request.user.id in admins:
                 question.title = title
-                question.body = body
+                question.body = body.encode('unicode_escape')
                 question.save()
         return HttpResponse("saved")
 
@@ -419,7 +419,7 @@ def ajax_answer_update(request):
         answer= get_object_or_404(Answer, pk=aid)
         if answer:
             if answer.uid == request.user.id or request.user.id in admins:
-                answer.body = body
+                answer.body = body.encode('unicode_escape')
                 answer.save()
         return HttpResponse("saved")
 
@@ -431,7 +431,7 @@ def ajax_answer_comment_update(request):
         comment = get_object_or_404(AnswerComment, pk=comment_id)
         if comment:
             if comment.uid == request.user.id or request.user.id in admins:
-                comment.body = comment_body
+                comment.body = comment_body.encode('unicode_escape')
                 comment.save()
         return HttpResponse("saved")
 
