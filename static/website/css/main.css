@@ -52,6 +52,7 @@ body {
 #logo {
     width: 25px;
     margin-top: -3px;
+    margin-right: 4px;
 }
 #content-wrapper {
     position: relative;
