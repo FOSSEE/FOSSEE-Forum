@@ -17,6 +17,7 @@ urlpatterns = patterns('',
     url(r'^user/(?P<user_id>\d+)/answers/$', 'website.views.user_answers', name='user_answers'),
     url(r'^clear-notifications/$', 'website.views.clear_notifications', name='clear_notifications'),
     url(r'^search/$', 'website.views.search', name='search'),
+    url(r'^unanswered-notification/$', 'website.views.unanswered_notification', name='unanswered_notification'),
 
     # Ajax helpers
     url(r'^ajax-tutorials/$', 'website.views.ajax_tutorials', name='ajax_tutorials'),

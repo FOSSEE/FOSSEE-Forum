@@ -513,9 +513,37 @@ def forums_mail(to = '', subject='', message=''):
     # Start of email send
     email = EmailMultiAlternatives(
         subject,'', 'forums', 
-        [to],
+        to.split(','),
         headers={"Content-type":"text/html;charset=iso-8859-1"}
     )
     email.attach_alternative(message, "text/html")
     email.send(fail_silently=True)
     # End of email send
+
+# daily notifications for unanswered questions.
+def unanswered_notification(request):
+    questions = Question.objects.all()
+    total_count = 0
+    message = """ 
+        The following questions are left unanswered.
+        Please take a look at them. <br><br>
+    """
+    for question in questions:
+        if not question.answer_set.count():
+            total_count += 1
+            message += """ 
+                #{0}<br>
+                Title: <b>{1}</b><br>
+                Category: <b>{2}</b><br>
+                Link: <b>{3}</b><br>
+                <hr>
+            """.format(
+                total_count,
+                question.title,
+                question.category,
+                'http://forums.spoken-tutorial.org/question/' + str(question.id)
+            )
+    to = "rush2jrp@gmail.com, jayaram@iitb.ac.in"
+    subject = "Unanswered questions in the forums."
+    forums_mail(to, subject, message)
+    return HttpResponse(message)
