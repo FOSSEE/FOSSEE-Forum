@@ -543,7 +543,9 @@ def unanswered_notification(request):
                 question.category,
                 'http://forums.spoken-tutorial.org/question/' + str(question.id)
             )
-    to = "rush2jrp@gmail.com, jayaram@iitb.ac.in"
+    to = "team@spoken-tutorial.org, team@fossee.in"
     subject = "Unanswered questions in the forums."
-    forums_mail(to, subject, message)
+    if total_count:
+        forums_mail(to, subject, message)
     return HttpResponse(message)
+
