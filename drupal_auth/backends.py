@@ -3,11 +3,14 @@ import hashlib
 from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
 from django.shortcuts import render_to_response, get_object_or_404
+from django.contrib.auth.models import update_last_login
+from django.contrib.auth.signals import user_logged_in
 
 User = get_user_model()
 
 class DrupalAuthBackend(object):
     def authenticate(self, username=None, password=None):
+        user_logged_in.disconnect(update_last_login)
         try:
             user = User.objects.get(username=username)
             p = hashlib.md5()
