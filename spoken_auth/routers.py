@@ -1,12 +1,12 @@
 class DrupalAuthRouter(object):
     def db_for_read(self, model, **hints):
-        if model._meta.app_label == 'drupal_auth':
-            return 'otc'
+        if model._meta.app_label == 'spoken_auth':
+            return 'spoken'
         return 'default'
 
     def db_for_write(self, model, **hints):
-        if model._meta.app_label == 'drupal_auth':
-            return 'otc'
+        if model._meta.app_label == 'spoken_auth':
+            return 'spoken'
         return 'default'
 
     def allow_relation(self, obj1, obj2, **hints):

@@ -16,7 +16,7 @@ framework.
 import os
 import sys
 
-sys.path.append('/Sites/venv/forums/')
+#sys.path.append('/Sites/venv/forums/')
 
 # We defer to a DJANGO_SETTINGS_MODULE already in the environment. This breaks
 # if running multiple sites in the same mod_wsgi process. To fix this, use
@@ -24,8 +24,8 @@ sys.path.append('/Sites/venv/forums/')
 # os.environ["DJANGO_SETTINGS_MODULE"] = "forums.settings"
 os.environ["DJANGO_SETTINGS_MODULE"] = "forums.settings"
 
-activate_this = '/Sites/venv/bin/activate_this.py'
-execfile(activate_this, dict(__file__=activate_this))
+#activate_this = '/Sites/venv/bin/activate_this.py'
+#execfile(activate_this, dict(__file__=activate_this))
 
 # This application object is used by any WSGI server configured to use this
 # file. This includes Django's development server, if the WSGI_APPLICATION

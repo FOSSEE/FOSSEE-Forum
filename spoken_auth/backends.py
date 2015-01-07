@@ -1,5 +1,4 @@
 import hashlib
-
 from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
 from django.shortcuts import render_to_response, get_object_or_404
@@ -13,9 +12,7 @@ class DrupalAuthBackend(object):
         user_logged_in.disconnect(update_last_login)
         try:
             user = User.objects.get(username=username)
-            p = hashlib.md5()
-            p.update(password)
-            if user.password == p.hexdigest():
+            if user.check_password(password):
                 return user
             return None
         except User.DoesNotExist:
