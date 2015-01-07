@@ -8,6 +8,7 @@ from django.contrib.auth.models import (
 class Users(AbstractBaseUser):
     id = models.IntegerField(primary_key=True)
     username = models.CharField(max_length=100L, unique=True)
+    email = models.CharField(max_length=100L, unique=True)
     USERNAME_FIELD = 'username'
     class Meta:
         db_table = 'auth_user'
