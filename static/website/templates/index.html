@@ -10,7 +10,13 @@
             {% for category in categories %}
                 <div>
                     <div class="thumbnail">
-                        <img src="{% static 'website/images/' %}{{ category }}.jpg">
+                        {% with file=category|get_category_image %}
+                            {% if file %}
+                                <img src="{% static category|get_category_image %}">
+                            {% else %}
+                                <div class="category-title">{{category}}</div>
+                            {% endif %}
+                        {% endwith %}
                         <div class="caption">
                             <small class="category">
                                 {{ category }}

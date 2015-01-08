@@ -359,3 +359,11 @@ table .title a {
     background: #FDF5E6;
     transition: background 2.5s ease;
 }
+.category-title{
+    height: 100px;
+    text-shadow: 1px 1px 1px #000, 3px 3px 5px blue;
+    line-height: 100px;
+    text-align: center;
+    font-size: 22px;
+    overflow: hidden;
+}

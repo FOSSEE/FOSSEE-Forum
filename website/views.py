@@ -12,30 +12,20 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
-from website.models import Question, Answer, Notification, TutorialDetails, TutorialResources, AnswerComment
+from website.models import Question, Answer, Notification, AnswerComment
+from spoken_auth.models import TutorialDetails, TutorialResources
 from website.forms import NewQuestionForm, AnswerQuesitionForm
 from website.helpers import get_video_info, prettify
+from django.db.models import Count
 
 admins = (
     9, 4376, 4915, 14595, 12329, 22467, 5518, 30705
 )
 
-categories = (
-    'Advanced-C++', 'BASH', 'Blender', 
-    'C-and-C++', 'CellDesigner', 'Digital-Divide', 
-    'Drupal', 'Firefox', 'GChemPaint', 'Geogebra', 
-    'GeoGebra-for-Engineering-drawing', 'GIMP', 'GNS3', 
-    'GSchem', 'Inkscape', 'Java', 'Java-Business-Application', 
-    'KiCad', 'KTouch', 'KTurtle', 'LaTeX', 
-    'LibreOffice-Suite-Base', 'LibreOffice-Suite-Calc', 
-    'LibreOffice-Suite-Draw', 'LibreOffice-Suite-Impress', 
-    'LibreOffice-Suite-Math', 'LibreOffice-Suite-Writer', 
-    'Linux', 'Netbeans', 'Ngspice', 'OpenFOAM', 'Orca', 'Oscad',
-    'PERL', 'PHP-and-MySQL', 'Python', 'Python-Old-Version', 
-    'QCad', 'R', 'Ruby', 'Scilab', 'Selenium', 
-    'Single-Board-Heater-System', 'Spoken-Tutorial-Technology', 
-    'Step', 'Thunderbird', 'Tux-Typing', 'What-is-Spoken-Tutorial', 'Xfig'
-) 
+categories = []
+trs = TutorialResources.objects.filter(Q(status = 1) | Q(status = 2), language__name = 'English').values('tutorial_detail__foss__foss').order_by('tutorial_detail__foss__foss').values_list('tutorial_detail__foss__foss').distinct()
+for tr in trs:
+    categories.append(tr[0])
 
 def home(request):
     questions = Question.objects.all().order_by('date_created').reverse()[:10]
@@ -225,8 +215,8 @@ def new_question(request):
             cleaned_data = form.cleaned_data
             question = Question()
             question.uid = request.user.id
-            question.category = cleaned_data['category']
-            question.tutorial = cleaned_data['tutorial']
+            question.category = cleaned_data['category'].replace(' ', '-')
+            question.tutorial = cleaned_data['tutorial'].replace(' ', '-')
             question.minute_range = cleaned_data['minute_range']
             question.second_range = cleaned_data['second_range']
             question.title = cleaned_data['title']
@@ -340,7 +330,7 @@ def ajax_category(request):
 def ajax_tutorials(request):
     if request.method == 'POST':
         category = request.POST.get('category')
-        tutorials = TutorialDetails.objects.using('spoken').filter(foss_category=category)
+        tutorials = TutorialDetails.objects.using('spoken').filter(foss__foss=category)
         context = {
             'tutorials': tutorials
         }
@@ -352,15 +342,17 @@ def ajax_duration(request):
         category = request.POST['category']
         tutorial =request.POST['tutorial']
         video_detail = TutorialDetails.objects.using('spoken').get(
-            Q(foss_category=category),
-            Q(tutorial_name=tutorial)
+            Q(foss__foss=category),
+            Q(tutorial=tutorial)
         )
         video_resource = TutorialResources.objects.using('spoken').get(
             Q(tutorial_detail_id=video_detail.id),
-            Q(language='English')
+            Q(language__name='English')
         )
-        video_path = '/Sites/spoken_tutorial_org/sites/default/files/{0}'.format(
-           video_resource.tutorial_video
+        video_path = '/home/sanmugam/devel/spoken/media/videos/{0}/{1}/{2}'.format(
+           str(video_detail.foss_id),
+           str(video_detail.id),
+           video_resource.video
         )
         # video_path = '/home/cheese/test-video.ogv'
         video_info = get_video_info(video_path)
@@ -475,30 +467,22 @@ def ajax_keyword_search(request):
 @csrf_exempt
 def ajax_time_search(request):
     if request.method == "POST":
-        key = request.POST['key']
-        questions = Question.objects.filter(title__icontains=key)
-        context = {
-            'questions': questions
-        }
-        return render(request, 'website/templates/ajax-keyword-search.html', context)
-
-@csrf_exempt
-def ajax_time_search(request):
-    if request.method == "POST":
         category = request.POST.get('category')
         tutorial = request.POST.get('tutorial')
         minute_range= request.POST.get('minute_range')
         second_range = request.POST.get('second_range')
-        
-        if category != 'None':
-            questions = Question.objects.filter(category=category)
-        if tutorial != 'None':
-            questions = questions.filter(tutorial=tutorial)
-        if minute_range != 'None':
-            questions = questions.filter(minute_range=minute_range)
-        if second_range != 'None':
-            questions = questions.filter(second_range=second_range)
-        
+        questions = None
+        print request.POST, "***********"
+        if category:
+            questions = Question.objects.filter(category=category.replace(' ', '-'))
+            print "sssssssssss", questions
+        if tutorial:
+            questions = questions.filter(tutorial=tutorial.replace(' ', '-'))
+        if minute_range:
+            questions = questions.filter(category=category.replace(' ', '-'), tutorial=tutorial.replace(' ', '-'), minute_range=minute_range)
+        if second_range:
+            questions = questions.filter(category=category.replace(' ', '-'), tutorial=tutorial.replace(' ', '-'),second_range=second_range)
+        print questions, "&&&&&&&&&&&"
         context = {
             'questions': questions
         }
