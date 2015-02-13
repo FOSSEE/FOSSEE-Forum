@@ -272,6 +272,14 @@ table .title a {
 #footer-inner a{
     color: #ffffff;
 }
+#footer-inner .cc{
+    font-size: 13px;
+    text-align: center;
+}
+
+#footer-inner .cc-logo{
+    padding-right: 5px;
+}
 .field_error {
     border: 1px solid red;
 }

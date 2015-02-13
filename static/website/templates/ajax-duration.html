@@ -3,7 +3,15 @@
 <div id="minutes">
     <option value="">min</option>
     {% for i in minutes|inc|get_range %}
-        <option value="{{ i }}-{{ i|inc }}">{{ i }}-{{ i|inc }} </option>
+        {% if i < 10 %}
+            {% if i == 9 %}
+                <option value="0{{ i }}-{{ i|inc }}">{{ i }}-{{ i|inc }} </option>
+            {% else %}
+                <option value="0{{ i }}-0{{ i|inc }}">{{ i }}-{{ i|inc }} </option>
+            {% endif %}
+        {% else %}
+            <option value="{{ i }}-{{ i|inc }}">{{ i }}-{{ i|inc }} </option>
+        {% endif %}
     {% endfor %}
 </div> <!-- /#minutes -->
 

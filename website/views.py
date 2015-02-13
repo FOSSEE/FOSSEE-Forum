@@ -203,7 +203,7 @@ def filter(request,  category=None, tutorial=None, minute_range=None, second_ran
     if 'qid' in request.GET:
         context['qid']  = int(request.GET['qid'])
 
-    context['questions'] = questions.order_by('date_created').reverse()
+    context['questions'] = questions.order_by('category', 'tutorial', 'minute_range', 'second_range')
     return render(request, 'website/templates/filter.html', context)
 
 @login_required
