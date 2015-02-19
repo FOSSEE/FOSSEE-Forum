@@ -4,7 +4,7 @@ $(document).ready(function() {
     $minute_range = $("#id_minute_range");
     $second_range = $("#id_second_range");
 
-    function reset() {
+/*    function reset() {
         for (var i = 0, l = arguments.length; i < l; i ++) {
             switch(arguments[i]) {
                 case "tutorial":
@@ -25,16 +25,12 @@ $(document).ready(function() {
             }
         }
     }
-
     $category.change(function() {
         $("#similar-link").hide();
-        /* resetting dropdowns */
         reset("tutorial", "minute_range", "second_range");
-        /* see thread-user.js */
         $("#question-details-ok").show();
         var category = $(this).val();
         if(category == "General") {
-            /* disabling all other fields */
             $tutorial.html("<option value='None'>Not required</option>");
             $tutorial.removeAttr("disabled");
             $minute_range.html("<option value='None'>Not required</option>");
@@ -55,7 +51,7 @@ $(document).ready(function() {
             });
         }
     });
-
+*/
     $tutorial.change(function() {
         /* resetting dropdowns */
         reset("minute_range", "second_range");

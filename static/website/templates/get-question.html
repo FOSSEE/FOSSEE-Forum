@@ -47,22 +47,6 @@
             </small>
         </span>
         
-        <span class="minute_range {% if question.minute_range == 'None' %}hideme{% endif %}">
-            <small>
-                <a href="{% url 'website:filter' question.category question.tutorial question.minute_range %}">
-                    {{ question.minute_range }} min
-                </a>
-            </small>
-        </span>
-        
-        <span class="second_range {% if question.minute_range == 'None' %}hideme{% endif %}">
-            <small>
-                <a href="{% url 'website:filter' question.category question.tutorial question.minute_range question.second_range%}">
-                    {{ question.second_range }} sec
-                </a>
-            </small>
-        </span>
-       
         <a id="question-details-edit" data-toggle="modal" data-target="#detailsModal" href="#" class="hideme">
             <span class="glyphicon glyphicon-edit"></span>
         </a>

@@ -61,8 +61,6 @@
             <table class="table table-bordered table-hover">
                 <th> FOSS </th>
                 <th> Tutorial</th>
-                <th> Min </th>
-                <th> Sec </th>
                 <th> Question <span class="glyphicon glyphicon-link"></span></th>
                 <th> Date</th>
                 <th> Views</th>
@@ -86,22 +84,6 @@
                         <a class="pull-right" href="{% url 'website:filter' question.category question.tutorial %}?qid={{ question.id }}">
                             <span class="glyphicon glyphicon-search"></span>
                         </a>
-                    </td>
-                    
-                    <td>
-                        <span>
-                            <a href="{% url 'website:filter' question.category question.tutorial question.minute_range %}?qid={{ question.id }}">
-                                {{ question.minute_range }}
-                            </a>
-                        </span>
-                    </td>
-                    
-                    <td>        
-                        <span>
-                            <a href="{% url 'website:filter' question.category question.tutorial question.minute_range question.second_range%}?qid={{ question.id }}">
-                                {{ question.second_range }}
-                            </a>
-                        </span>
                     </td>
                     
                     <td>

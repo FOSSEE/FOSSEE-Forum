@@ -9,7 +9,6 @@
     <hr>
     <form role="form" action="" method="POST">{% csrf_token %}
     {% with WIDGET_ERROR_CLASS='field_error' %}
-
     <p>
     Please enter the tutorial details.
         <img id="ajax-loader" src="{% static 'website/images/ajax-loader.gif' %}" style="display:none;">
@@ -22,14 +21,8 @@
             {% if category %}
                 {% render_field form.tutorial class+="form-control" %} 
             {% else %}
-                {% render_field form.tutorial class+="form-control" disabled="disabled" %} 
+                {% render_field form.tutorial class+="form-control" %} 
             {% endif %}
-        </div>
-        <div class="col-lg-2 col-md-2 col-sm-2">
-            {% render_field form.minute_range class+="form-control" disabled="disabled" %} 
-        </div>
-        <div class="col-lg-2 col-md-2 col-sm-2">
-            {% render_field form.second_range class+="form-control" disabled="disabled" %} 
         </div>
         <div class="col-lg-2 col-md-2 col-sm-2">
             <small><strong>

@@ -5,22 +5,31 @@ from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
+class FossCategory(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_modified = models.DateTimeField(auto_now=True)
+    def __unicode__(self):
+        return self.name
+
+class Issue(models.Model):
+    name = models.CharField(max_length=100)
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_modified = models.DateTimeField(auto_now=True)
+    def __unicode__(self):
+        return self.name
+
 class Question(models.Model):
-    uid  = models.IntegerField()
-    category = models.CharField(max_length=200)
-    tutorial = models.CharField(max_length=200)
-    minute_range = models.CharField(max_length=10)
-    second_range = models.CharField(max_length=10)
+    user  = models.ForeignKey(User)
+    category = models.ForeignKey(FossCategory)
+    tutorial = models.ForeignKey(Issue)
     title = models.CharField(max_length=200)
     body = models.TextField()
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
     views = models.IntegerField(default=1)
     # votes = models.IntegerField(default=0)
-
-    def user(self):
-        user = User.objects.get(id=self.uid)
-        return user.username
 
     class Meta:
         get_latest_by = "date_created"
@@ -74,5 +83,3 @@ class Notification(models.Model):
     def poster(self):
         user = User.objects.get(id=self.pid)
         return user.username
-
-# CDEEP database created using inspectdb arg of manage.py

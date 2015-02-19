@@ -9,7 +9,7 @@ register = template.Library()
 
 def get_category_image(category):
     base_path = settings.PROJECT_DIR + '/static/website/images/'
-    file_name = category.replace(' ', '-') + '.jpg'
+    file_name = category.name.replace(' ', '-') + '.jpg'
     file_path = base_path + file_name
     if os.path.isfile(file_path):
         return 'website/images/' + file_name

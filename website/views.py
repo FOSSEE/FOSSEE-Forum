@@ -12,7 +12,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
-from website.models import Question, Answer, Notification, AnswerComment
+from website.models import Question, Answer, Notification, AnswerComment, FossCategory
 from spoken_auth.models import TutorialDetails, TutorialResources
 from website.forms import NewQuestionForm, AnswerQuesitionForm
 from website.helpers import get_video_info, prettify
@@ -21,12 +21,7 @@ from django.db.models import Count
 admins = (
     9, 4376, 4915, 14595, 12329, 22467, 5518, 30705
 )
-
-categories = []
-trs = TutorialResources.objects.filter(Q(status = 1) | Q(status = 2), language__name = 'English').values('tutorial_detail__foss__foss').order_by('tutorial_detail__foss__foss').values_list('tutorial_detail__foss__foss').distinct()
-for tr in trs:
-    categories.append(tr[0])
-
+categories = FossCategory.objects.order_by('name')
 def home(request):
     questions = Question.objects.all().order_by('date_created').reverse()[:10]
     context = {
@@ -83,7 +78,7 @@ def question_answer(request):
             answer.question = question
             answer.body = body.encode('unicode_escape')
             answer.save()
-            if question.uid != request.user.id:
+            if question.user_id != request.user.id:
                 notification = Notification()
                 notification.uid = question.uid
                 notification.pid = request.user.id
@@ -194,7 +189,7 @@ def filter(request,  category=None, tutorial=None, minute_range=None, second_ran
     if category and tutorial and minute_range and second_range:
         questions = Question.objects.filter(category=category).filter(tutorial=tutorial).filter(minute_range=minute_range).filter(second_range=second_range)
     elif tutorial is None:
-        questions = Question.objects.filter(category=category)
+        questions = Question.objects.filter(category__name=category)
     elif minute_range is None:
         questions = Question.objects.filter(category=category).filter(tutorial=tutorial)
     else:  #second_range is None
@@ -203,7 +198,7 @@ def filter(request,  category=None, tutorial=None, minute_range=None, second_ran
     if 'qid' in request.GET:
         context['qid']  = int(request.GET['qid'])
 
-    context['questions'] = questions.order_by('category', 'tutorial', 'minute_range', 'second_range')
+    context['questions'] = questions
     return render(request, 'website/templates/filter.html', context)
 
 @login_required
@@ -212,13 +207,12 @@ def new_question(request):
     if request.method == 'POST':
         form = NewQuestionForm(request.POST)
         if form.is_valid():
+            print "EEEEEEEEEEEEEEEE"
             cleaned_data = form.cleaned_data
             question = Question()
-            question.uid = request.user.id
-            question.category = cleaned_data['category'].replace(' ', '-')
-            question.tutorial = cleaned_data['tutorial'].replace(' ', '-')
-            question.minute_range = cleaned_data['minute_range']
-            question.second_range = cleaned_data['second_range']
+            question.user = request.user
+            question.category = cleaned_data['category']
+            question.tutorial = cleaned_data['tutorial']
             question.title = cleaned_data['title']
             question.body = cleaned_data['body'].encode('unicode_escape')
             question.views= 1 

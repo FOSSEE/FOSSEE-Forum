@@ -40,7 +40,7 @@
             
             <td>
                 <span>
-                    <a href="{% url 'website:filter' question.category question.tutorial question.minute_range %}?qid={{ question.id }}">
+                    <a href="{% url 'website:filter' question.category question.tutorial %}?qid={{ question.id }}">
                         {{ question.minute_range }}
                     </a>
                 </span>
@@ -48,7 +48,7 @@
             
             <td>        
                 <span>
-                    <a href="{% url 'website:filter' question.category question.tutorial question.minute_range question.second_range%}?qid={{ question.id }}">
+                    <a href="{% url 'website:filter' question.category question.tutorial %}?qid={{ question.id }}">
                         {{ question.second_range }}
                     </a>
                 </span>
