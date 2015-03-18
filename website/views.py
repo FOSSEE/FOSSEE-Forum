@@ -212,7 +212,7 @@ def new_question(request):
             question = Question()
             question.user = request.user
             question.category = cleaned_data['category']
-            question.tutorial = cleaned_data['tutorial']
+            #question.tutorial = cleaned_data['tutorial']
             question.title = cleaned_data['title']
             question.body = cleaned_data['body'].encode('unicode_escape')
             question.views= 1 
@@ -224,12 +224,12 @@ def new_question(request):
                 The following new question has been posted in the Spoken Tutorial Forum: <br>
                 Title: <b>{0}</b><br>
                 Category: <b>{1}</b><br>
-                Tutorial: <b>{2}</b><br>
-                Link: <a href="{3}">{3}</a><br>
+                
+                Link: <a href="{2}">{2}</a><br>
             """.format(
                 question.title,
                 question.category, 
-                question.tutorial, 
+                #question.tutorial, 
                 'http://forums.spoken-tutorial.org/question/'+str(question.id)
             )
             email = EmailMultiAlternatives(
@@ -255,14 +255,16 @@ def new_question(request):
 # Notification Section
 @login_required
 def user_questions(request, user_id):
+    print "user_id"
+    print user_id
     marker = 0
     if 'marker' in request.GET:
         marker = int(request.GET['marker'])
 
     if str(user_id) == str(request.user.id):
-        total = Question.objects.filter(uid=user_id).count()
+        total = Question.objects.filter(user_id=user_id).count()
         total = int(total - (total % 10 - 10))
-        questions = Question.objects.filter(uid=user_id).order_by('date_created').reverse()[marker:marker+10]
+        questions = Question.objects.filter(user_id=user_id).order_by('date_created').reverse()[marker:marker+10]
         
         context = {
             'questions': questions,

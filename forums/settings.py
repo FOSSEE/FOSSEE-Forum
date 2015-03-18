@@ -141,6 +141,7 @@ INSTALLED_APPS = (
     #'spoken_auth',
     'compressor',
     'debug_toolbar',
+    'captcha',
     #'migrate_spoken',
 )
 
@@ -179,5 +180,10 @@ TEMPLATE_CONTEXT_PROCESSORS += (
 )
 
 COMPRESS_ROOT = PROJECT_DIR + "/static/"
-COMPRESS_ENABLED = True
-HTML_MINIFY = True
+COMPRESS_ENABLED = True 	# disable in production Env
+HTML_MINIFY = True 		# disable in production Env
+
+HTML_MINIFY = HTML_MINIFY
+RECAPTCHA_PUBLIC_KEY = '6LemngMTAAAAAAC0Fkv0CQcavkTIIJ3LTDzi9gMq'
+RECAPTCHA_PRIVATE_KEY = '6LemngMTAAAAAHZsIaY-G98QegM3htdGVEWbEJYL'
+RECAPTCHA_USE_SSL = True

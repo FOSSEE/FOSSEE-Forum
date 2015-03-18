@@ -60,7 +60,7 @@
         <div class="panel-body">
             <table class="table table-bordered table-hover">
                 <th> FOSS </th>
-                <th> Tutorial</th>
+                <!--<th> Tutorial</th>-->
                 <th> Question <span class="glyphicon glyphicon-link"></span></th>
                 <th> Date</th>
                 <th> Views</th>
@@ -77,14 +77,6 @@
                         </a>
                     </td>
                     
-                    <td>
-                        <span class="tutorial" data-toggle="tooltip" data-placement="top" title="{{ question.tutorial}}">
-                            {{ question.tutorial|truncatechars:12 }}
-                        </span>
-                        <a class="pull-right" href="{% url 'website:filter' question.category question.tutorial %}?qid={{ question.id }}">
-                            <span class="glyphicon glyphicon-search"></span>
-                        </a>
-                    </td>
                     
                     <td>
                         <span class="title" data-toggle="tooltip" data-placement="top" title="{{ question.title }}">

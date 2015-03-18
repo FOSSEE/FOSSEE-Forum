@@ -23,14 +23,16 @@ class Issue(models.Model):
 class Question(models.Model):
     user  = models.ForeignKey(User)
     category = models.ForeignKey(FossCategory)
-    tutorial = models.ForeignKey(Issue)
+    #tutorial = models.ForeignKey(Issue)
     title = models.CharField(max_length=200)
     body = models.TextField()
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
     views = models.IntegerField(default=1)
     # votes = models.IntegerField(default=0)
-
+    def __unicode__(self):
+        return self.user
+        
     class Meta:
         get_latest_by = "date_created"
 

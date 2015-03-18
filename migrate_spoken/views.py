@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
-from website.models import Question, Answer, AnswerComment, Notification
+#from website.models import Question, Answer, AnswerComment, Notification
 from migrate_spoken.models import OldUsers
 from spoken_auth.models import Users
 # Create your views here.

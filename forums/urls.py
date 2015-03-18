@@ -18,5 +18,6 @@ urlpatterns = patterns('',
     # User account urls
     url(r'^accounts/login/', 'forums.views.user_login', name='user_login'),
     url(r'^accounts/logout/', 'forums.views.user_logout', name='user_logout'),
+    url(r'^accounts/register/', 'forums.views.account_register', name='user_register'),
     url(r'^migrate', 'migrate_spoken.views.chenage_drupal_userid_spoken', name='chenage_drupal_userid_spoken'),
 )

@@ -38,14 +38,7 @@
                 </a>
             </small>
         </span>
-        
-        <span class="tutorial">
-            <small>
-                <a href="{% url 'website:filter' question.category question.tutorial %}">
-                    {{ question.tutorial}}
-                </a>
-            </small>
-        </span>
+      
         
         <a id="question-details-edit" data-toggle="modal" data-target="#detailsModal" href="#" class="hideme">
             <span class="glyphicon glyphicon-edit"></span>
@@ -202,14 +195,14 @@
           <div class="modal-body">
             
             <h5>The Current question is under:</h5>
-            {{ question.category }} 
+            {{ question.category }} <!--
             --&gt; {{ question.tutorial }} 
             {% if question.minute_range != 'None' %}
             --&gt; {{ question.minute_range }}
             {% endif %}
             {% if question.second_range != 'None' %}
             --&gt; {{ question.second_range}}
-            {% endif %}
+            {% endif %}-->
             
             <h5>Move the question to:</h5>
             <div class="row">
