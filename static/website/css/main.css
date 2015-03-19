@@ -103,11 +103,20 @@ body {
 #content .question .title a{
     padding: 0 0 7px 0;
     font-size: 1.1em;
-    color: #424242;
+    color: #2619bd;
+    font-weight:bold;
+}
+
+#content .question .title{
+    padding: 0 0 7px 0;
+    font-size: 1.1em;
+    color: #2619bd;
+    font-weight:bold;    
 }
 #content .question .body {
     padding: 10px;
-    background: #fafafa;
+    background: #F9F6F6;
+    color: #2619bd;
 }
 #content .question .category a,
 #content .question .tutorial a,
@@ -155,7 +164,7 @@ body {
     bottom: 0px;
 }
 #content .question .user{
-    background: #f5f5f5;
+    background: #EFE3E3;
     padding: 2px 7px;
 }
 table .category {
