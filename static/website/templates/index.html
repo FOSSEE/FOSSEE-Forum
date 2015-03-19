@@ -41,7 +41,7 @@
                 <div class="row">
                     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
                         <h3 align="center"><strong>{% total_question_count %}</strong></h3>
-                        <h3 align="center">Questions</h3>
+                        <h3 align="center" text-color="#7395d9" >Questions</h3>
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
                         <h3 align="center"><strong>{% total_answer_count %}</strong></h3>
@@ -59,7 +59,7 @@
         </div>
         <div class="panel-body">
             <table class="table table-bordered table-hover">
-                <th> FOSS </th>
+                <th> FOSS <span class="glyphicon glyphicon-link"></span></th>
                 <!--<th> Tutorial</th>-->
                 <th> Question <span class="glyphicon glyphicon-link"></span></th>
                 <th> Date</th>
@@ -69,17 +69,18 @@
                 {% for question in questions %}
                 <tr>
                     <td>
-                        <span href="#" class="category" data-toggle="tooltip" data-placement="top" title="{{ question.category}}">
-                            {{ question.category|truncatechars:12 }} 
-                        </span>
-                        <a class="pull-right" href="{% url 'website:filter' question.category %}?qid={{ question.id }}">
-                            <span class="glyphicon glyphicon-search"></span>
+                        <span class="category" data-toggle="tooltip" data-placement="top" title="{{ question.category}}">
+                          
+                        <a class="pull-left" href="{% url 'website:filter' question.category %}?qid={{ question.id }}">
+                           {{ question.category|truncatechars:12 }} 
+                         
                         </a>
+                         </span>
                     </td>
                     
                     
                     <td>
-                        <span class="title" data-toggle="tooltip" data-placement="top" title="{{ question.title }}">
+                        <span class="question" data-toggle="tooltip" data-placement="top" title="{{ question.title }}">
                             <a href="{% url 'website:get_question' question.id %}{% prettify question.title %}">{{ question.title|truncatechars:40 }}</a>
                         </span>            
                     </td>

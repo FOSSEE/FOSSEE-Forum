@@ -166,9 +166,10 @@ table .tutorial {
     color:#a26dc8; 
     font-weight:bold;
 }
-table .title a {
+table .question a{
     font-size: 1.1em;
-    color: #424242;
+    color: #2619bd;
+    font-weight:bold;
 }
 #similar-link {
     display: none;
