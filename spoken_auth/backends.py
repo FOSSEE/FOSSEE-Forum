@@ -11,7 +11,7 @@ class DrupalAuthBackend(object):
     def authenticate(self, username=None, password=None):
         user_logged_in.disconnect(update_last_login)
         try:
-            user = User.objects.get(username=username)
+            user = User.objects.get(username=username, is_active=True)
             if user.check_password(password):
                 return user
             return None

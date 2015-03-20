@@ -9,6 +9,7 @@ class Users(AbstractBaseUser):
     id = models.IntegerField(primary_key=True)
     username = models.CharField(max_length=100L, unique=True)
     email = models.CharField(max_length=100L, unique=True)
+    is_active = models.BooleanField()
     USERNAME_FIELD = 'username'
     class Meta:
         db_table = 'auth_user'
