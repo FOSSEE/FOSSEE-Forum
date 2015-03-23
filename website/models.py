@@ -66,7 +66,7 @@ class AnswerVote(models.Model):
 class AnswerComment(models.Model):
     uid = models.IntegerField()
     answer = models.ForeignKey(Answer)
-    body = models.TextField()
+    body = models.TextField(blank=False)
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
 

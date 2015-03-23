@@ -14,7 +14,7 @@ User = get_user_model()
 
 from website.models import Question, Answer, Notification, AnswerComment, FossCategory
 from spoken_auth.models import TutorialDetails, TutorialResources
-from website.forms import NewQuestionForm, AnswerQuesitionForm
+from website.forms import NewQuestionForm, AnswerQuesitionForm,AnswerCommentForm
 from website.helpers import get_video_info, prettify
 from django.db.models import Count
 
@@ -132,64 +132,74 @@ def answer_comment(request):
         answer_id = request.POST['answer_id'];
         body = request.POST['body']
         answer = Answer.objects.get(pk=answer_id)
-        comment = AnswerComment()
-        comment.uid = request.user.id
-        comment.answer = answer
-        comment.body = body.encode('unicode_escape')
-        comment.save()
-        
-        # notifying the answer owner
-        if answer.uid != request.user.id:
-            notification = Notification()
-            notification.uid = answer.uid
-            notification.pid = request.user.id
-            notification.qid = answer.question.id
-            notification.aid = answer.id
-            notification.cid = comment.id
-            notification.save()
-            
-            user = User.objects.get(id=answer.uid)
-            subject = 'Comment for your answer'
-            message = """
-                Dear {0}<br><br>
-                A comment has been posted on your answer.<br>
-                Link: {1}<br><br>
-                Regards,<br>
-                Spoken Tutorial Forums
-            """.format(
-                user.username,
-                "http://forums.spoken-tutorial.org/question/" + str(answer.question.id) + "#answer" + str(answer.id)
-            )
-            forums_mail(user.email, subject, message)
+	form = AnswerCommentForm(request.POST)
+	if form.is_valid():
+		comment = AnswerComment()
+		comment.uid = request.user.id
+		comment.answer = answer
+		comment.body = body.encode('unicode_escape')
+		comment.save()
 
-        # notifying other users in the comment thread
-        uids = answer.answercomment_set.filter(answer=answer).values_list('uid', flat=True)
-        #getting distinct uids
-        uids = set(uids) 
-        uids.remove(request.user.id)
-        for uid in uids:
-            notification = Notification()
-            notification.uid = uid
-            notification.pid = request.user.id
-            notification.qid = answer.question.id
-            notification.aid = answer.id
-            notification.cid = comment.id
-            notification.save()
-            
-            user = User.objects.get(id=uid)
-            subject = 'Comment has a reply'
-            message = """
-                Dear {0}<br><br>
-                A reply has been posted on your comment.<br>
-                Link: {1}<br><br>
-                Regards,<br>
-                Spoken Tutorial Forums
-            """.format(
-                user.username,
-                "http://forums.spoken-tutorial.org/question/" + str(answer.question.id) + "#answer" + str(answer.id)
-            )
-            forums_mail(user.email, subject, message)
-    return HttpResponseRedirect("/question/" + str(answer.question.id) + "#")
+		 # notifying the answer owner
+		if answer.uid != request.user.id:
+		    notification = Notification()
+		    notification.uid = answer.uid
+		    notification.pid = request.user.id
+		    notification.qid = answer.question.id
+		    notification.aid = answer.id
+		    notification.cid = comment.id
+		    notification.save()
+		    
+		    user = User.objects.get(id=answer.uid)
+		    subject = 'Comment for your answer'
+		    message = """
+		        Dear {0}<br><br>
+		        A comment has been posted on your answer.<br>
+		        Link: {1}<br><br>
+		        Regards,<br>
+		        Spoken Tutorial Forums
+		    """.format(
+		        user.username,
+		        "http://forums.spoken-tutorial.org/question/" + str(answer.question.id) + "#answer" + str(answer.id)
+		    )
+		    forums_mail(user.email, subject, message)
+
+		# notifying other users in the comment thread
+		uids = answer.answercomment_set.filter(answer=answer).values_list('uid', flat=True)
+		#getting distinct uids
+		uids = set(uids) 
+		uids.remove(request.user.id)
+		for uid in uids:
+		    notification = Notification()
+		    notification.uid = uid
+		    notification.pid = request.user.id
+		    notification.qid = answer.question.id
+		    notification.aid = answer.id
+		    notification.cid = comment.id
+		    notification.save()
+		    
+		    user = User.objects.get(id=uid)
+		    subject = 'Comment has a reply'
+		    message = """
+		        Dear {0}<br><br>
+		        A reply has been posted on your comment.<br>
+		        Link: {1}<br><br>
+		        Regards,<br>
+		        Spoken Tutorial Forums
+		    """.format(
+		        user.username,
+		        "http://forums.spoken-tutorial.org/question/" + str(answer.question.id) + "#answer" + str(answer.id)
+		    )
+		    forums_mail(user.email, subject, message)
+
+	else:
+		print "not valid"
+        
+		form = AnswerCommentForm()
+		print form
+
+       
+    	return HttpResponseRedirect("/question/" + str(answer.question.id) + "#")
 
 def filter(request,  category=None, tutorial=None, minute_range=None, second_range=None):
     context = {

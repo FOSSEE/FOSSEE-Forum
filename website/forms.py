@@ -30,3 +30,7 @@ class AnswerQuesitionForm(forms.Form):
     body = forms.CharField(widget=forms.Textarea(),
     		required = True
     		)
+
+class AnswerCommentForm(forms.Form):
+    body = forms.CharField(widget=forms.Textarea(),required = True)
+
