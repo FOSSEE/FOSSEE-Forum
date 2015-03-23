@@ -65,8 +65,11 @@ def get_question(request, question_id=None, pretty_url=None):
     return render(request, 'website/templates/get-question.html', context)
 
 @login_required
-def question_answer(request):
+def question_answer(request,qid):
+    print qid
+    context = {}
     if request.method == 'POST':
+    	
         form = AnswerQuesitionForm(request.POST)
         if form.is_valid():
             cleaned_data = form.cleaned_data
@@ -110,11 +113,21 @@ def question_answer(request):
                 email.attach_alternative(message, "text/html")
                 email.send(fail_silently=True)
                 # End of email send
-        return HttpResponseRedirect('/question/'+ str(qid) + "#answer" + str(answer.id)) 
-    return HttpResponseRedirect('/') 
+        	return HttpResponseRedirect('/question/'+ str(qid) + "#answer" + str(answer.id)) 
+    else:
+	form = AnswerQuesitionForm()
+	context = {
+    		'form': form
+	}
+	#print form
+	
+    return HttpResponseRedirect('/question/'+ str(qid)) 
+        
+    
 
 @login_required
 def answer_comment(request):
+
     if request.method == 'POST':
         answer_id = request.POST['answer_id'];
         body = request.POST['body']

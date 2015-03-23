@@ -36,16 +36,14 @@
         {% for question in questions %}
         <tr {% if question.id == qid %}class="parent-filter"{% endif %}>
             <td>
-                <span href="#" class="category" data-toggle="tooltip" data-placement="top" title="{{ question.category}}">
-                    {{ question.category|truncatechars:12 }} 
-                </span>
-                <a class="pull-right" href="{% url 'website:filter' question.category %}?qid={{ question.id }}">
-                    <span class="glyphicon glyphicon-search"></span>
-                </a>
+                <span class="category" data-toggle="tooltip" data-placement="top" title="{{ question.category}}">
+               <a class="pull-left" href="{% url 'website:filter' question.category %}?qid={{ question.id }}">
+                 {{ question.category|truncatechars:12 }} </a>
+                 </span>
             </td>
 
             <td>
-                <span class="title" data-toggle="tooltip" data-placement="top" title="{{ question.title }}">
+                <span class="question" data-toggle="tooltip" data-placement="top" title="{{ question.title }}">
                     <a href="{% url 'website:get_question' question.id %}{% prettify question.title %}">{{ question.title|truncatechars:40 }}</a>
                 </span>            
             </td>

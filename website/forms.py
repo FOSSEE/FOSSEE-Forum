@@ -27,4 +27,6 @@ class NewQuestionForm(forms.ModelForm):
         
 class AnswerQuesitionForm(forms.Form):
     question = forms.IntegerField(widget=forms.HiddenInput())
-    body = forms.CharField(widget=forms.Textarea())
+    body = forms.CharField(widget=forms.Textarea(),
+    		required = True
+    		)
