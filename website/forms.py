@@ -7,16 +7,18 @@ class NewQuestionForm(forms.ModelForm):
     category = forms.ModelChoiceField(widget = forms.Select(attrs = {}), 
     					queryset = FossCategory.objects.order_by('name'), 
     					empty_label = "Select a category", 
-    					error_messages = {'required':'Categoty field required.'})
+    					required = True,
+    					error_messages = {'required':'Select a category.'})
     					
-    '''tutorial = forms.ModelChoiceField(widget = forms.Select(attrs = {}), q
-    					ueryset = Issue.objects.order_by('name'), 
-    					empty_label = "Select a Issue", 
-    					error_messages = {'required':'Issue field required.'})'''
-    '''class Meta:
-        model = Question
-        fields = ['category', 'tutorial', 'title', 'body']'''
-        
+    title = forms.CharField(widget=forms.TextInput(),
+    					required = True,
+    					error_messages = {'required':'Title field required.'})
+    					
+    body = forms.CharField(widget=forms.Textarea(),
+    		required = True,
+    		error_messages = {'required':'question field required.'}
+    		)
+    
     class Meta:
         model = Question
         fields = ['category', 'title', 'body']
@@ -25,12 +27,16 @@ class NewQuestionForm(forms.ModelForm):
         category = kwargs.pop('category', None)
         super(NewQuestionForm, self).__init__(*args, **kwargs)
         
-class AnswerQuesitionForm(forms.Form):
+class AnswerQuestionForm(forms.ModelForm):
     question = forms.IntegerField(widget=forms.HiddenInput())
     body = forms.CharField(widget=forms.Textarea(),
-    		required = True
+    		required = True,
+    		error_messages = {'required':'Answer field required.'}
     		)
+    class Meta:
+        model = Question
+        fields = ['question', 'body']
 
 class AnswerCommentForm(forms.Form):
-    body = forms.CharField(widget=forms.Textarea(),required = True)
+    body = forms.CharField(widget=forms.Textarea(),required = True,)
 

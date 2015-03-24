@@ -1,8 +1,9 @@
 import re
 
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404,render_to_response
 from django.core.context_processors import csrf
+from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Max
@@ -14,7 +15,7 @@ User = get_user_model()
 
 from website.models import Question, Answer, Notification, AnswerComment, FossCategory
 from spoken_auth.models import TutorialDetails, TutorialResources
-from website.forms import NewQuestionForm, AnswerQuesitionForm,AnswerCommentForm
+from website.forms import NewQuestionForm, AnswerQuestionForm,AnswerCommentForm
 from website.helpers import get_video_info, prettify
 from django.db.models import Count
 
@@ -52,12 +53,13 @@ def get_question(request, question_id=None, pretty_url=None):
     if pretty_url != pretty_title:
         return HttpResponseRedirect('/question/'+ question_id + '/' + pretty_title)
     answers = question.answer_set.all()
-    form = AnswerQuesitionForm()
+    form = AnswerQuestionForm()
     context = {
         'question': question,
         'answers': answers,
         'form': form
     }
+   
     context.update(csrf(request))
     # updating views count
     question.views += 1
@@ -66,18 +68,20 @@ def get_question(request, question_id=None, pretty_url=None):
 
 @login_required
 def question_answer(request,qid):
-    print qid
-    context = {}
+   
+    dict_context = {}
+   
     if request.method == 'POST':
     	
-        form = AnswerQuesitionForm(request.POST)
+        form = AnswerQuestionForm(request.POST)
+	question = get_object_or_404(Question, id=qid)
+        answers = question.answer_set.all()
+        answer = Answer()
+        answer.uid = request.user.id
         if form.is_valid():
             cleaned_data = form.cleaned_data
             qid = cleaned_data['question']
             body = cleaned_data['body']
-            question = get_object_or_404(Question, id=qid)
-            answer = Answer()
-            answer.uid = request.user.id
             answer.question = question
             answer.body = body.encode('unicode_escape')
             answer.save()
@@ -97,7 +101,7 @@ def question_answer(request,qid):
                     Your question titled <b>"{1}"</b> has been answered.<br>
                     Link: {2}<br><br>
                     Regards,<br>
-                    Spoken Tutorial Forums
+                    Fossee Forums
                 """.format(
                     user.username, 
                     question.title, 
@@ -113,15 +117,17 @@ def question_answer(request,qid):
                 email.attach_alternative(message, "text/html")
                 email.send(fail_silently=True)
                 # End of email send
-        	return HttpResponseRedirect('/question/'+ str(qid) + "#answer" + str(answer.id)) 
-    else:
-	form = AnswerQuesitionForm()
-	context = {
-    		'form': form
-	}
-	#print form
+	    return HttpResponseRedirect('/question/'+ str(qid) + "#answer" + str(answer.id)) 
+	else:
+		dict_context  = {
+			'question':question,
+			'answers': answers,
+			'form': form
+		}
+		
+	    	return render(request, 'website/templates/get-question.html', dict_context)
 	
-    return HttpResponseRedirect('/question/'+ str(qid)) 
+    return HttpResponseRedirect('/') 
         
     
 
@@ -235,7 +241,7 @@ def new_question(request):
             question = Question()
             question.user = request.user
             question.category = cleaned_data['category']
-            #question.tutorial = cleaned_data['tutorial']
+            
             question.title = cleaned_data['title']
             question.body = cleaned_data['body'].encode('unicode_escape')
             question.views= 1 
@@ -272,6 +278,7 @@ def new_question(request):
         context['category'] = category
     
     context['form'] = form
+    print form.errors
     context.update(csrf(request))
     return render(request, 'website/templates/new-question.html', context)
 

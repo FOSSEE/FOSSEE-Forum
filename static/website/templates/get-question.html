@@ -168,14 +168,17 @@
         {% with WIDGET_ERROR_CLASS='field_error' %}
             <div class="row"> 
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                 {{ form.body.errors }}
                     <div class="form-group">
                         {% render_field form.question value=question.id %}
-                        <label for="id_body">Answer</label>
-                        {% render_field form.body class+='form-control body' %}
+                        <label for="id_body"><h4><u>Your Answer:</u></h4></label>
+                        {% render_field form.body class+='form-control' %}
                     </div>
-                     {{ form.body.errors }}
+                   
                 </div>
             </div>
+            
+             
         {% endwith %}
         <input class="btn btn-sm btn-info" type="submit" value="Submit Answer">
     </form>
@@ -197,14 +200,7 @@
             
             <h5>The Current question is under:</h5>
             {{ question.category }} <!--
-            --&gt; {{ question.tutorial }} 
-            {% if question.minute_range != 'None' %}
-            --&gt; {{ question.minute_range }}
-            {% endif %}
-            {% if question.second_range != 'None' %}
-            --&gt; {{ question.second_range}}
-            {% endif %}-->
-            
+           
             <h5>Move the question to:</h5>
             <div class="row">
                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
