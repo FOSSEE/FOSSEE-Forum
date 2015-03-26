@@ -106,7 +106,7 @@ def question_answer(request,qid):
                 """.format(
                     user.username, 
                     question.title, 
-                    'http://forums.spoken-tutorial.org/question/' + str(question.id) + "#answer" + str(answer.id)
+                    'http://forums.fossee.in/question/' + str(question.id) + "#answer" + str(answer.id)
                 )
                 
                 email = EmailMultiAlternatives(
@@ -165,10 +165,10 @@ def answer_comment(request):
 				A comment has been posted on your answer.<br>
 				Link: {1}<br><br>
 				Regards,<br>
-				Spoken Tutorial Forums
+				FOSSEE Forums
 			    """.format(
 				user.username,
-				"http://forums.spoken-tutorial.org/question/" + str(answer.question.id) + "#answer" + str(answer.id)
+				"http://forums.fossee.in/question/" + str(answer.question.id) + "#answer" + str(answer.id)
 			    )
 			    forums_mail(user.email, subject, message)
 		  	# notifying other users in the comment thread
@@ -192,10 +192,10 @@ def answer_comment(request):
 				A reply has been posted on your comment.<br>
 				Link: {1}<br><br>
 				Regards,<br>
-				Spoken Tutorial Forums
+				FOSSEE Forums
 			    """.format(
 				user.username,
-				"http://forums.spoken-tutorial.org/question/" + str(answer.question.id) + "#answer" + str(answer.id)
+				"http://forums.fossee.in/question/" + str(answer.question.id) + "#answer" + str(answer.id)
 			    )
 			    forums_mail(user.email, subject, message)
 
@@ -251,7 +251,7 @@ def new_question(request):
             # Sending email when a new question is asked
             subject = 'New Forum Question'
             message = """
-                The following new question has been posted in the Spoken Tutorial Forum: <br>
+                The following new question has been posted in the FOSSEE Forum: <br>
                 Title: <b>{0}</b><br>
                 Category: <b>{1}</b><br>
                 
@@ -260,11 +260,11 @@ def new_question(request):
                 question.title,
                 question.category, 
                 #question.tutorial, 
-                'http://forums.spoken-tutorial.org/question/'+str(question.id)
+                'http://forums.fossee.in/question/'+str(question.id)
             )
             email = EmailMultiAlternatives(
                 subject,'', 'forums', 
-                ['team@spoken-tutorial.org', 'team@fossee.in'],
+                ['team@fossee.in'],
                 headers={"Content-type":"text/html;charset=iso-8859-1"}
             )
             email.attach_alternative(message, "text/html")
@@ -552,9 +552,9 @@ def unanswered_notification(request):
                 total_count,
                 question.title,
                 question.category,
-                'http://forums.spoken-tutorial.org/question/' + str(question.id)
+                'http://forums.fossee.in/question/' + str(question.id)
             )
-    to = "team@spoken-tutorial.org, team@fossee.in"
+    to = "team@fossee.in"
     subject = "Unanswered questions in the forums."
     if total_count:
         forums_mail(to, subject, message)
