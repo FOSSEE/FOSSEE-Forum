@@ -6,7 +6,7 @@ from django.db.models import Q
 class NewQuestionForm(forms.ModelForm):
     category = forms.ModelChoiceField(widget = forms.Select(attrs = {}), 
     					queryset = FossCategory.objects.order_by('name'), 
-    					empty_label = "Select a category", 
+    					empty_label = "Select a Foss category", 
     					required = True,
     					error_messages = {'required':'Select a category.'})
     					

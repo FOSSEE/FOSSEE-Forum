@@ -78,6 +78,7 @@ def question_answer(request,qid):
 	question = get_object_or_404(Question, id=qid)
         answers = question.answer_set.all()
         answer = Answer()
+        
         answer.uid = request.user.id
         if form.is_valid():
             cleaned_data = form.cleaned_data
@@ -86,15 +87,17 @@ def question_answer(request,qid):
             answer.question = question
             answer.body = body.encode('unicode_escape')
             answer.save()
+            # if user_id of question not matches to user_id of answer that
+            # question , no
             if question.user_id != request.user.id:
                 notification = Notification()
-                notification.uid = question.uid
+                notification.uid = question.user_id
                 notification.pid = request.user.id
                 notification.qid = qid
                 notification.aid = answer.id
                 notification.save()
                 
-                user = User.objects.get(id=question.uid)
+                user = User.objects.get(id=question.user_id)
                 # Sending email when an answer is posted
                 subject = 'Question has been answered'
                 message = """
@@ -325,11 +328,15 @@ def user_answers(request, user_id):
 
 @login_required
 def user_notifications(request, user_id):
+    print "user_id"
+    print user_id
+    print request.user.id
     if str(user_id) == str(request.user.id):
         notifications = Notification.objects.filter(uid=user_id).order_by('date_created').reverse()
         context = {
             'notifications': notifications
         }
+        print notifications
         return render(request, 'website/templates/notifications.html', context)
     return HttpResponse("go away ...")
 
