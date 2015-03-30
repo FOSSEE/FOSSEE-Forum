@@ -24,6 +24,7 @@ admins = (
     9, 4376, 4915, 14595, 12329, 22467, 5518, 30705
 )
 categories = FossCategory.objects.order_by('name')
+
 def home(request):
     questions = Question.objects.all().order_by('date_created').reverse()[:10]
     context = {
@@ -305,6 +306,8 @@ def user_questions(request, user_id):
             'total': total,
             'marker': marker
         }
+        print "total"
+        print total
         return render(request, 'website/templates/user-questions.html', context)
     return HttpResponse("go away")
 
@@ -323,6 +326,8 @@ def user_answers(request, user_id):
             'total': total,
             'marker': marker
         }
+        print "anwer_total"
+        print total
         return render(request, 'website/templates/user-answers.html', context)
     return HttpResponse("go away")
 

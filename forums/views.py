@@ -57,7 +57,7 @@ def account_register(request):
 
 def send_registration_confirmation(user):
 	p = Profile.objects.get(user=user)
-	#user.email = "k.sanmugam2@gmail.com"
+	user.email = "ashwinids03@gmail.com"
 	# Sending email when an answer is posted
 	subject = 'Account Active Notification'
 	message = """Dear {0},
@@ -65,7 +65,7 @@ def send_registration_confirmation(user):
 	{2}
 	Regards,
 	Admin
-	Spoken Tutorials
+	FOSSEE forum
 	IIT Bombay.
 	""".format(
 		user.username,
@@ -73,15 +73,16 @@ def send_registration_confirmation(user):
 		"http://spoken-tutorial.org/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
 	)
 	email = EmailMultiAlternatives(
-		subject, message, 'administrator@spoken-tutorial.org',
+		subject, message, 'sysads@fossee.in',
 		to = [user.email], bcc = [], cc = [],
 		headers={'Reply-To': 'no-replay@spoken-tutorial.org', "Content-type":"text/html;charset=iso-8859-1"}
 	)
-	#email.attach_alternative(message, "text/html")
+	email.attach_alternative(message, "text/html")
 	try:
 		result = email.send(fail_silently=False)
 	except:
 		pass
+		
 def user_login(request):
     if request.user.is_anonymous():
     	
