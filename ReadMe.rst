@@ -33,7 +33,7 @@ Installation
 
     cd /path/to/spoken-tutorial-forums
 
-- Install pre-requisites using the command ::
+- Install pre-requisites using the command (please don't use sudo) ::
 
     pip install -r requirement.txt
 
@@ -45,12 +45,12 @@ Installation
 Usage
 -----
 
-- Using MySql (For development server only). Though, we recommend to use `mysql` for deployment
+- Using MySQL (For development server only). Though, we recommend to use `MySQL` for deployment
   server. See `settings.py` file for usage.
 
 - Create 'forum' database in 'MySQL'.
 
-- Only for Server deployment, Open `spoken-tutorial-forums/forums/settings.py` file and do the following changes ::
+- Only for Server deployment, open `spoken-tutorial-forums/forums/settings.py` file and make the following changes ::
 
     DATABASES = {
         'default': {
@@ -64,13 +64,13 @@ Usage
     }
 
 
-- For development on your machine, create a file `config.py` to `spoken-tutorial-forums/forums/` and write ::
+- For development on your machine, create a file `config.py` in `spoken-tutorial-forums/forums/` and add ::
 
     db_user='root' #(MySql username)
     
     db_pass = 'root' #(MySql password)
     
-- For development on your machine, Open `spoken-tutorial-forums/forums/settings.py` file and do the following changes ::
+- For development on your machine, open `spoken-tutorial-forums/forums/settings.py` file and make the following changes ::
 
     DATABASES = {
         'default': {

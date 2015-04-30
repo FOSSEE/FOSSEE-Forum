@@ -31,7 +31,7 @@ class Question(models.Model):
     views = models.IntegerField(default=1)
     # votes = models.IntegerField(default=0)
     def __unicode__(self):
-        return self.user
+             return '%s' % (self.user)
         
     class Meta:
         get_latest_by = "date_created"
