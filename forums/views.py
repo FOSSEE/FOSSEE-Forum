@@ -157,7 +157,7 @@ def send_registration_confirmation(user):
 	""".format(
 		user.username,
 		"http://fossee.in",
-		"http://localhost:8000/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
+		"http://forums.fossee.in/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
 	)
 	email = EmailMultiAlternatives(
 		subject, message, 'sysads@fossee.in',

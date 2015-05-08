@@ -140,19 +140,19 @@ def question_answer(request,qid):
 def answer_comment(request):
 	if request.method == 'POST':
 		answer_id = request.POST['answer_id'];
-                print answer_id
 		answer = Answer.objects.get(pk=answer_id)
 		answers = answer.question.answer_set.all()
 		form = AnswerCommentForm(request.POST)
 		if form.is_valid():
 			body = request.POST['body']
-			print body
 			comment = AnswerComment()
 			comment.uid = request.user.id
 			comment.answer = answer
 			comment.body = body.encode('unicode_escape')
+			
 			comment.save()
-		  # notifying the answer owner
+		  	# notifying the answer owner
+		  	
 			if answer.uid != request.user.id:
 			    notification = Notification()
 			    notification.uid = answer.uid
@@ -241,7 +241,7 @@ def new_question(request):
     if request.method == 'POST':
         form = NewQuestionForm(request.POST)
         if form.is_valid():
-            print "EEEEEEEEEEEEEEEE"
+           
             cleaned_data = form.cleaned_data
             question = Question()
             question.user = request.user
@@ -251,8 +251,7 @@ def new_question(request):
             question.body = cleaned_data['body'].encode('unicode_escape')
             question.views= 1 
             question.save()
-            print "question"
-            print question.id
+           
             # Sending email when a new question is asked
             subject = 'New Forum Question'
             message = """
@@ -280,21 +279,20 @@ def new_question(request):
             
             return HttpResponseRedirect('/')
     else:
-        #fix dirty code
+       
         category = request.GET.get('category')
         form = NewQuestionForm(category=category)
         context['category'] = category
     
     context['form'] = form
-    print form.errors
+   
     context.update(csrf(request))
     return render(request, 'website/templates/new-question.html', context)
 
 # Notification Section
 @login_required
 def user_questions(request, user_id):
-    print "user_id"
-    print user_id
+    
     marker = 0
     if 'marker' in request.GET:
         marker = int(request.GET['marker'])
@@ -309,8 +307,7 @@ def user_questions(request, user_id):
             'total': total,
             'marker': marker
         }
-        print "total"
-        print total
+       
         return render(request, 'website/templates/user-questions.html', context)
     return HttpResponse("go away")
 
