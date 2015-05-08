@@ -251,7 +251,8 @@ def new_question(request):
             question.body = cleaned_data['body'].encode('unicode_escape')
             question.views= 1 
             question.save()
-            
+            print "question"
+            print question.id
             # Sending email when a new question is asked
             subject = 'New Forum Question'
             message = """
@@ -271,6 +272,8 @@ def new_question(request):
                 ['team@fossee.in'],
                 headers={"Content-type":"text/html;charset=iso-8859-1"}
             )
+            print message
+            print "****************"
             email.attach_alternative(message, "text/html")
             email.send(fail_silently=True)
             # End of email send

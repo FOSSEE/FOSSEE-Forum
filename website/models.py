@@ -3,7 +3,7 @@ from django.db import models
 from django.contrib.auth.models import User
 
 from django.contrib.auth import get_user_model
-User = get_user_model()
+
 
 class FossCategory(models.Model):
     name = models.CharField(max_length=100)
@@ -85,3 +85,13 @@ class Notification(models.Model):
     def poster(self):
         user = User.objects.get(id=self.pid)
         return user.username
+        
+class Profile(models.Model):
+    user = models.ForeignKey(User)
+    confirmation_code = models.CharField(max_length=255)
+    phone = models.CharField(max_length=20, null=True)
+    address = models.TextField(null=True)
+    created = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        app_label = 'website'

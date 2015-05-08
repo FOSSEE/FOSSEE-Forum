@@ -20,4 +20,7 @@ urlpatterns = patterns('',
     url(r'^accounts/logout/', 'forums.views.user_logout', name='user_logout'),
     url(r'^accounts/register/', 'forums.views.account_register', name='user_register'),
     url(r'^migrate', 'migrate_spoken.views.chenage_drupal_userid_spoken', name='chenage_drupal_userid_spoken'),
+    url(r"^accounts/confirm/(?P<confirmation_code>\w+)/(?P<username>[\w. @-]+)/$", 'forums.views.confirm', name='confirm'),
+    url(r"^accounts/profile/(?P<username>[\w. @-]+)/$", 'forums.views.account_profile', name='profile'),
+    url(r"^accounts/view-profile/(?P<username>[\w. @-]+)/$", 'forums.views.account_view_profile', name='view_profile'),
 )

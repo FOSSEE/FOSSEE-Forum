@@ -11,7 +11,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.validators import MinLengthValidator, MinValueValidator, \
 RegexValidator, URLValidator
 from django.template.defaultfilters import filesizeformat
-
+from website.models import Profile
 
 
 class UserLoginForm(forms.Form):
@@ -35,6 +35,33 @@ class UserLoginForm(forms.Form):
         cleaned_data['user'] = user
         return cleaned_data
         
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        exclude = ['user', 'confirmation_code']
+
+    # def clean_picture(self):
+    #    if 'picture' in self.cleaned_data and not \
+    #        self.cleaned_data['picture']:
+    #         raise forms.ValidationError("Profile picture required!")
+
+    first_name = forms.CharField()
+    last_name = forms.CharField()
+    
+
+
+    def __init__(self, user, *args, **kwargs):
+        initial = ''
+        if 'instance' in kwargs:
+            initial = kwargs["instance"]
+        if 'user' in kwargs:
+            user = kwargs["user"]
+            del kwargs["user"]
+            
+        super(ProfileForm, self).__init__(*args, **kwargs)
+        self.fields['first_name'].initial = user.first_name
+        self.fields['last_name'].initial = user.last_name
+          
      
 class RegisterForm(forms.Form):
 	username = forms.CharField(
