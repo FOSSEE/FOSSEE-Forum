@@ -224,6 +224,7 @@ $(document).ready(function() {
     
     $comment_edit.click(function(e) {
         var target = $(this).data("target");
+        
         commentNicEditor.addInstance(target);
         $(this).parents("div.comment").prepend($commentPanelWrapper);
         $commentPanelWrapper.show();
@@ -277,6 +278,7 @@ $(document).ready(function() {
         
         var target = $(this).data("target");
         $("#"+target).show();
+        
         nics[target] = new nicEditor({
             buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link'],
             iconsPath: "/static/website/js/nicEditorIcons.gif",
@@ -290,6 +292,7 @@ $(document).ready(function() {
         $(this).siblings(".add-comment").show();
         
         var target = $(this).data("target");
+        
         nics[target].removeInstance(target);
         nics[target] = null;
         $("#"+target).hide();
@@ -298,6 +301,7 @@ $(document).ready(function() {
 
     $post_comment.click(function(e) {
         var target = $(this).data("target");
+        
         var answer_id = $(this).data("aid");
         var form = $(this).data("form");
         $form = $("#"+form);

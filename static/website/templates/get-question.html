@@ -107,7 +107,7 @@
             <div class="comments pull-right col-lg-11 col-md-11 col-sm-11 col-xs-11">
                 <!-- displaying comments -->
                 {% for comment in answer.answercomment_set.all %}
-                <div class="comment" id="comment{{ comment.id }}">
+                <div class="comment comment{{ comment.id }}">
                     <div class="body" id="cbody{{ comment.id }}">
                         {{ comment.body|safe }}
                     </div>
@@ -137,25 +137,33 @@
                 
                 <!-- form to add comment -->
                 {% if user.is_authenticated %}
+                 
                 <form id="form{{ answer.id }}" method="post" action="/answer-comment/"> {% csrf_token %}
-                    <input type="hidden" name="answer_id" value="{{answer.id}}">
+                    <input type="hidden" name="answer_id" value="{{ answer.id }}">
                     <textarea name="body" class="new-comment form-control" id="comment{{ answer.id }}" rows="2"></textarea>
                 </form>
+                
+               
                 <a class="add-comment" href="#" data-target="comment{{ answer.id }}">
                     <small>add comment</small>
                 </a>
+              
+                 
                 <a class="post-comment" href="#" data-target="comment{{ answer.id }}" data-aid="{{ answer.id }}" data-form="form{{ answer.id }}">
                     <small>post comment</small>
                 </a>
+                
                 <a class="cancel-comment" href="#" data-target="comment{{ answer.id }}">
                     <small>cancel comment</small>
                 </a>
+               
                 {% else %}
                 <br>
                 <a class="btn btn-xs btn-success vs" href="/accounts/login">
                     Login to add comment
                 </a>
                 {% endif %}
+                 
             </div> <!-- comments -->
         </div> <!-- /.row -->
         <br> <hr>

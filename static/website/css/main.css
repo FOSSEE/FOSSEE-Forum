@@ -232,8 +232,19 @@ table .question a{
 #content .answer {
     position: relative;
     border-bottom: 1px solid #f5f5f5;
-    
+    background: none repeat scroll 0% 0% #F9F4F4;
+    background-color: #F9F6F6;
+    background-image: none;
+    background-repeat: repeat;
+    background-attachment: scroll;
+    background-position: 0% 0%;
+    background-clip: border-box;
+    background-origin: padding-box;
+    background-size: auto auto;
     padding-bottom: 10px;
+    padding-left: 10px;
+    padding-top: 10px;
+    
     margin: 5px 0px;
 }
 #content .answer .body {
@@ -256,7 +267,7 @@ table .question a{
 .comments .add-comment {
     margin: 2px;
     padding: 1px 2px;
-    color: #000000;
+    color: #0000ff;
     background: #f5f5f5;
 }
 .comments .cancel-comment {
