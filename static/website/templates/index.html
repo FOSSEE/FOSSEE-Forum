@@ -22,7 +22,9 @@
                                 {{ category }}
                             </small>
                             {% latest_question category %}
-                            <a class="btn btn-xs btn-block btn-success" href="{% url 'website:new_question' %}?category={{ category|urlencode }}">Ask new question</a>
+                            
+
+                            <a class="btn btn-xs btn-block btn-success" href="{% url 'website:new_question' %}?category={{ category.id|urlencode }}">Ask new question</a>
                         </div>
                     </div>
                 </div>

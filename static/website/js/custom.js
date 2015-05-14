@@ -1,5 +1,6 @@
 $(document).ready(function() {
-    $category = $("#id_category");
+ $("#id_category").val($category); 
+
     $tutorial = $("#id_tutorial");
     $minute_range = $("#id_minute_range");
     $second_range = $("#id_second_range");
@@ -55,7 +56,7 @@ $(document).ready(function() {
     $tutorial.change(function() {
         /* resetting dropdowns */
         reset("minute_range", "second_range");
-        var category = $category.val();
+
         var tutorial = $(this).val();
         if(tutorial == "General") {
             /* disabling all other fields */

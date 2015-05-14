@@ -18,6 +18,7 @@
         <div class="col-lg-3 col-md-3 col-sm-3">
             {% render_field form.category class+="form-control category"%} 
         </div>
+       
         <!--<div class="col-lg-3 col-md-3 col-sm-3">
             {% if category %}
                 {% render_field form.tutorial class+="form-control" %} 
@@ -79,6 +80,19 @@ bkLib.onDomLoaded(function() {
     }).panelInstance('id_body');
 });
 </script>
+
+<script>
+
+ window.onload = function() {
+    /* your code */
+    var c2= "{{ category }}";
+    
+    $("#id_category").val(c2);   
+
+}
+
+</script>
+
 {% endblock %}
 
 {% block javascript %}
