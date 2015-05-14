@@ -21,7 +21,7 @@ from django.db.models import Count
 
 
 admins = (
-    9, 4376, 4915, 14595, 12329, 22467, 5518, 30705
+   9, 4376, 4915, 14595, 12329, 22467, 5518, 30705
 )
 categories = FossCategory.objects.order_by('name')
 
@@ -497,10 +497,14 @@ def ajax_notification_remove(request):
 def ajax_keyword_search(request):
     if request.method == "POST":
         key = request.POST['key']
-        questions = Question.objects.filter(title__icontains=key)
+        
+        questions = Question.objects.filter(title__contains=key)
+        
         context = {
             'questions': questions
         }
+     
+        
         return render(request, 'website/templates/ajax-keyword-search.html', context)
 
 @csrf_exempt
