@@ -18,7 +18,7 @@
         <div class="col-lg-3 col-md-3 col-sm-3">
             {% render_field form.category class+="form-control category"%} 
         </div>
-       
+
         <!--<div class="col-lg-3 col-md-3 col-sm-3">
             {% if category %}
                 {% render_field form.tutorial class+="form-control" %} 
@@ -86,8 +86,10 @@ bkLib.onDomLoaded(function() {
  window.onload = function() {
     /* your code */
     var c2= "{{ category }}";
-    
-    $("#id_category").val(c2);   
+    if(c2 != "None"){
+     $("#id_category").val(c2);   
+    }
+
 
 }
 
