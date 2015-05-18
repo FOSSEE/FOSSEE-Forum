@@ -1,5 +1,4 @@
 import re
-
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404,render_to_response
 from django.core.context_processors import csrf
@@ -213,6 +212,7 @@ def answer_comment(request):
 
 
 def filter(request,  category=None, tutorial=None, minute_range=None, second_range=None):
+    dict_context = {}
     context = {
         'category': category,
         'tutorial': tutorial,
@@ -231,9 +231,15 @@ def filter(request,  category=None, tutorial=None, minute_range=None, second_ran
 
     if 'qid' in request.GET:
         context['qid']  = int(request.GET['qid'])
-
-    context['questions'] = questions
-    return render(request, 'website/templates/filter.html', context)
+     
+    categories = FossCategory.objects.filter(name=category)
+        
+    dict_context = {
+			'questions':questions,
+			'categories': categories
+		   }
+		
+    return render(request, 'website/templates/filter.html',  dict_context)
 
 @login_required
 def new_question(request):
@@ -246,13 +252,12 @@ def new_question(request):
             question = Question()
             question.user = request.user
             question.category = cleaned_data['category']
-            
             question.title = cleaned_data['title']
             question.body = cleaned_data['body'].encode('unicode_escape')
             question.views= 1 
             question.save()
            
-            # Sending email when a new question is asked
+            #Sending email when a new question is asked
             subject = 'New Forum Question'
             message = """
                 The following new question has been posted in the FOSSEE Forum: <br>
@@ -271,11 +276,9 @@ def new_question(request):
                 ['team@fossee.in'],
                 headers={"Content-type":"text/html;charset=iso-8859-1"}
             )
-            print message
-            print "****************"
+           
             email.attach_alternative(message, "text/html")
             email.send(fail_silently=True)
-            # End of email send
             
             return HttpResponseRedirect('/')
     else:
@@ -341,7 +344,7 @@ def user_notifications(request, user_id):
         context = {
             'notifications': notifications
         }
-        print notifications
+        
         return render(request, 'website/templates/notifications.html', context)
     return HttpResponse("go away ...")
 

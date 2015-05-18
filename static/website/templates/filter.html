@@ -5,7 +5,11 @@
 {% if questions %}
 <h5>
     These are the similar questions in:
-    {% if category %}
+    
+    
+    
+     {% for category in categories %}
+     {% if category %}
         {{ category }}
     {% endif %}
     {% if tutorial %}
@@ -20,7 +24,8 @@
        <b> &gt; </b>
        {{ second_range }} sec
     {% endif %}
-    <a class="btn btn-xs btn-success pull-right" href="{% url 'website:new_question' %}?category={{ category|urlencode }}">Ask a new question.</a>
+    <a class="btn btn-xs btn-success pull-right" href="{% url 'website:new_question' %}?category={{ category.id |urlencode }}">Ask a new question.</a>
+     {% endfor %}
 </h5>
 <br>
 <div class="clearfix"></div>
