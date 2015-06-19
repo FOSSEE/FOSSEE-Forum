@@ -9,17 +9,47 @@
 {% endblock %}
 
 {% block content %}
+ 
 <span class="saving hideme">saving . . .</span>
 <span class="saved hideme">saved</span>
 
 <div class="row">
+ 
+        
+                        
     <div class="question-wrapper col-lg-12 col-md-12 col-sm-12 col-xs-12">
     <div class="question {% if user|can_edit:question %}editable{% endif %}">
+     <!-- VOTE CELL -->
+ 		
+                
+               
+                   <div class="votecell" style="padding-top: 0.0cm;">
+          		<div class="vote">
+                            {% ifequal thisUserUpvote 0 %}
+                                <img src="{% static 'website/images/up1-off.png' %}" class="vote-up" title="This question shows research effort; it is useful and clear"/>
+                            {% else %}
+                                <img src="{% static 'website/images/up1-on.png' %}" class="vote-up selected" title="This question shows research effort; it is useful and clear"/>
+                            {% endifequal %}
+
+                            <span class="vote-count-post" id="show_vote_count">
+                                {{ net_count }}
+                            </span>
+
+                            {% ifequal thisUserDownvote 0 %}
+                                <img src="{% static 'website/images/down1-off.png' %}" class="vote-down" title="This question does not show any research effort; it is not useful and unclear"/>
+                            {% else %}
+                                <img src="{% static 'website/images/down1-on.png' %}" class="vote-down selected" title="This question does not show any research effort; it is not useful and unclear"/>
+                            {% endifequal %}
+                        </div>
+                       
+                  </div>
         <div class="title {% if user|can_edit:question %}title-editable{% endif %}">
            {{ question.title }}
         </div>
         
         <div id="title-edit" class="hideme">
+        
+            
             <h5>Title</h5>
             <input class="form-control" type="text">
             <h5>Question</h5>
@@ -62,9 +92,12 @@
                 {{ question.user }}
             </span>
         </span>
+       
     </div> <!-- /.question -->
     </div>
+     
 </div> <!-- /.row -->
+
 
 <h4><u>Answers:</u></h4>
 <div id="answerPanelWrapper" style="display:none;">
@@ -207,80 +240,7 @@
           <div class="modal-body">
             
             <h5>The Current question is under:</h5>
-            {{ question.category }} <!--
-           
-            <h5>Move the question to:</h5>
-            <div class="row">
-                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-                    <select id="id_category" class="form-control">
-                        <option value="Advanced-C++">Advanced-C++</option>
-                        <option value="BASH">BASH</option>
-                        <option value="Blender">Blender</option>
-                        <option value="C-and-C++">C-and-C++</option>
-                        <option value="CellDesigner">CellDesigner</option>
-                        <option value="Digital-Divide">Digital-Divide</option>
-                        <option value="Drupal">Drupal</option>
-                        <option value="Firefox">Firefox</option>
-                        <option value="GChemPaint">GChemPaint</option>
-                        <option value="Geogebra">Geogebra</option>
-                        <option value="GeoGebra-for-Engineering-drawing">GeoGebra-for-Engineering-drawing</option>
-                        <option value="GIMP">GIMP</option>
-                        <option value="GNS3">GNS3</option>
-                        <option value="GSchem">GSchem</option>
-                        <option value="Inkscape">Inkscape</option>
-                        <option value="Java">Java</option>
-                        <option value="Java-Business-Application">Java-Business-Application</option>
-                        <option value="KiCad">KiCad</option>
-                        <option value="KTouch">KTouch</option>
-                        <option value="KTurtle">KTurtle</option>
-                        <option value="LaTeX">LaTeX</option>
-                        <option value="LibreOffice-Suite-Base">LibreOffice-Suite-Base</option>
-                        <option value="LibreOffice-Suite-Calc">LibreOffice-Suite-Calc</option>
-                        <option value="LibreOffice-Suite-Draw">LibreOffice-Suite-Draw</option>
-                        <option value="LibreOffice-Suite-Impress">LibreOffice-Suite-Impress</option>
-                        <option value="LibreOffice-Suite-Math">LibreOffice-Suite-Math</option>
-                        <option value="LibreOffice-Suite-Writer">LibreOffice-Suite-Writer</option>
-                        <option value="Linux">Linux</option>
-                        <option value="Netbeans">Netbeans</option>
-                        <option value="Ngspice">Ngspice</option>
-                        <option value="OpenFOAM">OpenFOAM</option>
-                        <option value="Orca">Orca</option>
-                        <option value="Oscad">Oscad</option>
-                        <option value="PERL">PERL</option>
-                        <option value="PHP-and-MySQL">PHP-and-MySQL</option>
-                        <option value="Python">Python</option>
-                        <option value="Python-Old-Version">Python-Old-Version</option>
-                        <option value="QCad">QCad</option>
-                        <option value="R">R</option>
-                        <option value="Ruby">Ruby</option>
-                        <option value="Scilab">Scilab</option>
-                        <option value="Selenium">Selenium</option>
-                        <option value="Single-Board-Heater-System">Single-Board-Heater-System</option>
-                        <option value="Spoken-Tutorial-Technology">Spoken-Tutorial-Technology</option>
-                        <option value="Step">Step</option>
-                        <option value="Thunderbird">Thunderbird</option>
-                        <option value="Tux-Typing">Tux-Typing</option>
-                        <option value="What-is-Spoken-Tutorial">What-is-Spoken-Tutorial</option>
-                        <option value="Xfig">Xfig</option>
-                        <option value="General">General FOSS</option>
-                    </select>
-                </div>
-                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-                    <select id="id_tutorial" class="form-control" disabled>
-                        <option value="None">Select a Tutorial</option>
-                    </select>
-                </div>
-                <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
-                    <select id="id_minute_range" class="form-control" disabled>
-                        <option value="None">min</option>
-                    </select>
-                </div>
-                <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
-                    <select id="id_second_range" class="form-control" disabled>
-                        <option value="None">sec</option>
-                    </select>
-                </div>
-            </div> <!-- /.row -->
+            {{ question.category }}
             <hr>
             <div class="pull-right">
                 <a id="question-details-ok" class="btn btn-sm btn-success hideme" data-qid={{ question.id }} href="#">Ok</a>
@@ -291,8 +251,14 @@
         </div><!-- /.modal-content -->
       </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
+<!-- AJAX SCRIPT -->
 
-<script src="{% static 'website/js/nicEdit.js' %}" type="text/javascript"></script>
+   
+
+{% endblock %}
+
+{% block javascript %}
+    <script src="{% static 'website/js/nicEdit.js' %}" type="text/javascript"></script>
 <script type="text/javascript">
     bkLib.onDomLoaded(function() {
         new nicEditor({
@@ -301,34 +267,82 @@
         }).panelInstance('id_body');
     });
 </script>
-{% endblock %}
+    <!-- <script src="{% static 'website/js/thread-user.js' %}"></script>
+    <script src="{% static 'website/js/custom.js' %}"></script> -->
+    <script type="text/javascript">
 
-{% block javascript %}
-    <script src="{% static 'website/js/thread-user.js' %}"></script>
-    <script src="{% static 'website/js/custom.js' %}"></script>
-    <script>
         $(document).ready(function() {
-            $vote = $(".vote");
-            
-            $vote.click(function() {
-                if($(this).hasClass("upvote")) {
-                    /* handle upvote click event */
-                    if($(this).hasClass("voted")) {
-                        $(this).removeClass("voted");
-                    } else {
-                        $(this).addClass("voted");
-                        $(this).siblings(".downvote").removeClass("voted");
-                    }
-                } else {
-                    /* handle downvote click event */
-                    if($(this).hasClass("voted")) {
-                        $(this).removeClass("voted");
-                    } else {
-                        $(this).addClass("voted");
-                        $(this).siblings(".upvote").removeClass("voted");
-                    }
-                }
-            });
+	 $.ajaxSetup({
+            data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
         });
+
+        $('div.vote img.vote-up').click(function() {
+         
+            
+	    
+            var id = {{ question.pk }};
+            var vote_type = 'up';
+		
+            /* USER HAS ALREADY VOTED */
+
+            if ($(this).hasClass('selected')) {
+                var vote_action = 'recall-vote'
+
+                $.post('/vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
+
+                    $('img.vote-up').removeAttr('src')
+                        .attr('src', '{% static 'website/images/up1-off.png' %}')
+                        .removeClass('selected');
+                    $('div.vote span.vote-count-post').html(response);
+                });
+            }
+            /* USER WISHES TO VOTE */
+            else {
+                var vote_action = 'vote'
+                $.post('/vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
+
+                    $('img.vote-up').removeAttr('src')
+                        .attr('src', '{% static 'website/images/up1-on.png' %}')
+                        .addClass('selected');
+                    $('div.vote span.vote-count-post').html(response);
+                });
+            }
+        });
+
+        /* DOWNVOTE */
+
+        $('div.vote img.vote-down').click(function() {
+
+            var id = {{ question.pk }};
+            var vote_type = 'down';
+		
+            /* USER HAS ALREADY DOWN-VOTED */
+
+            if ($(this).hasClass('selected')) {
+                var vote_action = 'recall-vote'
+
+                $.post('/vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
+
+                    $('img.vote-down').removeAttr('src')
+                        .attr('src', '{% static 'website/images/down1-off.png' %}')
+                        .removeClass('selected');
+                    $('div.vote span.vote-count-post').html(response);
+                });
+            }
+            /* USER WISHES TO VOTE */
+            else {
+                var vote_action = 'vote'
+                $.post('/vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
+
+                    $('img.vote-down').removeAttr('src')
+                        .attr('src', '{% static 'website/images/down1-on.png' %}')
+                        .addClass('selected');
+                    $('div.vote span.vote-count-post').html(response);
+                });
+            }
+        });
+    });
+
     </script>
+    
 {% endblock %}

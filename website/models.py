@@ -23,13 +23,14 @@ class Issue(models.Model):
 class Question(models.Model):
     user  = models.ForeignKey(User)
     category = models.ForeignKey(FossCategory)
-    #tutorial = models.ForeignKey(Issue)
     title = models.CharField(max_length=200)
     body = models.TextField()
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
     views = models.IntegerField(default=1)
-    # votes = models.IntegerField(default=0)
+    userUpVotes = models.ManyToManyField(User, blank=True, related_name='postUpVotes')
+    userDownVotes = models.ManyToManyField(User, blank=True, related_name='postDownVotes')
+    num_votes = models.IntegerField(default=0)
     def __unicode__(self):
              return '%s' % (self.user)
         
@@ -53,7 +54,10 @@ class Answer(models.Model):
     body = models.TextField()
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
-    # votes = models.IntegerField(default=0)
+    #userUpVotes = models.ManyToManyField(User, blank=True, related_name='postUpVotes')
+    #userDownVotes = models.ManyToManyField(User, blank=True, related_name='postDownVotes')
+    upvotes = models.IntegerField(default=0)
+    num_votes = models.IntegerField(default=0)
 
     def user(self):
         user = User.objects.get(id=self.uid)

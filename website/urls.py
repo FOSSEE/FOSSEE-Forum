@@ -1,4 +1,5 @@
 from django.conf.urls import patterns, include, url
+from website import views
 
 urlpatterns = patterns('',
     url(r'^$', 'website.views.home', name='home'),
@@ -9,6 +10,7 @@ urlpatterns = patterns('',
     url(r'^answer-comment/$', 'website.views.answer_comment', name='answer_comment'),
     url(r'^filter/(?P<category>[^/]+)/$', 'website.views.filter', name='filter'),
     url(r'^filter/(?P<category>[^/]+)/$', 'website.views.filter', name='filter'),
+    
     #url(r'^filter/(?P<category>[^/]+)/(?P<tutorial>[^/]+)/(?P<minute_range>[^/]+)/$', 'website.views.filter', name='filter'),
     #url(r'^filter/(?P<category>[^/]+)/(?P<tutorial>[^/]+)/(?P<minute_range>[^/]+)/(?P<second_range>[^/]+)/$', 'website.views.filter', name='filter'),
     url(r'^new-question/$', 'website.views.new_question', name='new_question'),
@@ -18,7 +20,7 @@ urlpatterns = patterns('',
     url(r'^clear-notifications/$', 'website.views.clear_notifications', name='clear_notifications'),
     url(r'^search/$', 'website.views.search', name='search'),
     url(r'^unanswered-notification/$', 'website.views.unanswered_notification', name='unanswered_notification'),
-
+    url(r'^vote_post/$', 'website.views.vote_post', name='vote_post'),
     # Ajax helpers
     url(r'^ajax-tutorials/$', 'website.views.ajax_tutorials', name='ajax_tutorials'),
     url(r'^ajax-duration/$', 'website.views.ajax_duration', name='ajax_duration'),

@@ -142,6 +142,8 @@ INSTALLED_APPS = (
     'compressor',
     'debug_toolbar',
     'captcha',
+    'googlesearch',
+    'gtm',
     #'migrate_spoken',
 )
 
@@ -177,11 +179,12 @@ LOGGING = {
 TEMPLATE_CONTEXT_PROCESSORS += (
     'django.core.context_processors.request',
     'website.context_processors.admin_processor', 
+    
 )
 
 COMPRESS_ROOT = PROJECT_DIR + "/static/"
-COMPRESS_ENABLED = True 	# disable in production Env
-HTML_MINIFY = True 		# disable in production Env
+COMPRESS_ENABLED = False 	# disable in production Env
+HTML_MINIFY = False 		# disable in production Env
 
 HTML_MINIFY = HTML_MINIFY
 RECAPTCHA_PUBLIC_KEY = '6LemngMTAAAAAAC0Fkv0CQcavkTIIJ3LTDzi9gMq'

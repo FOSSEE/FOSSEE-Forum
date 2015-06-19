@@ -23,4 +23,5 @@ urlpatterns = patterns('',
     url(r"^accounts/confirm/(?P<confirmation_code>\w+)/(?P<username>[\w. @-]+)/$", 'forums.views.confirm', name='confirm'),
     url(r"^accounts/profile/(?P<username>[\w. @-]+)/$", 'forums.views.account_profile', name='profile'),
     url(r"^accounts/view-profile/(?P<username>[\w. @-]+)/$", 'forums.views.account_view_profile', name='view_profile'),
+    url(r'^search/', include('googlesearch.urls')),
 )

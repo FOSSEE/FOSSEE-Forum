@@ -13,3 +13,4 @@ html5lib==1.0b3
 six==1.6.1
 sqlparse==0.1.11
 wsgiref==0.1.2
+django-googlesearch

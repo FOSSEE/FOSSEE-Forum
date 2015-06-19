@@ -248,6 +248,8 @@ table .question a{
     margin: 5px 0px;
 }
 #content .answer .body {
+	 padding-bottom: 10px;
+   ,,
 }
 #content .answer .user {
     padding: 2px 7px;
@@ -401,3 +403,84 @@ table .question a{
     font-size: 22px;
     overflow: hidden;
 }
+
+
+.votes {
+    color: rgb(85, 85, 85);
+      padding-top: 8px;
+      padding-bottom: 8px;
+    text-align: center;
+}
+
+.vote span {
+    display: block;
+    color: rgb(128, 129, 133);
+    font-weight: normal;
+}
+
+.vote-count-post {
+    display: block;
+    font-size: 17px;
+ 
+}
+
+.votecell {
+   	background:#ffffff;
+	
+	float:left;
+	width:60px;
+	height:100px;
+	margin-right:5px;
+	padding:0;
+	border-radius: 3px;
+}
+
+.post-text {
+    word-wrap: break-word;
+    width: 660px;
+    font-size: 107%;
+    margin-bottom: 5px;
+    margin-right: 5px;
+        margin-right-value: 5px;
+        margin-right-ltr-source: physical;
+        margin-right-rtl-source: physical;
+    line-height: 130%;
+}
+
+.post-taglist {
+    margin-bottom: 10px;
+    clear: both;
+}
+
+.vote {
+    text-align: center;
+}
+
+
+.vote-up-off, .vote-up-on, .vote-down-off, .vote-down-on, .star-on, .star-off, .comment-up-off, .comment-up-on, .comment-flag, .flag-off, .vote-accepted-off, .vote-accepted-on {
+    text-indent: -9999em;
+    font-size: 1px;
+}
+
+.vote-up-off, .vote-up-on, .vote-down-off, .vote-down-on, .star-on, .star-off {
+    background-position: 0px -265px;
+    display: block;
+    margin: 0px auto;
+        margin-top: 0px;
+        margin-right-value: auto;
+        margin-bottom: 0px;
+        margin-left-value: auto;
+        margin-left-ltr-source: physical;
+        margin-left-rtl-source: physical;
+        margin-right-ltr-source: physical;
+        margin-right-rtl-source: physical;
+    width: 41px;
+    height: 25px;
+}
+
+
+.space {
+    padding-top: 20px;
+}
+
+
