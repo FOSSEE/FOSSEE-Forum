@@ -15,24 +15,33 @@ from website.models import Profile
 
 
 class UserLoginForm(forms.Form):
+
     username = forms.CharField()
     password = forms.CharField(widget=forms.PasswordInput())
+    db = forms.ChoiceField(choices=[('forum', 'forum'), ('scilab', 'scilab'), ('client2', 'client2')])
 
     def clean(self):
         cleaned_data = self.cleaned_data
         username = cleaned_data.get('username')
-        print username
         password = cleaned_data.get('password')
-        print password
+        db = cleaned_data.get('db')
+        
         if username is None or password is None:
             raise forms.ValidationError("Invalid username or password")
-        user = authenticate(username=username, password=password)
-        
+
+
+        if db == 'forum':
+            user = authenticate(username=username, password=password)
+            print "default" , "*******************"
+        else:
+            user = authenticate(username=username, password=password, db=db)
+            print db , "*******************"
         if not user:
             raise forms.ValidationError("Invalid username or password")
         if not user.is_active:
             raise forms.ValidationError("User is blocked")
         cleaned_data['user'] = user
+        
         return cleaned_data
         
 class ProfileForm(forms.ModelForm):
@@ -95,3 +104,12 @@ class RegisterForm(forms.Form):
 		required=True
 	)
 	captcha = ReCaptchaField()
+	
+	
+	def clean_username(self):
+		try:
+			User.objects.get(username=self.cleaned_data['username'])
+			raise forms.ValidationError(_("This username has already existed."))
+		except User.DoesNotExist:
+			pass
+		return username

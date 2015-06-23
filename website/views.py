@@ -36,7 +36,9 @@ def questions(request):
     questions = Question.objects.all().order_by('date_created').reverse()
     paginator = Paginator(questions, 20)
     page = request.GET.get('page')
-
+    for q in questions:
+    	print q.title
+    	print q.num_votes
     try:
         questions = paginator.page(page)
     except PageNotAnInteger:
@@ -46,6 +48,7 @@ def questions(request):
     context = {
         'questions': questions
     }
+    
     return render(request, 'website/templates/questions.html', context)
 
 def get_question(request, question_id=None, pretty_url=None):
@@ -59,19 +62,21 @@ def get_question(request, question_id=None, pretty_url=None):
     thisuserdownvote = question.userDownVotes.filter(id=request.user.id).count()
 	
     net_count = question.userUpVotes.count() - question.userDownVotes.count()
+     
     context = {
         'question': question,
         'answers': answers,
         'form': form,
         'thisUserUpvote': thisuserupvote,
         'thisUserDownvote': thisuserdownvote,
-        'net_count': net_count
+        'net_count': net_count,
+        'num_votes':question.num_votes
     }
-   
     context.update(csrf(request))
     # updating views count
     question.views += 1
     question.save()
+   
     return render(request, 'website/templates/get-question.html', context)
 
 @login_required
@@ -343,7 +348,7 @@ def vote_post(request):
     num_votes = cur_post.userUpVotes.count() - cur_post.userDownVotes.count()
     cur_post.num_votes = num_votes
     cur_post.save()
-
+   
     print "Num Votes: %s" % num_votes
 
     return HttpResponse(num_votes)

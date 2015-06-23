@@ -49,7 +49,6 @@ def account_register(request):
         }
         context.update(csrf(request))
         return render_to_response('forums/templates/user-register.html', context)
-        
 def confirm(request, confirmation_code, username):
     try:
         user = User.objects.get(username=username)
@@ -60,11 +59,11 @@ def confirm(request, confirmation_code, username):
             user.save()
             user.backend='django.contrib.auth.backends.ModelBackend' 
             login(request,user)
-            print "In if"
+           
             messages.success(request, "Your account has been activated!. Please update your profile to complete your registration")
             return HttpResponseRedirect('/accounts/profile/'+user.username)
         else:
-            print "In else"
+            
             messages.success(request, "Something went wrong!. Please try again!")
             return HttpResponseRedirect('/')
     except Exception, e:

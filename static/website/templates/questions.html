@@ -13,6 +13,17 @@
    	<th> Question <span class="glyphicon glyphicon-link"></span></th>
         <th> Date</th>
         <th> Views</th>
+         <div class="viewcount" id ="viewcount">
+				   {% if num_votes == 0 %}
+                                   vote
+				   {% elif num_votes == 1 %}
+				   vote
+	                           {% elif num_votes == -1 %}
+                                   vote
+				   {% else %}
+				   votes
+				   {% endif %}
+                           </div>
         <th> Answers</th>
         <th> User</th>
         {% for question in questions %}
@@ -49,7 +60,7 @@
             <td>
                 {{ question.answer_set.count }}
             </td>
-            
+            <td>
            
                 <span class="title" data-toggle="tooltip" data-placement="top" title="{{ question.user }}">
                     {{ question.user|truncatechars:10 }}
