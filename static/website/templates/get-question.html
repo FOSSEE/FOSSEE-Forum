@@ -109,11 +109,13 @@
     <div id="commentNicPanel" style="display:none;"></div>
 </div>
 
+
 {% for answer in answers %}
+
 <div class="row">
     <div class="answer-wrapper col-lg-12 col-md-12 col-sm-12 col-xs-12">
         <div class="answer {% if user|can_edit:answer  %}editable{% endif %}" id="answer{{answer.id}}">
-            
+        	
             <div class="body" id="body{{ answer.id }}">
                 {{ answer.body|safe }}
             </div>
@@ -268,15 +270,16 @@
         }).panelInstance('id_body');
     });
 </script>
-    <!-- <script src="{% static 'website/js/thread-user.js' %}"></script>
-    <script src="{% static 'website/js/custom.js' %}"></script> -->
+   <script src="{% static 'website/js/thread-user.js' %}"></script>
     <script type="text/javascript">
 
         $(document).ready(function() {
+        
 	 $.ajaxSetup({
             data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
         });
 
+	
         $('div.vote img.vote-up').click(function() {
          
             
@@ -342,8 +345,12 @@
                 });
             }
         });
-    });
-
-    </script>
+        
+         
+        });
+ 
+  </script>
+   
     
+    <script src="{% static 'website/js/custom.js' %}"></script>
 {% endblock %}

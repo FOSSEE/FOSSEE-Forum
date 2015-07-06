@@ -456,6 +456,10 @@ table .question a{
     text-align: center;
 }
 
+.ans-vote {
+    text-align: center;
+}
+
 
 .vote-up-off, .vote-up-on, .vote-down-off, .vote-down-on, .star-on, .star-off, .comment-up-off, .comment-up-on, .comment-flag, .flag-off, .vote-accepted-off, .vote-accepted-on {
     text-indent: -9999em;

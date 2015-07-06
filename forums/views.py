@@ -19,8 +19,7 @@ def account_register(request):
     print request.method
     if request.method == 'POST':
         form = RegisterForm(request.POST)
-        print form
-        print form.is_valid
+        
         if form.is_valid():
         
             username = request.POST['username']
@@ -49,6 +48,7 @@ def account_register(request):
         }
         context.update(csrf(request))
         return render_to_response('forums/templates/user-register.html', context)
+        
 def confirm(request, confirmation_code, username):
     try:
         user = User.objects.get(username=username)

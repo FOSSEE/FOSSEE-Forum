@@ -54,8 +54,8 @@ class Answer(models.Model):
     body = models.TextField()
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
-    #userUpVotes = models.ManyToManyField(User, blank=True, related_name='postUpVotes')
-    #userDownVotes = models.ManyToManyField(User, blank=True, related_name='postDownVotes')
+    userUpVotes = models.ManyToManyField(User, blank=True, related_name='postAnswerUpVotes')
+    userDownVotes = models.ManyToManyField(User, blank=True, related_name='postAnswerDownVotes')
     upvotes = models.IntegerField(default=0)
     num_votes = models.IntegerField(default=0)
 

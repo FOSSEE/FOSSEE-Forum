@@ -270,7 +270,6 @@ $(document).ready(function() {
     $add_comment = $(".add-comment");
     $cancel_commment = $(".cancel-comment");
     $post_comment = $(".post-comment");
-
     $add_comment.click(function(e) {
         $(this).hide();
         $(this).siblings(".cancel-comment").show();

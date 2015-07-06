@@ -21,6 +21,8 @@ urlpatterns = patterns('',
     url(r'^search/$', 'website.views.search', name='search'),
     url(r'^unanswered-notification/$', 'website.views.unanswered_notification', name='unanswered_notification'),
     url(r'^vote_post/$', 'website.views.vote_post', name='vote_post'),
+    url(r'^ans_vote_post/$', 'website.views.ans_vote_post', name='ans_vote_post'),
+    
     # Ajax helpers
     url(r'^ajax-tutorials/$', 'website.views.ajax_tutorials', name='ajax_tutorials'),
     url(r'^ajax-duration/$', 'website.views.ajax_duration', name='ajax_duration'),
