@@ -100,6 +100,49 @@ Usage
     python manage.py runserver
 
 
+**Not for first time users and only for developers**
+Migration (How to add a new model field to an existing table using South without having to drop a table)
+--------------------------------------------------------------------------------------------------------
+
+- Enter into virual environment
+
+- install south ::
+     
+    pip install south
+
+- Add south to INSTALLED_APPS in settings.py
+
+- Change the directory to the `spoken-tutorial-forums/` project using the command ::
+
+    cd /path/to/spoken-tutorial-forums
+
+- Run below command to create south_migrationhistory table ::
+
+    python manage.py syncdb
+
+- Create the initial migration with South ::
+   
+    python manage.py schemamigration --initial website
+
+- Apply it as a fake migration ::
+
+    python manage.py migrate website --fake
+
+- Make the change to the website model, in this case ::
+    
+    git pull
+
+- Create a migration for your new change ::
+
+    python manage.py schemamigration --auto website
+
+- Apply new migration ::
+
+    python manage.py migrate website
+
+    
+
+
 Contributing
 ------------
 

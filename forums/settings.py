@@ -142,8 +142,8 @@ INSTALLED_APPS = (
     'compressor',
     'debug_toolbar',
     'captcha',
-    'googlesearch',
-    'gtm',
+    'south'
+    
     #'migrate_spoken',
 )
 
