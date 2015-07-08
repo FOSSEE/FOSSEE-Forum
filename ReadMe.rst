@@ -102,7 +102,7 @@ Usage
 
 **Not for first time users and only for developers**
 Migration (How to add a new model field to an existing table using South without having to drop a table)
---------------------------------------------------------------------------------------------------------
+---------
 
 - Enter into virual environment
 
