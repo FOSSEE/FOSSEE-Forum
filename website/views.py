@@ -36,9 +36,7 @@ def questions(request):
     questions = Question.objects.all().order_by('date_created').reverse()
     paginator = Paginator(questions, 20)
     page = request.GET.get('page')
-    for q in questions:
-    	print q.title
-    	print q.num_votes
+    
     try:
         questions = paginator.page(page)
     except PageNotAnInteger:
@@ -62,14 +60,26 @@ def get_question(request, question_id=None, pretty_url=None):
     thisuserdownvote = question.userDownVotes.filter(id=request.user.id).count()
     net_count = question.userUpVotes.count() - question.userDownVotes.count()
     
+    ans_votes = []
+
+    for vote in answers:
+    	#print "ansvote "+str(vote.userUpVotes.filter(id=request.user.id).count())
+    	#print "ansvote "+str(vote.userDownVotes.filter(id=request.user.id).count())
+    	net_ans_count  = vote.userUpVotes.count() - vote.userDownVotes.count()
+    	ans_votes.append([vote.userUpVotes.filter(id=request.user.id).count(),vote.userDownVotes.filter(id=request.user.id).count(),net_ans_count])
+    #for (f,b) in zip(foo, bar):
+    #print "f: ", f ,"; b: ", b
+    main_list = zip(answers,ans_votes)
+    print "ans : "+str(ans_votes)
     context = {
         'question': question,
-        'answers': answers,
+        'main_list': main_list,
         'form': form,
         'thisUserUpvote': thisuserupvote,
         'thisUserDownvote': thisuserdownvote,
         'net_count': net_count,
-        'num_votes':question.num_votes
+        'num_votes':question.num_votes,
+        'ans_votes':ans_votes
     }
     context.update(csrf(request))
     # updating views count
@@ -356,6 +366,7 @@ def ans_vote_post(request):
 
     
     post_id = int(request.POST.get('id'))
+    print post_id
     
     vote_type = request.POST.get('type')
     vote_action = request.POST.get('action')
