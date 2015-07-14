@@ -31,8 +31,12 @@ class Question(models.Model):
     userUpVotes = models.ManyToManyField(User, blank=True, related_name='postUpVotes')
     userDownVotes = models.ManyToManyField(User, blank=True, related_name='postDownVotes')
     num_votes = models.IntegerField(default=0)
+
+
     def __unicode__(self):
              return '%s' % (self.user)
+	
+		
         
     class Meta:
         get_latest_by = "date_created"
