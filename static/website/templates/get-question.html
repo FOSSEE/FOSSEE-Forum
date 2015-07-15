@@ -115,9 +115,7 @@
 
 <div class="row">
     <div class="answer-wrapper col-lg-12 col-md-12 col-sm-12 col-xs-12">
-        <div class="answer {% if user|can_edit:answer  %}editable{% endif %}" id="answer{{answer.id}}">
-        		
-           		<div class="votecell" style="padding-top: 0.0cm;">
+<div class="votecell" style="padding-top: 0.0cm;">
            		
           		<div class="ans-vote" >
           		
@@ -137,6 +135,9 @@
                             {% endifequal %}
                         </div>
                         </div>
+        <div class="answer {% if user|can_edit:answer  %}editable{% endif %}" id="answer{{answer.id}}" style="margin-left: 63px;">
+        		
+           		
                        
                   
             <div class="body" id="body{{ answer.id }}">
