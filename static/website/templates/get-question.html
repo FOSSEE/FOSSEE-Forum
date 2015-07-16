@@ -120,18 +120,18 @@
           		<div class="ans-vote" >
           		
                             {% ifequal ans_vote.0 0 %}
-                                <img src="{% static 'website/images/up1-off.png' %}" class="ans-vote-up"  id="{{ answer.id }}" title="This question shows research effort; it is useful and clear"/>
+                                <img src="{% static 'website/images/up1-off.png' %}" class="ans-vote-up"  id="up{{ answer.id }}" title="This question shows research effort; it is useful and clear"/>
                             {% else %}
-                                <img src="{% static 'website/images/up1-on.png' %}" class="ans-vote-up selected" id="{{ answer.id }}" title="This question shows research effort; it is useful and clear"/>
+                                <img src="{% static 'website/images/up1-on.png' %}" class="ans-vote-up selected" id="up{{ answer.id }}" title="This question shows research effort; it is useful and clear"/>
                             {% endifequal %}
 			    
                             <span class="vote-count-post" id="span{{ answer.id }}" >
                                 {{ ans_vote.2 }}
                             </span>
                             {% ifequal ans_vote.1 0 %}
-                                <img type="image" src="{% static 'website/images/down1-off.png' %}" class="ans-vote-down"  id="{{ answer.id }}" title="This question does not show any research effort; it is not useful and unclear" />
+                                <img type="image" src="{% static 'website/images/down1-off.png' %}" class="ans-vote-down"  id="down{{ answer.id }}" title="This question does not show any research effort; it is not useful and unclear" />
                             {% else %}
-                                <img src="{% static 'website/images/down1-on.png' %}" class="ans-vote-down selected" id="{{ answer.id }}" title="This question does not show any research effort; it is not useful and unclear"/>
+                                <img src="{% static 'website/images/down1-on.png' %}" class="ans-vote-down selected" id="down{{ answer.id }}" title="This question does not show any research effort; it is not useful and unclear"/>
                             {% endifequal %}
                         </div>
                         </div>
@@ -373,21 +373,24 @@
        /* UP VOTE */
        $('div.ans-vote img.ans-vote-up').click(function(event) {
        
-            var id = event.target.id;
-		   
+            var up_id = event.target.id;
             var vote_type = 'up';
+            
+            var id = up_id.replace('up','');
            
-            if ($('img#'+id).hasClass('selected')) {
+            if ($('img#'+up_id).hasClass('selected')) {
                 var vote_action = 'recall-vote'
 
                 $.post('/ans_vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
 
-                    $('img#'+id).removeAttr('src')
+                    $('img#'+up_id).removeAttr('src')
                         .attr('src', '{% static 'website/images/up1-off.png' %}')
                         .removeClass('selected');
                    
                     $('span#span'+id).html(response);
+                   
                 });
+                
             }
             
             /* USER WISHES TO VOTE */
@@ -396,11 +399,12 @@
                  var vote_action = 'vote'
                  $.post('/ans_vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
 
-                    $('img#'+id).removeAttr('src')
+                    $('img#'+up_id).removeAttr('src')
                         .attr('src', '{% static 'website/images/up1-on.png' %}')
                         .addClass('selected');
-                     
+                   
                     $('span#span'+id).html(response);
+                    
                 });
             }
           
@@ -410,21 +414,25 @@
 
         $('div.ans-vote img.ans-vote-down').click(function(event) {
 
-            var id = event.target.id;
+            var down_id = event.target.id;
             var vote_type = 'down';
-	    
+            
+            var id = down_id.replace('down','');
+           
+           
             /* USER HAS ALREADY DOWN-VOTED */
 	
-            if ($('div.ans-vote img.ans-vote-down').hasClass('selected')) {
+            if ($('img#'+down_id).hasClass('selected')) {
                 var vote_action = 'recall-vote'
 		
                 $.post('/ans_vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
 		   
-                    $('div.ans-vote img.ans-vote-down').removeAttr('src')
+                    $('img#'+down_id).removeAttr('src')
                         .attr('src', '{% static 'website/images/down1-off.png' %}')
                         .removeClass('selected');
-                   
+                  
                     $('div.ans-vote span#span'+id).html(response);
+                    
                 });
             }
             /* USER WISHES TO VOTE */
@@ -432,14 +440,16 @@
                 var vote_action = 'vote'
                 $.post('/ans_vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
 
-                    $('div.ans-vote img.ans-vote-down').removeAttr('src')
+                    $('img#'+down_id).removeAttr('src')
                         .attr('src', '{% static 'website/images/down1-on.png' %}')
                         .addClass('selected');
-                    
+                   
                     $('div.ans-vote span#span'+id).html(response);
+                    
                 });
             }
         });
+           
      });
  
   </script>
