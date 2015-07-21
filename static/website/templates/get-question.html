@@ -320,6 +320,7 @@
                         .attr('src', '{% static 'website/images/up1-off.png' %}')
                         .removeClass('selected');
                     $('div.vote span.vote-count-post').html(response);
+                    $('img.vote-down').css('pointer-events','all');
                 });
             }
             /* USER WISHES TO VOTE */
@@ -331,6 +332,7 @@
                         .attr('src', '{% static 'website/images/up1-on.png' %}')
                         .addClass('selected');
                     $('div.vote span.vote-count-post').html(response);
+                    $('img.vote-down').css('pointer-events','none');
                 });
             }
         });
@@ -353,6 +355,7 @@
                         .attr('src', '{% static 'website/images/down1-off.png' %}')
                         .removeClass('selected');
                     $('div.vote span.vote-count-post').html(response);
+                    $('img.vote-up').css('pointer-events','all');
                 });
             }
             /* USER WISHES TO VOTE */
@@ -364,6 +367,7 @@
                         .attr('src', '{% static 'website/images/down1-on.png' %}')
                         .addClass('selected');
                     $('div.vote span.vote-count-post').html(response);
+                    $('img.vote-up').css('pointer-events','none');
                 });
             }
         });
@@ -389,6 +393,8 @@
                    
                     $('span#span'+id).html(response);
                    
+                    $('img#down'+id).css('pointer-events','all');
+                   
                 });
                 
             }
@@ -404,6 +410,8 @@
                         .addClass('selected');
                    
                     $('span#span'+id).html(response);
+                    $('img#down'+id).css('pointer-events','none');
+                    
                     
                 });
             }
@@ -432,6 +440,8 @@
                         .removeClass('selected');
                   
                     $('div.ans-vote span#span'+id).html(response);
+                  
+                    $('img#up'+id).css('pointer-events','all')
                     
                 });
             }
@@ -445,12 +455,15 @@
                         .addClass('selected');
                    
                     $('div.ans-vote span#span'+id).html(response);
+                    $('img#up'+id).css('pointer-events','none')
                     
                 });
             }
         });
            
      });
+     
+     
  
   </script>
    
