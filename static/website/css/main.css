@@ -62,7 +62,7 @@ body {
     position: relative;
     max-width: 970px;
     margin:0 auto;
-    padding: 25px 0 15px 0;
+    padding: 1px 0 15px 0;
     background: #ffffff;
 }
 #content-inner {
@@ -97,7 +97,7 @@ body {
 /* } */
 #content .question {
     position: relative;
-    padding: 15px 0 15px 0;
+    padding: 30px 0 15px 0;
     border-bottom: 1px solid #f5f5f5;
 }
 #content .editable {

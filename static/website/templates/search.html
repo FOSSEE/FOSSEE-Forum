@@ -2,6 +2,17 @@
 {% load static %}
 {% block content %}
 
+  <style>
+       .gsc-search-button
+{
+    background-color: #C0C0C0 ;
+    border-radius: 5px;
+
+
+}
+    
+    </style>
+
    <!-- Nav tabs -->
 <ul class="nav nav-tabs">
   <li class="active" ><a href="#search-by-keyword" data-toggle="tab">Search by Keyword</a></li>
@@ -10,6 +21,23 @@
 
 <!-- Tab panes -->
 <div class="tab-content">
+
+ <div style="float:right; margin-right: 50px; width: 400px;">
+       <script>
+  (function() {
+    var cx = '011342992297670206849:dfzecvqmvgc';
+    var gcse = document.createElement('script');
+    gcse.type = 'text/javascript';
+    gcse.async = true;
+    gcse.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') +
+        '//cse.google.com/cse.js?cx=' + cx;
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(gcse, s);
+  })();
+</script>
+<gcse:search></gcse:search>
+    </div>
+
 <br>
     <div class="tab-pane active" id="search-by-keyword">
         <div class="row">
@@ -70,3 +98,4 @@
 {% block javascript %}
     <script src="{% static 'website/js/search.js' %}"></script>
 {% endblock %}
+

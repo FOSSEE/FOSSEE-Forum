@@ -5,8 +5,53 @@
 {% load helpers %}
 
 {% block content %}
+
+<div style="margin-left: 450px;" >
+ <script>
+  (function() {
+    var cx = '011342992297670206849:dfzecvqmvgc';
+    var gcse = document.createElement('script');
+    gcse.type = 'text/javascript';
+    gcse.async = true;
+    gcse.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') +
+        '//cse.google.com/cse.js?cx=' + cx;
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(gcse, s);
+  })();
+</script>
+<gcse:search></gcse:search>
+</div>
+
+<style>
+
+ .gsc-search-button
+	{
+	   
+	border-radius: 5px;
+	border-color: #666;
+
+	}
+
+
+input.gsc-search-button, input.gsc-search-button:hover, input.gsc-search-button:focus {
+    
+    background-image: url("http://www.google.com/uds/css/v2/search_box_icon.png") !important;
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    height: 28px !important;
+    width: 60px
+    
+    filter: none;
+    
+}
+    </style>
+
+
+
     <div id="carousel-container">
+
         <div class="carousel">
+
             {% for category in categories %}
                 <div>
                     <div class="thumbnail">
@@ -31,6 +76,8 @@
             {% endfor %}
         </div> <!-- /.carousel -->
     </div> <!-- /#carousel-container -->
+
+
 
     <div id="filter-container">
         <div class="row">

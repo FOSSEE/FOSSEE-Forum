@@ -1,6 +1,7 @@
 #Custom settings
 from os.path import *
 from config import *
+import os
 from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS
 
 PROJECT_DIR = abspath(dirname(__file__) + '/../')
@@ -144,6 +145,7 @@ INSTALLED_APPS = (
     'captcha',
     'south'
     
+    
     #'migrate_spoken',
 )
 
@@ -181,6 +183,16 @@ TEMPLATE_CONTEXT_PROCESSORS += (
     'website.context_processors.admin_processor', 
     
 )
+
+
+WHOOSH_INDEX = os.path.join(PROJECT_DIR,'whoosh/')
+
+HAYSTACK_CONNECTIONS = {
+	'default':{
+	'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
+	'PATH' : WHOOSH_INDEX,
+	},
+}
 
 COMPRESS_ROOT = PROJECT_DIR + "/static/"
 COMPRESS_ENABLED = True 	# disable in production Env

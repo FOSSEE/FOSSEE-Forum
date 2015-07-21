@@ -47,17 +47,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                                 <img id="logo" src="{% static 'website/images/logo.png' %}">
                                 FOSSEE Forums
                             </a>
+
+
                         </div> <!-- /.navbar-header -->
                         
                         <!-- Collect the nav links, forms, and other content for toggling -->
                         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                             <ul class="nav navbar-nav navbar-right">
-                              <li>
-                                <a href="{% url 'website:search' %}">
-                                    <span class="glyphicon glyphicon-search"></span>
-                                    Search
-                                </a>
-                              </li>
+                             
                               <li>
                                 <a href="{% url 'website:new_question' %}">
                                     <span class="glyphicon glyphicon-pencil"></span> 
@@ -105,9 +102,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                   </div> <!-- /.container -->
                 </nav>
             </div> <!-- /#header-inner -->
+
         </div> <!-- /#header-wrapper -->
+
+
         
-        <div id="content-wrapper">
+        <div id="content-wrapper" >
             <div id="content-inner" class="container">
                 <div id="content" class="col-lg-12 col-md-12 col-sm-12">
                     {% block content %}

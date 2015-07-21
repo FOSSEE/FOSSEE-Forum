@@ -24,5 +24,6 @@ urlpatterns = patterns('',
     url(r"^accounts/profile/(?P<username>[\w. @-]+)/$", 'forums.views.account_profile', name='profile'),
     url(r"^accounts/view-profile/(?P<username>[\w. @-]+)/$", 'forums.views.account_view_profile', name='view_profile'),
    
+   
     
 )
