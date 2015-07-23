@@ -18,7 +18,7 @@
         
                         
     <div class="question-wrapper col-lg-12 col-md-12 col-sm-12 col-xs-12">
-    <div class="question {% if user|can_edit:question %}editable{% endif %}">
+    <div class="question {% if user|can_edit:question %}editable{% endif %}" >
      <!-- VOTE CELL -->
  		
                 
@@ -57,7 +57,7 @@
         </div>
         
         <div id="questionNicPanel"></div>
-        <div id="{% if user|can_edit:question  %}questionInstance{% endif %}" class="body">
+        <div id="{% if user|can_edit:question  %}questionInstance{% endif %}" class="body"  style="margin-left : 60px">
             {{ question.body|safe }}
         </div>
         <br>
@@ -115,7 +115,7 @@
 
 <div class="row">
     <div class="answer-wrapper col-lg-12 col-md-12 col-sm-12 col-xs-12">
-<div class="votecell" style="padding-top: 0.0cm;">
+<div class="votecell" style="padding-top: 9px;">
            		
           		<div class="ans-vote" >
           		
@@ -140,7 +140,7 @@
            		
                        
                   
-            <div class="body" id="body{{ answer.id }}">
+            <div class="body" id="body{{ answer.id }}" style="padding-bottom: 0px">
                 {{ answer.body|safe }}
             </div>
             
@@ -151,7 +151,7 @@
                     </i>
                 </small>
                 
-                <span class="user">
+                <span class="user" style="background-color: #FFFFFF;padding: 2px 7px">
                     {{ answer.user }}
                 </span>
             </span>
@@ -172,14 +172,14 @@
                         {{ comment.body|safe }}
                     </div>
                     
-                    <span class="meta">
+                    <span class="meta_co" style="position: absolute;right: 0px; bottom: 0px;">
                         <small>
                             <i>
                                 {{ comment.date_created|date:"d-m-y" }}, {{ comment.date_created|time }}
                             </i>
                         </small>
                         
-                        <span class="user">
+                        <span class="user_co" style="padding: 2px 7px">
                             {{ comment.user }}
                         </span>
                     </span>
@@ -296,6 +296,13 @@
 </script>
    
     <script type="text/javascript">
+
+
+        /* For random color */
+	$(".user_co").each(function() {
+	    var hue = 'rgb(' + (Math.floor((256-199)*Math.random()) + 200) + ',' + (Math.floor((256-199)*Math.random()) + 200) + ',' + (Math.floor((256-199)*Math.random()) + 200) + ')';
+	    $(this).css("background-color", hue);
+	});
 
         $(document).ready(function() {
         
