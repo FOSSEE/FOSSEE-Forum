@@ -184,16 +184,6 @@ TEMPLATE_CONTEXT_PROCESSORS += (
     
 )
 
-
-WHOOSH_INDEX = os.path.join(PROJECT_DIR,'whoosh/')
-
-HAYSTACK_CONNECTIONS = {
-	'default':{
-	'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
-	'PATH' : WHOOSH_INDEX,
-	},
-}
-
 COMPRESS_ROOT = PROJECT_DIR + "/static/"
 COMPRESS_ENABLED = True 	# disable in production Env
 HTML_MINIFY = True 		# disable in production Env
