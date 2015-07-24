@@ -1,0 +1,10 @@
+Scilab
+Python
+FreeEDA
+OpenFOAM
+OR-Tools
+Osdag
+SBHS
+Netbook
+Sandhi
+DWSIM
