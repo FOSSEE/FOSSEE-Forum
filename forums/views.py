@@ -143,7 +143,7 @@ def account_view_profile(request, username):
 
 def send_registration_confirmation(user):
 	p = Profile.objects.get(user=user)
-	user.email = "ashwinids03@gmail.com"
+	 
 	# Sending email when an answer is posted
 	subject = 'Account Active Notification'
 	message = """Dear {0},
@@ -158,6 +158,7 @@ def send_registration_confirmation(user):
 		"http://fossee.in",
 		"http://forums.fossee.in/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
 	)
+	print user.email
 	email = EmailMultiAlternatives(
 		subject, message, 'sysads@fossee.in',
 		to = [user.email], bcc = [], cc = [],

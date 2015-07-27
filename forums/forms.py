@@ -105,7 +105,12 @@ class RegisterForm(forms.Form):
 			pass
 			
 			
-			
+	def clean_email(self):
+		try:
+			User.objects.get(email=self.cleaned_data['email'])
+			raise forms.ValidationError(_("This email is already taken."))
+		except User.DoesNotExist:
+			pass	
 			
 			
 		
