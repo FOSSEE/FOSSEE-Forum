@@ -41,7 +41,7 @@
         <tr {% if question.id == qid %}class="parent-filter"{% endif %}>
             <td>
                 <span class="category" data-toggle="tooltip" data-placement="top" title="{{ question.category }}">
-               <a class="pull-left" href="{% url 'website:filter' question.category %}?qid={{ question.id }}">
+               <a class="pull-left" href="{% url 'website:filter' question.category|lower %}?qid={{ question.id }}">
                  {{ question.category|truncatechars:12 }} </a>
                  </span>
             </td>

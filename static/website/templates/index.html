@@ -110,7 +110,7 @@ input.gsc-search-button, input.gsc-search-button:hover, input.gsc-search-button:
         <div class="panel-body">
             <table class="table table-bordered table-hover">
                 <th> FOSS </th>
-                <!--<th> Tutorial</th>-->
+             
                 <th> Question </th>
                 <th> Date</th>
                 <th> Views</th>
@@ -121,7 +121,7 @@ input.gsc-search-button, input.gsc-search-button:hover, input.gsc-search-button:
                     <td>
                         <span class="category" data-toggle="tooltip" data-placement="top" title="{{ question.category}}">
                           
-                        <a class="pull-left" href="{% url 'website:filter' question.category %}?qid={{ question.id }}">
+                        <a class="pull-left" href="{% url 'website:filter' question.category|lower %}?qid={{ question.id }}">
                            {{ question.category|truncatechars:12 }} 
                          
                         </a>

@@ -20,7 +20,7 @@
                 <span href="#" class="category" data-toggle="tooltip" data-placement="top" title="{{ question.category}}">
                     {{ question.category|truncatechars:12 }} 
                 </span>
-                <a class="pull-right" href="{% url 'website:filter' question.category %}?qid={{ question.id }}">
+                <a class="pull-right" href="{% url 'website:filter' question.category|lower %}?qid={{ question.id }}">
                     <span class="glyphicon glyphicon-search"></span>
                 </a>
             </td>
