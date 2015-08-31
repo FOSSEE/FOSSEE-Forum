@@ -1,6 +1,6 @@
 Scilab
 Python
-FreeEDA
+eSim
 OpenFOAM
 OR-Tools
 Osdag
