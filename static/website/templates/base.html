@@ -11,14 +11,17 @@
         {% compress css %}
          <link rel="stylesheet" href="{% static 'website/css/font-awesome.min.css' %}" type="text/css" media="screen" charset="utf-8" />
         <link rel="stylesheet" href="{% static 'website/css/yamm-min.css' %}" type="text/css" media="screen" charset="utf-8" />
-
-
         <link rel="stylesheet" href="{% static 'website/css/bootstrap.min.css' %}" type="text/css" media="screen" charset="utf-8" />
         <link rel="stylesheet" href="{% static 'website/slick/slick.css' %}" type="text/css" media="screen" charset="utf-8" />
         <link rel="stylesheet" href="{% static 'website/css/main.css' %}" type="text/css" media="screen" charset="utf-8" />
         <link rel="stylesheet" href="{% static 'website/css/nice-bar.css' %}" type="text/css" media="screen" charset="utf-8" />
 	<link rel="stylesheet" href="{% static 'website/css/login.css' %}" type="text/css" media="screen" charset="utf-8" />
+	<link rel="stylesheet" href="{% static 'website/css/theme.blue.css' %}" type="text/css" media="screen" charset="utf-8" />
+
         {% endcompress %}
+
+	<script src="{% static 'website/js/jquery-1.11.3.min.js' %}"></script>
+        <script src="{% static 'website/js/jquery.tablesorter.min.js' %}"></script>
     </head>
     <body>
     <!-- Google Tag Manager -->
@@ -84,8 +87,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                                   <li><a href="{% url 'website:user_answers' user.id %}">My Answers
                                  
                                   </a></li>
-                                  
-                                  <li class="divider"></li>
+
+				   <li><a href="/accounts/view-profile/{{ user.username }}">My Profile
+                                 
+                                  </a></li>
                                   <li><a href="{% url 'user_logout' %}">Logout</a></li>
                                 </ul>
                               </li> 
@@ -128,7 +133,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     </div> <!-- /#page-wrapper -->
         
     {% compress js %}
-        <script src="{% static 'website/js/jquery.min.js' %}"></script>
         <script src="{% static 'website/js/bootstrap.min.js' %}"></script>
         <script src="{% static 'website/slick/slick.min.js' %}"></script>
         <script src="{% static 'website/js/nice-bar.js' %}"></script>
@@ -138,3 +142,4 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     {% endcompress %}
     </body>
 </html>
+
