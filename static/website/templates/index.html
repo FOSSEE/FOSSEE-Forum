@@ -88,16 +88,16 @@
 
 
     <div id="filter-container">
-        <div class="row">
+        <div class="row" style="margin-left: 12%;">
             <form class ="" id="filter-form" action="" role="form">
-                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" >
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" style="width: 65%;">
                     <a class="btn btn-block btn-primary" href="{% url 'website:questions' %}" style="margin-top: 18px;">View all previous questions.</a>
                 </div> <!-- /.col -->
             </form>
-            <div class="col-lg-6 col-md-6 col-sm-6" >
-                <div class="row">
+            <div class="col-lg-6 col-md-6 col-sm-6" style="width: 25%;">
+                <div class="row" style="margin-left: 11px;">
 
-                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" style="width: 100px; margin-left:40px; margin-right:40px; " >
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" style="width: 100px; margin-right:40px; " >
                         <h3 style="font-size: 18px" align="center"><strong>{% total_question_count %}</strong></h3>
                         <h3 style="font-size: 18px; margin-top: 1px;" align="center" text-color="#7395d9" >Questions</h3>
                     </div>
@@ -116,6 +116,7 @@
             <table id="myTable" class="tablesorter-blue"> 
 	<thead> 
 	<tr> 
+		<th>No.</th>
 	        <th>FOSS</th>
 		<th>Question </th>
 		<th>Date</th>
@@ -127,6 +128,7 @@
 	<tbody> 
 	  {% for question in questions %}
 		        <tr>
+			    <td></td>
 		            <td>
 		                <span class="category" data-toggle="tooltip" data-placement="top" title="{{ question.category}}">
 		                 
@@ -136,7 +138,6 @@
 		                </a>
 		                 </span>
 		            </td>
-		           
 		           
 		            <td>
 		                <span class="question" data-toggle="tooltip" data-placement="top" title="{{ question.title }}">
@@ -175,6 +176,13 @@
 
 {% block javascript %}
 <script>
+
+    $('table tbody tr').each(function(idx){
+                $(this).children(":eq(0)").html(idx + 1);
+    });
+
+
+
     $(document).ready(function(){
         
         $carousel = $('.carousel').slick({

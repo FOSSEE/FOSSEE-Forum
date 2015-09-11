@@ -3,21 +3,40 @@
 {% load count_tags %}
 
 {% block content %}
+
+
+	<script>
+
+	    $(document).ready(function()
+		{
+		$("#myTable").tablesorter();
+		}
+	    );
+
+	 </script>
+
     <h4> 
         <h5>
             Showing {{ questions.start_index }} - {{ questions.end_index }} of {{ questions.paginator.count }} questions.
         </h5>
     </h4>
-    <table class="table table-bordered table-hover">
-        <th> FOSS </th>
-   	<th> Question <span class="glyphicon glyphicon-link"></span></th>
-        <th> Date</th>
-        <th> Views</th>
-        <th> Votes </th>
-        <th> Answers</th>
-        <th> User</th>
+       <table id="myTable" class="tablesorter-blue">
+        <thead> 
+	<tr> 
+		<th>No.</th>
+	        <th>FOSS</th>
+		<th>Question </th>
+		<th>Date</th>
+		<th>Views</th>
+		<th>Votes</th>
+		<th>Answers</th>
+		<th>User</th>  
+	</tr> 
+	</thead> 
+	<tbody> 
         {% for question in questions %}
         <tr>
+	    <td> </td>
             <td>
                 <span class="category" data-toggle="tooltip" data-placement="top" title="{{ question.category}}">
                
@@ -63,7 +82,7 @@
             </td>
         </tr>
         {% endfor %}
-
+    </tbody> 
     </table>
 
     <ul class="pagination pull-right">
@@ -93,5 +112,8 @@
 {% block javascript %}
 <script>
     $('span').tooltip();
+    $('table tbody tr').each(function(idx){
+                $(this).children(":eq(0)").html(idx + 1);
+    });
 </script>
 {% endblock %}

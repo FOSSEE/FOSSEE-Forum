@@ -2,6 +2,17 @@
 {% load helpers %}
 
 {% block content %}
+
+<script>
+
+    $(document).ready(function()
+        {
+        $("#myTable").tablesorter();
+        }
+    );
+
+ </script>
+
 {% if questions %}
 <h5 style="padding-top: 15px;">
     These are the similar questions in:
@@ -30,15 +41,23 @@
 <br>
 <div class="clearfix"></div>
 
-    <table class="table table-bordered">
-        <th> FOSS </th>
-        <th> Question <span class="glyphicon glyphicon-link"></span></th>
-        <th> Date</th>
-        <th> Views</th>
-        <th> Answers</th>
-        <th> User</th>
+    <table id="myTable" class="tablesorter-blue">
+       <thead> 
+	<tr> 
+		<th>No.</th>
+	        <th>FOSS</th>
+		<th>Question </th>
+		<th>Date</th>
+		<th>Views</th>
+		<th>Answers</th>
+		<th>User</th>  
+	</tr> 
+	</thead> 
+
+	<tbody> 
         {% for question in questions %}
         <tr {% if question.id == qid %}class="parent-filter"{% endif %}>
+	    <td></td>
             <td>
                 <span class="category" data-toggle="tooltip" data-placement="top" title="{{ question.category }}">
                <a class="pull-left" href="{% url 'website:filter' question.category|lower %}?qid={{ question.id }}">
@@ -76,6 +95,7 @@
 
         </tr>
         {% endfor %}
+    <tbody> 
     </table>
 {% else %}
 <h4>There are no similar questions.</h4>
@@ -84,6 +104,12 @@
 
 {% block javascript %}
 <script>
+
+     $('table tbody tr').each(function(idx){
+                $(this).children(":eq(0)").html(idx + 1);
+    });
+
+
     $(document).ready(function() {
         $('span').tooltip();
         $('.parent-filter').css("background", "#ffffe0");
