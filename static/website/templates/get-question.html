@@ -14,8 +14,6 @@
 <span class="saved hideme">saved</span>
 
 <div class="row">
- 
-        
                         
     <div class="question-wrapper col-lg-12 col-md-12 col-sm-12 col-xs-12">
     <div class="question {% if user|can_edit:question %}editable{% endif %}" >
@@ -140,7 +138,7 @@
            		
                        
                   
-            <div class="body" id="body{{ answer.id }}" style="padding-bottom: 0px">
+            <div class="body" id="body{{ answer.id }}" style="padding-bottom: 12px">
                 {{ answer.body|safe }}
             </div>
             

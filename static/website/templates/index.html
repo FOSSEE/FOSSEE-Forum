@@ -67,7 +67,7 @@
                             {% if file %}
                                 <img src="{% static category|get_category_image %}">
                             {% else %}
-                                <div class="category-title">{{category}}</div>
+                                <div class="category-title">{{ category.description }}</div>
                             {% endif %}
                         {% endwith %}
                         <div class="caption">
