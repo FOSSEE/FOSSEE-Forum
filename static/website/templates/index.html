@@ -67,12 +67,12 @@
                             {% if file %}
                                 <img src="{% static category|get_category_image %}">
                             {% else %}
-                                <div class="category-title">{{ category.description }}</div>
+                                <div class="category-title">{{category}}</div>
                             {% endif %}
                         {% endwith %}
                         <div class="caption">
                             <small class="category">
-                                {{ category }}
+                                {{ category.description }}
                             </small>
                             {% latest_question category %}
                             
