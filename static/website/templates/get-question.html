@@ -161,14 +161,15 @@
             {% endif %}
         </div> <!-- /.answer -->
         
-        <div class="row">
-            <div class="comments pull-right col-lg-11 col-md-11 col-sm-11 col-xs-11">
+        <div class="row" style="padding-left: 40px">
+            <div class="comments pull-right col-lg-11 col-md-11 col-sm-11 col-xs-11" >
                 <!-- displaying comments -->
                 {% for comment in answer.answercomment_set.all %}
                 <div class="comment comment{{ comment.id }}">
                     <div class="body" id="cbody{{ comment.id }}">
                         {{ comment.body|safe }}
                     </div>
+		    <br>
                     
                     <span class="meta_co" style="position: absolute;right: 0px; bottom: 0px;">
                         <small>
@@ -177,7 +178,7 @@
                             </i>
                         </small>
                         
-                        <span class="user_co" style="padding: 2px 7px">
+                        <span style="padding: 2px 7px">
                             {{ comment.user }}
                         </span>
                     </span>

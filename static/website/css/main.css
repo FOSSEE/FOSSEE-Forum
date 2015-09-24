@@ -98,7 +98,6 @@ body {
 #content .question {
     position: relative;
     padding: 30px 0 15px 0;
-    border-bottom: 1px solid #f5f5f5;
 }
 #content .editable {
     padding: 15px 5px 15px 5px;
@@ -361,12 +360,12 @@ table .question a{
     color: #a26dc8;
 }
 .carousel, .slick-list {
-    height: 245px;
+    height: 178px;
     margin-right: -2px;
 }
 .carousel .thumbnail {
     width: 97%;
-    height: 245px;
+    height: 178px;
     border: 1px solid #cccccc;
 }
 .carousel .thumbnail img {

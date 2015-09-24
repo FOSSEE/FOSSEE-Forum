@@ -133,12 +133,20 @@ def account_profile(request, username):
 def account_view_profile(request, username):
     
     user = User.objects.get(username = username)
-    profile = Profile.objects.filter(user = user)[0]
+    profile = Profile.objects.filter(user = user)
+    prof = None
+    if profile:
+        prof = profile[0]
+    
+    print "profile"
+    print profile
     context = {
         'profile' : profile,
         'media_url' : settings.MEDIA_URL,
     }
     return render(request, 'forums/templates/view-profile.html', context)
+    
+        
                 
 
 def send_registration_confirmation(user):

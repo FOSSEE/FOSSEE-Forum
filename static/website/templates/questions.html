@@ -38,7 +38,7 @@
         <tr>
 	    <td> </td>
             <td>
-                <span class="category" data-toggle="tooltip" data-placement="top" title="{{ question.category}}">
+                <span class="category" data-toggle="tooltip" data-placement="top" >
                
                 <a class="pull-left" href="{% url 'website:filter' question.category|lower %}?qid={{ question.id }}">
                  {{ question.category|truncatechars:12 }}   
@@ -49,7 +49,7 @@
           
             
             <td>
-                <span class="question" data-toggle="tooltip" data-placement="top" title="{{ question.title }}">
+                <span class="question" data-toggle="tooltip" data-placement="top" >
                     <a href="{% url 'website:get_question' question.id %}">{{ question.title|truncatechars:40 }}</a>
                 </span>            
             </td>
@@ -76,7 +76,7 @@
             </td>
             <td>
            
-                <span class="title" data-toggle="tooltip" data-placement="top" title="{{ question.user }}">
+                <span class="title" data-toggle="tooltip" data-placement="top" >
                     {{ question.user|truncatechars:10 }}
                 </span>
             </td>
