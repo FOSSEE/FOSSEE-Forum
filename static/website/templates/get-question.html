@@ -35,9 +35,9 @@
                            
 
                             {% ifequal thisUserDownvote 0 %}
-                                <img src="{% static 'website/images/down1-off.png' %}" class="vote-down" title="This question does not show any research effort; it is not useful and unclear"/>
+                                <img src="{% static 'website/images/down1-off.png' %}" class="vote-down" />
                             {% else %}
-                                <img src="{% static 'website/images/down1-on.png' %}" class="vote-down selected" title="This question does not show any research effort; it is not useful and unclear"/>
+                                <img src="{% static 'website/images/down1-on.png' %}" class="vote-down selected" />
                             {% endifequal %}
                         </div>
                        
