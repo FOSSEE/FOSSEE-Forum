@@ -24,9 +24,9 @@
                    <div class="votecell" style="padding-top: 0.0cm;">
           		<div class="vote">
                             {% ifequal thisUserUpvote 0 %}
-                                <img src="{% static 'website/images/up1-off.png' %}" class="vote-up" title="This question shows research effort; it is useful and clear"/>
+                                <img src="{% static 'website/images/up1-off.png' %}" class="vote-up"/>
                             {% else %}
-                                <img src="{% static 'website/images/up1-on.png' %}" class="vote-up selected" title="This question shows research effort; it is useful and clear"/>
+                                <img src="{% static 'website/images/up1-on.png' %}" class="vote-up selected"/>
                             {% endifequal %}
 
                             <span class="vote-count-post" id="show_vote_count">
