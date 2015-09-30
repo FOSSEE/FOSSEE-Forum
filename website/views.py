@@ -23,7 +23,7 @@ admins = (
    9, 4376, 4915, 14595, 12329, 22467, 5518, 30705
 )
 categories = FossCategory.objects.order_by('name')
-
+# for home page
 def home(request):
     questions = Question.objects.all().order_by('date_created').reverse()[:10]
     context = {
@@ -31,7 +31,8 @@ def home(request):
         'questions': questions
     }
     return render(request, "website/templates/index.html", context)
-
+    
+# to get all questions posted till now and pagination, 20 questions at a time
 def questions(request):
     questions = Question.objects.all().order_by('date_created').reverse()
     paginator = Paginator(questions, 20)
@@ -48,7 +49,8 @@ def questions(request):
     }
     
     return render(request, 'website/templates/questions.html', context)
-
+    
+# get particular question, with votes,anwsers
 def get_question(request, question_id=None, pretty_url=None):
     question = get_object_or_404(Question, id=question_id)
     pretty_title = prettify(question.title)
@@ -87,7 +89,9 @@ def get_question(request, question_id=None, pretty_url=None):
     question.save()
    
     return render(request, 'website/templates/get-question.html', context)
-
+    
+# post answer to a question, send notification to the user, whose question is answered
+# if anwser is posted by the owner of the question, no notification is sent
 @login_required
 def question_answer(request,qid):
    
@@ -155,7 +159,8 @@ def question_answer(request,qid):
     return HttpResponseRedirect('/') 
         
     
-
+# comments for specific answer and notification is sent to owner of the answer
+# notify other users in the comment thread
 @login_required
 def answer_comment(request):
 	if request.method == 'POST':
@@ -262,6 +267,7 @@ def filter(request,  category=None, tutorial=None, minute_range=None, second_ran
 		
     return render(request, 'website/templates/filter.html',  dict_context)
 
+# post a new question on to forums, notification is sent to mailing list team@fossee.in
 @login_required
 def new_question(request):
     context = {}
@@ -313,7 +319,9 @@ def new_question(request):
     context.update(csrf(request))
     return render(request, 'website/templates/new-question.html', context)
 
-  
+# return number of votes and initial votes
+# user who asked the question,cannot vote his/or anwser, 
+# other users can post votes
 def vote_post(request):
 
     
@@ -371,7 +379,10 @@ def vote_post(request):
     else:
 	    print "out"
     return HttpResponse(initial_votes)
-
+    
+# return number of votes and initial votes
+# user who posted the answer, cannot vote his/or anwser, 
+# other users can post votes
 def ans_vote_post(request):
 
     
@@ -436,6 +447,7 @@ def ans_vote_post(request):
     return HttpResponse(initial_votes)
 
 # Notification Section
+# to get all questions of a specific users
 @login_required
 def user_questions(request, user_id):
     
@@ -457,6 +469,7 @@ def user_questions(request, user_id):
         return render(request, 'website/templates/user-questions.html', context)
     return HttpResponse("go away")
 
+# to get all answers of a specific users
 @login_required
 def user_answers(request, user_id):
     marker = 0
@@ -477,6 +490,7 @@ def user_answers(request, user_id):
         return render(request, 'website/templates/user-answers.html', context)
     return HttpResponse("go away")
 
+# notification if any on header, when user logs in to the account 
 @login_required
 def user_notifications(request, user_id):
     print "user_id"
@@ -491,6 +505,7 @@ def user_notifications(request, user_id):
         return render(request, 'website/templates/notifications.html', context)
     return HttpResponse("go away ...")
 
+# to clear notification from header, once viewed or cancelled
 @login_required
 def clear_notifications(request):
     Notification.objects.filter(uid=request.user.id).delete()
@@ -681,7 +696,8 @@ def ajax_time_search(request):
 def ajax_vote(request):
     #for future use
     pass
-
+    
+# to send email
 def forums_mail(to = '', subject='', message=''):
     # Start of email send
     email = EmailMultiAlternatives(
