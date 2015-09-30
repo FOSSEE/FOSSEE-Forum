@@ -13,6 +13,7 @@ import random, string
 from forums.forms import *
 from website.models import *
 
+# to register new user and send confirmation link to registerd email id
 def account_register(request):
     context = {}
     print "account_registration"
@@ -48,7 +49,8 @@ def account_register(request):
         }
         context.update(csrf(request))
         return render_to_response('forums/templates/user-register.html', context)
-        
+
+# alert user after user account confirmation
 def confirm(request, confirmation_code, username):
     try:
         user = User.objects.get(username=username)
@@ -77,6 +79,8 @@ def account_logout(request):
     logout(request)
     return HttpResponseRedirect('/')
 
+# add details to the profile table of the user
+# update profile after registration confirmation
 @login_required
 def account_profile(request, username):
     user = request.user
@@ -129,6 +133,7 @@ def account_profile(request, username):
         context['form'] = ProfileForm(user, instance = instance)
         return render(request, 'forums/templates/profile.html', context)
   
+# view all profile details saved for the user, when clicked on my profile  
 @login_required
 def account_view_profile(request, username):
     
@@ -148,7 +153,7 @@ def account_view_profile(request, username):
     
         
                 
-
+# send confirm registration link    
 def send_registration_confirmation(user):
 	p = Profile.objects.get(user=user)
 	 
@@ -178,7 +183,8 @@ def send_registration_confirmation(user):
 		result = email.send(fail_silently=False)
 	except:
 		pass
-		
+
+# user login		
 def user_login(request):
     if request.user.is_anonymous():
     	
