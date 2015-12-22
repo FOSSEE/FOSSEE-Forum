@@ -1,0 +1,73 @@
+{% extends 'website/templates/base.html' %}
+{% load static %}
+
+{% block content %}
+
+   <!-- Nav tabs -->
+<ul class="nav nav-tabs">
+  <li class="active" ><a href="#search-by-keyword" data-toggle="tab">Search by Keyword</a></li>
+  <li><a href="#search-by-time" data-toggle="tab">Search by Time</a></li>
+</ul>
+
+<!-- Tab panes -->
+<div class="tab-content">
+<br>
+    <div class="tab-pane active" id="search-by-keyword">
+        <div class="row">
+            <div class="col-lg-10">
+                <input id="search-key" class="form-control" placeholder="eg: python, scilab">
+            </div>
+            <div class="col-lg-2">
+                <a id="search-key-submit" class="btn btn-primary btn-sm btn-block" href="#">Search</a>
+            </div>
+        </div>
+
+        <div id="keyword-search-results">
+        </div>
+    </div>
+
+    <div class="tab-pane" id="search-by-time">
+        <div class="row">
+             <div class="col-lg-3 col-md-3 col-sm-3">
+                <select id="search-category" class="form-control">
+                    <option value="None">Select Category</option>
+                    {% for category in categories %}
+                        <option value="{{ category }}">{{ category }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-lg-3 col-md-3 col-sm-3">
+                <select id="search-tutorial" class="form-control" disabled="disabled">
+                    <option value="None">Select Tutorial</option>
+                </select>
+            </div>
+
+            <div class="col-lg-2 col-md-2 col-sm-2">
+                <select id="search-minute-range" class="form-control" disabled="disabled">
+                    <option value="None">min</option>
+                </select>
+            </div>
+
+            <div class="col-lg-2 col-md-2 col-sm-2">
+                <select id="search-second-range" class="form-control" disabled="disabled">
+                    <option value="None">sec</option>
+                </select>
+            </div>
+
+            <div class="col-lg-2 col-md-2 col-sm-2">
+                <input id="search-time-submit" class="btn btn-sm btn-warning btn-block" type="button" value="Search">
+            </div>
+            <div class="clearfix"></div>  
+        </div> <!-- /.row -->
+
+        <div id="time-search-results">
+        </div>
+    </div>
+</div>  <!-- tab panes -->
+
+{% endblock %}
+
+{% block javascript %}
+    <script src="{% static 'website/js/search.js' %}"></script>
+{% endblock %}

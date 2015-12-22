@@ -1,0 +1,88 @@
+{% extends 'website/templates/base.html' %}
+{% load helpers %}
+
+{% block content %}
+{% if questions %}
+<h5>
+    These are the similar questions in:
+    {% if category %}
+        {{ category }}
+    {% endif %}
+    {% if tutorial %}
+       <b> &gt; </b>
+       {{ tutorial }}
+    {% endif %}
+    {% if minute_range %}
+       <b> &gt; </b>
+       {{ minute_range }} min
+    {% endif %}
+    {% if second_range %}
+       <b> &gt; </b>
+       {{ second_range }} sec
+    {% endif %}
+    <a class="btn btn-xs btn-success pull-right" href="{% url 'website:new_question' %}?category={{ category|urlencode }}">Ask a new question.</a>
+</h5>
+<br>
+<div class="clearfix"></div>
+
+    <table class="table table-bordered">
+        <th> FOSS </th>
+        <!--<th> Tutorial</th>-->
+        <th> Question</th>
+        <th> Date</th>
+        <th> Views</th>
+        <th> Answers</th>
+        <th> User</th>
+        {% for question in questions %}
+        <tr {% if question.id == qid %}class="parent-filter"{% endif %}>
+            <td>
+                <span class="category" data-toggle="tooltip" data-placement="top" title="{{ question.category}}">
+               <a class="pull-left" href="{% url 'website:filter' question.category %}?qid={{ question.id }}">
+                 {{ question.category|truncatechars:12 }} </a>
+                 </span>
+            </td>
+
+            <td>
+                <span class="question" data-toggle="tooltip" data-placement="top" title="{{ question.title }}">
+                    <a href="{% url 'website:get_question' question.id %}{% prettify question.title %}">{{ question.title|truncatechars:40 }}</a>
+                </span>            
+            </td>
+
+            <td>    
+                <span>
+                    <i>
+                        {{ question.date_created|date:"d-m-y" }}
+                    </i>
+                </span>
+            </td>
+                    
+            <td>
+                {{ question.views}}
+            </td>
+
+            <td>
+                {{ question.answer_set.count }}
+            </td>
+
+            <td>
+                    <span class="title" data-toggle="tooltip" data-placement="top" title="{{ question.user }}">
+                    {{ question.user|truncatechars:10 }}
+                </span>
+            </td>
+
+        </tr>
+        {% endfor %}
+    </table>
+{% else %}
+<h4>There are no similar questions.</h4>
+{% endif %}
+{% endblock %}
+
+{% block javascript %}
+<script>
+    $(document).ready(function() {
+        $('span').tooltip();
+        $('.parent-filter').css("background", "#ffffe0");
+    });
+</script>
+{% endblock %}

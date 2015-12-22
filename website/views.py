@@ -65,14 +65,10 @@ def get_question(request, question_id=None, pretty_url=None):
     ans_votes = []
 
     for vote in answers:
-    	#print "ansvote "+str(vote.userUpVotes.filter(id=request.user.id).count())
-    	#print "ansvote "+str(vote.userDownVotes.filter(id=request.user.id).count())
     	net_ans_count  = vote.userUpVotes.count() - vote.userDownVotes.count()
     	ans_votes.append([vote.userUpVotes.filter(id=request.user.id).count(),vote.userDownVotes.filter(id=request.user.id).count(),net_ans_count])
     #for (f,b) in zip(foo, bar):
-    #print "f: ", f ,"; b: ", b
     main_list = zip(answers,ans_votes)
-    print "ans : "+str(ans_votes)
     context = {
         'question': question,
         'main_list': main_list,
@@ -330,21 +326,15 @@ def vote_post(request):
     vote_type = request.POST.get('type')
     vote_action = request.POST.get('action')
     question_id =  request.POST.get('id') 
-    print question_id, "question_id"
-    
     question = get_object_or_404(Question, id=question_id)
-    
     cur_post = get_object_or_404(Question, id=post_id)
     thisuserupvote = cur_post.userUpVotes.filter(id=request.user.id).count()
     thisuserdownvote = cur_post.userDownVotes.filter(id=request.user.id).count()
     initial_votes = cur_post.userUpVotes.count() - cur_post.userDownVotes.count()
 
-    #print "IDDD"
-    print "logged in user_id:", request.user.id,"Person who asked(user_id)", question.user_id
 
     if request.user.id != question.user_id:
     #if request.user.id == question_id:
-	   	print "in"
 		
 		if vote_action == 'vote':
 		    if (thisuserupvote == 0) and (thisuserdownvote == 0):
@@ -371,14 +361,10 @@ def vote_post(request):
 		num_votes = cur_post.userUpVotes.count() - cur_post.userDownVotes.count()
 		cur_post.num_votes = num_votes
 		cur_post.save()
-	   
-		print "Num Votes: %s" % num_votes
-
 		return HttpResponse(num_votes)
     		
     else:
-	    print "out"
-    return HttpResponse(initial_votes)
+        return HttpResponse(initial_votes)
     
 # return number of votes and initial votes
 # user who posted the answer, cannot vote his/or anwser, 
@@ -387,12 +373,9 @@ def ans_vote_post(request):
 
     
     post_id = int(request.POST.get('id'))
-    print post_id
-    
     vote_type = request.POST.get('type')
     vote_action = request.POST.get('action')
     answer_id =  request.POST.get('id') 
-    print "answer_id", answer_id
 
     answer = Answer.objects.get(pk=answer_id)
     cur_post = get_object_or_404(Answer, id=post_id)
@@ -401,12 +384,9 @@ def ans_vote_post(request):
     userdownvote = cur_post.userDownVotes.filter(id=request.user.id).count()
 
     initial_votes = cur_post.userUpVotes.count() - cur_post.userDownVotes.count()
-    print "logged in user_id:", request.user.id,"Person who answered(user_id)", answer.uid
 
 
     if request.user.id != answer.uid:
-	    print "Not same"
-	    # print "User Initial Upvote and Downvote: %d %d %s " % (thisuserupvote, thisuserdownvote, vote_action)
 
 	    #This loop is for voting
 	    if vote_action == 'vote':
@@ -435,16 +415,13 @@ def ans_vote_post(request):
 	    cur_post.num_votes = num_votes
 	    cur_post.save()
 	   
-	    print "Num Votes: %s" % num_votes
 
 	    return HttpResponse(num_votes)
 		    
 	
     else:
 	#else:
-        print "Same"
-
-    return HttpResponse(initial_votes)
+        return HttpResponse(initial_votes)
 
 # Notification Section
 # to get all questions of a specific users
@@ -485,17 +462,12 @@ def user_answers(request, user_id):
             'total': total,
             'marker': marker
         }
-        print "anwer_total"
-        print total
         return render(request, 'website/templates/user-answers.html', context)
     return HttpResponse("go away")
 
 # notification if any on header, when user logs in to the account 
 @login_required
 def user_notifications(request, user_id):
-    print "user_id"
-    print user_id
-    print request.user.id
     if str(user_id) == str(request.user.id):
         notifications = Notification.objects.filter(uid=user_id).order_by('date_created').reverse()
         context = {
@@ -676,17 +648,14 @@ def ajax_time_search(request):
         minute_range= request.POST.get('minute_range')
         second_range = request.POST.get('second_range')
         questions = None
-        print request.POST, "***********"
         if category:
             questions = Question.objects.filter(category=category.replace(' ', '-'))
-            print "sssssssssss", questions
         if tutorial:
             questions = questions.filter(tutorial=tutorial.replace(' ', '-'))
         if minute_range:
             questions = questions.filter(category=category.replace(' ', '-'), tutorial=tutorial.replace(' ', '-'), minute_range=minute_range)
         if second_range:
             questions = questions.filter(category=category.replace(' ', '-'), tutorial=tutorial.replace(' ', '-'),second_range=second_range)
-        print questions, "&&&&&&&&&&&"
         context = {
             'questions': questions
         }
