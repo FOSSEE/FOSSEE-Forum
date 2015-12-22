@@ -9,6 +9,8 @@ from django.core.mail import EmailMultiAlternatives
 from django.contrib import messages
 from django.utils import timezone
 from django.conf import settings
+from django.core.mail import send_mail
+
 import random, string
 from forums.forms import *
 from website.models import *
@@ -16,19 +18,14 @@ from website.models import *
 # to register new user and send confirmation link to registerd email id
 def account_register(request):
     context = {}
-    print "account_registration"
-    print request.method
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         
         if form.is_valid():
         
             username = request.POST['username']
-            print username 
             password = request.POST['password']
-            print password
             email = request.POST['email']
-            print email
             user = User.objects.create_user(username, email, password)
             user.is_active = True
             user.save()
@@ -69,7 +66,6 @@ def confirm(request, confirmation_code, username):
             messages.success(request, "Something went wrong!. Please try again!")
             return HttpResponseRedirect('/')
     except Exception, e:
-        print "In excepw"
         messages.success(request, "Your account not activated!. Please try again!")
         return HttpResponseRedirect('/')
         
@@ -143,8 +139,6 @@ def account_view_profile(request, username):
     if profile:
         prof = profile[0]
     
-    print "profile"
-    print profile
     context = {
         'profile' : profile,
         'media_url' : settings.MEDIA_URL,
@@ -155,44 +149,42 @@ def account_view_profile(request, username):
                 
 # send confirm registration link    
 def send_registration_confirmation(user):
-	p = Profile.objects.get(user=user)
-	 
-	# Sending email when an answer is posted
-	subject = 'Account Active Notification'
-	message = """Dear {0},
-	Thank you for registering at {1}. You may activate your account by clicking on this link or copying and pasting it in your browser
-	{2}
-	Regards,
-	Admin
-	FOSSEE forum
-	IIT Bombay.
-	""".format(
-		user.username,
-		"http://fossee.in",
-		"http://forums.fossee.in/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
-	)
-	print user.email
-	email = EmailMultiAlternatives(
-		subject, message, 'sysads@fossee.in',
-		to = [user.email], bcc = [], cc = [],
-		headers={'Reply-To': 'no-replay@spoken-tutorial.org', "Content-type":"text/html;charset=iso-8859-1"}
-	)
-	print message
-	email.attach_alternative(message, "text/html")
-	try:
-		result = email.send(fail_silently=False)
-	except:
-		pass
+    p = Profile.objects.get(user=user)
+     
+    # Sending email when an answer is posted
+    subject = 'Account Active Notification'
+    message = """Dear {0},\n
+    Thank you for registering at {1}.\n\n You may activate your account by clicking on this link or copying and pasting it in your browser
+    {2}\n
+    Regards,\n
+    Admin\n
+    FOSSEE forum\n
+    IIT Bombay.
+    """.format(
+        user.username,
+        "http://fossee.in",
+        "http://forums.fossee.in/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
+    )
+    email = EmailMultiAlternatives(
+        subject, message, 'forums@fossee.in',
+        to = [user.email], bcc = [], cc = [],
+        headers={'Reply-To': 'forums@fossee.in', "Content-type":"text/html;charset=iso-8859-1"}
+    )
+    email.attach_alternative(message, "text/html")
+    try:
+        result = email.send(fail_silently=False)
+    except:
+        pass
 
-# user login		
+# user login        
 def user_login(request):
     if request.user.is_anonymous():
-    	
+        
         if request.method == 'POST':
             form = UserLoginForm(request.POST)
            
             if form.is_valid():
-            	
+                
                 cleaned_data = form.cleaned_data
                 
                 user = cleaned_data.get("user")
@@ -204,12 +196,13 @@ def user_login(request):
                 return HttpResponseRedirect('/')
         else:
             form = UserLoginForm()
-            print form.errors
         
         next_url = request.GET.get('next')
+
         context = {
             'form': form,
-            'next': next_url
+            'next': next_url,
+            'password_reset': True if next_url else False
         }
         
         context.update(csrf(request))
@@ -220,3 +213,69 @@ def user_login(request):
 def user_logout(request):
     logout(request)
     return HttpResponseRedirect('/')
+
+def forgotpassword(request):
+    context = {}
+    user_emails = []
+    context.update(csrf(request))
+    if request.method == 'POST':
+        users = User.objects.all()
+        for user in users:
+            user_emails.append(user.email)
+        email = request.POST['email']
+        if email == "":
+            context['invalid_email'] = True
+            return render_to_response("forums/templates/forgot-password.html", context)
+        if email in user_emails:
+            user = User.objects.get(email=email)
+            password = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8))
+            user.set_password(password)
+            user.save()
+            sender_name = "FOSSEE Forums"
+            sender_email = "forums@fossee.in"
+            subject = "FOSSEE Forums - Password Reset"
+            to = (user.email, )
+	    url = settings.EMAIL_URL
+            message = """Dear """+user.username+""",\nYour password for FOSSEE Forums has been reset. Your credentials are:\nUsername: """+user.username+"""\nPassword: """+password+"""\n\nWe recommend you to login with the given credentials & update your password immediately.\nLink to set new password: """+url+"""/accounts/login/?next=/accounts/update-password/\n\nThank You !\n\nRegards,\n SciPy India,\nFOSSEE - IIT Bombay."""
+	    send_mail(subject, message, sender_email, to)
+            form = UserLoginForm()
+            context['form'] = form
+            #context['password_reset'] = True
+            return HttpResponseRedirect('/accounts/login/?next=/accounts/update-password/')
+            #return render_to_response("forums/templates/user-login.html", context)
+        else:
+            context['invalid_email'] = True
+            return render_to_response("forums/templates/forgot-password.html", context)
+    else:
+        return render_to_response('forums/templates/forgot-password.html', context)
+
+def updatepassword(request):
+    context = {}
+    user = request.user
+    context.update(csrf(request))
+    if user.is_authenticated():
+        if request.method == 'POST':
+            new_password = request.POST['new_password']
+            confirm = request.POST['confirm_new_password']
+            if new_password == "" or confirm == "":
+                context['empty'] = True
+                return render_to_response("update-password.html", context)
+            if new_password == confirm:
+                user.set_password(new_password)
+                user.save()
+                context['password_updated'] = True
+                logout(request)
+                form = UserLoginForm()
+                context['form'] = form
+                #return render_to_response('website/templates/index.html', context)
+		return HttpResponseRedirect('/')
+            else:
+                context['no_match'] = True
+                return render_to_response("forums/templates/update-password.html", context)
+        else:
+            return render_to_response("forums/templates/update-password.html", context)
+    else:
+        form = UserLoginForm()
+        context['form'] = form
+        context['for_update_password'] = True
+        return render_to_response('website/templates/index.html', context)

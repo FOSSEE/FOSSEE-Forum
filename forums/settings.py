@@ -1,8 +1,8 @@
 #Custom settings
 from os.path import *
 from config import *
-import os
 from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS
+from local import *
 
 PROJECT_DIR = abspath(dirname(__file__) + '/../')
 
@@ -20,10 +20,10 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'forum',                      # Or path to database file if using sqlite3.
+        'NAME': 'forums_fossee',                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
-        'USER': db_user,
-        'PASSWORD': db_pass,
+        'USER': DB_USER,
+        'PASSWORD': DB_PASS,
         'HOST': '',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
         'PORT': '',                      # Set to empty string for default.
     }
@@ -69,7 +69,7 @@ MEDIA_URL = ''
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/var/www/example.com/static/"
-STATIC_ROOT = '/static/'
+STATIC_ROOT = ''
 
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
@@ -143,9 +143,6 @@ INSTALLED_APPS = (
     'compressor',
     'debug_toolbar',
     'captcha',
-    'south'
-    
-    
     #'migrate_spoken',
 )
 
@@ -181,7 +178,6 @@ LOGGING = {
 TEMPLATE_CONTEXT_PROCESSORS += (
     'django.core.context_processors.request',
     'website.context_processors.admin_processor', 
-    
 )
 
 COMPRESS_ROOT = PROJECT_DIR + "/static/"
@@ -189,6 +185,8 @@ COMPRESS_ENABLED = True 	# disable in production Env
 HTML_MINIFY = True 		# disable in production Env
 
 HTML_MINIFY = HTML_MINIFY
-RECAPTCHA_PUBLIC_KEY = '6LemngMTAAAAAAC0Fkv0CQcavkTIIJ3LTDzi9gMq'
-RECAPTCHA_PRIVATE_KEY = '6LemngMTAAAAAHZsIaY-G98QegM3htdGVEWbEJYL'
+RECAPTCHA_PUBLIC_KEY = PUB_KEY
+RECAPTCHA_PRIVATE_KEY = PRIV_KEY
 RECAPTCHA_USE_SSL = True
+DEBUG_TOOLBAR_PATCH_SETTINGS = False
+EMAIL_URL = "http://forums.fossee.aero.iitb.ac.in"

@@ -1,10 +1,33 @@
 {% extends "website/templates/base.html" %}
 {% load widget_tweaks %}
 {% block content %}
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'website/css/login.css' %}">
 <br><br><br>
 <div class="row">
-    <div class="col-lg-6" style="border-right: 1px dashed #424242;">
-        <h4>Please login with your <br>FOSSEE Forum account.</h4>
+<div class="form">
+<div class="headerlogin"><h2>Sign In</h2></div>
+<div class="login">
+	  {% if password_reset %}
+          <center>
+            <div class="alert alert-danger">
+                <a class="close" data-dismiss="alert" href="#">&times;</a>
+                <p>New login details have been sent to your email address.Do not forget to check your spam folder.</p>
+            </div>
+          </center>
+          <div class="clearfix"></div>
+        {% endif %}   
+	{% if password_updated %}
+          <center>
+            <div class="alert alert-danger">
+                <a class="close" data-dismiss="alert" href="#">&times;</a>
+                <p>Password has been updated successfully !</p>
+            </div>
+          </center>
+          <div class="clearfix"></div>
+        {% endif %}
+   </br>
         <form action="accounts/login/" method="POST"> {% csrf_token %}
             {% if form.errors %}
             <div class="alert alert-danger">
@@ -13,38 +36,43 @@
             </div>
             {% endif %}
             {% with WIDGET_ERROR_CLASS='field_error' %} 
-                <div class="form-group">
-                    <label for="id_username">Username:</label>
-                    {% render_field form.username class+="form-control" %}
-                </div>
-
-                <div class="form-group">
-                    <label for="id_username">Password:</label>
-                    {% render_field form.password class+="form-control" %}
-                </div>
+             <div class="input-group">
+                        <span class="input-group-addon"><i class="fa fa-user fa-fw"></i></span>
+                       {% render_field form.username class+="form-control" placeholder="Username" %}
+                    </div>
+                    </br>
+                      <div class="input-group">
+                        <span class="input-group-addon"><i class="fa fa-lock fa-fw"></i></span>
+                     {% render_field form.password class+="form-control" placeholder="Password" %}
+                    </div>
+           </br>
                 {% if next %}
                     <input type="hidden" name="next" value="{{ next }}">
                 {% endif %}
                 <input class="btn btn-sm btn-primary" type="submit" value="Login">
+                <span class="ch"><a  href="/accounts/forgot-password">Forgot Password?!!!!</a></span>
             {% endwith %}
         </form>
-    </div> <!-- /.col -->
 
-    <div class="col-lg-6">
+  
         <h4>Rules and Regulations</h4>
-        <ul>
+        <ol>
             <li>This forum is a place to discuss questions and doubts related to the FOSSEE FOSS.</li>
             <li>This is not a place for self promotion.</li>
             <li>Any violation of the above may lead to the permanent account deletion.</li>
-        </ul>
-        <h4>Dont have a FOSSEE Forum account yet ?</h4>
-        <p>
-            <a class="btn  btn-sm btn-success" href="/accounts/register/" >Register</a>
-        </p>
-    </div> <!-- /.col -->
+        </ol>
+       
+    </div><br/>
+<div class="sign">
+<div class="need">Need new account ?</div>
+<div> <a class="btn  btn-sm btn-success" href="/accounts/register/" >Register</a></div>
+</div>
+</div>
+ 
 </div> <!-- /.row -->
 {% endblock %}
 
 {% block javascript %}
     $(".alert").alert();
 {% endblock %}
+

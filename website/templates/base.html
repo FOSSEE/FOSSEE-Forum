@@ -1,0 +1,125 @@
+{% load compress %}
+
+{% load static %}
+<html>
+    <head>
+        <title>
+            {% block title %}
+            Spoken Tutorial Forums
+            {% endblock %}
+        </title>
+        {% compress css %}
+         <link rel="stylesheet" href="{% static 'website/css/font-awesome.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+        <link rel="stylesheet" href="{% static 'website/css/yamm-min.css' %}" type="text/css" media="screen" charset="utf-8" />
+
+
+        <link rel="stylesheet" href="{% static 'website/css/bootstrap.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+        <link rel="stylesheet" href="{% static 'website/slick/slick.css' %}" type="text/css" media="screen" charset="utf-8" />
+        <link rel="stylesheet" href="{% static 'website/css/main.css' %}" type="text/css" media="screen" charset="utf-8" />
+        <link rel="stylesheet" href="{% static 'website/css/nice-bar.css' %}" type="text/css" media="screen" charset="utf-8" />
+	<link rel="stylesheet" href="{% static 'website/css/login.css' %}" type="text/css" media="screen" charset="utf-8" />
+        {% endcompress %}
+    </head>
+    <body>
+        <div id="page-wrapper">
+        <div id="header-wrapper">
+            <div id="header-inner">
+                <nav class="navbar navbar-default" role="navigation">
+                    <div class="container">
+                        <!-- Brand and toggle get grouped for better mobile display -->
+                        <div class="navbar-header">
+                            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                              <span class="sr-only">Toggle navigation</span>
+                              <span class="icon-bar"></span>
+                              <span class="icon-bar"></span>
+                              <span class="icon-bar"></span>
+                            </button>
+                            <a class="navbar-brand" href="{% url 'website:home' %}">
+                                <img id="logo" src="{% static 'website/images/logo.png' %}">
+                                FOSSEE Forums
+                            </a>
+                        </div> <!-- /.navbar-header -->
+                        
+                        <!-- Collect the nav links, forms, and other content for toggling -->
+                        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                            <ul class="nav navbar-nav navbar-right">
+                              <li>
+                                <a href="{% url 'website:search' %}">
+                                    <span class="glyphicon glyphicon-search"></span>
+                                    Search
+                                </a>
+                              </li>
+                              <li>
+                                <a href="{% url 'website:new_question' %}">
+                                    <span class="glyphicon glyphicon-pencil"></span> 
+                                    Ask Question
+                                </a>
+                              </li>
+                              {% if user.is_authenticated %}
+                              <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                   <span class="glyphicon glyphicon-user"></span> 
+                                   {{ user }}<b class="caret"></b>
+                                </a>
+                                <ul class="dropdown-menu">
+                                  <li><a href="{% url 'website:user_questions' user.id %}">My Questions</a></li>
+                                  <li><a href="{% url 'website:user_answers' user.id %}">My Answers</a></li>
+                                  <li>
+                                    <a href="{% url 'website:user_notifications' user.id %}">
+                                        Notifications  
+                                        <span class="badge" style="background:#a26dc8; color:#ffffff;">
+                                            {% load notify %}
+                                            {% notification_count user.id %}
+                                        </span>
+                                    </a>
+                                  </li>
+                                  <li class="divider"></li>
+                                  <li><a href="{% url 'user_logout' %}">Logout</a></li>
+                                </ul>
+                              </li> <!-- /li.dropdown -->
+                              {% else %}
+                              <li>
+                                <a href="{% url 'user_login' %}">
+                                    <span class="glyphicon glyphicon-user"></span> 
+                                    Login
+                                </a>
+                              </li>
+                              {% endif %}
+                            </ul>
+                        </div> <!-- /.navbar-collapse -->
+                  </div> <!-- /.container -->
+                </nav>
+            </div> <!-- /#header-inner -->
+        </div> <!-- /#header-wrapper -->
+        
+        <div id="content-wrapper">
+            <div id="content-inner" class="container">
+                <div id="content" class="col-lg-12 col-md-12 col-sm-12">
+                    {% block content %}
+                    {% endblock %}
+                </div> <!-- /#content -->
+            </div> <!-- /#content-inner -->
+        </div> <!-- /#content-wrapper -->
+        
+        <div id="footer-wrapper" class="container">
+            <div id="footer-inner" class="col-lg-12 col-md-12 col-sm-12">
+                <div class="cc">
+                    <a class="cc-logo" rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">
+                        <img src="/static/website/images/cc-logo-88x31.png" alt="CC logo">
+                    </a> Spoken Tutorial Forum by <a href="http://www.iitb.ac.in" target="_blank">IIT Bombay</a> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Creative Commons Attribution-ShareAlike 4.0 International License</a>
+                </div> 
+            </div> <!-- /#footer-inner -->
+        </div> <!-- /#footer-wrapper -->
+    </div> <!-- /#page-wrapper -->
+        
+    {% compress js %}
+        <script src="{% static 'website/js/jquery.min.js' %}"></script>
+        <script src="{% static 'website/js/bootstrap.min.js' %}"></script>
+        <script src="{% static 'website/slick/slick.min.js' %}"></script>
+        <script src="{% static 'website/js/nice-bar.js' %}"></script>
+        {% block javascript %}
+            <!-- overide with custom javascript -->
+        {% endblock %}
+    {% endcompress %}
+    </body>
+</html>
