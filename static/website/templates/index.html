@@ -3,7 +3,7 @@
 {% load count_tags %}
 {% load notify %}
 {% load helpers %}
-
+ <link rel="stylesheet" href="{% static 'website/css/main.css' %}" type="text/css" media="screen" charset="utf-8" />
 {% block content %}
 
 <div style="margin-left: 450px;" >
@@ -74,10 +74,10 @@
                             <small class="category">
                                 {{ category.description }}
                             </small>
-                           
+				 {% latest_question category %}                           
                             
 
-                    <a class="btn btn-xs btn-block btn-success" href="{% url 'website:new_question' %}?category={{ category.id|urlencode }}">Ask new question</a>
+                    <a class="btn btn-xs btn-block btn-success" href="{% url 'website:new_question' %}?category={{ category.id|urlencode }}">Ask a question</a>
                         </div>
                     </div>
                 </div>

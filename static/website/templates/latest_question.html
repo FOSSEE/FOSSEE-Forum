@@ -1,13 +1,8 @@
 {% if question %}
-    <small class="latest">
-        <a href="{% url 'website:get_question' question.id %}">{{ question.title }}</a>
-    </small>
     <a class="btn btn-xs btn-block btn-primary" href="{% url 'website:filter' question.category %}">View previous questions</a>
 {% else %}
-    <small class="latest">
-        Be the first to ask question.
-    </small>
-    <a class="btn btn-block btn-xs">
+    <a class="btn btn-xs btn-block noquestion">
+
         No questions to display
     </a>
 {% endif %}

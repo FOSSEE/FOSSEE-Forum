@@ -33,7 +33,7 @@
        <b> &gt; </b>
        {{ second_range }} sec
     {% endif %}
-    <a class="btn btn-xs btn-success pull-right" href="{% url 'website:new_question' %}?category={{ category.id |urlencode }}">Ask a new question.</a>
+    <a class="btn btn-xs btn-success pull-right" href="{% url 'website:new_question' %}?category={{ category.id |urlencode }}">Ask a question</a>
      {% endfor %}
 </h5>
 <br>
