@@ -360,12 +360,12 @@ table .question a{
     color: #a26dc8;
 }
 .carousel, .slick-list {
-    height: 178px;
+    height: 220px;
     margin-right: -2px;
 }
 .carousel .thumbnail {
     width: 97%;
-    height: 178px;
+    height: 220px;
     border: 1px solid #cccccc;
 }
 .carousel .thumbnail img {
@@ -486,4 +486,10 @@ table .question a{
     padding-top: 20px;
 }
 
-
+.noquestion
+{
+    color:#008CBA;
+    font-weight:600;
+    font-size:12px;
+    text-align:center;
+}
