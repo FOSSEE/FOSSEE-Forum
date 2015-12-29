@@ -10,6 +10,8 @@ from django.core.mail import EmailMultiAlternatives
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
+from django.conf import settings
+
 User = get_user_model()
 
 from website.models import Question, Answer, Notification, AnswerComment, FossCategory
@@ -17,7 +19,7 @@ from spoken_auth.models import TutorialDetails, TutorialResources
 from website.forms import NewQuestionForm, AnswerQuestionForm,AnswerCommentForm
 from website.helpers import get_video_info, prettify
 from django.db.models import Count
-
+from django.core.mail import send_mail
 
 admins = (
    9, 4376, 4915, 14595, 12329, 22467, 5518, 30705
@@ -232,7 +234,6 @@ def answer_comment(request):
 	'answers':answers})
         return render(request, 'website/templates/get-question.html', context)
 
-
 def filter(request,  category=None, tutorial=None, minute_range=None, second_range=None):
     dict_context = {}
     context = {
@@ -241,15 +242,14 @@ def filter(request,  category=None, tutorial=None, minute_range=None, second_ran
         'minute_range': minute_range,
         'second_range': second_range
     }
-
     if category and tutorial and minute_range and second_range:
-        questions = Question.objects.filter(category=category).filter(tutorial=tutorial).filter(minute_range=minute_range).filter(second_range=second_range)
+        questions = Question.objects.filter(category=category).filter(tutorial=tutorial).filter(minute_range=minute_range).filter(second_range=second_range).order_by('date_created').reverse()
     elif tutorial is None:
-        questions = Question.objects.filter(category__name=category)
+        questions = Question.objects.filter(category__name=category).order_by('date_created').reverse()
     elif minute_range is None:
-        questions = Question.objects.filter(category=category).filter(tutorial=tutorial)
+        questions = Question.objects.filter(category=category).filter(tutorial=tutorial).order_by('date_created').reverse()
     else:  #second_range is None
-        questions = Question.objects.filter(category=category).filter(tutorial=tutorial).filter(minute_range=minute_range)
+        questions = Question.objects.filter(category=category).filter(tutorial=tutorial).filter(minute_range=minute_range).order_by('date_created').reverse()
 
     if 'qid' in request.GET:
         context['qid']  = int(request.GET['qid'])
@@ -267,6 +267,7 @@ def filter(request,  category=None, tutorial=None, minute_range=None, second_ran
 @login_required
 def new_question(request):
     context = {}
+    user = request.user
     if request.method == 'POST':
         form = NewQuestionForm(request.POST)
         if form.is_valid():
@@ -279,30 +280,26 @@ def new_question(request):
             question.body = cleaned_data['body'].encode('unicode_escape')
             question.views= 1 
             question.save()
-           
+            print(question.category) 
             #Sending email when a new question is asked
-            subject = 'New Forum Question'
-            message = """
-                The following new question has been posted in the FOSSEE Forum: <br>
-                Title: <b>{0}</b><br>
-                Category: <b>{1}</b><br>
-                
-                Link: <a href="{2}">{2}</a><br>
-            """.format(
+            sender_name = "FOSSEE Forums"
+            sender_email = "forums@fossee.in"
+            subject = "FOSSEE Forums - {0} - New Question".format(question.category)
+            to = ('team@fossee.in', )
+            url = settings.EMAIL_URL
+            message =""" The following new question has been posted in the FOSSEE Forum: \n\n
+                Title: {0}\n
+                Category: {1}\n
+                Link: {2}\n\n
+Regards,\nFOSSEE Team,\nIIT Bombay.
+             """.format(
                 question.title,
                 question.category, 
                 #question.tutorial, 
                 'http://forums.fossee.in/question/'+str(question.id)
-            )
-            email = EmailMultiAlternatives(
-                subject,'', 'forums', 
-                ['team@fossee.in'],
-                headers={"Content-type":"text/html;charset=iso-8859-1"}
-            )
-           
-            email.attach_alternative(message, "text/html")
-            email.send(fail_silently=True)
-            
+            ) 
+
+            send_mail(subject, message, sender_email, to)
             return HttpResponseRedirect('/')
     else:
        

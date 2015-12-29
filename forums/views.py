@@ -157,7 +157,6 @@ def send_registration_confirmation(user):
     Thank you for registering at {1}.\n\n You may activate your account by clicking on this link or copying and pasting it in your browser
     {2}\n
     Regards,\n
-    Admin\n
     FOSSEE forum\n
     IIT Bombay.
     """.format(
@@ -236,7 +235,7 @@ def forgotpassword(request):
             subject = "FOSSEE Forums - Password Reset"
             to = (user.email, )
 	    url = settings.EMAIL_URL
-            message = """Dear """+user.username+""",\nYour password for FOSSEE Forums has been reset. Your credentials are:\nUsername: """+user.username+"""\nPassword: """+password+"""\n\nWe recommend you to login with the given credentials & update your password immediately.\nLink to set new password: """+url+"""/accounts/login/?next=/accounts/update-password/\n\nThank You !\n\nRegards,\n SciPy India,\nFOSSEE - IIT Bombay."""
+            message = """Dear """+user.username+""",\nYour password for FOSSEE Forums has been reset. Your credentials are:\nUsername: """+user.username+"""\nPassword: """+password+"""\n\nWe recommend you to login with the given credentials & update your password immediately.\nLink to set new password: """+url+"""/accounts/login/?next=/accounts/update-password/\nThank You !\nRegards,\nFOSSEE Team,\n IIT Bombay."""
 	    send_mail(subject, message, sender_email, to)
             form = UserLoginForm()
             context['form'] = form
