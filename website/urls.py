@@ -9,7 +9,8 @@ urlpatterns = patterns('',
     url(r'^question-answer/(?P<qid>\d+)/$', 'website.views.question_answer', name='question_answer'),
     url(r'^answer-comment/$', 'website.views.answer_comment', name='answer_comment'),
     url(r'^filter/(?P<category>[^/]+)/$', 'website.views.filter', name='filter'),
-    url(r'^filter/(?P<category>[^/]+)/$', 'website.views.filter', name='filter'),
+    #url(r'^filter/$', 'website.views.filter', name='filter'),
+    #url(r'^filter/(?P<category>[^/]+)/$', 'website.views.filter', name='filter')
     
     #url(r'^filter/(?P<category>[^/]+)/(?P<tutorial>[^/]+)/(?P<minute_range>[^/]+)/$', 'website.views.filter', name='filter'),
     #url(r'^filter/(?P<category>[^/]+)/(?P<tutorial>[^/]+)/(?P<minute_range>[^/]+)/(?P<second_range>[^/]+)/$', 'website.views.filter', name='filter'),
