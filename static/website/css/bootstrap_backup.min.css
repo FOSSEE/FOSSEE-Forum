@@ -3934,7 +3934,7 @@ textarea.input-group-sm>.form-control,textarea.input-group-sm>.input-group-addon
 
 .nav>li>a:hover,.nav>li>a:focus{
 	text-decoration:none;
-	background-color:#eee
+	background-color:#000
 }
 
 .nav>li.disabled>a{
@@ -3949,8 +3949,8 @@ textarea.input-group-sm>.form-control,textarea.input-group-sm>.input-group-addon
 }
 
 .nav .open>a,.nav .open>a:hover,.nav .open>a:focus{
-	background-color:#eee;
-	border-color:#008cba
+	background-color:#fff;
+	border-color:#000
 }
 
 .nav .nav-divider{
@@ -3985,9 +3985,9 @@ textarea.input-group-sm>.form-control,textarea.input-group-sm>.input-group-addon
 }
 
 .nav-tabs>li.active>a,.nav-tabs>li.active>a:hover,.nav-tabs>li.active>a:focus{
-	color:#6f6f6f;
+	color:#fff;
 	cursor:default;
-	background-color:#fff;
+	background-color:#43ac6a;
 	border:1px solid #ddd;
 	border-bottom-color:transparent
 }
@@ -7206,8 +7206,8 @@ label,.control-label,.help-block,.checkbox,.radio{
 }
 
 .nav-tabs>li>a{
-	color:#222;
-	background-color:#e7e7e7
+	color:#fff;
+	background-color:#000
 }
 
 .nav-tabs .caret{

@@ -1,6 +1,7 @@
 {% extends 'website/templates/base.html' %}
 {% load widget_tweaks %}
 {% load static %}
+
 {% block title %}User Profile{% endblock %}
 {% block cssblock %}<link rel="stylesheet" href="{% static 'website/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
 {% block heading %}
@@ -8,6 +9,7 @@
 {% endblock %}
 
 {% block content %}
+
     <div class="row well ">
         <div class="col-sm-8">
             <form class="form-signin form-horizontal" role="form" id="login_form" method="post" enctype="multipart/form-data">{% csrf_token %}

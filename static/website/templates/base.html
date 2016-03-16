@@ -9,9 +9,9 @@
             {% endblock %}
         </title>
         {% compress css %}
-         <link rel="stylesheet" href="{% static 'website/css/font-awesome.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+         <link rel="stylesheet" href="{% static 'website/css/font-awesome.css' %}" type="text/css" media="screen" charset="utf-8" />
         <link rel="stylesheet" href="{% static 'website/css/yamm-min.css' %}" type="text/css" media="screen" charset="utf-8" />
-        <link rel="stylesheet" href="{% static 'website/css/bootstrap.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+        <link rel="stylesheet" href="{% static 'website/css/base.css' %}" type="text/css" media="screen" charset="utf-8" />
         <link rel="stylesheet" href="{% static 'website/slick/slick.css' %}" type="text/css" media="screen" charset="utf-8" />
         <link rel="stylesheet" href="{% static 'website/css/main.css' %}" type="text/css" media="screen" charset="utf-8" />
         <link rel="stylesheet" href="{% static 'website/css/nice-bar.css' %}" type="text/css" media="screen" charset="utf-8" />
@@ -81,14 +81,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                                    {{ user }}<b class="caret"></b>
                                 </a>
                                 <ul class="dropdown-menu">
-                                  <li><a href="{% url 'website:user_questions' user.id %}">My Questions
+                                <!--   <li><a href="{% url 'website:user_questions' user.id %}">My Questions
                                  
                                     </a></li>
                                   <li><a href="{% url 'website:user_answers' user.id %}">My Answers
                                  
-                                  </a></li>
+                                  </a></li> -->
 
-				   <li><a href="/accounts/view-profile/{{ user.username }}">My Profile
+				   <li><a href="/accounts/view-profile/{{ user.id }}">My Profile
                                  
                                   </a></li>
                                   <li><a href="{% url 'user_logout' %}">Logout</a></li>

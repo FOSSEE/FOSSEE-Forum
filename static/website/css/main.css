@@ -39,15 +39,15 @@ body {
     font-family: 'Varela Round', sans-serif;
 }
 #page-wrapper {
-    max-width: 970px;
+    max-width: 100%;
     margin:0 auto;
     box-shadow: 0px 0px 15px #cccccc;
 }
 .container {
-    max-width: 970px;
+    max-width: 100%;
 }
 #header-wrapper {
-    max-width: 970px;
+    max-width: 85%;
     margin:0 auto;
     background: #ffffff;
 }
@@ -60,7 +60,7 @@ body {
 }
 #content-wrapper {
     position: relative;
-    max-width: 970px;
+    max-width: 85%;
     margin:0 auto;
     padding: 1px 0 15px 0;
     background: #ffffff;
@@ -69,6 +69,7 @@ body {
     min-height: 600px;
 }
 #content{
+  max-width: 100%;  
 }
 .question-critic, .answer-critic {
     padding-left: 0;
@@ -286,7 +287,7 @@ table .question a{
     background: #42B449;
 }
 #footer-wrapper {
-    max-width: 970px;
+   max-width: 85%;
     margin:0 auto;
     background-color: #2d2d2d;
     color: #ffffff;
@@ -327,8 +328,8 @@ table .question a{
     position: relative;
     margin: 10px auto;
     padding: 10px;
-    border-left: 2px solid #424242;
-    background: #f7f7f7;
+    border: 1px solid #DBD6D6;
+    background: #fff;
 }
 .my-question .date,
 .my-answer .date {

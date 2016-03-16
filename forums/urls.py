@@ -22,7 +22,7 @@ urlpatterns = patterns('',
     url(r'^migrate', 'migrate_spoken.views.chenage_drupal_userid_spoken', name='chenage_drupal_userid_spoken'),
     url(r"^accounts/confirm/(?P<confirmation_code>\w+)/(?P<username>[\w. @-]+)/$", 'forums.views.confirm', name='confirm'),
     url(r"^accounts/profile/(?P<username>[\w. @-]+)/$", 'forums.views.account_profile', name='profile'),
-    url(r"^accounts/view-profile/(?P<username>[\w. @-]+)/$", 'forums.views.account_view_profile', name='view_profile'),
+    url(r"^accounts/view-profile/(?P<user_id>[\w. @-]+)/$", 'forums.views.account_view_profile', name='view_profile'),
     url(r'^accounts/forgot-password/$', 'forums.views.forgotpassword', name='forgotpassword'),
     url(r'^accounts/update-password/$', 'forums.views.updatepassword', name='updatepassword'), 
    
