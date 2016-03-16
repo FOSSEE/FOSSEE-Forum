@@ -1,4 +1,4 @@
-@import url("http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,700");
+﻿@import url("http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,700");
 /*! normalize.css v2.1.3 | MIT License | git.io/normalize */article,aside,details,figcaption,figure,footer,header,hgroup,main,nav,section,summary{
 	display:block
 }
@@ -24,6 +24,8 @@ html{
 
 body{
 	margin:0
+	font-size:14px;
+
 }
 
 a{
@@ -272,7 +274,7 @@ html{
 
 body{
 	font-family:"Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
-	font-size:15px;
+	font-size:14px;
 	line-height:1.428571429;
 	color:#222;
 	background-color:#fff
@@ -527,15 +529,17 @@ dl{
 }
 
 dt,dd{
-	line-height:1.428571429
+	line-height:2em;
 }
 
 dt{
-	font-weight:bold
+	
+	font-size:15px;
 }
 
 dd{
 	margin-left:0
+	font-size:15px;
 }
 
 @media(min-width:768px){
@@ -545,12 +549,15 @@ dd{
 		overflow:hidden;
 		clear:left;
 		text-align:right;
+		font-size:14px;
 		text-overflow:ellipsis;
 		white-space:nowrap
 	}
 
 	.dl-horizontal dd{
 		margin-left:180px
+
+
 	}
 
 	.dl-horizontal dd:before,.dl-horizontal dd:after{
@@ -1075,7 +1082,7 @@ pre code{
 	}
 
 	.col-sm-6{
-		width:0%
+		width:10%
 	}
 
 	.col-sm-5{
@@ -2194,7 +2201,7 @@ textarea.input-lg{
 
 @media(min-width:768px){
 	.form-horizontal .control-label{
-		text-align:right
+		text-align:left
 	}
 
 }
@@ -3934,7 +3941,7 @@ textarea.input-group-sm>.form-control,textarea.input-group-sm>.input-group-addon
 
 .nav>li>a:hover,.nav>li>a:focus{
 	text-decoration:none;
-	background-color:#232323;
+	background-color:#000
 }
 
 .nav>li.disabled>a{
@@ -3949,8 +3956,8 @@ textarea.input-group-sm>.form-control,textarea.input-group-sm>.input-group-addon
 }
 
 .nav .open>a,.nav .open>a:hover,.nav .open>a:focus{
-	background-color:#eee;
-	border-color:#008cba
+	background-color:#fff;
+	border-color:#000
 }
 
 .nav .nav-divider{
@@ -3985,10 +3992,10 @@ textarea.input-group-sm>.form-control,textarea.input-group-sm>.input-group-addon
 }
 
 .nav-tabs>li.active>a,.nav-tabs>li.active>a:hover,.nav-tabs>li.active>a:focus{
-	color:#6f6f6f;
+	color:#fff;
 	cursor:default;
-	background-color:#272727;
-	border:	1px solid #ddd;
+	background-color:#43ac6a;
+	border:1px solid #ddd;
 	border-bottom-color:transparent
 }
 
@@ -7192,8 +7199,9 @@ input,.form-control{
 }
 
 label,.control-label,.help-block,.checkbox,.radio{
-	font-size:12px;
+	font-size:14px;
 	font-weight:normal
+	
 }
 
 .form-group .btn,.input-group-addon,.input-group-btn .btn{
@@ -7205,9 +7213,9 @@ label,.control-label,.help-block,.checkbox,.radio{
 	border-color:transparent
 }
 
-.nav-tabs> li> a{
+.nav-tabs>li>a{
 	color:#fff;
-	background-color:#181515
+	background-color:#000
 }
 
 .nav-tabs .caret{

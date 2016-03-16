@@ -1,42 +1,187 @@
 {% extends 'website/templates/base.html' %}
 {% load widget_tweaks %}
 {% load static %}
+{% load count_tags %}
 {% block title %}User Profile{% endblock %}
 {% block cssblock %}
-    <link rel="stylesheet" href="{% static 'website/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
-    <style>
-        .view-profile .dl-horizontal dt{
-            text-align: left;
-            width: 100px;
-        }
-        .view-profile .dl-horizontal dd{
-            margin-left: 100px;
-        }
-    </style>
+   
+
 {% endblock %}
 {% block heading %}
         <i class="fa fa-list-ul"></i> User Profile
 {% endblock %}
 
 {% block content %}
-    <div class="row well view-profile" style="margin-top: 20px;">
-        <div class="col-sm-8">
+<br><br>
+  
 
-            <div class="col-sm-8">
-                <dl class="dl-horizontal">
-                    <dt>First name</dt>
-                    <dd>{% if profile.user.first_name %}{{ profile.user.first_name }}{% else %}-{% endif %}</dd>
+  <div class="col-lg-12 ">
+      
+           <ul class="nav nav-tabs">
+        <li class="active"><a data-toggle="tab" href="#profile"> <span ><i class="fa fa-user"></i></span>
+My Profile</a></li>
+        <li><a data-toggle="tab" href="#questions"><span ><i class="fa fa-question-circle"></i>
 
-                    <dt>Last name</dt>
-                    <dd>{% if profile.user.last_name %}{{ profile.user.last_name }}{% else %}-{% endif %}</dd>
-                    
-                    <dt>Profile created on</dt>
-                    <dd>{{ profile.created }}</dd>
-                  
-                </dl>
-            </div>
+</span>
+My Questions</a></li>
+        <li><a data-toggle="tab"href="#answers"><span ><i class="fa fa-check-circle"></i>
+</span>
+My Answers</a></li>    
+            </ul>
+    <div class="tab-content">
+        <!--<div id="sectionA" class="tab-pane fade in active">
+            <p>Section A content…</p>
+        </div>
+        <div id="sectionB" class="tab-pane fade">
+            <p>Section B content…</p>
+        </div>-->
+        <div id="profile" class="tab-pane fade in active">
+            <p>
+      <div class="row well view-profile" style="margin-top: 20px;">
+        <div class="col-sm-12">
+
+        <div class="col-sm-12">
+            <form class="form-signin form-horizontal  control-label " role="form" id="login_form" method="post" enctype="multipart/form-data">{% csrf_token %}
+                {{ form.errors }}
+                <div class="form-group">
+                    <label class="col-sm-3" for="id_first_name">User Name</label>
+                    <div class="col-sm-8 ">
+                     {% if profile.user.username %}{{ profile.user.username }}{% else %}-{% endif %}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 " for="id_last_name">First Name</label>
+                       <div class="col-sm-8  ">
+                        {% if profile.user.first_name %}{{ profile.user.first_name }}{% else %}-{% endif %}
+                     
+                    </div>
+                </div>
+                  <div class="form-group">
+                    <label class="col-sm-3 " for="id_last_name">Last Name</label>
+                       <div class="col-sm-8   ">
+                      {% if profile.user.last_name %}{{ profile.user.last_name }}{% else %}-{% endif %}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 " for= "id_street">Address</label>
+                     <div class="col-sm-8  ">
+                    {% if profile.address %}{{ profile.address }}{% else %}-{% endif %}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 " for="id_phone">Email</label>
+                      <div class="col-sm-8  ">
+                 {% if profile.user.email %}{{ profile.user.email }}{% else %}-{% endif %}
+                      
+                    </div>
+                </div>
+             
+                <div class="form-group">
+                    <label class="col-sm-3 " for="id_phone">Phone</label>
+                      <div class="col-sm-8 ">
+                     {% if profile.phone %}{{ profile.phone }}{% else %}-{% endif %}
+                      
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 " for="id_phone">Profile Created</label>
+                      <div class="col-sm-8  ">
+                     {{ profile.created }}
+                      
+                    </div>
+                </div>
+
+         
+            </form>
+       
+    </div>
+      
         </div>
     </div>
+            </p>
+        </div>
+        <div id="questions" class="tab-pane fade">
+            <p>
+            <div class="row well view-profile" style="margin-top: 20px;">
+      
+    {% for question in questions %}
+        <div class="my-question">
+            <span class="title">
+                <a href="{% url 'website:get_question' question.id %}">{{ question.title }}</a>
+            </span>
+            <br>
+            <span class="date">
+                <small>
+                Asked on:
+                {{ question.date_created }}
+                </small>
+            </span>
+        </div>
+    {% endfor %}
+    {% if total > 10 %}
+        <ul class="pagination pull-right">
+            {% for i in total|get_range:"0,10" %}
+                <li>
+                    <a href="{% url 'website:user_questions' user.id %}?marker={{ i }}">
+                        {% if i == marker %}
+                            <strong>{{ i|div:"10"|inc }}</strong>
+                        {% else %}
+                            {{ i|div:"10"|inc }}
+                        {% endif %}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    </div>
+            </p>
+        </div>
+          <div id="answers" class="tab-pane fade">
+            <p>
+            <div class="row well view-profile" style="margin-top: 20px;">
+                
+    {% for answer in answers%}
+        <div class="my-answer">
+            <span class="body">
+                <a href="{% url 'website:get_question' answer.question.id %}#answer{{ answer.id }}">{{ answer.body|safe }}</a>
+            </span>
+
+            <span class="date">
+                <small>
+                Replied on:
+                {{ answer.date_created }}
+                </small>
+            </span>
+        </div>
+    {% endfor %}
+    
+    {% if total > 10 %}
+        <ul class="pagination pull-right">
+            {% for i in total|get_range:"0,10" %}
+                <li>
+                    <a href="{% url 'website:user_answers' user.id %}?marker={{ i }}">
+                        {% if i == marker %}
+                            <strong>{{ i|div:"10"|inc }}</strong>
+                        {% else %}
+                            {{ i|div:"10"|inc }}
+                        {% endif %}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>
+            </p>
+        </div>
+        </div>
+     
+        </div>
+
+    
+  
+
+
+
 {% endblock %}
 
 

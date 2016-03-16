@@ -1,6 +1,6 @@
 #Custom settings
 from os.path import *
-from config import *
+#from config import *
 from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS
 from local import *
 
@@ -190,3 +190,11 @@ RECAPTCHA_PRIVATE_KEY = PRIV_KEY
 RECAPTCHA_USE_SSL = True
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
 EMAIL_URL = "http://forums.fossee.aero.iitb.ac.in"
+EMAIL_USE_TLS = True
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp-auth.iitb.ac.in'
+EMAIL_PORT = 25
+EMAIL_HOST_USER = 't16614'
+EMAIL_HOST_PASSWORD = 'ldap@16614'
+
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

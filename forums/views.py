@@ -131,17 +131,30 @@ def account_profile(request, username):
   
 # view all profile details saved for the user, when clicked on my profile  
 @login_required
-def account_view_profile(request, username):
-    
-    user = User.objects.get(username = username)
-    profile = Profile.objects.filter(user = user)
-    prof = None
-    if profile:
-        prof = profile[0]
-    
+def account_view_profile(request, user_id):
+    # user_id = username
+    user = User.objects.get(pk = user_id)
+    profile = Profile.objects.get(user = user)
+    # prof = None
+    marker = 0
+    if 'marker' in request.GET:
+        marker = int(request.GET['marker'])
+    # if profile:
+    #     prof = profile[0]
+    if str(user_id) == str(request.user.id):
+        total = Question.objects.filter(user_id=user_id).count()
+        total = int(total - (total % 10 - 10))
+        questions = Question.objects.filter(user_id=user_id).order_by('date_created').reverse()[marker:marker+10]
+        total1 = Answer.objects.filter(uid=user_id).count()
+        total1= int(total1 - (total1 % 10 - 10))
+        answers =Answer.objects.filter(uid=user_id).order_by('date_created').reverse()[marker:marker+10]
+
     context = {
         'profile' : profile,
         'media_url' : settings.MEDIA_URL,
+        'questions' : questions,
+        'answers' : answers
+        
     }
     return render(request, 'forums/templates/view-profile.html', context)
     

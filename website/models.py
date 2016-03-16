@@ -65,7 +65,7 @@ class Answer(models.Model):
 
     def user(self):
         user = User.objects.get(id=self.uid)
-        return user.username
+        return user
 
 class AnswerVote(models.Model):
     uid = models.IntegerField()
@@ -80,7 +80,7 @@ class AnswerComment(models.Model):
 
     def user(self):
         user = User.objects.get(id=self.uid)
-        return user.username
+        return user
 
 class Notification(models.Model):
     uid = models.IntegerField()

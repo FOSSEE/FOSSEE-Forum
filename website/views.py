@@ -121,118 +121,137 @@ def question_answer(request,qid):
                 notification.save()
                 
                 user = User.objects.get(id=question.user_id)
-                # Sending email when an answer is posted
-                subject = 'Question has been answered'
-                message = """
-                    Dear {0}<br><br>
-                    Your question titled <b>"{1}"</b> has been answered.<br>
-                    Link: {2}<br><br>
-                    Regards,<br>
-                    Fossee Forums
-                """.format(
-                    user.username, 
-                    question.title, 
-                    'http://forums.fossee.in/question/' + str(question.id) + "#answer" + str(answer.id)
-                )
-                
-                email = EmailMultiAlternatives(
-                    subject,'', 'forums', 
-                    [user.email],
-                    headers={"Content-type":"text/html;charset=iso-8859-1"}
-                )
-                
-                email.attach_alternative(message, "text/html")
-                email.send(fail_silently=True)
-                # End of email send
-	    return HttpResponseRedirect('/question/'+ str(qid) + "#answer" + str(answer.id)) 
-	else:
-		dict_context  = {
-			'question':question,
-			'answers': answers,
-			'form': form
-		}
-		
-	    	return render(request, 'website/templates/get-question.html', dict_context)
-	
-    return HttpResponseRedirect('/') 
-        
+            
+
+            #Sending email when a new question is asked
+            sender_name = "FOSSEE Forums"
+            sender_email = "forums@fossee.in"
+            subject = "FOSSEE Forums - {0} - Your question has been answered".format(question.category)
+	    to = [question.user.email]
+            url = settings.EMAIL_URL
+            message =""" The following new question has been posted in the FOSSEE Forum: \n\n
+                Title: {0}\n
+                Category: {1}\n
+                Link: {2}\n\n
+Regards,\nFOSSEE Team,\nIIT Bombay.
+             """.format(
+                question.title,
+                question.category, 
+                #question.tutorial, 
+                'http://forums.fossee.in/question/' + str(question.id) + "#answer" + str(answer.id)
+            ) 
+
+            send_mail(subject, message, sender_email, to)
+            return HttpResponseRedirect('/')
+    else:
+       
+        category = request.GET.get('category')
+        form = NewQuestionForm(category=category)
+        context['category'] = category
     
+    context['form'] = form
+   
+    context.update(csrf(request))
+    return render(request, 'website/templates/get-question.html', context)   
+
+
 # comments for specific answer and notification is sent to owner of the answer
 # notify other users in the comment thread
 @login_required
 def answer_comment(request):
-	if request.method == 'POST':
-		answer_id = request.POST['answer_id'];
-		answer = Answer.objects.get(pk=answer_id)
-		answers = answer.question.answer_set.all()
-		form = AnswerCommentForm(request.POST)
-		if form.is_valid():
-			body = request.POST['body']
-			comment = AnswerComment()
-			comment.uid = request.user.id
-			comment.answer = answer
-			comment.body = body.encode('unicode_escape')
-			
-			comment.save()
-		  	# notifying the answer owner
-		  	
-			if answer.uid != request.user.id:
-			    notification = Notification()
-			    notification.uid = answer.uid
-			    notification.pid = request.user.id
-			    notification.qid = answer.question.id
-			    notification.aid = answer.id
-			    notification.cid = comment.id
-			    notification.save()
-			    
-			    user = User.objects.get(id=answer.uid)
-			    subject = 'Comment for your answer'
-			    message = """
-				Dear {0}<br><br>
-				A comment has been posted on your answer.<br>
-				Link: {1}<br><br>
-				Regards,<br>
-				FOSSEE Forums
-			    """.format(
-				user.username,
-				"http://forums.fossee.in/question/" + str(answer.question.id) + "#answer" + str(answer.id)
-			    )
-			    forums_mail(user.email, subject, message)
-		  	# notifying other users in the comment thread
-			uids = answer.answercomment_set.filter(answer=answer).values_list('uid', flat=True)
-			#getting distinct uids
-			uids = set(uids) 
-			uids.remove(request.user.id)
-			for uid in uids:
-			    notification = Notification()
-			    notification.uid = uid
-			    notification.pid = request.user.id
-			    notification.qid = answer.question.id
-			    notification.aid = answer.id
-			    notification.cid = comment.id
-			    notification.save()
-			    
-			    user = User.objects.get(id=uid)
-			    subject = 'Comment has a reply'
-			    message = """
-				Dear {0}<br><br>
-				A reply has been posted on your comment.<br>
-				Link: {1}<br><br>
-				Regards,<br>
-				FOSSEE Forums
-			    """.format(
-				user.username,
-				"http://forums.fossee.in/question/" + str(answer.question.id) + "#answer" + str(answer.id)
-			    )
-			    forums_mail(user.email, subject, message)
+    if request.method == 'POST':
+        answer_id = request.POST['answer_id'];
+        answer = Answer.objects.get(pk=answer_id)
+        answers = answer.question.answer_set.all()
+        answer_creator = answer.user()
+        form = AnswerCommentForm(request.POST)
+        if form.is_valid():
+            body = request.POST['body']
+            comment = AnswerComment()
+            comment.uid = request.user.id
+            comment.answer = answer
+            comment.body = body.encode('unicode_escape')
+            
+            comment.save()
+            # notifying the answer owner
+            
+            if answer.uid != request.user.id:
+                notification = Notification()
+                notification.uid = answer.uid
+                notification.pid = request.user.id
+                notification.qid = answer.question.id
+                notification.aid = answer.id
+                notification.cid = comment.id
+                notification.save()
+                
+                user = User.objects.get(id=answer.uid)
+            sender_name = "FOSSEE Forums"
+            sender_email = "forums@fossee.in"
+            subject = "FOSSEE Forums - {0} - Comment for your answer".format(answer.question.category)
+            to = [answer_creator.email]
+            url = settings.EMAIL_URL
+            message =""" 
+                A comment has been posted on your answer. \n\n
+                Title: {0}\n
+                Category: {1}\n
+                Link: {2}\n\n
+Regards,\nFOSSEE Team,\nIIT Bombay.
+             """.format(
+                answer.question.title,
+                answer.question.category, 
+                #question.tutorial, 
+                'http://forums.fossee.in/question/' + str(answer.question.id) + "#answer" + str(answer.id)
+            ) 
+            send_mail(subject, message, sender_email, to)
+            # notifying other users in the comment thread
+            uids = answer.answercomment_set.filter(answer=answer).values_list('uid', flat=True)
+            answer_comments = answer.answercomment_set.filter(answer=answer)
+            comment_creator_emails = []
+            for c in answer_comments:
+                comment_creator = c.user()
+                email = comment_creator.email
+                comment_creator_emails.append(email)
+            #getting distinct uids
+            uids = set(uids)
+            uids.remove(request.user.id)
+            for uid in uids:
+                notification = Notification()
+                notification.uid = uid
+                notification.pid = request.user.id
+                notification.qid = answer.question.id
+                notification.aid = answer.id
+                notification.cid = comment.id
+                notification.save()
+                
+                user = User.objects.get(id=uid)
+            sender_name = "FOSSEE Forums"
+            sender_email = "forums@fossee.in"
+            subject = "FOSSEE Forums - {0} - Comment has a reply".format(answer.question.category)
+            to = comment_creator_emails
+            url = settings.EMAIL_URL
+            message ="""
+                A reply has been posted on your comment.\n\n
+                Title: {0}\n
+                Category: {1}\n
+                Link: {2}\n\n
+Regards,\nFOSSEE Team,\nIIT Bombay.
+             """.format(
+                answer.question.title,
+                answer.question.category, 
+                #question.tutorial, 
+                'http://forums.fossee.in/question/' + str(answer.question.id) + "#answer" + str(answer.id)
+            )
 
-    			return HttpResponseRedirect("/question/" + str(answer.question.id))
-	context = {}
-    	context.update(csrf(request))
-    	context.update({'form':form,
-	'question':answer.question,
-	'answers':answers})
-        return render(request, 'website/templates/get-question.html', context)
+            send_mail(subject, message, sender_email, to)                
+            return HttpResponseRedirect("/question/" + str(answer.question.id))
+    context = {}
+    context.update(csrf(request))
+    context.update({'form':form,
+       'question':answer.question,
+       'answers':answers})
+    return render(request, 'website/templates/get-question.html', context)
+
+
 
 def filter(request,  category=None, tutorial=None, minute_range=None, second_range=None):
     dict_context = {}
@@ -285,7 +304,7 @@ def new_question(request):
             sender_name = "FOSSEE Forums"
             sender_email = "forums@fossee.in"
             subject = "FOSSEE Forums - {0} - New Question".format(question.category)
-            to = ('team@fossee.in', )
+            to = ('priyanka@fossee.in', )
             url = settings.EMAIL_URL
             message =""" The following new question has been posted in the FOSSEE Forum: \n\n
                 Title: {0}\n
@@ -698,7 +717,7 @@ def unanswered_notification(request):
                 question.category,
                 'http://forums.fossee.in/question/' + str(question.id)
             )
-    to = "team@fossee.in"
+    to = "priyanka@fossee.in"
     subject = "Unanswered questions in the forums."
     if total_count:
         forums_mail(to, subject, message)
