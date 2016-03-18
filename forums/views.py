@@ -88,6 +88,8 @@ def account_profile(request, username):
         if form.is_valid():
             user.first_name = request.POST['first_name']
             user.last_name = request.POST['last_name']
+            profile.address = request.POST['address']
+            profile.phone = request.POST['phone']
             user.save()
             form_data = form.save(commit=False)
             form_data.user_id = user.id
@@ -100,7 +102,10 @@ def account_profile(request, username):
             # if 'picture' in request.FILES:
             #     form_data.picture = request.FILES['picture']
             
-            form_data.save()
+            #form_data.save()
+            #profile.address = address
+            #profile.phone = phone
+            profile.save()
             
             """if 'picture' in request.FILES:
                 size = 128, 128
@@ -118,7 +123,7 @@ def account_profile(request, username):
                     form_data.thumb = 'user/' + str(user.id)+ '/' + str(user.id) + '-thumb.' + ext
                     form_data.save()"""
             messages.success(request, "Your profile has been updated!")
-            return HttpResponseRedirect("/accounts/view-profile/" + user.username)
+            return HttpResponseRedirect("/accounts/view-profile/{0}".format(user.id))
         
         context = {'form':form}
         return render(request, 'forums/templates/profile.html', context)
@@ -127,8 +132,7 @@ def account_profile(request, username):
         context.update(csrf(request))
         instance = Profile.objects.get(user_id=user.id)
         context['form'] = ProfileForm(user, instance = instance)
-        return render(request, 'forums/templates/profile.html', context)
-  
+        return render(request, 'forums/templates/profile.html', context) 
 # view all profile details saved for the user, when clicked on my profile  
 @login_required
 def account_view_profile(request, user_id):
