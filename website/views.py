@@ -13,8 +13,8 @@ from django.contrib.auth import get_user_model
 from django.conf import settings
 
 User = get_user_model()
-
-from website.models import Question, Answer, Notification, AnswerComment, FossCategory
+  
+from website.models import Question, Answer, Notification, AnswerComment, FossCategory, Profile
 from spoken_auth.models import TutorialDetails, TutorialResources
 from website.forms import NewQuestionForm, AnswerQuestionForm,AnswerCommentForm
 from website.helpers import get_video_info, prettify
@@ -252,6 +252,22 @@ Regards,\nFOSSEE Team,\nIIT Bombay.
     return render(request, 'website/templates/get-question.html', context)
 
 
+def visit_profile(request):
+    uids = answer.answercomment_set.filter(answer=answer).values_list('uid', flat=True)
+    answer_comments = answer.answercomment_set.filter(answer=answer)
+    profile_list=[]
+    for c in answer_comments:
+        comment_creator = c.user()
+        profile_ids = comment_creator.uid
+        profile_list.append(profile_ids)
+
+    profiles = Question.objects.all()
+
+    context = {
+        'profile_obj' :profiles
+    }
+
+    return render(request, 'website/templates/temporary_profile.html', context)
 
 def filter(request,  category=None, tutorial=None, minute_range=None, second_range=None):
     dict_context = {}
@@ -722,4 +738,3 @@ def unanswered_notification(request):
     if total_count:
         forums_mail(to, subject, message)
     return HttpResponse(message)
-
