@@ -88,7 +88,7 @@
             </small>
             
             <span class="user">
-                {{ question.user }}
+                <a href="/accounts/view-profile/{{ question.user.id }}"> {{question.user}} </a>
             </span>
         </span>
        
@@ -150,7 +150,7 @@
                 </small>
                 
                 <span class="user" style="background-color: #FFFFFF;padding: 2px 7px">
-                    {{ answer.user }}
+                    <a href="/accounts/view-profile/{{ answer.user.id }}"> {{answer.user}} </a>
                 </span>
             </span>
             {% if user|can_edit:answer  %}
@@ -179,14 +179,14 @@
                         </small>
                         
                         <span style="padding: 2px 7px">
-                            {{ comment.user }}
+                            <a href="/accounts/view-profile/{{ comment.user.id }}"> {{comment.user}} </a>
                         </span>
                     </span>
                     {% if user|can_edit:comment %}
                     <div class="modify-wrapper">
                         <span class="modify" style="display:block">
                             <a class="edit btn btn-xs btn-info vs" href="#cbody{{ comment.id }}" data-target="cbody{{ comment.id }}">Edit</a>
-                            <a class="save btn btn-xs btn-success vs"  data-target="cbody{{ comment.id }}" data-cid="{{ comment.id }}" href="#">Save</a>
+                            <a class="save btn btn-xs btn-success vs"  data-target="cbody{{ comment.id }}" data-cid="{{ user.id }}" href="#">Save</a>
                         </span>
                     </div>
                     {% endif %}
