@@ -251,24 +251,6 @@ Regards,\nFOSSEE Team,\nIIT Bombay.
        'answers':answers})
     return render(request, 'website/templates/get-question.html', context)
 
-
-def visit_profile(request):
-    uids = answer.answercomment_set.filter(answer=answer).values_list('uid', flat=True)
-    answer_comments = answer.answercomment_set.filter(answer=answer)
-    profile_list=[]
-    for c in answer_comments:
-        comment_creator = c.user()
-        profile_ids = comment_creator.uid
-        profile_list.append(profile_ids)
-
-    profiles = Question.objects.all()
-
-    context = {
-        'profile_obj' :profiles
-    }
-
-    return render(request, 'website/templates/temporary_profile.html', context)
-
 def filter(request,  category=None, tutorial=None, minute_range=None, second_range=None):
     dict_context = {}
     context = {
