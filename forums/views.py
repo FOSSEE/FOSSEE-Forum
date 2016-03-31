@@ -157,17 +157,22 @@ def account_view_profile(request, user_id):
     if str(user_id) == str(request.user.id):
          flag = True
 
+
+    instance = Profile.objects.get(user_id=user.id)
+    form = ProfileForm(user, instance = instance)
     context = {
         'show': flag,
         'profile' : profile,
         'media_url' : settings.MEDIA_URL,
         'questions' : questions,
-        'answers' : answers
+        'answers' : answers,
+        'form' : form,
+        'user':user,
         
     }
     return render(request, 'forums/templates/view-profile.html', context)
     
-        
+    
                 
 # send confirm registration link    
 def send_registration_confirmation(user):

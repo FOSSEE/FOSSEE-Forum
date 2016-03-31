@@ -106,7 +106,12 @@ def question_answer(request,qid):
         if form.is_valid():
             cleaned_data = form.cleaned_data
             qid = cleaned_data['question']
-            body = cleaned_data['body']
+            body = str(cleaned_data['body'])
+            #print body
+            body = body.replace("\\r", '')
+            body = body.replace("\\n", '')
+            body = body.replace("\\t", '')
+            #print body       
             answer.question = question
             answer.body = body.encode('unicode_escape')
             answer.save()
@@ -167,6 +172,11 @@ def answer_comment(request):
         form = AnswerCommentForm(request.POST)
         if form.is_valid():
             body = request.POST['body']
+            body = str(body)
+        
+            body = body.replace("\\r", '')
+            body = body.replace("\\n", '')
+            body = body.replace("\\t", '') 
             comment = AnswerComment()
             comment.uid = request.user.id
             comment.answer = answer
@@ -294,7 +304,12 @@ def new_question(request):
             question.user = request.user
             question.category = cleaned_data['category']
             question.title = cleaned_data['title']
-            question.body = cleaned_data['body'].encode('unicode_escape')
+            question.body = cleaned_data['body']
+            #print body
+            question.body = question.body.replace("\\r", '')
+            question.body = question.body.replace("\\n", '')
+            question.body = question.body.replace("\\t", '')
+            #print body 
             question.views= 1 
             question.save()
             print(question.category) 
