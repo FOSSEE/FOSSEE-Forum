@@ -167,7 +167,7 @@ def account_view_profile(request, user_id):
         'questions' : questions,
         'answers' : answers,
         'form' : form,
-        'user':user,
+        'user_show':user,
         
     }
     return render(request, 'forums/templates/view-profile.html', context)
