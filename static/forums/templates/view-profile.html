@@ -10,10 +10,8 @@
 {% block heading %}
         <i class="fa fa-list-ul"></i> User Profile
 {% endblock %}
-
 {% block content %}
 <br><br>
-  
 
   <div class="col-lg-12 ">
       
@@ -26,8 +24,12 @@ My Profile</a></li>
 My Questions</a></li>
         <li><a data-toggle="tab"href="#answers"><span ><i class="fa fa-check-circle"></i>
 </span>
-My Answers</a></li>    
-            </ul>
+My Answers</a></li>  
+        {% if show %}
+        <li><a data-toggle="tab" href="#profile_edit"><span ><i class="fa fa-user"></i></span>
+        Edit Profile</a></li>   
+        {% endif %}
+    </ul>
     <div class="tab-content">
         <!--<div id="sectionA" class="tab-pane fade in active">
             <p>Section A content…</p>
@@ -37,10 +39,11 @@ My Answers</a></li>
         </div>-->
         <div id="profile" class="tab-pane fade in active">
             <p>
-      <div class="row well view-profile" style="margin-top: 20px;">
-        <div class="col-sm-12">
+             <div class="row well view-profile" style="margin-top: 20px;">
+            <div class="col-sm-12">
 
-        <div class="col-sm-12">
+            <div class="col-sm-12">
+          
             <form class="form-signin form-horizontal  control-label " role="form" id="login_form" method="post" enctype="multipart/form-data">{% csrf_token %}
                 {{ form.errors }}
                 <div class="form-group">
@@ -62,27 +65,34 @@ My Answers</a></li>
                       {% if profile.user.last_name %}{{ profile.user.last_name }}{% else %}-{% endif %}
                     </div>
                 </div>
+
+                {% if show %}
                 <div class="form-group">
                     <label class="col-sm-3 " for= "id_street">Address</label>
                      <div class="col-sm-8  ">
                     {% if profile.address %}{{ profile.address }}{% else %}-{% endif %}
                     </div>
                 </div>
+                {% endif %}
+
+                {% if show %}
                 <div class="form-group">
                     <label class="col-sm-3 " for="id_phone">Email</label>
                       <div class="col-sm-8  ">
                  {% if profile.user.email %}{{ profile.user.email }}{% else %}-{% endif %}
-                      
                     </div>
                 </div>
-             
+                {% endif %}
+
+                {% if show %}
                 <div class="form-group">
                     <label class="col-sm-3 " for="id_phone">Phone</label>
                       <div class="col-sm-8 ">
                      {% if profile.phone %}{{ profile.phone }}{% else %}-{% endif %}
-                      
-                    </div>
+                      </div>
                 </div>
+                {% endif%}
+
                 <div class="form-group">
                     <label class="col-sm-3 " for="id_phone">Profile Created</label>
                       <div class="col-sm-8  ">
@@ -100,6 +110,22 @@ My Answers</a></li>
     </div>
             </p>
         </div>
+
+<div id="profile_edit" class="tab-pane fade ">
+    <div class="row well view-profile" style="margin-top: 20px;">
+        <div class="col-sm-12">
+            <div class="col-sm-12">
+    {% if show %}
+    <form class="form-signin form-horizontal" action="/accounts/profile/{{user.username}}/" method="post" enctype="multipart/form-data">{% csrf_token %}
+    {{ form.as_p }}
+        <input class="btn btn-primary" type="submit" value="Submit" />
+    </form>
+    {%  endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
         <div id="questions" class="tab-pane fade">
             <p>
             <div class="row well view-profile" style="margin-top: 20px;">
@@ -109,7 +135,7 @@ My Answers</a></li>
             <span class="title">
                 <a href="{% url 'website:get_question' question.id %}">{{ question.title }}</a>
             </span>
-            <br>
+            <br />
             <span class="date">
                 <small>
                 Asked on:
@@ -145,7 +171,7 @@ My Answers</a></li>
             <span class="body">
                 <a href="{% url 'website:get_question' answer.question.id %}#answer{{ answer.id }}">{{ answer.body|safe }}</a>
             </span>
-
+            <br> <br>
             <span class="date">
                 <small>
                 Replied on:

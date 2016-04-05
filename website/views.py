@@ -13,8 +13,8 @@ from django.contrib.auth import get_user_model
 from django.conf import settings
 
 User = get_user_model()
-
-from website.models import Question, Answer, Notification, AnswerComment, FossCategory
+  
+from website.models import Question, Answer, Notification, AnswerComment, FossCategory, Profile
 from spoken_auth.models import TutorialDetails, TutorialResources
 from website.forms import NewQuestionForm, AnswerQuestionForm,AnswerCommentForm
 from website.helpers import get_video_info, prettify
@@ -106,7 +106,12 @@ def question_answer(request,qid):
         if form.is_valid():
             cleaned_data = form.cleaned_data
             qid = cleaned_data['question']
-            body = cleaned_data['body']
+            body = str(cleaned_data['body'])
+            #print body
+            body = body.replace("\\r", '')
+            body = body.replace("\\n", '')
+            body = body.replace("\\t", '')
+            #print body       
             answer.question = question
             answer.body = body.encode('unicode_escape')
             answer.save()
@@ -167,6 +172,11 @@ def answer_comment(request):
         form = AnswerCommentForm(request.POST)
         if form.is_valid():
             body = request.POST['body']
+            body = str(body)
+        
+            body = body.replace("\\r", '')
+            body = body.replace("\\n", '')
+            body = body.replace("\\t", '') 
             comment = AnswerComment()
             comment.uid = request.user.id
             comment.answer = answer
@@ -251,8 +261,6 @@ Regards,\nFOSSEE Team,\nIIT Bombay.
        'answers':answers})
     return render(request, 'website/templates/get-question.html', context)
 
-
-
 def filter(request,  category=None, tutorial=None, minute_range=None, second_range=None):
     dict_context = {}
     context = {
@@ -296,7 +304,12 @@ def new_question(request):
             question.user = request.user
             question.category = cleaned_data['category']
             question.title = cleaned_data['title']
-            question.body = cleaned_data['body'].encode('unicode_escape')
+            question.body = cleaned_data['body']
+            #print body
+            question.body = question.body.replace("\\r", '')
+            question.body = question.body.replace("\\n", '')
+            question.body = question.body.replace("\\t", '')
+            #print body 
             question.views= 1 
             question.save()
             print(question.category) 
@@ -722,4 +735,3 @@ def unanswered_notification(request):
     if total_count:
         forums_mail(to, subject, message)
     return HttpResponse(message)
-

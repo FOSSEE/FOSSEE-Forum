@@ -139,30 +139,40 @@ def account_view_profile(request, user_id):
     # user_id = username
     user = User.objects.get(pk = user_id)
     profile = Profile.objects.get(user = user)
+    flag = False
     # prof = None
     marker = 0
     if 'marker' in request.GET:
         marker = int(request.GET['marker'])
     # if profile:
     #     prof = profile[0]
-    if str(user_id) == str(request.user.id):
-        total = Question.objects.filter(user_id=user_id).count()
-        total = int(total - (total % 10 - 10))
-        questions = Question.objects.filter(user_id=user_id).order_by('date_created').reverse()[marker:marker+10]
-        total1 = Answer.objects.filter(uid=user_id).count()
-        total1= int(total1 - (total1 % 10 - 10))
-        answers =Answer.objects.filter(uid=user_id).order_by('date_created').reverse()[marker:marker+10]
+    
+    total = Question.objects.filter(user_id=user_id).count()
+    total = int(total - (total % 10 - 10))
+    questions = Question.objects.filter(user_id=user_id).order_by('date_created').reverse()[marker:marker+10]
+    total1 = Answer.objects.filter(uid=user_id).count()
+    total1= int(total1 - (total1 % 10 - 10))
+    answers =Answer.objects.filter(uid=user_id).order_by('date_created').reverse()[marker:marker+10]
 
+    if str(user_id) == str(request.user.id):
+         flag = True
+
+
+    instance = Profile.objects.get(user_id=user.id)
+    form = ProfileForm(user, instance = instance)
     context = {
+        'show': flag,
         'profile' : profile,
         'media_url' : settings.MEDIA_URL,
         'questions' : questions,
-        'answers' : answers
+        'answers' : answers,
+        'form' : form,
+        'user':user,
         
     }
     return render(request, 'forums/templates/view-profile.html', context)
     
-        
+    
                 
 # send confirm registration link    
 def send_registration_confirmation(user):

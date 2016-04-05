@@ -80,7 +80,8 @@ bkLib.onDomLoaded(function() {
     /* your code */
     var c2= "{{ category }}";
     if(c2 != "None"){
-     $("#id_category").val(c2);   
+     $("#id_category").val(c2);
+     $("#id_category option:not(:selected)").prop('disabled',true);
     }
 
 
