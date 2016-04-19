@@ -1,24 +1,35 @@
 from django import forms
-
 from website.models import *
 #from spoken_auth.models import TutorialDetails
 from django.db.models import Q
 class NewQuestionForm(forms.ModelForm):
     category = forms.ModelChoiceField(widget = forms.Select(attrs = {}), 
-    					queryset = FossCategory.objects.order_by('name'), 
-    					empty_label = "Select a Foss category", 
-    					required = True,
-    					error_messages = {'required':'Select a category.'})
-    					
+                        queryset = FossCategory.objects.order_by('name'), 
+                        empty_label = "Select a Foss category", 
+                        required = True,
+                        error_messages = {'required':'Select a category.'})
+                        
     title = forms.CharField(widget=forms.TextInput(),
-    					required = True,
-    					error_messages = {'required':'Title field required.'})
-    					
+                        required = True,
+                        error_messages = {'required':'Title field required.'})
+                        
     body = forms.CharField(widget=forms.Textarea(),
-    		required = True,
-    		error_messages = {'required':'question field required.'}
-    		)
+            required = True,
+            error_messages = {'required':'question field required.'})
     
+    def clean_title(self):
+        title = self.cleaned_data['title']
+        print title
+        if not title.strip():
+           raise forms.ValidationError("Can not be only Spaces")
+        return title
+    
+    def clean_body(self):
+        body = self.cleaned_data['body']
+        if not body.strip():
+            raise forms.ValidationError("Can not be only Spaces")
+        return body
+
     class Meta:
         model = Question
         fields = ['category', 'title', 'body']
@@ -30,9 +41,9 @@ class NewQuestionForm(forms.ModelForm):
 class AnswerQuestionForm(forms.ModelForm):
     question = forms.IntegerField(widget=forms.HiddenInput())
     body = forms.CharField(widget=forms.Textarea(),
-    		required = True,
-    		error_messages = {'required':'Answer field required.'}
-    		)
+            required = True,
+            error_messages = {'required':'Answer field required.'}
+            )
     class Meta:
         model = Question
         fields = ['question', 'body']

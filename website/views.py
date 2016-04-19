@@ -11,6 +11,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
 from django.conf import settings
+from django.contrib import messages 
 
 User = get_user_model()
   
@@ -37,17 +38,9 @@ def home(request):
 # to get all questions posted till now and pagination, 20 questions at a time
 def questions(request):
     questions = Question.objects.all().order_by('date_created').reverse()
-    paginator = Paginator(questions, 20)
-    page = request.GET.get('page')
-    
-    try:
-        questions = paginator.page(page)
-    except PageNotAnInteger:
-        questions = paginator.page(1)
-    except EmptyPage:
-        questions = paginator.page(paginator.num_pages)
+   
     context = {
-        'questions': questions
+        'questions': questions,
     }
     
     return render(request, 'website/templates/questions.html', context)
@@ -297,6 +290,7 @@ def new_question(request):
     user = request.user
     if request.method == 'POST':
         form = NewQuestionForm(request.POST)
+        print request.POST
         if form.is_valid():
            
             cleaned_data = form.cleaned_data
@@ -305,7 +299,6 @@ def new_question(request):
             question.category = cleaned_data['category']
             question.title = cleaned_data['title']
             question.body = cleaned_data['body']
-            #print body
             question.body = question.body.replace("\\r", '')
             question.body = question.body.replace("\\n", '')
             question.body = question.body.replace("\\t", '')
@@ -317,7 +310,7 @@ def new_question(request):
             sender_name = "FOSSEE Forums"
             sender_email = "forums@fossee.in"
             subject = "FOSSEE Forums - {0} - New Question".format(question.category)
-            to = ('priyanka@fossee.in', )
+            to = ('forums@fossee.in', )
             url = settings.EMAIL_URL
             message =""" The following new question has been posted in the FOSSEE Forum: \n\n
                 Title: {0}\n
@@ -333,14 +326,17 @@ Regards,\nFOSSEE Team,\nIIT Bombay.
 
             send_mail(subject, message, sender_email, to)
             return HttpResponseRedirect('/')
+        else:
+             context.update(csrf(request))
+             context['form'] = form
+             return render(request, 'website/templates/new-question.html', context)
     else:
        
         category = request.GET.get('category')
         form = NewQuestionForm(category=category)
         context['category'] = category
     
-    context['form'] = form
-   
+    context['form'] = form   
     context.update(csrf(request))
     return render(request, 'website/templates/new-question.html', context)
 
@@ -730,7 +726,7 @@ def unanswered_notification(request):
                 question.category,
                 'http://forums.fossee.in/question/' + str(question.id)
             )
-    to = "priyanka@fossee.in"
+    to = "forums@fossee.in"
     subject = "Unanswered questions in the forums."
     if total_count:
         forums_mail(to, subject, message)
