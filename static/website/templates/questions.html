@@ -9,7 +9,7 @@
 
 	    $(document).ready(function()
 		{
-		$("#myTable").tablesorter();
+		$("#myTable").DataTable();
 		}
 	    );
 
@@ -17,7 +17,6 @@
 
     <h4> 
         <h5>
-            Showing {{ questions.start_index }} - {{ questions.end_index }} of {{ questions.paginator.count }} questions.
         </h5>
     </h4>
        <table id="myTable" class="tablesorter-blue">
