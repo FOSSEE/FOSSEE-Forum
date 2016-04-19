@@ -7,7 +7,7 @@
         </span> Create a new question . . .
     </h4>
     <hr>
-    <form role="form" action="" method="POST">{% csrf_token %}
+    <form role="form" action="" method="POST" onsubmit="return validate();">{% csrf_token %}
     {% with WIDGET_ERROR_CLASS='field_error' %}
     <p>
     Please enter the FOSS details.
@@ -39,7 +39,7 @@
             </div>
             {{ form.body.errors }}
             <div class="form-group">
-                <label for="id_body">Question:</label>
+                <label for="id_body" >Question:</label>
                 {% render_field form.body class+="form-control body" %}
             </div>
            
@@ -66,12 +66,15 @@
 
 <script src="{% static 'website/js/nicEdit.js' %}" type="text/javascript"></script>
 <script type="text/javascript">
+function validate() {
+    // return false
+
 bkLib.onDomLoaded(function() {
 	new nicEditor({
         iconsPath: "{% static 'website/js/nicEditorIcons.gif' %}",
         buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link', 'forecolor', 'bgcolor']
     }).panelInstance('id_body');
-});
+}); }
 </script>
 
 <script>
@@ -81,11 +84,10 @@ bkLib.onDomLoaded(function() {
     var c2= "{{ category }}";
     if(c2 != "None"){
      $("#id_category").val(c2);
-     $("#id_category option:not(:selected)").prop('disabled',true);
     }
-
-
 }
+   
+
 
 </script>
 
