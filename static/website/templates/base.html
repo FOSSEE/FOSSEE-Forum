@@ -1,4 +1,3 @@
-{% load compress %}
 
 {% load static %}
 <html>
@@ -8,7 +7,7 @@
             FOSSEE Forums
             {% endblock %}
         </title>
-        {% compress css %}
+    <link rel="stylesheet" href="{% static 'website/css/codemirror.css' %}" type="text/css" media="screen" charset="utf-8" />
          <link rel="stylesheet" href="{% static 'website/css/font-awesome.css' %}" type="text/css" media="screen" charset="utf-8" />
         <link rel="stylesheet" href="{% static 'website/css/yamm-min.css' %}" type="text/css" media="screen" charset="utf-8" />
         <link rel="stylesheet" href="{% static 'website/css/base.css' %}" type="text/css" media="screen" charset="utf-8" />
@@ -18,7 +17,7 @@
 	<link rel="stylesheet" href="{% static 'website/css/login.css' %}" type="text/css" media="screen" charset="utf-8" />
 	<link rel="stylesheet" href="{% static 'website/css/theme.blue.css' %}" type="text/css" media="screen" charset="utf-8" />
 
-        {% endcompress %}
+
         <link rel="stylesheet" type="text/css" href="{% static 'website/css/dataTables.bootstrap.min.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'website/css/bootstrap.min.css' %}">
 	<script src="{% static 'website/js/jquery-1.12.0.min.js' %}"></script>
@@ -134,14 +133,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         </div> <!-- /#footer-wrapper -->
     </div> <!-- /#page-wrapper -->
         
-    {% compress js %}
+    
         <script src="{% static 'website/js/bootstrap.min.js' %}"></script>
         <script src="{% static 'website/slick/slick.min.js' %}"></script>
         <script src="{% static 'website/js/nice-bar.js' %}"></script>
         {% block javascript %}
             <!-- overide with custom javascript -->
         {% endblock %}
-    {% endcompress %}
+  
     </body>
 </html>
 

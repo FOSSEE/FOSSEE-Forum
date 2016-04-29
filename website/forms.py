@@ -19,15 +19,18 @@ class NewQuestionForm(forms.ModelForm):
     
     def clean_title(self):
         title = self.cleaned_data['title']
-        print title
         if not title.strip():
            raise forms.ValidationError("Can not be only Spaces")
+        if len(title) < 3:
+            raise forms.ValidationError("Title more than 3 characters")
         return title
     
     def clean_body(self):
         body = self.cleaned_data['body']
         if not body.strip():
             raise forms.ValidationError("Can not be only Spaces")
+        if len(body) < 30:
+            raise forms.ValidationError("Question more than 50 characters")
         return body
 
     class Meta:

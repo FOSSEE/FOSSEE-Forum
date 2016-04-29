@@ -36,8 +36,6 @@ class Question(models.Model):
     def __unicode__(self):
              return '%s' % (self.user)
 	
-		
-        
     class Meta:
         get_latest_by = "date_created"
 

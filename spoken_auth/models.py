@@ -12,7 +12,7 @@ class Users(AbstractBaseUser):
     is_active = models.BooleanField()
     USERNAME_FIELD = 'username'
     class Meta:
-        db_table = 'auth_user'
+        app_label = 'auth_user'
 
 class FossCategory(models.Model):
     foss = models.CharField(unique=True, max_length = 255)
@@ -21,14 +21,14 @@ class FossCategory(models.Model):
     created = models.DateTimeField(auto_now_add = True)
     updated = models.DateTimeField(auto_now = True)
     class Meta:
-        db_table = 'creation_fosscategory'
+         app_label= 'creation_fosscategory'
 
 class Language(models.Model):
     name = models.CharField(max_length = 255, unique = True)
     created = models.DateTimeField(auto_now_add = True)
     updated = models.DateTimeField(auto_now = True)
     class Meta:
-        db_table = 'creation_language'
+        app_label = 'creation_language'
 
 class TutorialDetails(models.Model):
     foss = models.ForeignKey(FossCategory)
@@ -38,7 +38,7 @@ class TutorialDetails(models.Model):
     updated = models.DateTimeField(auto_now = True)
 
     class Meta:
-        db_table = 'creation_tutorialdetail'
+        app_label = 'creation_tutorialdetail'
 
 class TutorialResources(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -48,4 +48,4 @@ class TutorialResources(models.Model):
     status = models.PositiveSmallIntegerField(default = 0)
 
     class Meta:
-        db_table = 'creation_tutorialresource'
+        app_label = 'creation_tutorialresource'

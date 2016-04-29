@@ -56,7 +56,7 @@
         
         <div id="questionNicPanel"></div>
         <div id="{% if user|can_edit:question  %}questionInstance{% endif %}" class="body"  style="margin-left : 60px">
-            {{ question.body|safe }}
+            <pre>{{ question.body|safe }}</pre> 
         </div>
         <br>
         

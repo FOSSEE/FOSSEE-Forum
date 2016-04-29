@@ -21,6 +21,7 @@ from website.forms import NewQuestionForm, AnswerQuestionForm,AnswerCommentForm
 from website.helpers import get_video_info, prettify
 from django.db.models import Count
 from django.core.mail import send_mail
+import datetime
 
 admins = (
    9, 4376, 4915, 14595, 12329, 22467, 5518, 30705
@@ -310,7 +311,7 @@ def new_question(request):
             sender_name = "FOSSEE Forums"
             sender_email = "forums@fossee.in"
             subject = "FOSSEE Forums - {0} - New Question".format(question.category)
-            to = ('forums@fossee.in', )
+            to = ('priyanka@fossee.in', )
             url = settings.EMAIL_URL
             message =""" The following new question has been posted in the FOSSEE Forum: \n\n
                 Title: {0}\n
@@ -339,6 +340,48 @@ Regards,\nFOSSEE Team,\nIIT Bombay.
     context['form'] = form   
     context.update(csrf(request))
     return render(request, 'website/templates/new-question.html', context)
+
+
+# daily notifications for unanswered questions.
+def unanswered_notification(request):
+    questions = Question.objects.all()
+    total_count = 0
+    for question in questions:
+        if not question.answer_set.count():
+            total_count += 1
+            now = datetime.datetime.utcnow()
+            timediff = now - question.date_created
+            difference = timediff.total_seconds()
+            if difference > '24:07:25.235168':
+                sender_email = "forums@fossee.in"
+                message += """
+                    The following questions are left unanswered.
+                    Please take a look at them. <br><br>
+                    #{0}<br>
+                    Title: <b>{1}</b><br>
+                    Category: <b>{2}</b><br>
+                    Link: <b>{3}</b><br>
+                    <hr>
+                """.format(
+                    total_count,
+                    question.title,
+                    question.category,
+                    'http://forums.fossee.in/question/' + str(question.id)
+                )
+            to = "priyanka@fossee.in"
+            subject = "Unanswered questions in the forums."
+            if total_count:
+                send_mail(subject, message, sender_email, to)
+            return HttpResponseRedirect('/')
+        
+        else:
+             context.update(csrf(request))
+             context['form'] = form
+             return render(request, 'website/templates/base.html', context)
+
+    context['form'] = form   
+    context.update(csrf(request))
+    return render(request, 'website/templates/base.html', context)
 
 # return number of votes and initial votes
 # user who asked the question,cannot vote his/or anwser, 
@@ -692,42 +735,14 @@ def ajax_vote(request):
     pass
     
 # to send email
-def forums_mail(to = '', subject='', message=''):
-    # Start of email send
-    email = EmailMultiAlternatives(
-        subject,'', 'forums', 
-        to.split(','),
-        headers={"Content-type":"text/html;charset=iso-8859-1"}
-    )
-    email.attach_alternative(message, "text/html")
-    email.send(fail_silently=True)
-    # End of email send
+# def forums_mail(to = '', subject='', message=''):
+#     # Start of email send
+#     email = EmailMultiAlternatives(
+#         subject,'', 'forums', 
+#         to.split(','),
+#         headers={"Content-type":"text/html;charset=iso-8859-1"}
+#     )
+#     email.attach_alternative(message, "text/html")
+#     email.send(fail_silently=True)
+#     # End of email send
 
-# daily notifications for unanswered questions.
-def unanswered_notification(request):
-    questions = Question.objects.all()
-    total_count = 0
-    message = """ 
-        The following questions are left unanswered.
-        Please take a look at them. <br><br>
-    """
-    for question in questions:
-        if not question.answer_set.count():
-            total_count += 1
-            message += """ 
-                #{0}<br>
-                Title: <b>{1}</b><br>
-                Category: <b>{2}</b><br>
-                Link: <b>{3}</b><br>
-                <hr>
-            """.format(
-                total_count,
-                question.title,
-                question.category,
-                'http://forums.fossee.in/question/' + str(question.id)
-            )
-    to = "forums@fossee.in"
-    subject = "Unanswered questions in the forums."
-    if total_count:
-        forums_mail(to, subject, message)
-    return HttpResponse(message)

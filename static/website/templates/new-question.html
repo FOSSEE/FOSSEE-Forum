@@ -14,7 +14,7 @@
         <img id="ajax-loader" src="{% static 'website/images/ajax-loader.gif' %}" style="display:none;">
     </p>
     <div class="row">
-    	{{ form.category.errors }}
+        {{ form.category.errors }}
         <div class="col-lg-3 col-md-3 col-sm-3">
             {% render_field form.category class+="form-control category"%} 
         </div>
@@ -68,9 +68,8 @@
 <script type="text/javascript">
 function validate() {
     // return false
-
 bkLib.onDomLoaded(function() {
-	new nicEditor({
+    new nicEditor({
         iconsPath: "{% static 'website/js/nicEditorIcons.gif' %}",
         buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link', 'forecolor', 'bgcolor']
     }).panelInstance('id_body');
@@ -78,7 +77,6 @@ bkLib.onDomLoaded(function() {
 </script>
 
 <script>
-
  window.onload = function() {
     /* your code */
     var c2= "{{ category }}";
@@ -87,8 +85,6 @@ bkLib.onDomLoaded(function() {
     }
 }
    
-
-
 </script>
 
 {% endblock %}
