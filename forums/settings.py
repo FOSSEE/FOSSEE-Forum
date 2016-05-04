@@ -143,6 +143,7 @@ ROOT_URLCONF = 'forums.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'forums.wsgi.application'
+DJANGO_WYSIWYG_FLAVOR = "ckeditor"
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -165,6 +166,8 @@ INSTALLED_APPS = (
     'kombu.transport.django',
     'djangocodemirror',
     'post_office',
+    'django_wysiwyg',
+    'tinymce',
     # 'djcelery.transport',
     # 'djkombu',
     #'migrate_spoken',
@@ -211,13 +214,23 @@ RECAPTCHA_USE_SSL = True
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
 
 EMAIL_URL = "http://forums.fossee.aero.iitb.ac.in"
-EMAIL_USE_TLS = True
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
-EMAIL_HOST = 'smtp-auth.iitb.ac.in'
-EMAIL_PORT = 25
-EMAIL_HOST_USER = 't16614'
-EMAIL_HOST_PASSWORD = 'ldap@16614'
+# EMAIL_HOST = 'smtp-auth.iitb.ac.in'
+# EMAIL_PORT = 25
+# EMAIL_HOST_USER = 't16614'
+# EMAIL_HOST_PASSWORD = 'ldap@16614'
+# EMAIL_USE_TLS = True
+# DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+#this setting is for smtp dummy server for testing purpose
+ACCOUNT_ACTIVATION_DAYS = 7
+EMAIL_HOST = 'localhost'
+EMAIL_PORT = 1025
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+EMAIL_USE_TLS = False
+DEFAULT_FROM_EMAIL = 'testing@example.com'
+
 SERVER_EMAIL = EMAIL_HOST_USER

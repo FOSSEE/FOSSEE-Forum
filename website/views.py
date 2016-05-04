@@ -128,7 +128,7 @@ def question_answer(request,qid):
             subject = "FOSSEE Forums - {0} - Your question has been answered".format(question.category)
 	    to = [question.user.email]
             url = settings.EMAIL_URL
-            message =""" The following new question has been posted in the FOSSEE Forum: \n\n
+            message =""" The following answer has been posted in the FOSSEE Forum: \n\n
                 Title: {0}\n
                 Category: {1}\n
                 Link: {2}\n\n

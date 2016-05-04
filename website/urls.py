@@ -3,6 +3,7 @@ from website import views
 
 urlpatterns = [
     url(r'^$', views.home, name='home'),
+    url(r'^tinymce/', include('tinymce.urls')),
     url(r'^questions/$', views.questions, name='questions'),
     url(r'^question/(?P<question_id>\d+)/$', views.get_question, name='get_question'),
     url(r'^question/(?P<question_id>\d+)/(?P<pretty_url>.+)/$', views.get_question, name='get_question'),

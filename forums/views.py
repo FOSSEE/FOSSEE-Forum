@@ -29,7 +29,7 @@ def account_register(request):
             password = request.POST['password']
             email = request.POST['email']
             user = User.objects.create_user(username, email, password)
-            user.is_active = True
+            user.is_active = False
             user.save()
             confirmation_code = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for x in range(33))
             p = Profile(user=user, confirmation_code=confirmation_code)
@@ -216,8 +216,10 @@ def user_login(request):
                 cleaned_data = form.cleaned_data
                 
                 user = cleaned_data.get("user")
-                
-                login(request, user)
+                if user.is_active:
+                    login(request, user)
+                else:
+                    return render_to_response('forums/templates/user-login.html', context)
                 if 'next' in request.POST:
                     next_url = request.POST.get('next')
                     return HttpResponseRedirect(next_url)

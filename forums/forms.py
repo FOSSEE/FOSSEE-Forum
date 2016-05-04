@@ -12,6 +12,8 @@ from django.core.validators import MinLengthValidator, MinValueValidator, \
 RegexValidator, URLValidator
 from django.template.defaultfilters import filesizeformat
 from website.models import Profile
+import re
+from django.utils.translation import ugettext_lazy as _
 
 
 class UserLoginForm(forms.Form):
@@ -64,20 +66,10 @@ class ProfileForm(forms.ModelForm):
           
      
 class RegisterForm(forms.Form):
-	username = forms.CharField(
-		label = _("Username"),
-		max_length = 30,
-		widget = forms.TextInput(),
-		required = True,
-		validators = [
-		RegexValidator(
-			regex = '^[a-zA-Z0-9-_+.]*$',
-			message = 'Username required. 30 characters or fewer. \
-			Letters, digits and @/./+/-/_ only.',
-			code = 'invalid_username'
-		),
-		]
-	)
+	username = forms.RegexField(
+	    regex=r'^\w+$', widget=forms.TextInput(attrs=dict(required=True, max_length=30)), label=_("Username"), error_messages={ 
+	    'invalid': _("This value must contain only letters, numbers and underscores.") })
+
 	password = forms.CharField(
 		label = _("Password"),
 		widget = forms.PasswordInput(render_value = False),
@@ -112,5 +104,12 @@ class RegisterForm(forms.Form):
 		except User.DoesNotExist:
 			pass	
 			
-			
-		
+	
+	# def clean(self):
+ #        if 'password1' in self.cleaned_data and 'password2' in self.cleaned_data:
+ #            if self.cleaned_data['password1'] != self.cleaned_data['password2']:
+ #                raise forms.ValidationError(_("The two password fields did not match."))
+ #        return self.cleaned_data
+
+
+        

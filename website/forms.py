@@ -2,6 +2,7 @@ from django import forms
 from website.models import *
 #from spoken_auth.models import TutorialDetails
 from django.db.models import Q
+from tinymce.widgets import TinyMCE
 class NewQuestionForm(forms.ModelForm):
     category = forms.ModelChoiceField(widget = forms.Select(attrs = {}), 
                         queryset = FossCategory.objects.order_by('name'), 
@@ -13,9 +14,9 @@ class NewQuestionForm(forms.ModelForm):
                         required = True,
                         error_messages = {'required':'Title field required.'})
                         
-    body = forms.CharField(widget=forms.Textarea(),
-            required = True,
-            error_messages = {'required':'question field required.'})
+    body = forms.CharField(
+            widget=TinyMCE(
+                attrs={'cols': 115, 'rows': 15}))
     
     def clean_title(self):
         title = self.cleaned_data['title']

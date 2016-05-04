@@ -40,9 +40,10 @@
             {{ form.body.errors }}
             <div class="form-group">
                 <label for="id_body" >Question:</label>
+                <div id="id_body">
                 {% render_field form.body class+="form-control body" %}
             </div>
-           
+           </div>
         </div>
     </div>
     <input class="btn btn-success" type="submit" value="Submit Question"> 
@@ -68,12 +69,19 @@
 <script type="text/javascript">
 function validate() {
     // return false
+// 
 bkLib.onDomLoaded(function() {
-    new nicEditor({
-        iconsPath: "{% static 'website/js/nicEditorIcons.gif' %}",
-        buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link', 'forecolor', 'bgcolor']
-    }).panelInstance('id_body');
-}); }
+nicEditors.editors.push(
+    new nicEditor({iconsPath : '/media/js/nicEditorIcons.gif',
+        buttonList : ['fontSize','fontFamily','bold','italic',
+            'underline','strikeThrough','left','center','right','justify',
+            'ol','ul','subscript','superscript','hr','link','unlink','forecolor']
+    }).panelInstance(
+        document.getElementById('id_body')
+    )
+);
+});
+ }
 </script>
 
 <script>
