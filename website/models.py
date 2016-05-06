@@ -34,7 +34,7 @@ class Question(models.Model):
 
 
     def __unicode__(self):
-             return '%s' % (self.user)
+             return '{0} - {1} - {2}'.format(self.category.name, self.title, self.user)
 	
 		
         
@@ -66,6 +66,10 @@ class Answer(models.Model):
     def user(self):
         user = User.objects.get(id=self.uid)
         return user
+
+    def __unicode__(self):
+             return 'Answer - {0} - {1}'.format(self.question.category.name, self.question.title)
+
 
 class AnswerVote(models.Model):
     uid = models.IntegerField()
