@@ -3,6 +3,9 @@ from website.models import *
 #from spoken_auth.models import TutorialDetails
 from django.db.models import Q
 class NewQuestionForm(forms.ModelForm):
+    class Meta:
+        model = Question
+        fields = ('title')
     category = forms.ModelChoiceField(widget = forms.Select(attrs = {}), 
                         queryset = FossCategory.objects.order_by('name'), 
                         empty_label = "Select a Foss category", 
@@ -22,12 +25,18 @@ class NewQuestionForm(forms.ModelForm):
         print title
         if not title.strip():
            raise forms.ValidationError("Can not be only Spaces")
+        if len(title) < 3:
+            raise forms.ValidationError("Title More than 3 characters")
+        if Question.objects.filter(title=title).exists():
+            raise forms.ValidationError("This title already exist.")
         return title
     
     def clean_body(self):
         body = self.cleaned_data['body']
         if not body.strip():
             raise forms.ValidationError("Can not be only Spaces")
+        if len(body) < 30:
+            raise forms.ValidationError("Body min. 30 characters")
         return body
 
     class Meta:
