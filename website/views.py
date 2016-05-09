@@ -341,6 +341,49 @@ Regards,\nFOSSEE Team,\nIIT Bombay.
     context.update(csrf(request))
     return render(request, 'website/templates/new-question.html', context)
 
+
+# def unanswered_notification(request):
+    
+#     import datetime as DT
+#     try:
+#         weekago = DT.date.today() - DT.timedelta(days=7)
+#         questions = Question.objects.filter(date_created__lte=weekago)
+#     except Exception, e:
+#         print "No questions found"
+
+#     message = """ The following questions are left unanswered. Please take a look at them.: \n\n"""
+#     i = 0
+#     for question in questions:
+#         try:
+#             uque = Answer.objects.filter(question__id=question.id)
+#         except Exception, e:
+#             print "error occured >> "
+#             print e
+
+#         if not uque.exists():
+#             i=i+1
+        
+#             message += """ 
+#                 Title: <b>{0}</b><br>
+#                 Category: <b>{1}</b><br>
+#                 Link: <b>{2}</b><br>
+#                 <hr>
+#             """.format(
+#                 question.title,
+#                 question.category,
+#                 'http://forums.fossee.in/question/' + str(question.id)
+#             )
+    
+#     message+= "out of " + str(len(questions)) + " " + str(i) + " are not answered"
+
+#     sender_email = "forums@fossee.in"    
+#     to = ("forums@fossee.in",)
+#     subject = "Unanswered questions in the forums."
+#     if i:
+#         send_mail(subject,message, sender_email, to)
+#     return HttpResponse('/')
+
+
 # return number of votes and initial votes
 # user who asked the question,cannot vote his/or anwser, 
 # other users can post votes
@@ -691,44 +734,4 @@ def ajax_time_search(request):
 def ajax_vote(request):
     #for future use
     pass
-    
-# to send email
-def forums_mail(to = '', subject='', message=''):
-    # Start of email send
-    email = EmailMultiAlternatives(
-        subject,'', 'forums', 
-        to.split(','),
-        headers={"Content-type":"text/html;charset=iso-8859-1"}
-    )
-    email.attach_alternative(message, "text/html")
-    email.send(fail_silently=True)
-    # End of email send
 
-# daily notifications for unanswered questions.
-def unanswered_notification(request):
-    questions = Question.objects.all()
-    total_count = 0
-    message = """ 
-        The following questions are left unanswered.
-        Please take a look at them. <br><br>
-    """
-    for question in questions:
-        if not question.answer_set.count():
-            total_count += 1
-            message += """ 
-                #{0}<br>
-                Title: <b>{1}</b><br>
-                Category: <b>{2}</b><br>
-                Link: <b>{3}</b><br>
-                <hr>
-            """.format(
-                total_count,
-                question.title,
-                question.category,
-                'http://forums.fossee.in/question/' + str(question.id)
-            )
-    to = SET_TO_EMAIL_ID
-    subject = "Unanswered questions in the forums."
-    if total_count:
-        forums_mail(to, subject, message)
-    return HttpResponse(message)

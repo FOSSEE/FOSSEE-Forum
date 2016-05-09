@@ -20,7 +20,7 @@ urlpatterns = patterns('',
     url(r'^user/(?P<user_id>\d+)/answers/$', 'website.views.user_answers', name='user_answers'),
     url(r'^clear-notifications/$', 'website.views.clear_notifications', name='clear_notifications'),
     url(r'^search/$', 'website.views.search', name='search'),
-    url(r'^unanswered-notification/$', 'website.views.unanswered_notification', name='unanswered_notification'),
+    # url(r'^unanswerednotification/$', views.unanswered_notification, name='unanswered_notification'),
     url(r'^vote_post/$', 'website.views.vote_post', name='vote_post'),
     url(r'^ans_vote_post/$', 'website.views.ans_vote_post', name='ans_vote_post'),
     
