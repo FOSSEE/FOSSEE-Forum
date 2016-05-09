@@ -53,10 +53,16 @@
             <input class="form-control" type="text">
             <h5>Question</h5>
         </div>
-        
+        <script src="//cdn.tinymce.com/4/tinymce.min.js"></script>
+  <script type="text/javascript">
+  tinymce.init({
+    selector: '#myeditablediv',
+    inline: true
+  });
+  </script>
         <div id="questionNicPanel"></div>
         <div id="{% if user|can_edit:question  %}questionInstance{% endif %}" class="body"  style="margin-left : 60px">
-            {{ question.body|safe }}
+            <pre>{{ question.body|safe }}</pre>
         </div>
         <br>
         
@@ -139,7 +145,7 @@
                        
                   
             <div class="body" id="body{{ answer.id }}" style="padding-bottom: 12px">
-                {{ answer.body|safe }}
+                <pre>{{ answer.body|safe }}</pre>
             </div>
             
             <span class="meta">
@@ -167,7 +173,7 @@
                 {% for comment in answer.answercomment_set.all %}
                 <div class="comment comment{{ comment.id }}">
                     <div class="body" id="cbody{{ comment.id }}">
-                        {{ comment.body|safe }}
+                        <pre>{{ comment.body|safe }}</pre>
                     </div>
 		    <br>
                     
@@ -288,6 +294,7 @@
 <script type="text/javascript">
     bkLib.onDomLoaded(function() {
         new nicEditor({
+            fullPanel : true,   
             iconsPath: "{% static 'website/js/nicEditorIcons.gif' %}",
             buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link']
         }).panelInstance('id_body');

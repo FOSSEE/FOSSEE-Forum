@@ -66,15 +66,13 @@
 
 <script src="{% static 'website/js/nicEdit.js' %}" type="text/javascript"></script>
 <script type="text/javascript">
-function validate() {
-    // return false
-
 bkLib.onDomLoaded(function() {
-	new nicEditor({
+    new nicEditor({
+        fullPanel : true,
         iconsPath: "{% static 'website/js/nicEditorIcons.gif' %}",
         buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link', 'forecolor', 'bgcolor']
     }).panelInstance('id_body');
-}); }
+});
 </script>
 
 <script>
