@@ -313,3 +313,4 @@ def updatepassword(request):
         context['form'] = form
         context['for_update_password'] = True
         return render_to_response('website/templates/index.html', context)
+
