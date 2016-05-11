@@ -21,6 +21,7 @@ from website.forms import NewQuestionForm, AnswerQuestionForm,AnswerCommentForm
 from website.helpers import get_video_info, prettify
 from django.db.models import Count
 from django.core.mail import send_mail
+from forums.settings import SET_TO_EMAIL_ID
 
 admins = (
    9, 4376, 4915, 14595, 12329, 22467, 5518, 30705
@@ -310,7 +311,7 @@ def new_question(request):
             sender_name = "FOSSEE Forums"
             sender_email = "forums@fossee.in"
             subject = "FOSSEE Forums - {0} - New Question".format(question.category)
-            to = ('forums@fossee.in', )
+            to = (SET_TO_EMAIL_ID, )
             url = settings.EMAIL_URL
             message =""" The following new question has been posted in the FOSSEE Forum: \n\n
                 Title: {0}\n
@@ -726,7 +727,7 @@ def unanswered_notification(request):
                 question.category,
                 'http://forums.fossee.in/question/' + str(question.id)
             )
-    to = "forums@fossee.in"
+    to = SET_TO_EMAIL_ID
     subject = "Unanswered questions in the forums."
     if total_count:
         forums_mail(to, subject, message)
