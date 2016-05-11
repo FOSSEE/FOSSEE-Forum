@@ -15,16 +15,15 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^tinymce/', include('tinymce.urls')),
     url(r'^', include('website.urls', namespace='website')),
-    url(r'^/', include('django.contrib.auth.urls')),
+    url(r'^', include('django.contrib.auth.urls')),
+
     url(r'^forgotpassword/$', password_reset, {'template_name': 'forums/templates/password_reset.html'}, name='password_reset'),
-    # url(r'^forgotpassword/$', password_reset, name="password_reset"),
-    url(r'^password_reset/(?P<uidb64>[0-9A-Za-z]+)-(?P<user_id>.+)/$',password_reset_confirm, {'template_name': 'forums/templates/password_reset_confirm.html'},name='password_reset_confirm'),
-    url(r'^password_reset/mail_sent/$', password_reset_done, {'template_name': 'forums/templates/password_reset_done.html'},name='password_reset_done'),
-    url(r'^password_reset/complete/$', password_reset_complete, {'template_name': 'forums/templates/password_reset_complete.html'},name='password_reset_complete'),
-    url(r'^changepassword/$', password_change, name='password_change'),
+    url(r'^password_reset/(?P<uidb36>[0-9A-Za-z]+)-(?P<token>.+)/$',password_reset_confirm, {'template_name': 'forums/templates/password_Reset_confirm.html'}, name='password_reset_confirm'), #{'template_name': 'forums/templates/password_reset_confirm.html'}
+    url(r'^password_reset/mail_sent/$', password_reset_done, {'template_name': 'forums/templates/password_reset_mail.html'}, name='password_reset_done'), #{'template_name': 'forums/templates/password_reset_mail.html'}
+    url(r'^password_reset/complete/$', password_reset_complete, {'template_name': 'forums/templates/password_reset_complete.html'}, name='password_reset_complete'), #, {'template_name': 'forums/templates/password_reset_complete.html'}
     url(r'^password_change/done/$', password_change_done, {'template_name': 'forums/templates/password_reset_done.html'},name='password_change_done'),
+    
     # User account urls
     url(r'^accounts/login/', 'forums.views.user_login', name='user_login'),
     url(r'^accounts/logout/', 'forums.views.user_logout', name='user_logout'),
