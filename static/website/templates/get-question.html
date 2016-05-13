@@ -1,12 +1,15 @@
 {% extends 'website/templates/base.html' %}
 {% load static %}
 {% load widget_tweaks %}
-
+{% load markup %}
 {% load permission_tags %}
 
 {% block title %}
     {{ question.category }} - {{ question.title }} - FOSSEE Forums
 {% endblock %}
+
+{% block extra_head %} <link rel="stylesheet" href="{{ STATIC_URL }}css/code.css"> {% endblock %}
+
 
 {% block content %}
  
@@ -53,10 +56,16 @@
             <input class="form-control" type="text">
             <h5>Question</h5>
         </div>
-        
+        <script src="//cdn.tinymce.com/4/tinymce.min.js"></script>
+  <script type="text/javascript">
+  tinymce.init({
+    selector: '#myeditablediv',
+    inline: true
+  });
+  </script>
         <div id="questionNicPanel"></div>
         <div id="{% if user|can_edit:question  %}questionInstance{% endif %}" class="body"  style="margin-left : 60px">
-            {{ question.body|safe }}
+            <p>{{ question.body|markdown:'codehilite'}}</p>
         </div>
         <br>
         
@@ -139,7 +148,7 @@
                        
                   
             <div class="body" id="body{{ answer.id }}" style="padding-bottom: 12px">
-                {{ answer.body|safe }}
+                <p>{{ answer.body|markdown:'codehilite' }}</p>
             </div>
             
             <span class="meta">
@@ -167,7 +176,7 @@
                 {% for comment in answer.answercomment_set.all %}
                 <div class="comment comment{{ comment.id }}">
                     <div class="body" id="cbody{{ comment.id }}">
-                        {{ comment.body|safe }}
+                        <p>{{ comment.body|markdown:'codehilite' }}</p>
                     </div>
 		    <br>
                     
@@ -288,6 +297,7 @@
 <script type="text/javascript">
     bkLib.onDomLoaded(function() {
         new nicEditor({
+            fullPanel : true,   
             iconsPath: "{% static 'website/js/nicEditorIcons.gif' %}",
             buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link']
         }).panelInstance('id_body');

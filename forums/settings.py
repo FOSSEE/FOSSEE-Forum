@@ -135,7 +135,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
-    # Uncomment the next line to enable admin documentation:
+    'django.contrib.markup',
     # 'django.contrib.admindocs',
     'website',
     'widget_tweaks',
@@ -143,6 +143,7 @@ INSTALLED_APPS = (
     'compressor',
     'debug_toolbar',
     'captcha',
+    'djangocodemirror', 
     #'migrate_spoken',
 )
 
@@ -192,20 +193,20 @@ DEBUG_TOOLBAR_PATCH_SETTINGS = False
 EMAIL_URL = "http://forums.fossee.aero.iitb.ac.in"
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
-EMAIL_HOST = 'smtp-auth.iitb.ac.in'
-EMAIL_PORT = 25
-EMAIL_HOST_USER = 't16614'
-EMAIL_HOST_PASSWORD = 'ldap@16614'
-EMAIL_USE_TLS = True
+# EMAIL_HOST = 'smtp-auth.iitb.ac.in'
+# EMAIL_PORT = 25
+# EMAIL_HOST_USER = 't16614'
+# EMAIL_HOST_PASSWORD = 'ldap@16614'
+# EMAIL_USE_TLS = True
 
 #this setting is for smtp dummy server for testing purpose
-# ACCOUNT_ACTIVATION_DAYS = 7
-# EMAIL_HOST = 'localhost'
-# EMAIL_PORT = 1025
-# EMAIL_HOST_USER = ''
-# EMAIL_HOST_PASSWORD = ''
-# EMAIL_USE_TLS = False
-# DEFAULT_FROM_EMAIL = 'testing@example.com'
+ACCOUNT_ACTIVATION_DAYS = 7
+EMAIL_HOST = 'localhost'
+EMAIL_PORT = 1025
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+EMAIL_USE_TLS = False
+DEFAULT_FROM_EMAIL = 'testing@example.com'
 
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
