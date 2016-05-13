@@ -3,6 +3,8 @@ from os.path import *
 #from config import *
 from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS
 from local import *
+from forums.settings import SET_TO_EMAIL_ID
+from local import SET_SITE_ID
 
 PROJECT_DIR = abspath(dirname(__file__) + '/../')
 
@@ -10,7 +12,7 @@ PROJECT_DIR = abspath(dirname(__file__) + '/../')
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
-
+SITE_ID = SET_SITE_ID
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
@@ -42,8 +44,6 @@ TIME_ZONE = 'Asia/Calcutta'
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
-
-SITE_ID = 1
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
@@ -143,7 +143,11 @@ INSTALLED_APPS = (
     'compressor',
     'debug_toolbar',
     'captcha',
+<<<<<<< HEAD
     'djangocodemirror', 
+=======
+    'djangocodemirror'
+>>>>>>> email template changed
     #'migrate_spoken',
 )
 
