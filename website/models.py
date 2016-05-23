@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
-
+# from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth import get_user_model
 
 
@@ -20,11 +20,21 @@ class Issue(models.Model):
     def __unicode__(self):
         return self.name
 
+# class TemplateTypes(models.Model):
+
+#     type_name = models.CharField(max_length=80)
+#     content_type = models.ForeignKey(ContentType, blank=True, null=True)
+    
+#     def __unicode__(self):
+#         return self.type_name
+
 class Question(models.Model):
     user  = models.ForeignKey(User)
     category = models.ForeignKey(FossCategory)
     title = models.CharField(max_length=200)
     body = models.TextField()
+    # template_type = models.ForeignKey('TemplateTypes')
+    # template_body = models.TextField()
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
     views = models.IntegerField(default=1)
@@ -36,8 +46,6 @@ class Question(models.Model):
     def __unicode__(self):
              return '{0} - {1} - {2}'.format(self.category.name, self.title, self.user)
 	
-		
-        
     class Meta:
         get_latest_by = "date_created"
 

@@ -1,7 +1,6 @@
 {% extends 'website/templates/base.html' %}
 {% load static %}
 {% load widget_tweaks %}
-{% load markup %}
 {% load permission_tags %}
 
 {% block title %}
@@ -65,7 +64,7 @@
   </script>
         <div id="questionNicPanel"></div>
         <div id="{% if user|can_edit:question  %}questionInstance{% endif %}" class="body"  style="margin-left : 60px">
-            <p>{{ question.body|markdown:'codehilite'}}</p>
+            <p>{{ question.body| safe}}</p>
         </div>
         <br>
         
@@ -148,7 +147,7 @@
                        
                   
             <div class="body" id="body{{ answer.id }}" style="padding-bottom: 12px">
-                <p>{{ answer.body|markdown:'codehilite' }}</p>
+                <p>{{ answer.body| safe }}</p>
             </div>
             
             <span class="meta">
@@ -176,7 +175,7 @@
                 {% for comment in answer.answercomment_set.all %}
                 <div class="comment comment{{ comment.id }}">
                     <div class="body" id="cbody{{ comment.id }}">
-                        <p>{{ comment.body|markdown:'codehilite' }}</p>
+                        <p>{{ comment.body| safe }}</p>
                     </div>
 		    <br>
                     

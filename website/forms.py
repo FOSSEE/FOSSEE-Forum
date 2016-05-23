@@ -25,10 +25,12 @@ class NewQuestionForm(forms.ModelForm):
         print title
         if not title.strip():
            raise forms.ValidationError("Can not be only Spaces")
-        if len(title) < 3:
-            raise forms.ValidationError("Title More than 3 characters")
+        if len(title) < 15:
+            raise forms.ValidationError("Title More than 3 Words")
         if Question.objects.filter(title=title).exists():
             raise forms.ValidationError("This title already exist.")
+        if (e for e in str(title) if e.isalnum() != True):
+            raise forms.ValidationError("Only Alphanuemaric")
         return title
     
     def clean_body(self):

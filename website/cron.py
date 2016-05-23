@@ -1,9 +1,14 @@
 import os
 import sys
 
+# os.environ.setdefault("DJANGO_SETTINGS_MODULE", "forums.settings")
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "forums.settings")
+
 base_path =  os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(base_path)
+
+import django
+django.setup()
 
 from website.models import Question, Answer
 from django.db.models import Count
