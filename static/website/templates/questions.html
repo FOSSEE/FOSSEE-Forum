@@ -24,7 +24,7 @@
 	<tr> 
 		<th>No.</th>
 	        <th>FOSS</th>
-		<th>Question </th>
+		<th>Question Title </th>
 		<th>Date</th>
 		<th>Views</th>
 		<th>Votes</th>
@@ -53,10 +53,10 @@
                 </span>            
             </td>
             
-            <td>    
+            <td data-dateformat="D-M-YYYY">    
                 <span>
                     <i>
-                        {{ question.date_created|date:"y-m-d" }}
+                        {{ question.date_created | date:"y/m/d" }}
                     </i>
                 </span>
             </td>
