@@ -142,9 +142,7 @@
                         </div>
                         </div>
         <div class="answer {% if user|can_edit:answer  %}editable{% endif %}" id="answer{{answer.id}}" style="margin-left: 63px;">
-        		
-           		
-                       
+        	                  
                   
             <div class="body" id="body{{ answer.id }}" style="padding-bottom: 12px">
                 <p>{{ answer.body| safe }}</p>
@@ -247,10 +245,35 @@
                     <div class="form-group">
                         {% render_field form.question value=question.id %}
                         <label for="id_body"><h4><u>Your Answer:</u></h4></label>
-                        {% render_field form.body class+='form-control' %}
-                    </div>
-                   
-                </div>
+                        {% render_field form.body class+="form-control body" %}
+                        </div>
+         <!--
+
+        Codemirro implementation
+
+          <div><link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/codemirror/CodeMirror/master/lib/codemirror.css">
+        <script type="text/javascript" src="https://cdn.rawgit.com/codemirror/CodeMirror/master/lib/codemirror.js"></script>
+        <!-- <script type="text/javascript" src="https://cdn.rawgit.com/codemirror/CodeMirror/master/mode/python/python.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+        <script type="text/javascript" src="https://cdn.rawgit.com/carlo/jquery-base64/master/jquery.base64.min.js"></script>
+    <body>
+        <!-- <textarea id="editor"></textarea> 
+    </body>
+    <script>
+        var editor = CodeMirror.fromTextArea(document.getElementById("id_body"), {
+            lineNumbers: true,
+            tabMode: "indent"
+        }).panelInstance("id_body");
+
+        function submit_html()
+        {
+            editor.save();
+            var code = document.getElementById("id_body").value;
+            var data_url = "data:text/html;charset=utf-8;base64," + $.base64.encode(code);
+
+        }
+    </script></div>  -->         
+        </div>
             </div>
             
              

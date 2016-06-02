@@ -1,6 +1,7 @@
 from website.models import Question, Answer, AnswerComment, FossCategory
 from django.contrib import admin
 
+
 class QuestionAdmin(admin.ModelAdmin):
     #search_fields = ['title','user']
     list_filter = ('category','date_created','date_modified')

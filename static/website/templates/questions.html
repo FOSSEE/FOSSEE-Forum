@@ -53,14 +53,12 @@
                 </span>            
             </td>
             
-            <td data-dateformat="D-M-YYYY">    
-                <span>
-                    <i>
-                        {{ question.date_created | date:"y/m/d" }}
-                    </i>
-                </span>
+            <td>
+                <span style="display: none;">{{ question.date_created |date:"Y-m-d" }}</span>
+                    {{ question.date_created|date:"d/m/y" }}
+
             </td>
-            
+
             <td>
                 {{ question.views}}
             </td>
@@ -84,7 +82,7 @@
     </tbody> 
     </table>
 
-    <ul class="pagination pull-right">
+    <!-- <ul class="pagination pull-right">
         {% if questions.has_previous %}
             <li><a href="?page={{ questions.previous_page_number }}">&laquo; <small>Prev</small></a></li>
         {% else %}
@@ -104,7 +102,7 @@
         {% else %}
             <li class="disabled"><a href="#">&raquo;</a></li>
         {% endif %}
-    <ul>
+    <ul> -->
 
 {% endblock %}
 

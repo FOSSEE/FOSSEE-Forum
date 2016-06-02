@@ -2,6 +2,7 @@ from django import forms
 from website.models import *
 #from spoken_auth.models import TutorialDetails
 from django.db.models import Q
+import re
 class NewQuestionForm(forms.ModelForm):
     class Meta:
         model = Question
@@ -22,15 +23,16 @@ class NewQuestionForm(forms.ModelForm):
     
     def clean_title(self):
         title = self.cleaned_data['title']
-        print title
         if not title.strip():
            raise forms.ValidationError("Can not be only Spaces")
-        if len(title) < 15:
+        if len(title) < 12:
             raise forms.ValidationError("Title More than 3 Words")
         if Question.objects.filter(title=title).exists():
             raise forms.ValidationError("This title already exist.")
-        if (e for e in str(title) if e.isalnum() != True):
-            raise forms.ValidationError("Only Alphanuemaric")
+        temp = title.replace(" ", '')
+        for e in str(temp):
+            if not e.isalnum():
+                raise forms.ValidationError("Only Alphanuemaric")
         return title
     
     def clean_body(self):

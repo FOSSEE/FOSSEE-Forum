@@ -102,12 +102,12 @@ def question_answer(request,qid):
             qid = cleaned_data['question']
             body = str(cleaned_data['body'])
             #print body
-            body = body.replace("\\r", '')
-            body = body.replace("\\n", '')
-            body = body.replace("\\t", '')
-            #print body       
+            # body = body.replace("\\r", '')
+            # body = body.replace("\\n", '')
+            # body = body.replace("\\t", '')
+            answer.body = body.splitlines()    
             answer.question = question
-            answer.body = body.encode('unicode_escape')
+            answer.body = body.encode('unicode_internal')     
             answer.save()
             # if user_id of question not matches to user_id of answer that
             # question , no
@@ -165,16 +165,17 @@ def answer_comment(request):
         answer_creator = answer.user()
         form = AnswerCommentForm(request.POST)
         if form.is_valid():
-            body = request.POST['body']
+            cleaned_data = form.cleaned_data
+            body = cleaned_data['body']
             body = str(body)
         
-            body = body.replace("\\r", '')
-            body = body.replace("\\n", '')
-            body = body.replace("\\t", '') 
+            # body = body.replace("\\r", '')
+            # body = body.replace("\\n", '')
+            # body = body.replace("\\t", '') 
             comment = AnswerComment()
             comment.uid = request.user.id
             comment.answer = answer
-            comment.body = body.encode('unicode_escape')
+            comment.body = body.encode('unicode_internal')
             
             comment.save()
             # notifying the answer owner
@@ -300,13 +301,13 @@ def new_question(request):
             question.category = cleaned_data['category']
             question.title = cleaned_data['title']
             question.body = cleaned_data['body']
-            question.body = question.body.replace("\\r", '')
-            question.body = question.body.replace("\\n", '')
-            question.body = question.body.replace("\\t", '')
-            #print body 
+            # question.body = question.body.replace("\\r", '')
+            # question.body = question.body.replace("\\n", '')
+            # question.body = question.body.replace("\\t", '')
+            body = str(question.body) 
             question.views= 1 
             question.save()
-            print(question.category) 
+            # print(question.category) 
             #Sending email when a new question is asked
             sender_name = "FOSSEE Forums"
             sender_email = "forums@fossee.in"
@@ -340,48 +341,6 @@ Regards,\nFOSSEE Team,\nIIT Bombay.
     context['form'] = form   
     context.update(csrf(request))
     return render(request, 'website/templates/new-question.html', context)
-
-
-# def unanswered_notification(request):
-    
-#     import datetime as DT
-#     try:
-#         weekago = DT.date.today() - DT.timedelta(days=7)
-#         questions = Question.objects.filter(date_created__lte=weekago)
-#     except Exception, e:
-#         print "No questions found"
-
-#     message = """ The following questions are left unanswered. Please take a look at them.: \n\n"""
-#     i = 0
-#     for question in questions:
-#         try:
-#             uque = Answer.objects.filter(question__id=question.id)
-#         except Exception, e:
-#             print "error occured >> "
-#             print e
-
-#         if not uque.exists():
-#             i=i+1
-        
-#             message += """ 
-#                 Title: <b>{0}</b><br>
-#                 Category: <b>{1}</b><br>
-#                 Link: <b>{2}</b><br>
-#                 <hr>
-#             """.format(
-#                 question.title,
-#                 question.category,
-#                 'http://forums.fossee.in/question/' + str(question.id)
-#             )
-    
-#     message+= "out of " + str(len(questions)) + " " + str(i) + " are not answered"
-
-#     sender_email = "forums@fossee.in"    
-#     to = ("forums@fossee.in",)
-#     subject = "Unanswered questions in the forums."
-#     if i:
-#         send_mail(subject,message, sender_email, to)
-#     return HttpResponse('/')
 
 
 # return number of votes and initial votes
