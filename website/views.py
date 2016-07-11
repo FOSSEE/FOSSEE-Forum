@@ -314,14 +314,15 @@ def new_question(request):
             to = (SET_TO_EMAIL_ID, )
             url = settings.EMAIL_URL
             message =""" The following new question has been posted in the FOSSEE Forum: \n\n
-                Title: {0}\n
+                Title: {0}\n 
                 Category: {1}\n
-                Link: {2}\n\n
+                Question : {2}\n\n
+                Link: {3}\n\n
 Regards,\nFOSSEE Team,\nIIT Bombay.
              """.format(
                 question.title,
                 question.category, 
-                #question.tutorial, 
+                question.body, 
                 'http://forums.fossee.in/question/'+str(question.id)
             ) 
 
