@@ -161,7 +161,7 @@
 		          
 		            <td>
 		                <span class="title" data-toggle="tooltip" data-placement="top" >
-		                    {{ question.user|truncatechars:10 }}
+		                    <a href="{% url 'view_profile' question.user.id %}">{{ question.user|truncatechars:10 }}
 		                </span>
 		            </td>
 		        </tr>

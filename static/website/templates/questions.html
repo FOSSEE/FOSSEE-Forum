@@ -4,14 +4,15 @@
 
 {% block content %}
 
-
+<!-- <script type="text/javascript" src="dataTables.scrollingPagination.js"></script> -->
 	<script>
 
 	    $(document).ready(function()
 		{
-		$("#myTable").DataTable();
-		}
-	    );
+		$("#myTable").DataTable({
+          // 'sPaginationType': "scrolling"
+          });
+      });
 
 	 </script>
 
@@ -74,7 +75,7 @@
             <td>
            
                 <span class="title" data-toggle="tooltip" data-placement="top" >
-                    {{ question.user|truncatechars:10 }}
+                    <a href="{% url 'view_profile' question.user.id %}">{{ question.user|truncatechars:10 }}
                 </span>
             </td>
         </tr>

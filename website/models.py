@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
-# from django.contrib.contenttypes.models import ContentType
+
 from django.contrib.auth import get_user_model
 
 
@@ -10,6 +10,7 @@ class FossCategory(models.Model):
     description = models.TextField()
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
+    email = models.CharField(max_length =50)
     def __unicode__(self):
         return self.name
 
