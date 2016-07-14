@@ -148,7 +148,7 @@ WSGI_APPLICATION = 'forums.wsgi.application'
 
 
 INSTALLED_APPS = (
-    'website',
+    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -156,10 +156,10 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
-    'django.contrib.admin',
+    'website',
     # 'django.contrib.admindocs',
     'widget_tweaks',
-    'spoken_auth',
+    # 'spoken_auth',
     'debug_toolbar',
     'captcha',
     #'migrate_spoken',

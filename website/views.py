@@ -16,7 +16,7 @@ from django.contrib import messages
 User = get_user_model()
   
 from website.models import Question, Answer, Notification, AnswerComment, FossCategory, Profile
-from spoken_auth.models import TutorialDetails, TutorialResources
+# from spoken_auth.models import TutorialDetails, TutorialResources
 from website.forms import NewQuestionForm, AnswerQuestionForm,AnswerCommentForm
 from website.helpers import get_video_info, prettify
 from django.db.models import Count
@@ -87,12 +87,11 @@ def get_question(request, question_id=None, pretty_url=None):
 @login_required
 def question_answer(request,qid):
    
-    dict_context = {}
+    context = {}
+    question = get_object_or_404(Question, id=qid)
    
     if request.method == 'POST':
-    	
-        form = AnswerQuestionForm(request.POST)
-	question = get_object_or_404(Question, id=qid)
+    	form = AnswerQuestionForm(request.POST)
         answers = question.answer_set.all()
         answer = Answer()
         
@@ -126,7 +125,7 @@ def question_answer(request,qid):
             sender_name = "FOSSEE Forums"
             sender_email = "forums@fossee.in"
             subject = "FOSSEE Forums - {0} - Your question has been answered".format(question.category)
-	    to = [question.user.email]
+            to = [question.user.email,'forum-notifications@fossee.in',]
             url = settings.EMAIL_URL
             message =""" The following new question has been posted in the FOSSEE Forum: \n\n
                 Title: {0}\n
@@ -141,13 +140,18 @@ Regards,\nFOSSEE Team,\nIIT Bombay.
             ) 
 
             send_mail(subject, message, sender_email, to)
-            return HttpResponseRedirect('/')
+            return HttpResponseRedirect("/question/" + str(question.id))
+        else:
+            context['form'] = form
+            # context['category'] = category
+            context['question'] = question
+
     else:
-       
         category = request.GET.get('category')
         form = NewQuestionForm(category=category)
         context['category'] = category
-    
+        context['question'] = question
+
     context['form'] = form
    
     context.update(csrf(request))
@@ -158,6 +162,9 @@ Regards,\nFOSSEE Team,\nIIT Bombay.
 # notify other users in the comment thread
 @login_required
 def answer_comment(request):
+
+    context = {}
+    # question = get_object_or_404(Question, id=qid)
     if request.method == 'POST':
         answer_id = request.POST['answer_id'];
         answer = Answer.objects.get(pk=answer_id)
@@ -165,8 +172,7 @@ def answer_comment(request):
         answer_creator = answer.user()
         form = AnswerCommentForm(request.POST)
         if form.is_valid():
-            cleaned_data = form.cleaned_data
-            body = cleaned_data['body']
+            body = request.POST['body']
             body = str(body)
         
             # body = body.replace("\\r", '')
@@ -193,7 +199,7 @@ def answer_comment(request):
             sender_name = "FOSSEE Forums"
             sender_email = "forums@fossee.in"
             subject = "FOSSEE Forums - {0} - Comment for your answer".format(answer.question.category)
-            to = [answer_creator.email]
+            to = [answer_creator.email, 'forum-notifications@fossee.in',]
             url = settings.EMAIL_URL
             message =""" 
                 A comment has been posted on your answer. \n\n
@@ -216,6 +222,7 @@ Regards,\nFOSSEE Team,\nIIT Bombay.
                 comment_creator = c.user()
                 email = comment_creator.email
                 comment_creator_emails.append(email)
+                comment_creator_emails.append('forum-notifications@fossee.in')
             #getting distinct uids
             uids = set(uids)
             uids.remove(request.user.id)
@@ -249,11 +256,18 @@ Regards,\nFOSSEE Team,\nIIT Bombay.
 
             send_mail(subject, message, sender_email, to)                
             return HttpResponseRedirect("/question/" + str(answer.question.id))
-    context = {}
+            print "------success in comment ---------"
+        else:
+            print "---------form not valid else part---------"
+            context.update({'form':form,
+                'question':answer.question,
+                'answers':answers})
+            return render(request, 'website/templates/get-question.html', context)
     context.update(csrf(request))
     context.update({'form':form,
        'question':answer.question,
        'answers':answers})
+    print "-----------end---------"
     return render(request, 'website/templates/get-question.html', context)
 
 def filter(request,  category=None, tutorial=None, minute_range=None, second_range=None):
@@ -312,17 +326,18 @@ def new_question(request):
             sender_name = "FOSSEE Forums"
             sender_email = "forums@fossee.in"
             subject = "FOSSEE Forums - {0} - New Question".format(question.category)
-            to = (SET_TO_EMAIL_ID, )
+            to = (SET_TO_EMAIL_ID,question.category.email,)
             url = settings.EMAIL_URL
             message =""" The following new question has been posted in the FOSSEE Forum: \n\n
-                Title: {0}\n
+                Title: {0}\n 
                 Category: {1}\n
-                Link: {2}\n\n
+                Question : {2}\n\n
+                Link: {3}\n\n
 Regards,\nFOSSEE Team,\nIIT Bombay.
              """.format(
                 question.title,
                 question.category, 
-                #question.tutorial, 
+                question.body, 
                 'http://forums.fossee.in/question/'+str(question.id)
             ) 
 

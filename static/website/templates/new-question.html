@@ -7,7 +7,7 @@
         </span> Create a new question . . .
     </h4>
     <hr>
-    <form role="form" action="" method="POST" onsubmit="return validate();">{% csrf_token %}
+    <form role="form" action="" method="POST" onsubmit="return category_name();">{% csrf_token %}
     {% with WIDGET_ERROR_CLASS='field_error' %}
     <p>
     Please enter the FOSS details.
@@ -102,21 +102,26 @@ bkLib.onDomLoaded(function() {
 });
 </script>
 
-
-
 <script>
-
- window.onload = function() {
-    /* your code */
+window.onload = function(){
     var c2= "{{ category }}";
-    if(c2 != "None"){
-     $("#id_category").val(c2);
+    console.log(c2)
+    if(c2 != ""){
+        $("#id_category").val(c2);
+        // $( "#id_category option:not(:selected)" ).prop('disabled',true);
     }
 }
-   
 
-
+// $('#id_category').bind('change', function () {
+//           var url = $(this).val(); // get selected value
+//            // if (url) { // require a URL
+//            //     window.location = "?category="+url; // redirect
+//            // }
+     
+//           return false;
+//     });
 </script>
+
 
 {% endblock %}
 

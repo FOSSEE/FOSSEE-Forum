@@ -203,7 +203,7 @@
                 <!-- form to add comment -->
                 {% if user.is_authenticated %}
                  
-                <form id="form{{ answer.id }}" method="post" action="/answer-comment/"> {% csrf_token %}
+                <form id="form{{ answer.id }}" method="post" action="/answer-comment/" > {% csrf_token %}
                     <input type="hidden" name="answer_id" value="{{ answer.id }}">
                     <textarea name="body" class="new-comment form-control" id="comment{{ answer.id }}" rows="2"></textarea>
                 </form>
@@ -282,11 +282,10 @@
     </form>
 {% else %}
     <h4>
-        <a class="btn btn-xs btn-success" href="{% url 'user_login'%}"><b>Log-in</b></a> to answer to this question.
+        <a class="btn btn-xs btn-success" href="{% url 'user_login'%}?next={{ request.get_full_path|urlencode }}"><b>Log-in</b></a> to answer to this question.
     </h4> 
 {% endif %}
 
-    <!-- Modal -->
     <div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -328,7 +327,18 @@
    
     <script type="text/javascript">
 
+// function checkAndConfirm() {
+//     var x = document.getElementsByTagName("textarea")[0].getAttribute("id");           
+//   // var val = $.trim($("body").val());
+//   var y = x;
 
+//  // alert("out");
+//  alert(y);
+//     if (val != "") {
+//         alert("in");
+//         alert(val);
+//     }
+// }
         /* For random color */
 	$(".user_co").each(function() {
 	    var hue = 'rgb(' + (Math.floor((256-199)*Math.random()) + 200) + ',' + (Math.floor((256-199)*Math.random()) + 200) + ',' + (Math.floor((256-199)*Math.random()) + 200) + ')';
@@ -500,7 +510,6 @@
         });
            
      });
-     
      
  
   </script>
