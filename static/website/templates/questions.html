@@ -4,15 +4,14 @@
 
 {% block content %}
 
-<!-- <script type="text/javascript" src="dataTables.scrollingPagination.js"></script> -->
+
 	<script>
 
 	    $(document).ready(function()
 		{
-		$("#myTable").DataTable({
-          // 'sPaginationType': "scrolling"
-          });
-      });
+		$("#myTable").DataTable();
+		}
+	    );
 
 	 </script>
 
@@ -25,7 +24,7 @@
 	<tr> 
 		<th>No.</th>
 	        <th>FOSS</th>
-		<th>Question Title </th>
+		<th>Question </th>
 		<th>Date</th>
 		<th>Views</th>
 		<th>Votes</th>
@@ -54,12 +53,14 @@
                 </span>            
             </td>
             
-            <td>
-                <span style="display: none;">{{ question.date_created |date:"Y-m-d" }}</span>
-                    {{ question.date_created|date:"d/m/y" }}
-
+            <td>    
+                <span>
+                    <i>
+                        {{ question.date_created|date:"y-m-d" }}
+                    </i>
+                </span>
             </td>
-
+            
             <td>
                 {{ question.views}}
             </td>
@@ -75,7 +76,7 @@
             <td>
            
                 <span class="title" data-toggle="tooltip" data-placement="top" >
-                    <a href="{% url 'view_profile' question.user.id %}">{{ question.user|truncatechars:10 }}
+                    {{ question.user|truncatechars:10 }}
                 </span>
             </td>
         </tr>
@@ -83,7 +84,7 @@
     </tbody> 
     </table>
 
-    <!-- <ul class="pagination pull-right">
+    <ul class="pagination pull-right">
         {% if questions.has_previous %}
             <li><a href="?page={{ questions.previous_page_number }}">&laquo; <small>Prev</small></a></li>
         {% else %}
@@ -103,7 +104,7 @@
         {% else %}
             <li class="disabled"><a href="#">&raquo;</a></li>
         {% endif %}
-    <ul> -->
+    <ul>
 
 {% endblock %}
 

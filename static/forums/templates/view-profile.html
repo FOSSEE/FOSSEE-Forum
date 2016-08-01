@@ -12,21 +12,19 @@
 {% endblock %}
 {% block content %}
 <br><br>
-<div>
-<h3>
-{{profile.user.username}}'s Profile...
-</h3> 
-</div>
-<br><br>
+
   <div class="col-lg-12 ">
       
            <ul class="nav nav-tabs">
-        <li class="active"><a data-toggle="tab" href="#profile"> <span ><i class="fa fa-user"></i></span> {{profile.user.username}}'s Profile</a></li>
+        <li class="active"><a data-toggle="tab" href="#profile"> <span ><i class="fa fa-user"></i></span>
+My Profile</a></li>
         <li><a data-toggle="tab" href="#questions"><span ><i class="fa fa-question-circle"></i>
 
-</span> {{profile.user.username}}'s Questions</a></li>
+</span>
+My Questions</a></li>
         <li><a data-toggle="tab"href="#answers"><span ><i class="fa fa-check-circle"></i>
-</span> {{profile.user.username}}'s Answers</a></li>  
+</span>
+My Answers</a></li>  
         {% if show %}
         <li><a data-toggle="tab" href="#profile_edit"><span ><i class="fa fa-user"></i></span>
         Edit Profile</a></li>   
@@ -119,37 +117,7 @@
             <div class="col-sm-12">
     {% if show %}
     <form class="form-signin form-horizontal" action="/accounts/profile/{{user.username}}/" method="post" enctype="multipart/form-data">{% csrf_token %}
-    <div class="form-group">
-                    <label class="col-sm-3 control-label" for="id_first_name">First Name<span style="color:red">*</span></label>
-                    <div class="col-sm-5">
-                        {% render_field form.first_name class+="form-control first_name" tabindex="1" data-placeholder="Choose first_name" %}
-                        {{ form.first_name.errors }}
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-sm-3 control-label" for="id_last_name">Last Name<span style="color:red">*</span></label>
-                    <div class="col-sm-5">
-                        {% render_field form.last_name class+="form-control last_name" tabindex="1" data-placeholder="Choose last_name" %}
-                        {{ form.last_name.errors }}
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-sm-3 control-label" for= "id_street">Address<span style="color:red">*</span></label>
-                    <div class="col-sm-5">
-                        {% render_field form.address class+="form-control street" tabindex="1" data-placeholder="Enter street" %}
-                        {{ form.address.errors }}
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-sm-3 control-label" for="id_phone">Phone</label>
-                    <div class="col-sm-5">
-                        {% render_field form.phone class+="form-control phone" tabindex="1" data-placeholder="Choose phone" %}
-                        {{ form.phone.errors }}
-                    </div>
-                </div>
-
-
-
+    {{ form.as_p }}
         <input class="btn btn-primary" type="submit" value="Submit" />
     </form>
     {%  endif %}
@@ -201,7 +169,7 @@
     {% for answer in answers%}
         <div class="my-answer">
             <span class="body">
-                <a href="{% url 'website:get_question' answer.question.id %}">{{ answer.question.title }}</a> 
+                <a href="{% url 'website:get_question' answer.question.id %}#answer{{ answer.id }}">{{ answer.body|safe }}</a>
             </span>
             <br> <br>
             <span class="date">
