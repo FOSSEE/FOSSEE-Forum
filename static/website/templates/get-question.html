@@ -1,6 +1,7 @@
 {% extends 'website/templates/base.html' %}
 {% load static %}
 {% load widget_tweaks %}
+{% load markup %}
 {% load permission_tags %}
 
 {% block title %}
@@ -64,7 +65,7 @@
   </script>
         <div id="questionNicPanel"></div>
         <div id="{% if user|can_edit:question  %}questionInstance{% endif %}" class="body"  style="margin-left : 60px">
-            <p>{{ question.body| safe}}</p>
+            <p>{{ question.body|markdown:'codehilite'}}</p>
         </div>
         <br>
         
@@ -142,10 +143,12 @@
                         </div>
                         </div>
         <div class="answer {% if user|can_edit:answer  %}editable{% endif %}" id="answer{{answer.id}}" style="margin-left: 63px;">
-        	                  
+        		
+           		
+                       
                   
             <div class="body" id="body{{ answer.id }}" style="padding-bottom: 12px">
-                <p>{{ answer.body| safe }}</p>
+                <p>{{ answer.body|markdown:'codehilite' }}</p>
             </div>
             
             <span class="meta">
@@ -173,7 +176,7 @@
                 {% for comment in answer.answercomment_set.all %}
                 <div class="comment comment{{ comment.id }}">
                     <div class="body" id="cbody{{ comment.id }}">
-                        <p>{{ comment.body| safe }}</p>
+                        <p>{{ comment.body|markdown:'codehilite' }}</p>
                     </div>
 		    <br>
                     
@@ -203,7 +206,7 @@
                 <!-- form to add comment -->
                 {% if user.is_authenticated %}
                  
-                <form id="form{{ answer.id }}" method="post" action="/answer-comment/" > {% csrf_token %}
+                <form id="form{{ answer.id }}" method="post" action="/answer-comment/"> {% csrf_token %}
                     <input type="hidden" name="answer_id" value="{{ answer.id }}">
                     <textarea name="body" class="new-comment form-control" id="comment{{ answer.id }}" rows="2"></textarea>
                 </form>
@@ -245,35 +248,10 @@
                     <div class="form-group">
                         {% render_field form.question value=question.id %}
                         <label for="id_body"><h4><u>Your Answer:</u></h4></label>
-                        {% render_field form.body class+="form-control body" %}
-                        </div>
-         <!--
-
-        Codemirro implementation
-
-          <div><link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/codemirror/CodeMirror/master/lib/codemirror.css">
-        <script type="text/javascript" src="https://cdn.rawgit.com/codemirror/CodeMirror/master/lib/codemirror.js"></script>
-        <!-- <script type="text/javascript" src="https://cdn.rawgit.com/codemirror/CodeMirror/master/mode/python/python.js"></script>
-        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-        <script type="text/javascript" src="https://cdn.rawgit.com/carlo/jquery-base64/master/jquery.base64.min.js"></script>
-    <body>
-        <!-- <textarea id="editor"></textarea> 
-    </body>
-    <script>
-        var editor = CodeMirror.fromTextArea(document.getElementById("id_body"), {
-            lineNumbers: true,
-            tabMode: "indent"
-        }).panelInstance("id_body");
-
-        function submit_html()
-        {
-            editor.save();
-            var code = document.getElementById("id_body").value;
-            var data_url = "data:text/html;charset=utf-8;base64," + $.base64.encode(code);
-
-        }
-    </script></div>  -->         
-        </div>
+                        {% render_field form.body class+='form-control' %}
+                    </div>
+                   
+                </div>
             </div>
             
              
@@ -282,10 +260,11 @@
     </form>
 {% else %}
     <h4>
-        <a class="btn btn-xs btn-success" href="{% url 'user_login'%}?next={{ request.get_full_path|urlencode }}"><b>Log-in</b></a> to answer to this question.
+        <a class="btn btn-xs btn-success" href="{% url 'user_login'%}"><b>Log-in</b></a> to answer to this question.
     </h4> 
 {% endif %}
 
+    <!-- Modal -->
     <div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -327,18 +306,7 @@
    
     <script type="text/javascript">
 
-// function checkAndConfirm() {
-//     var x = document.getElementsByTagName("textarea")[0].getAttribute("id");           
-//   // var val = $.trim($("body").val());
-//   var y = x;
 
-//  // alert("out");
-//  alert(y);
-//     if (val != "") {
-//         alert("in");
-//         alert(val);
-//     }
-// }
         /* For random color */
 	$(".user_co").each(function() {
 	    var hue = 'rgb(' + (Math.floor((256-199)*Math.random()) + 200) + ',' + (Math.floor((256-199)*Math.random()) + 200) + ',' + (Math.floor((256-199)*Math.random()) + 200) + ')';
@@ -510,6 +478,7 @@
         });
            
      });
+     
      
  
   </script>

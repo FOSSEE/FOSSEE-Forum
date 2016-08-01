@@ -39,38 +39,16 @@ class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
         exclude = ['user', 'confirmation_code']
-    first_name = forms.CharField(widget=forms.TextInput(),
-                        required = True,
-                        error_messages = {'required':'First name field required.'})
-    last_name = forms.CharField(widget=forms.TextInput(),
-                        required = True,
-                        error_messages = {'required':'Last name field required.'})
 
-    phone = forms.CharField(max_length = 12, widget=forms.TextInput(),required=False, validators = [RegexValidator(regex = '^[0-9-_+.]*$')])
+    # def clean_picture(self):
+    #    if 'picture' in self.cleaned_data and not \
+    #        self.cleaned_data['picture']:
+    #         raise forms.ValidationError("Profile picture required!")
 
-  #   def clean_phone(self):
-  #   	phone = self.cleaned_data['phone']
-  #   	temp = str(phone)
-  #   	if not temp.isdigit():
-  #   		raise forms.ValidationError("Enter valid contact number.")
-		# return phone
+    first_name = forms.CharField()
+    last_name = forms.CharField()
+    
 
-    def clean_last_name(self):
-		last_name = self.cleaned_data['last_name']
-		temp = last_name
-		for e in str(temp):
-			if not e.isalnum():
-				raise forms.ValidationError("Only Alphanuemaric")
-		return last_name
-
-    def clean_first_name(self):
-    	first_name = self.cleaned_data['first_name']
-    	temp = first_name.replace(" ", '')
-    	for e in str(temp):
-			if not e.isalnum():
-				raise forms.ValidationError("Only Alphanuemaric")
-				return first_name
-	
 
     def __init__(self, user, *args, **kwargs):
         initial = ''
@@ -134,9 +112,5 @@ class RegisterForm(forms.Form):
 		except User.DoesNotExist:
 			pass	
 			
-	def clean_password_confirm(self):
-		password = self.cleaned_data.get('password')
-		password_confirm = self.cleaned_data.get('password_confirm')
-		if password and password_confirm != password :
-			raise forms.ValidationError('Passwords do not match')
-		return self.cleaned_data
+			
+		

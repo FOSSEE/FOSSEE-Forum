@@ -116,7 +116,7 @@
 	<tr> 
 		<th>No.</th>
 	        <th>FOSS</th>
-		<th>Question Title </th>
+		<th>Question </th>
 		<th>Date</th>
 		<th>Views</th>
 		<th>Answers</th>
@@ -161,7 +161,7 @@
 		          
 		            <td>
 		                <span class="title" data-toggle="tooltip" data-placement="top" >
-		                    <a href="{% url 'view_profile' question.user.id %}">{{ question.user|truncatechars:10 }}
+		                    {{ question.user|truncatechars:10 }}
 		                </span>
 		            </td>
 		        </tr>

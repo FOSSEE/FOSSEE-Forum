@@ -7,7 +7,7 @@
         </span> Create a new question . . .
     </h4>
     <hr>
-    <form role="form" action="" method="POST" onsubmit="return category_name();">{% csrf_token %}
+    <form role="form" action="" method="POST" onsubmit="return validate();">{% csrf_token %}
     {% with WIDGET_ERROR_CLASS='field_error' %}
     <p>
     Please enter the FOSS details.
@@ -38,37 +38,10 @@
                 {% render_field form.title class+="form-control title" %} 
             </div>
             {{ form.body.errors }}
-             <div class="form-group">
+            <div class="form-group">
                 <label for="id_body" >Question:</label>
-                <!-- <div>
-                <textarea class= "codemirror-textarea"></textarea>
-                </div> -->
                 {% render_field form.body class+="form-control body" %}
             </div>
-
-        
-        <!-- <div><link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/codemirror/CodeMirror/master/lib/codemirror.css">
-        <script type="text/javascript" src="https://cdn.rawgit.com/codemirror/CodeMirror/master/lib/codemirror.js"></script>
-        <!-- <script type="text/javascript" src="https://cdn.rawgit.com/codemirror/CodeMirror/master/mode/python/python.js"></script>
-        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-        <script type="text/javascript" src="https://cdn.rawgit.com/carlo/jquery-base64/master/jquery.base64.min.js"></script>
-    <body>
-        <!-- <textarea id="editor"></textarea>
-    </body>
-    <script>
-        var editor = CodeMirror.fromTextArea(document.getElementById("id_body"), {
-            lineNumbers: true,
-            tabMode: "indent"
-        });
-
-        function submit_html()
-        {
-            editor.save();
-            var code = document.getElementById("id_body").value;
-            var data_url = "data:text/html;charset=utf-8;base64," + $.base64.encode(code);
-
-        }
-    </script></div>  -->
            
         </div>
     </div>
@@ -102,26 +75,17 @@ bkLib.onDomLoaded(function() {
 });
 </script>
 
+
+
 <script>
-window.onload = function(){
+ window.onload = function() {
+    /* your code */
     var c2= "{{ category }}";
-    console.log(c2)
-    if(c2 != ""){
-        $("#id_category").val(c2);
-        // $( "#id_category option:not(:selected)" ).prop('disabled',true);
+    if(c2 != "None"){
+     $("#id_category").val(c2);
     }
 }
-
-// $('#id_category').bind('change', function () {
-//           var url = $(this).val(); // get selected value
-//            // if (url) { // require a URL
-//            //     window.location = "?category="+url; // redirect
-//            // }
-     
-//           return false;
-//     });
 </script>
-
 
 {% endblock %}
 

@@ -304,24 +304,12 @@ $(document).ready(function() {
 
     $post_comment.click(function(e) {
         var target = $(this).data("target");
-       // alert(target);
+        
         var answer_id = $(this).data("aid");
         var form = $(this).data("form");
         $form = $("#"+form);
         nics[target].instanceById(target).saveContent();
-        var text = (nics[target].instanceById(target).getContent());
-        // alert(text)
-        text = text.replace(/<br ?\/?>/g, "\n")
-        text = text.replace(/&nbsp;/g, ' ');
-        // alert(text+"after");
-        // alert(text.trim().length);
-        if(text.trim().length > 0 ){
-            $form.submit();
-            e.preventDefault;
-        }
-         else{
-            alert("Kindly write a comment")
-            return false;
-        }
+        $form.submit();
+        e.preventDefault;
     });
 });
