@@ -30,7 +30,7 @@
 .tablesorter-blue tbody td,
 .tablesorter-blue tfoot th,
 .tablesorter-blue tfoot td {
-	padding: 8px;
+	padding: 13px;
 	vertical-align: top;
 }
 .tablesorter-blue .header,
@@ -96,23 +96,7 @@
 /* hovered row colors
  you'll need to add additional lines for
  rows with more than 2 child rows
- */
-.tablesorter-blue tbody > tr.hover > td,
-.tablesorter-blue tbody > tr:hover > td,
-.tablesorter-blue tbody > tr:hover + tr.tablesorter-childRow > td,
-.tablesorter-blue tbody > tr:hover + tr.tablesorter-childRow + tr.tablesorter-childRow > td,
-.tablesorter-blue tbody > tr.even.hover > td,
-.tablesorter-blue tbody > tr.even:hover > td,
-.tablesorter-blue tbody > tr.even:hover + tr.tablesorter-childRow > td,
-.tablesorter-blue tbody > tr.even:hover + tr.tablesorter-childRow + tr.tablesorter-childRow > td {
-	background-color: #d9d9d9;
-}
-.tablesorter-blue tbody > tr.odd.hover > td,
-.tablesorter-blue tbody > tr.odd:hover > td,
-.tablesorter-blue tbody > tr.odd:hover + tr.tablesorter-childRow > td,
-.tablesorter-blue tbody > tr.odd:hover + tr.tablesorter-childRow + tr.tablesorter-childRow > td {
-	background-color: #bfbfbf;
-}
+ 
 
 /* table processing indicator */
 .tablesorter-blue .tablesorter-processing {
@@ -122,36 +106,9 @@
 	background-image: url('data:image/gif;base64,R0lGODlhFAAUAKEAAO7u7lpaWgAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQBCgACACwAAAAAFAAUAAACQZRvoIDtu1wLQUAlqKTVxqwhXIiBnDg6Y4eyx4lKW5XK7wrLeK3vbq8J2W4T4e1nMhpWrZCTt3xKZ8kgsggdJmUFACH5BAEKAAIALAcAAAALAAcAAAIUVB6ii7jajgCAuUmtovxtXnmdUAAAIfkEAQoAAgAsDQACAAcACwAAAhRUIpmHy/3gUVQAQO9NetuugCFWAAAh+QQBCgACACwNAAcABwALAAACE5QVcZjKbVo6ck2AF95m5/6BSwEAIfkEAQoAAgAsBwANAAsABwAAAhOUH3kr6QaAcSrGWe1VQl+mMUIBACH5BAEKAAIALAIADQALAAcAAAIUlICmh7ncTAgqijkruDiv7n2YUAAAIfkEAQoAAgAsAAAHAAcACwAAAhQUIGmHyedehIoqFXLKfPOAaZdWAAAh+QQFCgACACwAAAIABwALAAACFJQFcJiXb15zLYRl7cla8OtlGGgUADs=') !important;
 }
 
-/* Zebra Widget - row alternating colors */
-.tablesorter-blue tbody tr.odd > td {
-	background-color: #ebf2fa;
-}
-.tablesorter-blue tbody tr.even > td {
-	background-color: #fff;
-}
+/* Zebra Widget - row alternating colors
 
-/* Column Widget - column sort colors */
-.tablesorter-blue td.primary,
-.tablesorter-blue tr.odd td.primary {
-	background-color: #99b3e6;
-}
-.tablesorter-blue tr.even td.primary {
-	background-color: #c2d1f0;
-}
-.tablesorter-blue td.secondary,
-.tablesorter-blue tr.odd td.secondary {
-	background-color: #c2d1f0;
-}
-.tablesorter-blue tr.even td.secondary {
-	background-color: #d6e0f5;
-}
-.tablesorter-blue td.tertiary,
-.tablesorter-blue tr.odd td.tertiary {
-	background-color: #d6e0f5;
-}
-.tablesorter-blue tr.even td.tertiary {
-	background-color: #ebf0fa;
-}
+/* Column Widget - column sort colors */	
 
 /* caption */
 caption {
