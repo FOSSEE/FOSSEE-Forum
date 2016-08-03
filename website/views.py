@@ -16,11 +16,12 @@ from django.contrib import messages
 User = get_user_model()
   
 from website.models import Question, Answer, Notification, AnswerComment, FossCategory, Profile
-from spoken_auth.models import TutorialDetails, TutorialResources
+# from spoken_auth.models import TutorialDetails, TutorialResources
 from website.forms import NewQuestionForm, AnswerQuestionForm,AnswerCommentForm
 from website.helpers import get_video_info, prettify
 from django.db.models import Count
 from django.core.mail import send_mail
+from forums.settings import SET_TO_EMAIL_ID
 
 admins = (
    9, 4376, 4915, 14595, 12329, 22467, 5518, 30705
@@ -86,12 +87,11 @@ def get_question(request, question_id=None, pretty_url=None):
 @login_required
 def question_answer(request,qid):
    
-    dict_context = {}
+    context = {}
+    question = get_object_or_404(Question, id=qid)
    
     if request.method == 'POST':
-    	
-        form = AnswerQuestionForm(request.POST)
-	question = get_object_or_404(Question, id=qid)
+    	form = AnswerQuestionForm(request.POST)
         answers = question.answer_set.all()
         answer = Answer()
         
@@ -101,12 +101,12 @@ def question_answer(request,qid):
             qid = cleaned_data['question']
             body = str(cleaned_data['body'])
             #print body
-            body = body.replace("\\r", '')
-            body = body.replace("\\n", '')
-            body = body.replace("\\t", '')
-            #print body       
+            # body = body.replace("\\r", '')
+            # body = body.replace("\\n", '')
+            # body = body.replace("\\t", '')
+            answer.body = body.splitlines()    
             answer.question = question
-            answer.body = body.encode('unicode_escape')
+            answer.body = body.encode('unicode_internal')     
             answer.save()
             # if user_id of question not matches to user_id of answer that
             # question , no
@@ -125,7 +125,7 @@ def question_answer(request,qid):
             sender_name = "FOSSEE Forums"
             sender_email = "forums@fossee.in"
             subject = "FOSSEE Forums - {0} - Your question has been answered".format(question.category)
-	    to = [question.user.email]
+            to = [question.user.email,'forum-notifications@fossee.in',]
             url = settings.EMAIL_URL
             message =""" The following new question has been posted in the FOSSEE Forum: \n\n
                 Title: {0}\n
@@ -140,13 +140,18 @@ Regards,\nFOSSEE Team,\nIIT Bombay.
             ) 
 
             send_mail(subject, message, sender_email, to)
-            return HttpResponseRedirect('/')
+            return HttpResponseRedirect("/question/" + str(question.id))
+        else:
+            context['form'] = form
+            # context['category'] = category
+            context['question'] = question
+
     else:
-       
         category = request.GET.get('category')
         form = NewQuestionForm(category=category)
         context['category'] = category
-    
+        context['question'] = question
+
     context['form'] = form
    
     context.update(csrf(request))
@@ -157,6 +162,9 @@ Regards,\nFOSSEE Team,\nIIT Bombay.
 # notify other users in the comment thread
 @login_required
 def answer_comment(request):
+
+    context = {}
+    # question = get_object_or_404(Question, id=qid)
     if request.method == 'POST':
         answer_id = request.POST['answer_id'];
         answer = Answer.objects.get(pk=answer_id)
@@ -167,13 +175,13 @@ def answer_comment(request):
             body = request.POST['body']
             body = str(body)
         
-            body = body.replace("\\r", '')
-            body = body.replace("\\n", '')
-            body = body.replace("\\t", '') 
+            # body = body.replace("\\r", '')
+            # body = body.replace("\\n", '')
+            # body = body.replace("\\t", '') 
             comment = AnswerComment()
             comment.uid = request.user.id
             comment.answer = answer
-            comment.body = body.encode('unicode_escape')
+            comment.body = body.encode('unicode_internal')
             
             comment.save()
             # notifying the answer owner
@@ -191,7 +199,7 @@ def answer_comment(request):
             sender_name = "FOSSEE Forums"
             sender_email = "forums@fossee.in"
             subject = "FOSSEE Forums - {0} - Comment for your answer".format(answer.question.category)
-            to = [answer_creator.email]
+            to = [answer_creator.email, 'forum-notifications@fossee.in',]
             url = settings.EMAIL_URL
             message =""" 
                 A comment has been posted on your answer. \n\n
@@ -214,6 +222,7 @@ Regards,\nFOSSEE Team,\nIIT Bombay.
                 comment_creator = c.user()
                 email = comment_creator.email
                 comment_creator_emails.append(email)
+                comment_creator_emails.append('forum-notifications@fossee.in')
             #getting distinct uids
             uids = set(uids)
             uids.remove(request.user.id)
@@ -247,11 +256,18 @@ Regards,\nFOSSEE Team,\nIIT Bombay.
 
             send_mail(subject, message, sender_email, to)                
             return HttpResponseRedirect("/question/" + str(answer.question.id))
-    context = {}
+            print "------success in comment ---------"
+        else:
+            print "---------form not valid else part---------"
+            context.update({'form':form,
+                'question':answer.question,
+                'answers':answers})
+            return render(request, 'website/templates/get-question.html', context)
     context.update(csrf(request))
     context.update({'form':form,
        'question':answer.question,
        'answers':answers})
+    print "-----------end---------"
     return render(request, 'website/templates/get-question.html', context)
 
 def filter(request,  category=None, tutorial=None, minute_range=None, second_range=None):
@@ -299,28 +315,29 @@ def new_question(request):
             question.category = cleaned_data['category']
             question.title = cleaned_data['title']
             question.body = cleaned_data['body']
-            question.body = question.body.replace("\\r", '')
-            question.body = question.body.replace("\\n", '')
-            question.body = question.body.replace("\\t", '')
-            #print body 
+            # question.body = question.body.replace("\\r", '')
+            # question.body = question.body.replace("\\n", '')
+            # question.body = question.body.replace("\\t", '')
+            body = str(question.body) 
             question.views= 1 
             question.save()
-            print(question.category) 
+            # print(question.category) 
             #Sending email when a new question is asked
             sender_name = "FOSSEE Forums"
             sender_email = "forums@fossee.in"
             subject = "FOSSEE Forums - {0} - New Question".format(question.category)
-            to = ('forums@fossee.in', )
+            to = (SET_TO_EMAIL_ID,question.category.email,)
             url = settings.EMAIL_URL
             message =""" The following new question has been posted in the FOSSEE Forum: \n\n
-                Title: {0}\n
+                Title: {0}\n 
                 Category: {1}\n
-                Link: {2}\n\n
+                Question : {2}\n\n
+                Link: {3}\n\n
 Regards,\nFOSSEE Team,\nIIT Bombay.
              """.format(
                 question.title,
                 question.category, 
-                #question.tutorial, 
+                question.body, 
                 'http://forums.fossee.in/question/'+str(question.id)
             ) 
 
@@ -339,6 +356,7 @@ Regards,\nFOSSEE Team,\nIIT Bombay.
     context['form'] = form   
     context.update(csrf(request))
     return render(request, 'website/templates/new-question.html', context)
+
 
 # return number of votes and initial votes
 # user who asked the question,cannot vote his/or anwser, 
@@ -690,44 +708,4 @@ def ajax_time_search(request):
 def ajax_vote(request):
     #for future use
     pass
-    
-# to send email
-def forums_mail(to = '', subject='', message=''):
-    # Start of email send
-    email = EmailMultiAlternatives(
-        subject,'', 'forums', 
-        to.split(','),
-        headers={"Content-type":"text/html;charset=iso-8859-1"}
-    )
-    email.attach_alternative(message, "text/html")
-    email.send(fail_silently=True)
-    # End of email send
 
-# daily notifications for unanswered questions.
-def unanswered_notification(request):
-    questions = Question.objects.all()
-    total_count = 0
-    message = """ 
-        The following questions are left unanswered.
-        Please take a look at them. <br><br>
-    """
-    for question in questions:
-        if not question.answer_set.count():
-            total_count += 1
-            message += """ 
-                #{0}<br>
-                Title: <b>{1}</b><br>
-                Category: <b>{2}</b><br>
-                Link: <b>{3}</b><br>
-                <hr>
-            """.format(
-                total_count,
-                question.title,
-                question.category,
-                'http://forums.fossee.in/question/' + str(question.id)
-            )
-    to = "forums@fossee.in"
-    subject = "Unanswered questions in the forums."
-    if total_count:
-        forums_mail(to, subject, message)
-    return HttpResponse(message)

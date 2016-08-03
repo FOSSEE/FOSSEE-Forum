@@ -10,6 +10,7 @@ class FossCategory(models.Model):
     description = models.TextField()
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
+    email = models.CharField(max_length =50)
     def __unicode__(self):
         return self.name
 
@@ -34,10 +35,11 @@ class Question(models.Model):
 
 
     def __unicode__(self):
-             return '%s' % (self.user)
-	
-		
-        
+             return '{0} - {1} - {2}'.format(self.category.name, self.title, self.user)
+
+    def __str__(self):
+        return self.body
+
     class Meta:
         get_latest_by = "date_created"
 
@@ -66,6 +68,13 @@ class Answer(models.Model):
     def user(self):
         user = User.objects.get(id=self.uid)
         return user
+
+    def __unicode__(self):
+             return 'Answer - {0} - {1}'.format(self.question.category.name, self.question.title)
+
+    def __str__(self):
+        return self.body
+
 
 class AnswerVote(models.Model):
     uid = models.IntegerField()

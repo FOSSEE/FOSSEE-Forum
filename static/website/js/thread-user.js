@@ -1,5 +1,6 @@
 bkLib.onDomLoaded(function() {
     var questionNicEditor = new nicEditor({
+        fullPanel : true,
         buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link', 'forecolor', 'bgcolor'],
         iconsPath: "/static/website/js/nicEditorIcons.gif",
     });
@@ -156,6 +157,7 @@ $(document).ready(function() {
     $answerPanelWrapper = $("#answerPanelWrapper");
 
     var answerNicEditor = new nicEditor({
+        fullPanel : true,
         buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link', 'forecolor', 'bgcolor'],
         iconsPath: "/static/website/js/nicEditorIcons.gif",
     });
@@ -217,6 +219,7 @@ $(document).ready(function() {
         $(this).find(".modify-wrapper").hide();
     });
     var commentNicEditor = new nicEditor({
+        fullPanel : true,
         buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link', 'forecolor', 'bgcolor'],
         iconsPath: "/static/website/js/nicEditorIcons.gif",
     });
@@ -279,6 +282,7 @@ $(document).ready(function() {
         $("#"+target).show();
         
         nics[target] = new nicEditor({
+            fullPanel : true,
             buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link'],
             iconsPath: "/static/website/js/nicEditorIcons.gif",
         }).panelInstance(target, {hasPanel : true});
@@ -300,12 +304,24 @@ $(document).ready(function() {
 
     $post_comment.click(function(e) {
         var target = $(this).data("target");
-        
+       // alert(target);
         var answer_id = $(this).data("aid");
         var form = $(this).data("form");
         $form = $("#"+form);
         nics[target].instanceById(target).saveContent();
-        $form.submit();
-        e.preventDefault;
+        var text = (nics[target].instanceById(target).getContent());
+        // alert(text)
+        text = text.replace(/<br ?\/?>/g, "\n")
+        text = text.replace(/&nbsp;/g, ' ');
+        // alert(text+"after");
+        // alert(text.trim().length);
+        if(text.trim().length > 0 ){
+            $form.submit();
+            e.preventDefault;
+        }
+         else{
+            alert("Kindly write a comment")
+            return false;
+        }
     });
 });
