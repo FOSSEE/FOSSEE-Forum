@@ -122,7 +122,7 @@ class RegisterForm(forms.Form):
 	def clean_username(self):
 		try:
 			User.objects.get(username=self.cleaned_data['username'])
-			raise forms.ValidationError(_("This username has already existed."))
+			raise forms.ValidationError("This username has already existed.")
 		except User.DoesNotExist:
 			pass
 			
@@ -130,7 +130,7 @@ class RegisterForm(forms.Form):
 	def clean_email(self):
 		try:
 			User.objects.get(email=self.cleaned_data['email'])
-			raise forms.ValidationError(_("This email is already taken."))
+			raise forms.ValidationError("This email is already taken.")
 		except User.DoesNotExist:
 			pass	
 			

@@ -1,4 +1,3 @@
-
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth import login, logout, authenticate
 from django.shortcuts import render_to_response , render
@@ -270,9 +269,9 @@ def user_logout(request):
 #             sender_email = "forums@fossee.in"
 #             subject = "FOSSEE Forums - Password Reset"
 #             to = (user.email, )
-# 	    url = settings.EMAIL_URL
+#       url = settings.EMAIL_URL
 #             message = """Dear """+user.username+""",\nYour password for FOSSEE Forums has been reset. Your credentials are:\nUsername: """+user.username+"""\nPassword: """+password+"""\n\nWe recommend you to login with the given credentials & update your password immediately.\nLink to set new password: """+url+"""/accounts/login/?next=/accounts/update-password/\nThank You !\nRegards,\nFOSSEE Team,\n IIT Bombay."""
-# 	    send_mail(subject, message, sender_email, to)
+#       send_mail(subject, message, sender_email, to)
 #             form = UserLoginForm()
 #             context['form'] = form
 #             #context['password_reset'] = True
@@ -303,7 +302,7 @@ def user_logout(request):
 #                 form = UserLoginForm()
 #                 context['form'] = form
 #                 #return render_to_response('website/templates/index.html', context)
-# 		return HttpResponseRedirect('/')
+#       return HttpResponseRedirect('/')
 #             else:
 #                 context['no_match'] = True
 #                 return render_to_response("forums/templates/update-password.html", context)
@@ -314,4 +313,3 @@ def user_logout(request):
 #         context['form'] = form
 #         context['for_update_password'] = True
 #         return render_to_response('website/templates/index.html', context)
-
