@@ -119,6 +119,7 @@
 		<th>Question Title </th>
 		<th>Date</th>
 		<th>Views</th>
+        <th>Votes</th>
 		<th>Answers</th>
 		<th>User</th>  
 	</tr> 
@@ -154,6 +155,11 @@
 		            <td>
 		                {{ question.views}}
 		            </td>
+                    <td>
+            
+                          {{ question.num_votes}}
+                
+                      </td>
 		           
 		            <td>
 		                {{ question.answer_set.count }}

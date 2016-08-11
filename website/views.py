@@ -23,6 +23,7 @@ from django.db.models import Count
 from django.core.mail import send_mail
 from forums.settings import SET_TO_EMAIL_ID
 
+
 admins = (
    9, 4376, 4915, 14595, 12329, 22467, 5518, 30705
 )
@@ -329,22 +330,24 @@ def new_question(request):
             to = (SET_TO_EMAIL_ID,question.category.email,)
             url = settings.EMAIL_URL
             message =""" The following new question has been posted in the FOSSEE Forum: \n\n
-                Title: {0}\n 
-                Category: {1}\n
-                Question : {2}\n\n
-                Link: {3}\n\n
+                Title : {0}\n 
+                Category : {1}\n
+                Link : {2}\n\n
+                Question : {3}\n\n
 Regards,\nFOSSEE Team,\nIIT Bombay.
              """.format(
                 question.title,
                 question.category, 
-                question.body, 
-                'http://forums.fossee.in/question/'+str(question.id)
+                'http://forums.fossee.in/question/'+str(question.id),
+                question.body
             ) 
 
             send_mail(subject, message, sender_email, to)
             return HttpResponseRedirect('/')
         else:
              context.update(csrf(request))
+             category = request.POST.get('category', None)
+             context['category'] = category
              context['form'] = form
              return render(request, 'website/templates/new-question.html', context)
     else:
@@ -366,6 +369,7 @@ def vote_post(request):
     
     post_id = int(request.POST.get('id'))
     
+    post_id.votes.up(user_id)
     vote_type = request.POST.get('type')
     vote_action = request.POST.get('action')
     question_id =  request.POST.get('id') 

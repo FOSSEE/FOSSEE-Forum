@@ -41,6 +41,7 @@ urlpatterns = patterns('',
     url(r"^accounts/confirm/(?P<confirmation_code>\w+)/(?P<username>[\w. @-]+)/$", views.confirm, name='confirm'),
     url(r"^accounts/profile/(?P<username>[\w. @-]+)/$", views.account_profile, name='profile'),
     url(r"^accounts/view-profile/(?P<user_id>[\w. @-]+)/$", views.account_view_profile, name='view_profile'),
+    #url(r'^ratings/', include('ratings.urls')),   
     # url(r'^accounts/forgot-password/$', views.forgotpassword, name='forgotpassword'),
     # url(r'^accounts/update-password/$', views.updatepassword, name='updatepassword'), 
    
