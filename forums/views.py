@@ -182,9 +182,12 @@ def account_view_profile(request, user_id):
 def send_registration_confirmation(user):
     p = Profile.objects.get(user=user)
      
-    # Sending email when an answer is posted
+    # Sending email when an answer is poste
+    sender_name = "FOSSEE Forums"
+    sender_email = "forums@fossee.in"
     subject = 'Account Active Notification'
-    message = """Dear {0},\n
+    to = [user.email,]
+    message ="""Dear {0},\n
     Thank you for registering at {1}.\n\n You may activate your account by clicking on this link or copying and pasting it in your browser
     {2}\n
     Regards,\n
@@ -192,17 +195,12 @@ def send_registration_confirmation(user):
     IIT Bombay.
     """.format(
         user.username,
-        "http://fossee.in",
+        "http://forums.fossee.in",
         "http://forums.fossee.in/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
     )
-    email = EmailMultiAlternatives(
-        subject, message, 'forums@fossee.in',
-        to = [user.email], bcc = [], cc = [],
-        headers={'Reply-To': 'forums@fossee.in', "Content-type":"text/html;charset=iso-8859-1"}
-    )
-    email.attach_alternative(message, "text/html")
     try:
-        result = email.send(fail_silently=False)
+        send_mail(subject, message, sender_email, to)
+        return HttpResponseRedirect('/')
     except:
         pass
 
@@ -249,6 +247,9 @@ def user_logout(request):
     logout(request)
     return HttpResponseRedirect('/')
 
+
+# def password_reset(request):
+#     users = Profile.objects.get()
 # def forgotpassword(request):
 #     context = {}
 #     user_emails = []

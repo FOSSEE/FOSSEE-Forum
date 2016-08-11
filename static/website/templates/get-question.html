@@ -14,17 +14,27 @@
  
 <span class="saving hideme">saving . . .</span>
 <span class="saved hideme">saved</span>
-
+<script src="js/like-dislike.js"></script>
 <div class="row">
                         
     <div class="question-wrapper col-lg-12 col-md-12 col-sm-12 col-xs-12">
     <div class="question {% if user|can_edit:question %}editable{% endif %}" >
+    <div id="demo">
+      <button class="like">Like
+        <span class="likes">0</span>
+      </button>
+      <div>
+      <button class="dislike">Dislike
+        <span class="dislikes">0</span>
+      </button>
+      </div>
+    </div>
      <!-- VOTE CELL -->
- 		
+        
                 
                
-                   <div class="votecell" style="padding-top: 0.0cm;">
-          		<div class="vote">
+                   <!-- <div class="votecell" style="padding-top: 0.0cm;">
+                <div class="vote">
                             {% ifequal thisUserUpvote 0 %}
                                 <img src="{% static 'website/images/up1-off.png' %}" class="vote-up"/>
                             {% else %}
@@ -43,8 +53,8 @@
                             {% endifequal %}
                         </div>
                        
-                  </div>
-        <div class="title {% if user|can_edit:question %}title-editable{% endif %}">
+                  </div> -->
+        <div class="title {% if user|can_edit:question %}title-editable{% endif %}" style="margin-left : 60px">
            {{ question.title }}
         </div>
         
@@ -63,7 +73,7 @@
   });
   </script>
         <div id="questionNicPanel"></div>
-        <div id="{% if user|can_edit:question  %}questionInstance{% endif %}" class="body"  style="margin-left : 60px">
+        <div id="{% if user|can_edit:question  %}questionInstance{% endif %}" class="body"  style="margin-left : 55px">
             <p>{{ question.body| safe}}</p>
         </div>
         <br>
@@ -121,16 +131,16 @@
 
 <div class="row">
     <div class="answer-wrapper col-lg-12 col-md-12 col-sm-12 col-xs-12">
-<div class="votecell" style="padding-top: 9px;">
-           		
-          		<div class="ans-vote" >
-          		
+<!-- <div class="votecell" style="padding-top: 9px;">
+                
+                <div class="ans-vote" >
+                
                             {% ifequal ans_vote.0 0 %}
                                 <img src="{% static 'website/images/up1-off.png' %}" class="ans-vote-up"  id="up{{ answer.id }}" title="This question shows research effort; it is useful and clear"/>
                             {% else %}
                                 <img src="{% static 'website/images/up1-on.png' %}" class="ans-vote-up selected" id="up{{ answer.id }}" title="This question shows research effort; it is useful and clear"/>
                             {% endifequal %}
-			    
+                
                             <span class="vote-count-post" id="span{{ answer.id }}" >
                                 {{ ans_vote.2 }}
                             </span>
@@ -140,9 +150,9 @@
                                 <img src="{% static 'website/images/down1-on.png' %}" class="ans-vote-down selected" id="down{{ answer.id }}" title="This question does not show any research effort; it is not useful and unclear"/>
                             {% endifequal %}
                         </div>
-                        </div>
+                        </div> -->
         <div class="answer {% if user|can_edit:answer  %}editable{% endif %}" id="answer{{answer.id}}" style="margin-left: 63px;">
-        	                  
+                              
                   
             <div class="body" id="body{{ answer.id }}" style="padding-bottom: 12px">
                 <p>{{ answer.body| safe }}</p>
@@ -175,7 +185,7 @@
                     <div class="body" id="cbody{{ comment.id }}">
                         <p>{{ comment.body| safe }}</p>
                     </div>
-		    <br>
+            <br>
                     
                     <span class="meta_co" style="position: absolute;right: 0px; bottom: 0px;">
                         <small>
@@ -327,6 +337,32 @@
    
     <script type="text/javascript">
 
+    $('#demo').likeDislike({
+      reverseMode: true,
+      activeBtn: localStorage['key']? localStorage['key'] : '',
+      click: function(btnType, likes, dislikes, event) {
+        var self = this;
+        // lock the buttons
+        self.readOnly(true);
+     
+   // send data to the serve
+        $.ajax({
+          url: '/action',
+          type: 'GET',
+          data: 'id=1' + '&likes=' + likes + '&dislikes=' + dislikes,
+          success: function (data) {
+            // show new values
+            $(self).find('.likes').text(data.likes);
+            $(self).find('.dislikes').text(data.dislikes);
+            localStorage['key'] = btnType;
+     
+            // unlock the buttons
+            self.readOnly(false);
+          }
+        });
+      }
+    });
+
 // function checkAndConfirm() {
 //     var x = document.getElementsByTagName("textarea")[0].getAttribute("id");           
 //   // var val = $.trim($("body").val());
@@ -340,176 +376,176 @@
 //     }
 // }
         /* For random color */
-	$(".user_co").each(function() {
-	    var hue = 'rgb(' + (Math.floor((256-199)*Math.random()) + 200) + ',' + (Math.floor((256-199)*Math.random()) + 200) + ',' + (Math.floor((256-199)*Math.random()) + 200) + ')';
-	    $(this).css("background-color", hue);
-	});
+    $(".user_co").each(function() {
+        var hue = 'rgb(' + (Math.floor((256-199)*Math.random()) + 200) + ',' + (Math.floor((256-199)*Math.random()) + 200) + ',' + (Math.floor((256-199)*Math.random()) + 200) + ')';
+        $(this).css("background-color", hue);
+    });
 
         $(document).ready(function() {
         
-	 $.ajaxSetup({
+     $.ajaxSetup({
             data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
         });
 
-	/* VOTE FOR QUESTION */
-	
-        $('div.vote img.vote-up').click(function() {
-            var id = {{ question.pk }};
-            var vote_type = 'up';
-		
-            /* USER HAS ALREADY VOTED */
-
-            if ($(this).hasClass('selected')) {
-                var vote_action = 'recall-vote'
-
-                $.post('/vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
-
-                    $('img.vote-up').removeAttr('src')
-                        .attr('src', '{% static 'website/images/up1-off.png' %}')
-                        .removeClass('selected');
-                    $('div.vote span.vote-count-post').html(response);
-                    $('img.vote-down').css('pointer-events','all');
-                });
-            }
-            /* USER WISHES TO VOTE */
-            else {
-                var vote_action = 'vote'
-                $.post('/vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
-
-                    $('img.vote-up').removeAttr('src')
-                        .attr('src', '{% static 'website/images/up1-on.png' %}')
-                        .addClass('selected');
-                    $('div.vote span.vote-count-post').html(response);
-                    $('img.vote-down').css('pointer-events','none');
-                });
-            }
-        });
-
-        /* DOWNVOTE */
-
-        $('div.vote img.vote-down').click(function() {
-
-            var id = {{ question.pk }};
-            var vote_type = 'down';
-		
-            /* USER HAS ALREADY DOWN-VOTED */
-
-            if ($(this).hasClass('selected')) {
-                var vote_action = 'recall-vote'
-
-                $.post('/vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
-
-                    $('img.vote-down').removeAttr('src')
-                        .attr('src', '{% static 'website/images/down1-off.png' %}')
-                        .removeClass('selected');
-                    $('div.vote span.vote-count-post').html(response);
-                    $('img.vote-up').css('pointer-events','all');
-                });
-            }
-            /* USER WISHES TO VOTE */
-            else {
-                var vote_action = 'vote'
-                $.post('/vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
-
-                    $('img.vote-down').removeAttr('src')
-                        .attr('src', '{% static 'website/images/down1-on.png' %}')
-                        .addClass('selected');
-                    $('div.vote span.vote-count-post').html(response);
-                    $('img.vote-up').css('pointer-events','none');
-                });
-            }
-        });
+    // /* VOTE FOR QUESTION */
+    
+    //     $('div.vote img.vote-up').click(function() {
+    //         var id = {{ question.pk }};
+    //         var vote_type = 'up';
         
-       /* VOTE FOR ANSWERS */
+    //         /* USER HAS ALREADY VOTED */
+
+    //         if ($(this).hasClass('selected')) {
+    //             var vote_action = 'recall-vote'
+
+    //             $.post('/vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
+
+    //                 $('img.vote-up').removeAttr('src')
+    //                     .attr('src', '{% static 'website/images/up1-off.png' %}')
+    //                     .removeClass('selected');
+    //                 $('div.vote span.vote-count-post').html(response);
+    //                 $('img.vote-down').css('pointer-events','all');
+    //             });
+    //         }
+    //         /* USER WISHES TO VOTE */
+    //         else {
+    //             var vote_action = 'vote'
+    //             $.post('/vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
+
+    //                 $('img.vote-up').removeAttr('src')
+    //                     .attr('src', '{% static 'website/images/up1-on.png' %}')
+    //                     .addClass('selected');
+    //                 $('div.vote span.vote-count-post').html(response);
+    //                 $('img.vote-down').css('pointer-events','none');
+    //             });
+    //         }
+    //     });
+
+    //     /* DOWNVOTE */
+
+    //     $('div.vote img.vote-down').click(function() {
+
+    //         var id = {{ question.pk }};
+    //         var vote_type = 'down';
         
-       /* UP VOTE */
-       $('div.ans-vote img.ans-vote-up').click(function(event) {
+    //         /* USER HAS ALREADY DOWN-VOTED */
+
+    //         if ($(this).hasClass('selected')) {
+    //             var vote_action = 'recall-vote'
+
+    //             $.post('/vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
+
+    //                 $('img.vote-down').removeAttr('src')
+    //                     .attr('src', '{% static 'website/images/down1-off.png' %}')
+    //                     .removeClass('selected');
+    //                 $('div.vote span.vote-count-post').html(response);
+    //                 $('img.vote-up').css('pointer-events','all');
+    //             });
+    //         }
+    //         /* USER WISHES TO VOTE */
+    //         else {
+    //             var vote_action = 'vote'
+    //             $.post('/vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
+
+    //                 $('img.vote-down').removeAttr('src')
+    //                     .attr('src', '{% static 'website/images/down1-on.png' %}')
+    //                     .addClass('selected');
+    //                 $('div.vote span.vote-count-post').html(response);
+    //                 $('img.vote-up').css('pointer-events','none');
+    //             });
+    //         }
+    //     });
+        
+    //    /* VOTE FOR ANSWERS */
+        
+    //    /* UP VOTE */
+    //    $('div.ans-vote img.ans-vote-up').click(function(event) {
        
-            var up_id = event.target.id;
-            var vote_type = 'up';
+    //         var up_id = event.target.id;
+    //         var vote_type = 'up';
             
-            var id = up_id.replace('up','');
+    //         var id = up_id.replace('up','');
            
-            if ($('img#'+up_id).hasClass('selected')) {
-                var vote_action = 'recall-vote'
+    //         if ($('img#'+up_id).hasClass('selected')) {
+    //             var vote_action = 'recall-vote'
 
-                $.post('/ans_vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
+    //             $.post('/ans_vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
 
-                    $('img#'+up_id).removeAttr('src')
-                        .attr('src', '{% static 'website/images/up1-off.png' %}')
-                        .removeClass('selected');
+    //                 $('img#'+up_id).removeAttr('src')
+    //                     .attr('src', '{% static 'website/images/up1-off.png' %}')
+    //                     .removeClass('selected');
                    
-                    $('span#span'+id).html(response);
+    //                 $('span#span'+id).html(response);
                    
-                    $('img#down'+id).css('pointer-events','all');
+    //                 $('img#down'+id).css('pointer-events','all');
                    
-                });
+    //             });
                 
-            }
+    //         }
             
-            /* USER WISHES TO VOTE */
-            else {
+    //         /* USER WISHES TO VOTE */
+    //         else {
             
-                 var vote_action = 'vote'
-                 $.post('/ans_vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
+    //              var vote_action = 'vote'
+    //              $.post('/ans_vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
 
-                    $('img#'+up_id).removeAttr('src')
-                        .attr('src', '{% static 'website/images/up1-on.png' %}')
-                        .addClass('selected');
+    //                 $('img#'+up_id).removeAttr('src')
+    //                     .attr('src', '{% static 'website/images/up1-on.png' %}')
+    //                     .addClass('selected');
                    
-                    $('span#span'+id).html(response);
-                    $('img#down'+id).css('pointer-events','none');
+    //                 $('span#span'+id).html(response);
+    //                 $('img#down'+id).css('pointer-events','none');
                     
                     
-                });
-            }
+    //             });
+    //         }
           
-        }); /* END OF UP VOTE FOR ANSWERS */
+    //     }); /* END OF UP VOTE FOR ANSWERS */
         
-        /* DOWNVOTE */
+    //     /* DOWNVOTE */
 
-        $('div.ans-vote img.ans-vote-down').click(function(event) {
+    //     $('div.ans-vote img.ans-vote-down').click(function(event) {
 
-            var down_id = event.target.id;
-            var vote_type = 'down';
+    //         var down_id = event.target.id;
+    //         var vote_type = 'down';
             
-            var id = down_id.replace('down','');
+    //         var id = down_id.replace('down','');
            
            
-            /* USER HAS ALREADY DOWN-VOTED */
-	
-            if ($('img#'+down_id).hasClass('selected')) {
-                var vote_action = 'recall-vote'
-		
-                $.post('/ans_vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
-		   
-                    $('img#'+down_id).removeAttr('src')
-                        .attr('src', '{% static 'website/images/down1-off.png' %}')
-                        .removeClass('selected');
+    //         /* USER HAS ALREADY DOWN-VOTED */
+    
+    //         if ($('img#'+down_id).hasClass('selected')) {
+    //             var vote_action = 'recall-vote'
+        
+    //             $.post('/ans_vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
+           
+    //                 $('img#'+down_id).removeAttr('src')
+    //                     .attr('src', '{% static 'website/images/down1-off.png' %}')
+    //                     .removeClass('selected');
                   
-                    $('div.ans-vote span#span'+id).html(response);
+    //                 $('div.ans-vote span#span'+id).html(response);
                   
-                    $('img#up'+id).css('pointer-events','all')
+    //                 $('img#up'+id).css('pointer-events','all')
                     
-                });
-            }
-            /* USER WISHES TO VOTE */
-            else {
-                var vote_action = 'vote'
-                $.post('/ans_vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
+    //             });
+    //         }
+    //         /* USER WISHES TO VOTE */
+    //         else {
+    //             var vote_action = 'vote'
+    //             $.post('/ans_vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
 
-                    $('img#'+down_id).removeAttr('src')
-                        .attr('src', '{% static 'website/images/down1-on.png' %}')
-                        .addClass('selected');
+    //                 $('img#'+down_id).removeAttr('src')
+    //                     .attr('src', '{% static 'website/images/down1-on.png' %}')
+    //                     .addClass('selected');
                    
-                    $('div.ans-vote span#span'+id).html(response);
-                    $('img#up'+id).css('pointer-events','none')
+    //                 $('div.ans-vote span#span'+id).html(response);
+    //                 $('img#up'+id).css('pointer-events','none')
                     
-                });
-            }
-        });
+    //             });
+    //         }
+    //     });
            
-     });
+    //  });
      
  
   </script>
