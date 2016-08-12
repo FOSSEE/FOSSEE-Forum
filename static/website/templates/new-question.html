@@ -7,7 +7,7 @@
         </span> Create a new question . . .
     </h4>
     <hr>
-    <form role="form" action="" method="POST" onsubmit="return category_name();">{% csrf_token %}
+    <form role="form" action="" method="POST" >{% csrf_token %}
     {% with WIDGET_ERROR_CLASS='field_error' %}
     <p>
     Please enter the FOSS details.
@@ -72,7 +72,7 @@
            
         </div>
     </div>
-    <input class="btn btn-success" type="submit" value="Submit Question"> 
+    <input class="btn btn-success" type="submit"  onclick = "return validate_dd();" value="Submit Question"> 
     {% endwith %}
     </form>
 
@@ -102,13 +102,29 @@ bkLib.onDomLoaded(function() {
 });
 </script>
 
+
+<script type="text/javascript">
+    function dd_validate() {
+        alert("function");
+        return category_dd();
+
+   }
+</script>
+
 <script>
 window.onload = function(){
+    
     var c2= "{{ category }}";
-    console.log(c2)
-    if(c2 != ""){
+    console.log(c2);
+    if (c2 == "None"){
+      
         $("#id_category").val(c2);
-        // $( "#id_category option:not(:selected)" ).prop('disabled',true);
+        $( "#id_category option" ).prop('disabled',false);         
+    }   
+    else  if(c2 != ""){
+       
+        $("#id_category").val(c2);
+        $( "#id_category option:not(:selected)" ).prop('disabled',true);     
     }
 }
 
@@ -120,6 +136,19 @@ window.onload = function(){
      
 //           return false;
 //     });
+</script>
+
+<script>
+function category_dd(){
+     var c2= "{{ category }}";
+    
+     if(c2 != ""){
+       alert("here");
+        $("#id_category").val(c2);
+        $( "#id_category option:not(:selected)" ).prop('disabled',true);     
+    }
+    return true;
+}
 </script>
 
 

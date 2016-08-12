@@ -61,8 +61,8 @@ def get_question(request, question_id=None, pretty_url=None):
     ans_votes = []
 
     for vote in answers:
-    	net_ans_count  = vote.userUpVotes.count() - vote.userDownVotes.count()
-    	ans_votes.append([vote.userUpVotes.filter(id=request.user.id).count(),vote.userDownVotes.filter(id=request.user.id).count(),net_ans_count])
+        net_ans_count  = vote.userUpVotes.count() - vote.userDownVotes.count()
+        ans_votes.append([vote.userUpVotes.filter(id=request.user.id).count(),vote.userDownVotes.filter(id=request.user.id).count(),net_ans_count])
     #for (f,b) in zip(foo, bar):
     main_list = zip(answers,ans_votes)
     context = {
@@ -91,7 +91,7 @@ def question_answer(request,qid):
     question = get_object_or_404(Question, id=qid)
    
     if request.method == 'POST':
-    	form = AnswerQuestionForm(request.POST)
+        form = AnswerQuestionForm(request.POST)
         answers = question.answer_set.all()
         answer = Answer()
         
@@ -293,10 +293,10 @@ def filter(request,  category=None, tutorial=None, minute_range=None, second_ran
     categories = FossCategory.objects.filter(name=category)
         
     dict_context = {
-			'questions':questions,
-			'categories': categories
-		   }
-		
+            'questions':questions,
+            'categories': categories
+           }
+        
     return render(request, 'website/templates/filter.html',  dict_context)
 
 # post a new question on to forums, notification is sent to mailing list team@fossee.in
@@ -345,6 +345,8 @@ Regards,\nFOSSEE Team,\nIIT Bombay.
             return HttpResponseRedirect('/')
         else:
              context.update(csrf(request))
+             category = request.POST.get('category', None)
+             context['category'] = category
              context['form'] = form
              return render(request, 'website/templates/new-question.html', context)
     else:
@@ -378,34 +380,34 @@ def vote_post(request):
 
     if request.user.id != question.user_id:
     #if request.user.id == question_id:
-		
-		if vote_action == 'vote':
-		    if (thisuserupvote == 0) and (thisuserdownvote == 0):
-		        if vote_type == 'up':
-		            cur_post.userUpVotes.add(request.user)
-		        elif vote_type == 'down':
-		            cur_post.userDownVotes.add(request.user)
-		        else:
-		            return HttpResponse("Error: Unknown vote-type passed.")
-		    else:
-		        return HttpResponse(initial_votes)
-		#This loop is for canceling vote
-		elif vote_action == 'recall-vote':
-		    if (vote_type == 'up') and (thisuserupvote == 1):
-		        cur_post.userUpVotes.remove(request.user)
-		    elif (vote_type == 'down') and (thisuserdownvote == 1):
-		        cur_post.userDownVotes.remove(request.user)
-		    else:
-		        # "Error - Unknown vote type or no vote to recall"
-		        return HttpResponse(initial_votes)
-		else:
-		    return HttpResponse("Error: Bad Action.")
+        
+        if vote_action == 'vote':
+            if (thisuserupvote == 0) and (thisuserdownvote == 0):
+                if vote_type == 'up':
+                    cur_post.userUpVotes.add(request.user)
+                elif vote_type == 'down':
+                    cur_post.userDownVotes.add(request.user)
+                else:
+                    return HttpResponse("Error: Unknown vote-type passed.")
+            else:
+                return HttpResponse(initial_votes)
+        #This loop is for canceling vote
+        elif vote_action == 'recall-vote':
+            if (vote_type == 'up') and (thisuserupvote == 1):
+                cur_post.userUpVotes.remove(request.user)
+            elif (vote_type == 'down') and (thisuserdownvote == 1):
+                cur_post.userDownVotes.remove(request.user)
+            else:
+                # "Error - Unknown vote type or no vote to recall"
+                return HttpResponse(initial_votes)
+        else:
+            return HttpResponse("Error: Bad Action.")
 
-		num_votes = cur_post.userUpVotes.count() - cur_post.userDownVotes.count()
-		cur_post.num_votes = num_votes
-		cur_post.save()
-		return HttpResponse(num_votes)
-    		
+        num_votes = cur_post.userUpVotes.count() - cur_post.userDownVotes.count()
+        cur_post.num_votes = num_votes
+        cur_post.save()
+        return HttpResponse(num_votes)
+            
     else:
         return HttpResponse(initial_votes)
     
@@ -431,39 +433,39 @@ def ans_vote_post(request):
 
     if request.user.id != answer.uid:
 
-	    #This loop is for voting
-	    if vote_action == 'vote':
-		if (userupvote == 0) and (userdownvote == 0):
-		    if vote_type == 'up':
-		        cur_post.userUpVotes.add(request.user)
-		    elif vote_type == 'down':
-		        cur_post.userDownVotes.add(request.user)
-		    else:
-		        return HttpResponse("Error: Unknown vote-type passed.")
-		else:
-		    return HttpResponse(initial_votes)
-	    #This loop is for canceling vote
-	    elif vote_action == 'recall-vote':
-		if (vote_type == 'up') and (userupvote == 1):
-		    cur_post.userUpVotes.remove(request.user)
-		elif (vote_type == 'down') and (userdownvote == 1):
-		    cur_post.userDownVotes.remove(request.user)
-		else:
-		    # "Error - Unknown vote type or no vote to recall"
-		    return HttpResponse(initial_votes)
-	    else:
-		return HttpResponse("Error: Bad Action.")
+        #This loop is for voting
+        if vote_action == 'vote':
+            if (thisuserupvote == 0) and (thisuserdownvote == 0):
+                if vote_type == 'up':
+                    cur_post.userUpVotes.add(request.user)
+                elif vote_type == 'down':
+                    cur_post.userDownVotes.add(request.user)
+                else:
+                    return HttpResponse("Error: Unknown vote-type passed.")
+            else:
+                return HttpResponse(initial_votes)
+        #This loop is for canceling vote
+        elif vote_action == 'recall-vote':
+            if (vote_type == 'up') and (thisuserupvote == 1):
+                cur_post.userUpVotes.remove(request.user)
+            elif (vote_type == 'down') and (thisuserdownvote == 1):
+                cur_post.userDownVotes.remove(request.user)
+            else:
+                # "Error - Unknown vote type or no vote to recall"
+                return HttpResponse(initial_votes)
+        else:
+            return HttpResponse("Error: Bad Action.")
 
-	    num_votes = cur_post.userUpVotes.count() - cur_post.userDownVotes.count()
-	    cur_post.num_votes = num_votes
-	    cur_post.save()
-	   
+        num_votes = cur_post.userUpVotes.count() - cur_post.userDownVotes.count()
+        cur_post.num_votes = num_votes
+        cur_post.save()
+       
 
-	    return HttpResponse(num_votes)
-		    
-	
+        return HttpResponse(num_votes)
+            
+    
     else:
-	#else:
+    #else:
         return HttpResponse(initial_votes)
 
 # Notification Section
@@ -708,4 +710,3 @@ def ajax_time_search(request):
 def ajax_vote(request):
     #for future use
     pass
-

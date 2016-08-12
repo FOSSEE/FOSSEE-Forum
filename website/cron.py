@@ -48,8 +48,8 @@ class Cron(object):
                 mail_body += string
             sender_email = "forums@fossee.in"    
             mail_body += "Please do the needful.\n\nRegards,\nFOSSEE Team,\nIIT Bombay."
-            # to = (item.category.email,)
-            to = ('priyanka@fossee.in', 'rohan@fossee.in',)
+            to = (item.category.email,)
+            # to = ('priyanka@fossee.in', 'rohan@fossee.in',)
             subject =  "FOSSEE Forums - " + str(item.category) +" - Unanswered Question"
             send_mail(subject,mail_body, sender_email, to)
 
