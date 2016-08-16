@@ -128,9 +128,9 @@ def question_answer(request,qid):
             to = [question.user.email,'forum-notifications@fossee.in',]
             url = settings.EMAIL_URL
             message =""" The following new question has been posted in the FOSSEE Forum: \n\n
-                Title: {0}\n
-                Category: {1}\n
-                Link: {2}\n\n
+                <b>Title: </b>{0}\n
+                <b>Category:</b> {1}\n
+                <b>Link: </b>{2}\n\n
 Regards,\nFOSSEE Team,\nIIT Bombay.
              """.format(
                 question.title,
@@ -203,9 +203,9 @@ def answer_comment(request):
             url = settings.EMAIL_URL
             message =""" 
                 A comment has been posted on your answer. \n\n
-                Title: {0}\n
-                Category: {1}\n
-                Link: {2}\n\n
+                <b>Title:</b> {0}\n
+                <b>Category: </b>{1}\n
+                <b>Link: </b>{2}\n\n
 Regards,\nFOSSEE Team,\nIIT Bombay.
              """.format(
                 answer.question.title,
@@ -243,9 +243,9 @@ Regards,\nFOSSEE Team,\nIIT Bombay.
             url = settings.EMAIL_URL
             message ="""
                 A reply has been posted on your comment.\n\n
-                Title: {0}\n
-                Category: {1}\n
-                Link: {2}\n\n
+                <b> Title: </b>{0}\n
+                <b> Category: </b>{1}\n
+                <b> Link: </b>{2}\n\n
 Regards,\nFOSSEE Team,\nIIT Bombay.
              """.format(
                 answer.question.title,
@@ -330,10 +330,10 @@ def new_question(request):
             url = settings.EMAIL_URL
             message = """
             The following new question has been posted in the FOSSEE Forum: <br> 
-                <b> Title: </b>{0}<br> 
-                <b> Category: </b>{1}<br>
-                <b> Link: </b> <a href="{3}">{3}</a><br>
-                <b> Question: </b> {2} <br> 
+                <b> Title: </b>{0} \n
+                <b> Category: </b>{1} \n
+                <b> Link: </b> <a href="{2}"></a> \n
+                <b> Question: </b> {3} <br> \n\n
                 Regards,\nFOSSEE Team,\nIIT Bombay.
             """.format(
                 question.title,
