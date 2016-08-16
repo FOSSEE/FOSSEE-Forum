@@ -55,13 +55,8 @@
             <input class="form-control" type="text">
             <h5>Question</h5>
         </div>
-        <script src="//cdn.tinymce.com/4/tinymce.min.js"></script>
-  <script type="text/javascript">
-  tinymce.init({
-    selector: '#myeditablediv',
-    inline: true
-  });
-  </script>
+
+
         <div id="questionNicPanel"></div>
         <div id="{% if user|can_edit:question  %}questionInstance{% endif %}" class="body"  style="margin-left : 60px">
             <p>{{ question.body| safe}}</p>
@@ -82,10 +77,12 @@
         </a>
         
         <span class="modify">
-            {% if user|can_edit:question  %}
+            <!-- {% if user|can_edit:question  %} -->
+             <a class="hide-question btn btn-xs btn-info" data-qid="{{ question.id }}" data-status="{{ question.status }}" href="#">{% if question.status == 1 %} Hide {% else %} Show {% endif %}</a>
+                <a class="delete-question btn btn-xs btn-info" data-qid="{{ question.id }}" href="#">Delete</a>
                 <a class="edit btn btn-xs btn-info" href="#">Edit</a>
                 <a class="save btn btn-xs btn-success" data-qid="{{ question.id }}" href="#">Save</a>
-            {% endif %}
+            <!-- {% endif %} -->
         </span>
         
         <span class="meta">
@@ -143,7 +140,6 @@
                         </div>
         <div class="answer {% if user|can_edit:answer  %}editable{% endif %}" id="answer{{answer.id}}" style="margin-left: 63px;">
                               
-                  
             <div class="body" id="body{{ answer.id }}" style="padding-bottom: 12px">
                 <p>{{ answer.body| safe }}</p>
             </div>
@@ -159,12 +155,12 @@
                     <a href="/accounts/view-profile/{{ answer.user.id }}"> {{answer.user}} </a>
                 </span>
             </span>
-            {% if user|can_edit:answer  %}
+            <!-- {% if user|can_edit:answer  %} -->
             <span class="modify" style="display:block">
                 <a class="edit btn btn-xs btn-info vs" href="#body{{ answer.id}}" data-target="body{{ answer.id }}">Edit</a>
                 <a class="save btn btn-xs btn-success vs"  data-target="body{{ answer.id }}" data-aid="{{ answer.id }}" href="#">Save</a>
             </span>
-            {% endif %}
+            <!-- {% endif %} -->
         </div> <!-- /.answer -->
         
         <div class="row" style="padding-left: 40px">

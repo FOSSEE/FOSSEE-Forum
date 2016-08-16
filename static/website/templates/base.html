@@ -52,10 +52,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                               <span class="icon-bar"></span>
                               <span class="icon-bar"></span>
                             </button>
-                            <a class="navbar-brand" href="{% url 'website:home' %}">
-                                <img id="logo" src="{% static 'website/images/logo.png' %}">
-                                FOSSEE Forums
-                            </a>
+                            
+                                <a class="navbar-brand" href="{% url 'website:home' %}">
+                                    <img id="logo" style="width: 70%; height: 70%" src="{% static 'website/images/fossee_logo.png' %}">
+                                </a>
 
 
                         </div> <!-- /.navbar-header -->
@@ -129,10 +129,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         
         <div id="footer-wrapper" class="container">
             <div id="footer-inner" class="col-lg-12 col-md-12 col-sm-12">
+            <a class="navbar-brand" href="http://fossee.in/" target="_blank">
+                                <img id="logo" src="{% static 'website/images/logo.png' %}">
+                                <!-- FOSSEE Forums -->
+                            </a>
                 <div class="cc">
                     <a class="cc-logo" rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">
                         <img src="/static/website/images/cc-logo-88x31.png" alt="CC logo">
-                    </a> FOSSEE Forum by <a href="http://www.iitb.ac.in" target="_blank">IIT Bombay</a> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Creative Commons Attribution-ShareAlike 4.0 International License</a>
+                    </a> This forum by FOSSEE at <a href="http://www.iitb.ac.in" target="_blank">IIT Bombay</a> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Creative Commons Attribution-ShareAlike 4.0 International License</a>
                 </div> 
             </div> <!-- /#footer-inner -->
         </div> <!-- /#footer-wrapper -->

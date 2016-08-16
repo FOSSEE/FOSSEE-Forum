@@ -35,7 +35,7 @@ class Question(models.Model):
 
 
     def __unicode__(self):
-             return '{0} - {1} - {2}'.format(self.category.name, self.title, self.user)
+             return '{0} - {1} - {2} - {3}'.format(self.id, self.category.name, self.title, self.user)
 
     def __str__(self):
         return self.body

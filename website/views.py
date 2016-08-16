@@ -328,18 +328,19 @@ def new_question(request):
             subject = "FOSSEE Forums - {0} - New Question".format(question.category)
             to = (SET_TO_EMAIL_ID,question.category.email,)
             url = settings.EMAIL_URL
-            message =""" The following new question has been posted in the FOSSEE Forum: \n\n
-                Title: {0}\n 
-                Category: {1}\n
-                Question : {2}\n\n
-                Link: {3}\n\n
-Regards,\nFOSSEE Team,\nIIT Bombay.
-             """.format(
+            message = """
+            The following new question has been posted in the FOSSEE Forum: <br> 
+                <b> Title: </b>{0}<br> 
+                <b> Category: </b>{1}<br>
+                <b> Link: </b> <a href="{3}">{3}</a><br>
+                <b> Question: </b> {2} <br> 
+                Regards,\nFOSSEE Team,\nIIT Bombay.
+            """.format(
                 question.title,
                 question.category, 
-                question.body, 
-                'http://forums.fossee.in/question/'+str(question.id)
-            ) 
+               'http://forums.fossee.in/question/'+str(question.id),
+                question.body
+            )
 
             send_mail(subject, message, sender_email, to)
             return HttpResponseRedirect('/')
