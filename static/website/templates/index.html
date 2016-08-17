@@ -146,9 +146,8 @@
 		           
 		            <td>   
 		                <span>
-		                    <i>
-		                        {{ question.date_created|date:"d-m-y" }}
-		                    </i>
+		                    <span style="display: none;">{{ question.date_created |date:"Y-m-d" }}</span>
+                    {{ question.date_created|date:"d/m/y" }}
 		                </span>
 		            </td>
 		           

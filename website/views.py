@@ -326,7 +326,7 @@ def new_question(request):
             sender_name = "FOSSEE Forums"
             sender_email = "forums@fossee.in"
             subject = "FOSSEE Forums - {0} - New Question".format(question.category)
-            to = (SET_TO_EMAIL_ID,question.category.email,)
+            to = (question.category.email,)
             url = settings.EMAIL_URL
             message = """
             The following new question has been posted in the FOSSEE Forum: <br> 
