@@ -331,24 +331,26 @@ def new_question(request):
             subject = "FOSSEE Forums - {0} - New Question".format(question.category)
             to = (question.category.email,)
             url = settings.EMAIL_URL
-            message = """
-            The following new question has been posted in the FOSSEE Forum: <br> 
-                <b>Title</b>: {0} <br>
-                <b>Category:</b> {1} <br>
-                <b>Link:</b> <a href="{2}"></a> \n<br>
-                <b>Question:</b> {3} <br><br>
-                Regards,\nFOSSEE Team,\nIIT Bombay.
+
+            essage = """
+                The following new question has been posted in the FOSSEE Forum: <br>
+                <b> Title: </b>{0}<br>
+                <b> Category: </b>{1}<br>
+                <b> Link: </b><a href="{3}">{3}</a><br>
+                <b> Question : </b>{2}<br>
             """.format(
                 question.title,
-                question.category, 
-               'http://forums.fossee.in/question/'+str(question.id),
-                body
+                question.category,
+                question.body,
+                'http://forums.fossee.in/question/'+str(question.id),
             )
-
-            email = EmailMultiAlternatives(subject, '', sender_email, to, headers={"Content-type":"text/html;charset=iso-8859-1"} )
+            email = EmailMultiAlternatives(
+                subject,'',
+                sender_email, to,
+                headers={"Content-type":"text/html;charset=iso-8859-1"}
+            )
             email.attach_alternative(message, "text/html")
-            email.send(fail_silently = True)
-            # send_mail(subject, message, sender_email, to)
+            email.send(fail_silently=True)
             return HttpResponseRedirect('/')
         else:
              context.update(csrf(request))
