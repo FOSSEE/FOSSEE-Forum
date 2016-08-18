@@ -12,6 +12,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.contrib import messages 
+from django.utils.html import strip_tags
 
 User = get_user_model()
   
@@ -128,9 +129,9 @@ def question_answer(request,qid):
             to = [question.user.email,'forum-notifications@fossee.in',]
             url = settings.EMAIL_URL
             message =""" The following new question has been posted in the FOSSEE Forum: \n\n
-                <b>Title: </b>{0}\n
-                <b>Category:</b> {1}\n
-                <b>Link: </b>{2}\n\n
+                Title: {0}\n
+                Category: {1}\n
+                Link: {2}\n\n
 Regards,\nFOSSEE Team,\nIIT Bombay.
              """.format(
                 question.title,
@@ -203,9 +204,9 @@ def answer_comment(request):
             url = settings.EMAIL_URL
             message =""" 
                 A comment has been posted on your answer. \n\n
-                <b>Title:</b> {0}\n
-                <b>Category: </b>{1}\n
-                <b>Link: </b>{2}\n\n
+                Title: {0}\n
+                Category: {1}\n
+                Link: {2}\n\n
 Regards,\nFOSSEE Team,\nIIT Bombay.
              """.format(
                 answer.question.title,
@@ -243,9 +244,9 @@ Regards,\nFOSSEE Team,\nIIT Bombay.
             url = settings.EMAIL_URL
             message ="""
                 A reply has been posted on your comment.\n\n
-                <b> Title: </b>{0}\n
-                <b> Category: </b>{1}\n
-                <b> Link: </b>{2}\n\n
+                Title: {0}\n
+                Category: {1}\n
+                Link: {2}\n\n
 Regards,\nFOSSEE Team,\nIIT Bombay.
              """.format(
                 answer.question.title,
@@ -318,7 +319,7 @@ def new_question(request):
             # question.body = question.body.replace("\\r", '')
             # question.body = question.body.replace("\\n", '')
             # question.body = question.body.replace("\\t", '')
-            body = str(question.body) 
+            body = strip_tags(question.body)
             question.views= 1 
             question.save()
             # print(question.category) 
@@ -330,16 +331,16 @@ def new_question(request):
             url = settings.EMAIL_URL
             message = """
             The following new question has been posted in the FOSSEE Forum: <br> 
-                <b> Title: </b>{0} \n
-                <b> Category: </b>{1} \n
-                <b> Link: </b> <a href="{2}"></a> \n
-                <b> Question: </b> {3} <br> \n\n
+                Title: <b>{0}</b> \n
+                Category: <b>{1}</b> \n
+                Link: </b><a href="{2}"></a></b> \n
+                Question: </b>{3}</b> \n\n
                 Regards,\nFOSSEE Team,\nIIT Bombay.
             """.format(
                 question.title,
                 question.category, 
                'http://forums.fossee.in/question/'+str(question.id),
-                question.body
+                body
             )
 
             send_mail(subject, message, sender_email, to)
