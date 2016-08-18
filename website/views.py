@@ -12,6 +12,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.contrib import messages 
+from django.utils.html import strip_tags
 
 User = get_user_model()
   
@@ -21,6 +22,7 @@ from website.forms import NewQuestionForm, AnswerQuestionForm,AnswerCommentForm
 from website.helpers import get_video_info, prettify
 from django.db.models import Count
 from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
 from forums.settings import SET_TO_EMAIL_ID
 
 admins = (
@@ -127,8 +129,9 @@ def question_answer(request,qid):
             subject = "FOSSEE Forums - {0} - Your question has been answered".format(question.category)
             to = [question.user.email,'forum-notifications@fossee.in',]
             url = settings.EMAIL_URL
-            message =""" The following new question has been posted in the FOSSEE Forum: \n\n
-                Title: {0}\n
+            message = "  "
+            html_message =""" The following new question has been posted in the FOSSEE Forum: \n\n
+                Title: <b> {0} </b>\n
                 Category: {1}\n
                 Link: {2}\n\n
 Regards,\nFOSSEE Team,\nIIT Bombay.
@@ -139,7 +142,7 @@ Regards,\nFOSSEE Team,\nIIT Bombay.
                 'http://forums.fossee.in/question/' + str(question.id) + "#answer" + str(answer.id)
             ) 
 
-            send_mail(subject, message, sender_email, to)
+            send_mail(subject, message, sender_email, to, html_messege= "")
             return HttpResponseRedirect("/question/" + str(question.id))
         else:
             context['form'] = form
@@ -318,7 +321,7 @@ def new_question(request):
             # question.body = question.body.replace("\\r", '')
             # question.body = question.body.replace("\\n", '')
             # question.body = question.body.replace("\\t", '')
-            body = str(question.body) 
+            body = strip_tags(question.body)
             question.views= 1 
             question.save()
             # print(question.category) 
@@ -326,22 +329,28 @@ def new_question(request):
             sender_name = "FOSSEE Forums"
             sender_email = "forums@fossee.in"
             subject = "FOSSEE Forums - {0} - New Question".format(question.category)
-            to = (SET_TO_EMAIL_ID,question.category.email,)
+            to = (question.category.email,)
             url = settings.EMAIL_URL
-            message =""" The following new question has been posted in the FOSSEE Forum: \n\n
-                Title: {0}\n 
-                Category: {1}\n
-                Question : {2}\n\n
-                Link: {3}\n\n
-Regards,\nFOSSEE Team,\nIIT Bombay.
-             """.format(
-                question.title,
-                question.category, 
-                question.body, 
-                'http://forums.fossee.in/question/'+str(question.id)
-            ) 
 
-            send_mail(subject, message, sender_email, to)
+            message = """
+                The following new question has been posted in the FOSSEE Forum: <br>
+                <b> Title: </b>{0}<br>
+                <b> Category: </b>{1}<br>
+                <b> Link: </b><a href="{3}">{3}</a><br>
+                <b> Question : </b>{2}<br>
+            """.format(
+                question.title,
+                question.category,
+                question.body,
+                'http://forums.fossee.in/question/'+str(question.id),
+            )
+            email = EmailMultiAlternatives(
+                subject,'',
+                sender_email, to,
+                headers={"Content-type":"text/html;charset=iso-8859-1"}
+            )
+            email.attach_alternative(message, "text/html")
+            email.send(fail_silently=True)
             return HttpResponseRedirect('/')
         else:
              context.update(csrf(request))
