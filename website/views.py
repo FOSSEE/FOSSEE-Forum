@@ -332,7 +332,7 @@ def new_question(request):
             to = (question.category.email,)
             url = settings.EMAIL_URL
 
-            essage = """
+            message = """
                 The following new question has been posted in the FOSSEE Forum: <br>
                 <b> Title: </b>{0}<br>
                 <b> Category: </b>{1}<br>
