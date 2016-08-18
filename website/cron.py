@@ -49,7 +49,7 @@ class Cron(object):
                 mail_body += string
             sender_email = settings.SENDER_EMAIL    
             mail_body += "Please do the needful.\n\nRegards,\nFOSSEE Team,\nIIT Bombay."
-            to = (item.category.email,)
+            to = (item.category.email, 'forum-notifications@fossee.in')
             subject =  "FOSSEE Forums - " + str(item.category) +" - Unanswered Question"
             send_mail(subject,mail_body, sender_email, to)
 

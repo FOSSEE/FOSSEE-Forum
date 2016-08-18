@@ -54,11 +54,11 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'forums_fossee_current',                      # Or path to database file if using sqlite3.
+        'NAME': 'new_forums',                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': DB_USER,
         'PASSWORD': DB_PASS,
-        'HOST': '',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        'HOST': '127.0.0.1',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
         'PORT': '',                      # Set to empty string for default.
     }
 }
@@ -162,8 +162,6 @@ INSTALLED_APPS = (
     # 'spoken_auth',
     'debug_toolbar',
     'captcha',
-    # 'vote',
-    # 'ratings',
     #'migrate_spoken',
 )
 
@@ -213,8 +211,9 @@ GOOGLE_RECAPTCHA_SITE_KEY = FORUM_GOOGLE_RECAPTCHA_SITE_KEY
 
 RECAPTCHA_USE_SSL = True
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
+
 EMAIL_URL = EMAIL_URL
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 #Sender email, forum notification email, domain name
 SENDER_EMAIL = SENDER_EMAIL
@@ -229,18 +228,7 @@ EMAIL_HOST = EMAIL_HOST_SERVER
 EMAIL_PORT = EMAIL_PORT_SERVER
 
 # Optional SMTP authentication information for EMAIL_HOST.
-EMAIL_HOST_USER = EMAIL_HOST_USER_SERVER
-EMAIL_HOST_PASSWORD = EMAIL_HOST_PASSWORD_SERVER
-EMAIL_USE_TLS = EMAIL_USE_TLS_SERVER
+#EMAIL_HOST_USER = EMAIL_HOST_USER_SERVER
+#EMAIL_HOST_PASSWORD = EMAIL_HOST_PASSWORD_SERVER
+#EMAIL_USE_TLS = EMAIL_USE_TLS_SERVER
 
-SENDER_EMAIL = SENDER_EMAIL
-FORUM_NOTIFICATION = FORUM_NOTIFICATION
-DOMAIN_NAME = DOMAIN_NAME
-
-#EMAIL_HOST = 'smtp-auth.iitb.ac.in'
-#EMAIL_PORT = 25
-#EMAIL_HOST_USER = 't16614'
-#EMAIL_HOST_PASSWORD = 'ldap@16614'
-#EMAIL_USE_TLS = True
-
-#this setting is for smtp dummy server for testing purpose
