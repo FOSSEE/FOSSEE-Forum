@@ -324,49 +324,4 @@ $(document).ready(function() {
             return false;
         }
     });
-
-     $('.delete-question').on('click', function(e){
-        question_id = parseInt($('.delete-question').data("qid"));
-        $('#confirm-delete').modal({ backdrop: 'static', keyboard: false })
-        .one('click', '#delete', function() {
-            $.ajax({
-                url: "/ajax-delete-question/",
-                type: "POST",
-                data: {
-                    question_id: question_id,
-                },
-                success: function(data) {
-                    $deleted.hide();
-                    $deleted.show();
-                    $deleted.fadeOut(10000);
-                    window.location = '/';
-                }
-            });
-        });
-    });
-
-    /* hide */
-    $('.hide-question').on('click', function(e){
-        question_id = parseInt($('.hide-question').data("qid"));
-        status = parseInt($('.hide-question').data("status"));
-        $('#confirm-hide').modal({ backdrop: 'static', keyboard: false })
-        .one('click', '#chide', function() {
-            $.ajax({
-                url: "/ajax-hide-question/",
-                type: "POST",
-                data: {
-                    question_id: question_id,
-                    status : status,
-                },
-                success: function(data) {
-                    $hide_qmsg.hide();
-                    $hide_qmsg.show();
-                    $hide_qmsg.fadeOut(10000);
-                    window.location.reload();
-                }
-            });
-        });
-    });
-});
-
 });

@@ -22,6 +22,7 @@ from website.forms import NewQuestionForm, AnswerQuestionForm,AnswerCommentForm
 from website.helpers import get_video_info, prettify
 from django.db.models import Count
 from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
 from forums.settings import SET_TO_EMAIL_ID
 
 admins = (
@@ -128,8 +129,9 @@ def question_answer(request,qid):
             subject = "FOSSEE Forums - {0} - Your question has been answered".format(question.category)
             to = [question.user.email,'forum-notifications@fossee.in',]
             url = settings.EMAIL_URL
-            message =""" The following new question has been posted in the FOSSEE Forum: \n\n
-                Title: {0}\n
+            message = "  "
+            html_message =""" The following new question has been posted in the FOSSEE Forum: \n\n
+                Title: <b> {0} </b>\n
                 Category: {1}\n
                 Link: {2}\n\n
 Regards,\nFOSSEE Team,\nIIT Bombay.
@@ -140,7 +142,7 @@ Regards,\nFOSSEE Team,\nIIT Bombay.
                 'http://forums.fossee.in/question/' + str(question.id) + "#answer" + str(answer.id)
             ) 
 
-            send_mail(subject, message, sender_email, to)
+            send_mail(subject, message, sender_email, to, html_messege= "")
             return HttpResponseRedirect("/question/" + str(question.id))
         else:
             context['form'] = form
@@ -331,10 +333,10 @@ def new_question(request):
             url = settings.EMAIL_URL
             message = """
             The following new question has been posted in the FOSSEE Forum: <br> 
-                Title: <b>{0}</b> \n
-                Category: <b>{1}</b> \n
-                Link: </b><a href="{2}"></a></b> \n
-                Question: </b>{3}</b> \n\n
+                <b>Title</b>: {0} <br>
+                <b>Category:</b> {1} <br>
+                <b>Link:</b> <a href="{2}"></a> \n<br>
+                <b>Question:</b> {3} <br><br>
                 Regards,\nFOSSEE Team,\nIIT Bombay.
             """.format(
                 question.title,
@@ -343,7 +345,10 @@ def new_question(request):
                 body
             )
 
-            send_mail(subject, message, sender_email, to)
+            email = EmailMultiAlternatives(subject, '', sender_email, to, headers={"Content-type":"text/html;charset=iso-8859-1"} )
+            email.attach_alternative(message, "text/html")
+            email.send(fail_silently = True)
+            # send_mail(subject, message, sender_email, to)
             return HttpResponseRedirect('/')
         else:
              context.update(csrf(request))
