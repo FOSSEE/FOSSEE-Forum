@@ -131,7 +131,7 @@ def question_answer(request,qid):
             url = settings.EMAIL_URL
             message = "  "
             message =""" The following new question has been posted in the FOSSEE Forum: \n\n
-                Title: <b> {0} </b>\n
+                Title: {0} \n
                 Category: {1}\n
                 Link: {2}\n\n
 Regards,\nFOSSEE Team,\nIIT Bombay.
