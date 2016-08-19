@@ -130,8 +130,8 @@ def question_answer(request,qid):
             to = [question.user.email,'forum-notifications@fossee.in',]
             url = settings.EMAIL_URL
             message = "  "
-            html_message =""" The following new question has been posted in the FOSSEE Forum: \n\n
-                Title: <b> {0} </b>\n
+            message =""" The following new question has been posted in the FOSSEE Forum: \n\n
+                Title: {0} \n
                 Category: {1}\n
                 Link: {2}\n\n
 Regards,\nFOSSEE Team,\nIIT Bombay.
@@ -142,7 +142,7 @@ Regards,\nFOSSEE Team,\nIIT Bombay.
                 'http://forums.fossee.in/question/' + str(question.id) + "#answer" + str(answer.id)
             ) 
 
-            send_mail(subject, message, sender_email, to, html_messege= "")
+            send_mail(subject, message, sender_email, to)
             return HttpResponseRedirect("/question/" + str(question.id))
         else:
             context['form'] = form
