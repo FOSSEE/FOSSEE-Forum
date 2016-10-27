@@ -14,6 +14,14 @@ class FossCategory(models.Model):
     def __unicode__(self):
         return self.name
 
+class SubFossCategory(models.Model):
+    parent = models.ForeignKey(FossCategory)
+    name = models.CharField(max_length=100)
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_modified = models.DateTimeField(auto_now=True)
+    def __unicode__(self):
+        return self.name
+
 class Issue(models.Model):
     name = models.CharField(max_length=100)
     date_created = models.DateTimeField(auto_now_add=True)
@@ -24,6 +32,7 @@ class Issue(models.Model):
 class Question(models.Model):
     user  = models.ForeignKey(User)
     category = models.ForeignKey(FossCategory)
+    sub_category = models.CharField(max_length = 200)
     title = models.CharField(max_length=200)
     body = models.TextField()
     date_created = models.DateTimeField(auto_now_add=True)
@@ -35,7 +44,7 @@ class Question(models.Model):
 
 
     def __unicode__(self):
-             return '{0} - {1} - {2} - {3}'.format(self.id, self.category.name, self.title, self.user)
+             return '{0} - {1} - {2} - {3} - {4}'.format(self.id, self.category.name, self.sub_category, self.title, self.user)
 
     def __str__(self):
         return self.body

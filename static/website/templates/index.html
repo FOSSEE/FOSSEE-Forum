@@ -119,9 +119,7 @@
 		<th>Question Title </th>
 		<th>Date</th>
 		<th>Views</th>
-        <th>Votes</th>
 		<th>Answers</th>
-		<th>User</th>  
 	</tr> 
 	</thead> 
 	<tbody> 
@@ -154,21 +152,13 @@
 		            <td>
 		                {{ question.views}}
 		            </td>
-                    <td>
-            
-                          {{ question.num_votes}}
                 
-                      </td>
 		           
 		            <td>
 		                {{ question.answer_set.count }}
 		            </td>
 		          
-		            <td>
-		                <span class="title" data-toggle="tooltip" data-placement="top" >
-		                    <a href="{% url 'view_profile' question.user.id %}">{{ question.user|truncatechars:10 }}
-		                </span>
-		            </td>
+		          
 		        </tr>
 		        {% endfor %}
 		</tbody> 

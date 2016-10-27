@@ -3,6 +3,10 @@ from website.models import *
 #from spoken_auth.models import TutorialDetails
 from django.db.models import Q
 import re
+
+tutorials = (
+    ("Select a Tutorial", "Select a Tutorial"),
+)
 class NewQuestionForm(forms.ModelForm):
     class Meta:
         model = Question
@@ -23,16 +27,11 @@ class NewQuestionForm(forms.ModelForm):
     
     def clean_title(self):
         title = self.cleaned_data['title']
-        # if title.strip():
-        #    raise forms.ValidationError("Title Can not be only Spaces")
         if len(title) < 12:
             raise forms.ValidationError("Title should be longer than 12 characteres")
         if Question.objects.filter(title=title).exists():
             raise forms.ValidationError("This title already exist.")
-        # temp = title.replace(" ", '')
-        # for e in str(temp):
-        #     if not e.isalnum():
-        #         raise forms.ValidationError("Only Alphanuemaric")
+       
         return title
     
     def clean_body(self):
@@ -52,7 +51,29 @@ class NewQuestionForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         category = kwargs.pop('category', None)
+        selecttutorial = kwargs.pop('tutorial', None)
+
+        print "category", category
         super(NewQuestionForm, self).__init__(*args, **kwargs)
+        tutorial_choices = (
+                ("Select a Sub Category", "Select a Sub Category"),
+        )
+        super(NewQuestionForm, self).__init__(*args, **kwargs)
+        if FossCategory.objects.filter(id=category).exists():
+            print "category exists", category
+            self.fields['category'].initial = category
+            children = SubFossCategory.objects.filter(parent_id = category)
+            for child in children:
+                print "child", child
+                tutorial_choices += ((child.name, child.name),)
+                print tutorial_choices
+            self.fields['tutorial'] = forms.CharField(widget=forms.Select(choices=tutorial_choices))
+            if SubFossCategory.objects.filter(name = selecttutorial).exists():
+                self.fields['tutorial'].initial = selecttutorial
+        else:
+            print "category dont exist"
+            self.fields['tutorial'] = forms.CharField(widget=forms.Select(choices=tutorial_choices))
+
 
 class AnswerQuestionForm(forms.ModelForm):
     question = forms.IntegerField(widget=forms.HiddenInput())
@@ -75,12 +96,3 @@ class AnswerQuestionForm(forms.ModelForm):
 class AnswerCommentForm(forms.Form):
     body = forms.CharField(widget=forms.Textarea(),required = True,
         error_messages = {'required':'Comment field required.'})
-
-    # def clean_body(self):
-    #     body = self.cleaned_data['body']
-    #     body = body.replace('&nbsp;', ' ')
-    #     body = body.replace('<br>', '\n')
-    #     if body.isspace():
-    #         raise forms.ValidationError("Body Can not be only Spaces")
-    #     return body
-

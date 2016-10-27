@@ -54,7 +54,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'forums_fossee',                      # Or path to database file if using sqlite3.
+        'NAME': 'abcd',                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': DB_USER,
         'PASSWORD': DB_PASS,
@@ -209,10 +209,10 @@ DEBUG_TOOLBAR_PATCH_SETTINGS = False
 EMAIL_URL = "http://forums.fossee.aero.iitb.ac.in"
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
-# EMAIL_HOST = 'smtp-auth.iitb.ac.in'
-# EMAIL_PORT = 25
-# EMAIL_HOST_USER = 't16614'
-# EMAIL_HOST_PASSWORD = 'ldap@16614'
-# EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp-auth.iitb.ac.in'
+EMAIL_PORT = 25
+EMAIL_HOST_USER = 't16614'
+EMAIL_HOST_PASSWORD = 'ldap@16614'
+EMAIL_USE_TLS = True
 
 #this setting is for smtp dummy server for testing purpose

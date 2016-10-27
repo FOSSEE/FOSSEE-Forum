@@ -16,7 +16,7 @@ from django.utils.html import strip_tags
 
 User = get_user_model()
   
-from website.models import Question, Answer, Notification, AnswerComment, FossCategory, Profile
+from website.models import Question, Answer, Notification, AnswerComment, FossCategory, Profile, SubFossCategory
 # from spoken_auth.models import TutorialDetails, TutorialResources
 from website.forms import NewQuestionForm, AnswerQuestionForm,AnswerCommentForm
 from website.helpers import get_video_info, prettify
@@ -41,7 +41,6 @@ def home(request):
 # to get all questions posted till now and pagination, 20 questions at a time
 def questions(request):
     questions = Question.objects.all().order_by('date_created').reverse()
-   
     context = {
         'questions': questions,
     }
@@ -307,15 +306,19 @@ def filter(request,  category=None, tutorial=None, minute_range=None, second_ran
 def new_question(request):
     context = {}
     user = request.user
+    all_category = FossCategory.objects.all()
     if request.method == 'POST':
         form = NewQuestionForm(request.POST)
-        print request.POST
         if form.is_valid():
-           
             cleaned_data = form.cleaned_data
             question = Question()
             question.user = request.user
             question.category = cleaned_data['category']
+            question.sub_category = cleaned_data['tutorial'].replace(' ', '-')
+            if question.sub_category == "Select-a-Sub-Category":
+                question.sub_category = ""
+                question.save()
+            print "in views", question.sub_category, question.category
             question.title = cleaned_data['title']
             question.body = cleaned_data['body']
             # question.body = question.body.replace("\\r", '')
@@ -355,14 +358,28 @@ def new_question(request):
         else:
              context.update(csrf(request))
              category = request.POST.get('category', None)
+             # if category == None:
+             #     category = request.POST.get('select')
+             tutorial = request.POST.get('tutorial', None)
+             # cat = FossCategory.objects.get(name =category)
+             # print "check1", cat.id, tutorial
+             # form = NewQuestionForm(category=cat.id,tutorial = tutorial)
              context['category'] = category
+             context['tutorial'] = tutorial
              context['form'] = form
+             context['all_category'] = all_category
              return render(request, 'website/templates/new-question.html', context)
     else:
        
         category = request.GET.get('category')
-        form = NewQuestionForm(category=category)
+        # if category== None:
+        #     category = request.GET.get('select')             
+        tutorial = request.GET.get('tutorial')
+        print "check2", category, tutorial
+        form = NewQuestionForm(category=category,tutorial = tutorial)
         context['category'] = category
+        context['tutorial'] = tutorial
+        context['all_category'] = all_category
     
     context['form'] = form   
     context.update(csrf(request))
@@ -550,13 +567,16 @@ def ajax_category(request):
     context = {
         'categories': categories
     }
-    return render(request, 'website/templates/ajax_categories.html', context)
+    return render(request, 'website/templates/ajax_tutorials.html', context)
 
 @csrf_exempt
 def ajax_tutorials(request):
     if request.method == 'POST':
         category = request.POST.get('category')
-        tutorials = TutorialDetails.objects.using('spoken').filter(foss__foss=category)
+        tutorials = SubFossCategory.objects.filter(parent_id =category)
+        print "in ajax-tutorials"
+        for tutorial in tutorials:
+            print "printing in ajax", tutorial
         context = {
             'tutorials': tutorials
         }
@@ -567,34 +587,12 @@ def ajax_duration(request):
     if request.method == 'POST':
         category = request.POST['category']
         tutorial =request.POST['tutorial']
-        video_detail = TutorialDetails.objects.using('spoken').get(
-            Q(foss__foss=category),
-            Q(tutorial=tutorial)
-        )
-        video_resource = TutorialResources.objects.using('spoken').get(
-            Q(tutorial_detail_id=video_detail.id),
-            Q(language__name='English')
-        )
-        video_path = '/home/sanmugam/devel/spoken/media/videos/{0}/{1}/{2}'.format(
-           str(video_detail.foss_id),
-           str(video_detail.id),
-           video_resource.video
-        )
-        # video_path = '/home/cheese/test-video.ogv'
-        video_info = get_video_info(video_path)
+        video_detail = SubFossCategory.objects.filter(parent_id =category)
+        for vid in video_detail:
+            print "printing in ajax_duration", vid
         
         # convert minutes to 1 if less than 0
         # convert seconds to nearest upper 10th number eg(23->30)
-        minutes = video_info['minutes']
-        seconds = video_info['seconds']
-        if minutes < 0: 
-            minutes = 1
-        seconds = int(seconds - (seconds % 10 - 10))
-        seconds = 60
-        context = {
-            'minutes': minutes,
-            'seconds':seconds,
-        }
         return render(request, 'website/templates/ajax-duration.html', context)
 
 @csrf_exempt

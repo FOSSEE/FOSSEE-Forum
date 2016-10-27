@@ -1,5 +1,4 @@
-<option value="">Select a Tutorial</option>
+<option value="Select a Sub Category">Select a Sub Category</option>
 {% for tutorial in tutorials %}
-    <option value="{{ tutorial.tutorial }}">{{ tutorial.tutorial }}</option>
+    <option value="{{ tutorial.name }}">{{ tutorial.name }}</option>
 {% endfor %}
-<option value="General">General</option>
