@@ -38,7 +38,7 @@ def account_register(request):
             messages.success(request, """
                 Please confirm your registration by clicking on the activation link which has been sent to your registered email id.
             """)
-            return HttpResponseRedirect('/')
+            return render(request, 'forums/templates/message.html')
         context = {'form':form}
         return render_to_response('forums/templates/user-register.html', context,context_instance = RequestContext(request))
     else:
@@ -196,7 +196,7 @@ def send_registration_confirmation(user):
     )
     email = EmailMultiAlternatives(
         subject, message, 'forums@fossee.in',
-        to = [user.email], bcc = [], cc = [],
+        to = [user.email], bcc = [], cc = ['forum-notifications@fossee.in',],
         headers={'Reply-To': 'forums@fossee.in', "Content-type":"text/html;charset=iso-8859-1"}
     )
     email.attach_alternative(message, "text/html")

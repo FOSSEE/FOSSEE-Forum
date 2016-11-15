@@ -1,6 +1,8 @@
 {% extends 'website/templates/base.html' %}
 {% load helpers %}
-
+{% block title %}
+    {{ question.category }} - FOSSEE Forums
+{% endblock %}
 {% block content %}
 
 <script>
@@ -23,8 +25,7 @@
         {{ category }}
     {% endif %}
     {% if tutorial %}
-       <b> &gt; </b>
-       {{ tutorial }}
+       {{ name }}
     {% endif %}
     {% if minute_range %}
        <b> &gt; </b>
@@ -59,9 +60,16 @@
 	    <td></td>
             <td>
                 <span class="category" data-toggle="tooltip" data-placement="top" >
-               <a class="pull-left" href="{% url 'website:filter' question.category|lower %}?qid={{ question.id }}">
-                 {{ question.category|truncatechars:12 }} </a>
-                 </span>
+                {% if question.sub_category %}
+                <a class="pull-left" href="{% url 'website:filter' question.category question.sub_category %}?qid={{ question.id }}">
+                 {{ question.sub_category|truncatechars:12 }}   
+                </a> 
+                {% else %}
+                 <a class="pull-left" href="{% url 'website:filter' question.category|lower %}?qid={{ question.id }}">
+                 {{ question.category|truncatechars:12 }}   
+                </a> 
+                {% endif %}
+                </span>
             </td>
 
             <td>
