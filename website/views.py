@@ -329,7 +329,7 @@ def new_question(request):
             question = Question()
             question.user = request.user
             question.category = cleaned_data['category']
-            question.sub_category = cleaned_data['tutorial'].replace(' ', '-')
+            question.sub_category = cleaned_data['tutorial']
             if (question.sub_category == "Select-a-Sub-Category"):
                 if str(question.category) == "Scilab-Toolbox":
                     context.update(csrf(request))
