@@ -50,10 +50,16 @@ def questions(request):
 # get particular question, with votes,anwsers
 def get_question(request, question_id=None, pretty_url=None):
     question = get_object_or_404(Question, id=question_id)
+    sub_category = True
+    if question.sub_category == "" or str(question.sub_category) == 'None':
+        sub_category = False
+    else:
+        sub_category = True
     pretty_title = prettify(question.title)
     if pretty_url != pretty_title:
         return HttpResponseRedirect('/question/'+ question_id + '/' + pretty_title)
     answers = question.answer_set.all()
+    ans_count = question.answer_set.count()
     form = AnswerQuestionForm()
     thisuserupvote = question.userUpVotes.filter(id=request.user.id).count()
     thisuserdownvote = question.userDownVotes.filter(id=request.user.id).count()
@@ -67,7 +73,9 @@ def get_question(request, question_id=None, pretty_url=None):
     #for (f,b) in zip(foo, bar):
     main_list = zip(answers,ans_votes)
     context = {
+        'ans_count': ans_count,
         'question': question,
+        'sub_category':sub_category,
         'main_list': main_list,
         'form': form,
         'thisUserUpvote': thisuserupvote,
@@ -285,18 +293,24 @@ def filter(request,  category=None, tutorial=None, minute_range=None, second_ran
     elif tutorial is None:
         questions = Question.objects.filter(category__name=category).order_by('date_created').reverse()
     elif minute_range is None:
-        questions = Question.objects.filter(category=category).filter(tutorial=tutorial).order_by('date_created').reverse()
-    else:  #second_range is None
-        questions = Question.objects.filter(category=category).filter(tutorial=tutorial).filter(minute_range=minute_range).order_by('date_created').reverse()
+        questions = Question.objects.filter(category__name=category).filter(sub_category=tutorial).order_by('date_created').reverse()
+    else:
+        questions = Question.objects.filter(category=category).filter(sub_category=tutorial).filter(minute_range=minute_range).order_by('date_created').reverse()
 
     if 'qid' in request.GET:
         context['qid']  = int(request.GET['qid'])
      
     categories = FossCategory.objects.filter(name=category)
-        
+    sub_category = SubFossCategory.objects.filter(name = tutorial)
+    try:
+        name = SubFossCategory.objects.get(name = tutorial)
+        dict_context['name'] = name
+    except:
+        pass        
     dict_context = {
             'questions':questions,
-            'categories': categories
+            'categories': categories,
+            'tutorial': sub_category,
            }
         
     return render(request, 'website/templates/filter.html',  dict_context)
@@ -305,6 +319,7 @@ def filter(request,  category=None, tutorial=None, minute_range=None, second_ran
 @login_required
 def new_question(request):
     context = {}
+    toolbox = False
     user = request.user
     all_category = FossCategory.objects.all()
     if request.method == 'POST':
@@ -314,11 +329,21 @@ def new_question(request):
             question = Question()
             question.user = request.user
             question.category = cleaned_data['category']
-            question.sub_category = cleaned_data['tutorial'].replace(' ', '-')
-            if question.sub_category == "Select-a-Sub-Category":
+            question.sub_category = cleaned_data['tutorial']
+            if (question.sub_category == "Select-a-Sub-Category"):
+                if str(question.category) == "Scilab-Toolbox":
+                    context.update(csrf(request))
+                    category = request.POST.get('category', None)
+                    tutorial = request.POST.get('tutorial', None)
+                    context['category'] = category
+                    context['tutorial'] = tutorial
+                    context['form'] = form
+                    context['toolbox'] = toolbox
+                    return render(request, 'website/templates/new-question.html', context)
+                else:
+                    pass
                 question.sub_category = ""
                 question.save()
-            print "in views", question.sub_category, question.category
             question.title = cleaned_data['title']
             question.body = cleaned_data['body']
             # question.body = question.body.replace("\\r", '')
@@ -327,6 +352,9 @@ def new_question(request):
             body = strip_tags(question.body)
             question.views= 1 
             question.save()
+            if str(question.sub_category) == 'None':
+                question.sub_category = ""
+                question.save()
             # print(question.category) 
             #Sending email when a new question is asked
             sender_name = "FOSSEE Forums"
@@ -358,29 +386,23 @@ def new_question(request):
         else:
              context.update(csrf(request))
              category = request.POST.get('category', None)
-             # if category == None:
-             #     category = request.POST.get('select')
              tutorial = request.POST.get('tutorial', None)
-             # cat = FossCategory.objects.get(name =category)
-             # print "check1", cat.id, tutorial
-             # form = NewQuestionForm(category=cat.id,tutorial = tutorial)
              context['category'] = category
              context['tutorial'] = tutorial
              context['form'] = form
-             context['all_category'] = all_category
+             context['toolbox'] = toolbox
              return render(request, 'website/templates/new-question.html', context)
     else:
        
         category = request.GET.get('category')
-        # if category== None:
-        #     category = request.GET.get('select')             
+        if category == 12:
+            toolbox = True
         tutorial = request.GET.get('tutorial')
-        print "check2", category, tutorial
         form = NewQuestionForm(category=category,tutorial = tutorial)
         context['category'] = category
         context['tutorial'] = tutorial
-        context['all_category'] = all_category
-    
+        context['toolbox'] = toolbox
+        
     context['form'] = form   
     context.update(csrf(request))
     return render(request, 'website/templates/new-question.html', context)
@@ -540,13 +562,15 @@ def user_answers(request, user_id):
 @login_required
 def user_notifications(request, user_id):
     if str(user_id) == str(request.user.id):
-        notifications = Notification.objects.filter(uid=user_id).order_by('date_created').reverse()
-        context = {
-            'notifications': notifications
-        }
-        
-        return render(request, 'website/templates/notifications.html', context)
-    return HttpResponse("go away ...")
+        try :
+            notifications = Notification.objects.filter(uid=user_id).order_by('date_created').reverse()
+            context = {
+                'notifications': notifications
+            }
+            return render(request, 'website/templates/notifications.html', context)
+        except:
+            Notification.objects.filter(uid=request.user.id).delete()
+            return HttpResponseRedirect("/user/{0}/notifications/".format(request.user.id))
 
 # to clear notification from header, once viewed or cancelled
 @login_required
@@ -573,27 +597,25 @@ def ajax_category(request):
 def ajax_tutorials(request):
     if request.method == 'POST':
         category = request.POST.get('category')
-        tutorials = SubFossCategory.objects.filter(parent_id =category)
-        print "in ajax-tutorials"
-        for tutorial in tutorials:
-            print "printing in ajax", tutorial
-        context = {
-            'tutorials': tutorials
-        }
-        return render(request, 'website/templates/ajax-tutorials.html', context)
+        if category == '12':
+            tutorials = SubFossCategory.objects.filter(parent_id =category)
+            context = {
+                'tutorials': tutorials
+            }
+            return render(request, 'website/templates/ajax-tutorials.html', context)
+        else:
+            return HttpResponse("changed")
+            pass
 
 @csrf_exempt
 def ajax_duration(request):
     if request.method == 'POST':
         category = request.POST['category']
         tutorial =request.POST['tutorial']
-        video_detail = SubFossCategory.objects.filter(parent_id =category)
-        for vid in video_detail:
-            print "printing in ajax_duration", vid
-        
+        video_detail = SubFossCategory.objects.filter(parent_id =category)        
         # convert minutes to 1 if less than 0
         # convert seconds to nearest upper 10th number eg(23->30)
-        return render(request, 'website/templates/ajax-duration.html', context)
+        return render(request, 'website/templates/ajax-duration.html')
 
 @csrf_exempt
 def ajax_question_update(request):
@@ -603,7 +625,7 @@ def ajax_question_update(request):
         body = request.POST['question_body']
         question = get_object_or_404(Question, pk=qid)
         if question:
-            if question.uid == request.user.id or request.user.id in admins:
+            if question.user.id == request.user.id or request.user.id in admins:
                 question.title = title
                 question.body = body.encode('unicode_escape')
                 question.save()

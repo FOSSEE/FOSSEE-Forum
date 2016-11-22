@@ -2,6 +2,9 @@
 {% load static %}
 {% load count_tags %}
 
+{% block title %}
+    Previous Questions - FOSSEE Forums
+{% endblock %}
 {% block content %}
 
 <!-- <script type="text/javascript" src="dataTables.scrollingPagination.js"></script> -->
@@ -21,10 +24,20 @@
         </h5>
     </h4>
        <table id="myTable" class="tablesorter-blue">
+        <colgroup>
+        <col width="5%" />
+        <col width="20%" />
+        <col width="50%" />
+        <col width="8%" />
+        <col width="8%" />
+        <col width="8%" />
+        <col width="8%" />
+        <col width="8%" />
+    </colgroup>
         <thead> 
 	<tr> 
 		<th>No.</th>
-	        <th>FOSS</th>
+	    <th>FOSS</th>
 		<th>Question Title </th>
 		<th>Date</th>
 		<th>Views</th>
@@ -35,15 +48,21 @@
 	</thead> 
 	<tbody> 
         {% for question in questions %}
+        {% if question.category.name != "Sandhi" %}
         <tr>
 	    <td> </td>
             <td>
                 <span class="category" data-toggle="tooltip" data-placement="top" >
-               
-                <a class="pull-left" href="{% url 'website:filter' question.category|lower %}?qid={{ question.id }}">
+                {% if question.sub_category %}
+                <a class="pull-left" href="{% url 'website:filter' question.category question.sub_category %}?qid={{ question.id }}">
+                 {{ question.sub_category }}   
+                </a> 
+                {% else %}
+                 <a class="pull-left" href="{% url 'website:filter' question.category|lower %}?qid={{ question.id }}">
                  {{ question.category|truncatechars:12 }}   
                 </a> 
                 
+                {% endif %}
                 </span>
             </td>
           
@@ -79,31 +98,11 @@
                 </span>
             </td>
         </tr>
+        {% endif %}
         {% endfor %}
     </tbody> 
     </table>
 
-    <!-- <ul class="pagination pull-right">
-        {% if questions.has_previous %}
-            <li><a href="?page={{ questions.previous_page_number }}">&laquo; <small>Prev</small></a></li>
-        {% else %}
-            <li class="disabled"><a href="#">&laquo;</a></li>
-        {% endif %}
-        
-        {% for num in questions.paginator.page_range %}
-            {% ifequal num questions.number %}
-                <li class="active"><a href="#">{{ num }}<span class="sr-only">(current)</span></a></li>
-            {% else %}
-                <li><a href="?page={{ num }}">{{ num }}</a></li>
-            {% endifequal %}
-        {% endfor %}
-        
-        {% if questions.has_next %}
-            <li><a href="?page={{ questions.next_page_number }}"><small>Next</small>&raquo;</a></li>
-        {% else %}
-            <li class="disabled"><a href="#">&raquo;</a></li>
-        {% endif %}
-    <ul> -->
 
 {% endblock %}
 

@@ -112,6 +112,14 @@
         </div>
         <div class="panel-body">
             <table id="myTable" class="tablesorter-blue"> 
+                 <colgroup>
+        <col width="5%" />
+        <col width="20%" />
+        <col width="50%" />
+        <col width="8%" />
+        <col width="8%" />
+        <col width="8%" />
+    </colgroup>
 	<thead> 
 	<tr> 
 		<th>No.</th>
@@ -128,12 +136,16 @@
 			    <td></td>
 		            <td>
 		                <span class="category" data-toggle="tooltip" data-placement="top" >
-		                 
-		                <a class="pull-left" href="{% url 'website:filter' question.category|lower %}?qid={{ question.id }}">
-		                   {{ question.category|truncatechars:12 }}
-		                
-		                </a>
-		                 </span>
+                {% if question.sub_category %}
+                <a class="pull-left" href="{% url 'website:filter' question.category question.sub_category %}?qid={{ question.id }}">
+                 {{ question.sub_category }}   
+                </a> 
+                {% else %}
+                 <a class="pull-left" href="{% url 'website:filter' question.category|lower %}?qid={{ question.id }}">
+                 {{ question.category|truncatechars:12 }}   
+                </a> 
+                {% endif %}
+                </span>
 		            </td>
 		           
 		            <td>

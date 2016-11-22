@@ -18,10 +18,8 @@
 <div class="row">
                         
     <div class="question-wrapper col-lg-12 col-md-12 col-sm-12 col-xs-12">
-    <div class="question {% if user|can_edit:question %}editable{% endif %}" >
+    <div class="question {% if user|can_edit:question and not ans_count %}editable{% endif %}" >
      <!-- VOTE CELL -->
-        
-                
                
                    <div class="votecell" style="padding-top: 0.0cm;">
                 <div class="vote">
@@ -44,7 +42,7 @@
                         </div>
                        
                   </div>
-        <div class="title {% if user|can_edit:question %}title-editable{% endif %}">
+        <div class="title {% if user|can_edit:question and not ans_count %}title-editable{% endif %}">
            {{ question.title }}
         </div>
         
@@ -63,7 +61,7 @@
   });
   </script>
         <div id="questionNicPanel"></div>
-        <div id="{% if user|can_edit:question  %}questionInstance{% endif %}" class="body"  style="margin-left : 60px">
+        <div id="{% if user|can_edit:question and not ans_count %}questionInstance{% endif %}" class="body"  style="margin-left : 60px">
             <p>{{ question.body| safe}}</p>
         </div>
         <br>
@@ -75,18 +73,21 @@
                 </a>
             </small>
         </span>
-      
+        {% if sub_category %}
          <span class="tutorial">
             <small>
+                <a href="{% url 'website:filter' question.category question.sub_category %}">
                     {{ question.sub_category}}
+                </a>
             </small>
         </span>
+        {% endif%}
         <a id="question-details-edit" data-toggle="modal" data-target="#detailsModal" href="#" class="hideme">
             <span class="glyphicon glyphicon-edit"></span>
         </a>
         
         <span class="modify">
-            {% if user|can_edit:question  %}
+            {% if user|can_edit:question and not ans_count  %}
                 <a class="edit btn btn-xs btn-info" href="#">Edit</a>
                 <a class="save btn btn-xs btn-success" data-qid="{{ question.id }}" href="#">Save</a>
             {% endif %}
@@ -192,14 +193,14 @@
                             <a href="/accounts/view-profile/{{ comment.user.id }}"> {{comment.user}} </a>
                         </span>
                     </span>
-                    {% if user|can_edit:comment %}
+                   <!--  {% if user|can_edit:comment %}
                     <div class="modify-wrapper">
                         <span class="modify" style="display:block">
                             <a class="edit btn btn-xs btn-info vs" href="#cbody{{ comment.id }}" data-target="cbody{{ comment.id }}">Edit</a>
                             <a class="save btn btn-xs btn-success vs"  data-target="cbody{{ comment.id }}" data-cid="{{ user.id }}" href="#">Save</a>
                         </span>
                     </div>
-                    {% endif %}
+                    {% endif %} -->
                 </div> <!-- /.comment -->
                 {% endfor %}
                 
@@ -273,7 +274,7 @@
             var data_url = "data:text/html;charset=utf-8;base64," + $.base64.encode(code);
         }
     </script></div>  -->         
-        </div>
+        </div> 
             </div>
             
              

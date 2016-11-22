@@ -59,26 +59,30 @@ class NewQuestionForm(forms.ModelForm):
                 ("Select a Sub Category", "Select a Sub Category"),
         )
         super(NewQuestionForm, self).__init__(*args, **kwargs)
-        if FossCategory.objects.filter(id=category).exists():
-            print "category exists", category
-            self.fields['category'].initial = category
-            children = SubFossCategory.objects.filter(parent_id = category)
-            for child in children:
-                print "child", child
-                tutorial_choices += ((child.name, child.name),)
-                print tutorial_choices
-            self.fields['tutorial'] = forms.CharField(widget=forms.Select(choices=tutorial_choices))
-            if SubFossCategory.objects.filter(name = selecttutorial).exists():
-                self.fields['tutorial'].initial = selecttutorial
+        if category == '12':
+            if FossCategory.objects.filter(id=category).exists():
+                print "category exists", category
+                self.fields['category'].initial = category
+                children = SubFossCategory.objects.filter(parent_id = category)
+                for child in children:
+                    print "child", child
+                    tutorial_choices += ((child.name, child.name),)
+                    print tutorial_choices
+                self.fields['tutorial'] = forms.CharField(widget=forms.Select(choices=tutorial_choices))
+                if SubFossCategory.objects.filter(name = selecttutorial).exists():
+                    self.fields['tutorial'].initial = selecttutorial
+            else:
+                print "category dont exist"
+                self.fields['tutorial'] = forms.CharField(widget=forms.Select(choices=tutorial_choices))
         else:
-            print "category dont exist"
+            self.fields['category'].initial = category
             self.fields['tutorial'] = forms.CharField(widget=forms.Select(choices=tutorial_choices))
-
+            print "not a toolbox"
 
 class AnswerQuestionForm(forms.ModelForm):
     question = forms.IntegerField(widget=forms.HiddenInput())
     body = forms.CharField(widget=forms.Textarea(),
-            required = True,
+            required = True,    
             error_messages = {'required':'Answer field required.'}
             )
     def clean_body(self):

@@ -1,6 +1,9 @@
 {% extends 'website/templates/base.html' %}
 {% load static %}
 {% load widget_tweaks %}
+{% block title %}
+    Ask a question - FOSSEE Forums
+{% endblock %}
 {% block content %}
     <h4 style="padding-top: 15px;">
         <span class="glyphicon glyphicon-pencil">
@@ -10,7 +13,7 @@
     <form role="form" action="" method="POST" >{% csrf_token %}
     {% with WIDGET_ERROR_CLASS='field_error' %}
     <p>
-    Please enter the FOSS details.
+    Select the category.
         <img id="ajax-loader" src="{% static 'website/images/ajax-loader.gif' %}" style="display:none;">
     </p>
     <div class="row">
@@ -18,11 +21,11 @@
         <div class="col-lg-3 col-md-3 col-sm-3">
             {% render_field form.category class+="form-control category"%} 
         </div>
-        <div class="col-lg-3 col-md-3 col-sm-3">
+        <div id = 'tutorial' class="col-lg-3 col-md-3 col-sm-3">
             {% if category %}
-                {% render_field form.tutorial class+="form-control" %} 
+                {% render_field form.tutorial class+="form-control tutorial" %}
             {% else %}
-                {% render_field form.tutorial class+="form-control" disabled="disabled" %} 
+                {% render_field form.tutorial class+="form-control" %} 
             {% endif %}
         </div>
         <div class="col-lg-2 col-md-2 col-sm-2">
@@ -34,18 +37,16 @@
         </div>
     </div>
     <hr>
-
-    <p>Please enter your question details.</p>
     <div class="row">
         <div class="col-lg-12">
          {{ form.title.errors }}
             <div class="form-group">
-                <label for="id_title">Title:</label>
+                <label for="id_title">Question Title:</label>
                 {% render_field form.title class+="form-control title" %} 
             </div>
             {{ form.body.errors }}
              <div class="form-group">
-                <label for="id_body" >Question:</label>
+                <label for="id_body" >Question Description:</label>
         
                 {% render_field form.body class+="form-control body" %}
             </div>
@@ -84,25 +85,34 @@ bkLib.onDomLoaded(function() {
 </script>
 
 
-<!-- 
+
 <script>
 window.onload = function(){
     
     var c2= "{{ category }}";
-    alert(c2);
+    
+    if (c2 != '12'){
+      
+        $(".tutorial" ).hide()    
+     }
+     else {
+         $(".tutorial" ).show()    
+
+     }
     if (c2 == "None"){
       
-        $("#id_category").val(c2);
-        $( "#id_category option" ).prop('disabled',false);         
-    }   
-    else  if(c2 != ""){
+         $("#id_category").val(c2);
+         $( "#id_category option" ).prop('disabled',false);         
+     }   
+
+     else  if(c2 != ""){
        
-        $("#id_category").val(c2);
-        $( "#id_category option:not(:selected)" ).prop('disabled',true);     
-    }
+         $("#id_category").val(c2);
+         $( "#id_category option:not(:selected)" ).prop('disabled',true);     
+     }
 }
 </script>
- -->
+
 
 
 

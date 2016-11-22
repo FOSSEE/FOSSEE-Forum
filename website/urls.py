@@ -11,7 +11,8 @@ urlpatterns = patterns('',
     url(r'^filter/(?P<category>[^/]+)/$', views.filter, name='filter'),
     #url(r'^filter/$', 'website.views.filter', name='filter'),
     #url(r'^filter/(?P<category>[^/]+)/$', 'website.views.filter', name='filter')
-    
+    url(r'^filter/(?P<category>[^/]+)/(?P<tutorial>[^/]+)/$', 'website.views.filter', name='filter'),
+
     #url(r'^filter/(?P<category>[^/]+)/(?P<tutorial>[^/]+)/(?P<minute_range>[^/]+)/$', 'website.views.filter', name='filter'),
     #url(r'^filter/(?P<category>[^/]+)/(?P<tutorial>[^/]+)/(?P<minute_range>[^/]+)/(?P<second_range>[^/]+)/$', 'website.views.filter', name='filter'),
     url(r'^new-question/$', views.new_question, name='new_question'),
