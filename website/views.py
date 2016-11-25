@@ -360,7 +360,7 @@ def new_question(request):
             sender_name = "FOSSEE Forums"
             sender_email = "forums@fossee.in"
             subject = "FOSSEE Forums - {0} - New Question".format(question.category)
-            to = (question.category.email,)
+            to = (question.category.email,'forum-notifications@fossee.in')
             url = settings.EMAIL_URL
 
             message = """
