@@ -1,6 +1,6 @@
-#Custom settings
+# Custom settings
 from os.path import *
-#from config import *
+# from config import *
 from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS
 from local import *
 from forums.settings import TO_EMAIL_ID
@@ -37,9 +37,6 @@ TEMPLATES = [
     },
 ]
 
-
-
-
 DEBUG = True
 
 SITE_ID = SET_SITE_ID
@@ -53,8 +50,8 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'abcd',                      # Or path to database file if using sqlite3.
+        'ENGINE': 'django.db.backends.mysql',   # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': 'forum',                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': DB_USER,
         'PASSWORD': DB_PASS,
@@ -120,7 +117,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -145,8 +142,6 @@ ROOT_URLCONF = 'forums.urls'
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'forums.wsgi.application'
 
-
-
 INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
@@ -164,7 +159,7 @@ INSTALLED_APPS = (
     'captcha',
     # 'vote',
     # 'ratings',
-    #'migrate_spoken',
+    # 'migrate_spoken',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -215,4 +210,4 @@ EMAIL_HOST_USER = 't16614'
 EMAIL_HOST_PASSWORD = 'ldap@16614'
 EMAIL_USE_TLS = True
 
-#this setting is for smtp dummy server for testing purpose
+# this setting is for smtp dummy server for testing purpose
