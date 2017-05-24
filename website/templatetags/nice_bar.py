@@ -1,10 +1,10 @@
 import re
 
 from django import template
-
 from website.models import Question, Answer
 
 register = template.Library()
+
 
 # Showing/Hiding nice-bar on pages
 def is_nice_bar_visible(request):
@@ -25,4 +25,6 @@ def is_nice_bar_visible(request):
     except:
         return False
     return False
+
+
 register.filter('is_nice_bar_visible', is_nice_bar_visible)

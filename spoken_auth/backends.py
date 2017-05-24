@@ -7,7 +7,9 @@ from django.contrib.auth.signals import user_logged_in
 
 User = get_user_model()
 
+
 class DrupalAuthBackend(object):
+
     def authenticate(self, username=None, password=None):
         user_logged_in.disconnect(update_last_login)
         try:

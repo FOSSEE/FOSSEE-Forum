@@ -5,7 +5,9 @@ from django.contrib.auth.models import (
     BaseUserManager, AbstractBaseUser
 )
 
+
 class DrupalUserManager(BaseUserManager):
+
     def create_user(self, password=None):
         user = self.model()
         if not email:
@@ -14,14 +16,14 @@ class DrupalUserManager(BaseUserManager):
         user.set_password(password)
         user.save(using=self._db)
         return user
-    
+
     def create_superuser(self, username, password):
         user = self.model()
         user.id = 1
-        user.username= username
+        user.username = username
         p = hashlib.md5()
         p.update(password)
-        user.pass_field= p.hexdigest()
+        user.pass_field = p.hexdigest()
         user.is_admin = True
         user.save(using=self._db)
         return user

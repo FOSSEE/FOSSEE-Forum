@@ -12,6 +12,15 @@ hr {
 .navbar-default {
     margin-bottom: 0;
 }
+.taggs {
+    color: #ffffff;
+    background-color: #a26dc8;
+    border-radius: 8px;
+    border-color: #a26dc8;
+    height: 25px;
+    padding: 3px 5px;
+    margin: 0 5px 0 0;
+}
 #filter-container {
     background: #f5f5f5;
     padding-top: 5px;  
@@ -122,6 +131,7 @@ body {
     background: #F9F6F6;
     color: #2619bd;
 }
+
 #content .question .category a,
 #content .question .tutorial a,
 #content .question .minute_range a,
@@ -135,6 +145,10 @@ body {
 }
 #content .question .category a {
     background: #a26dc8;
+    color: #ffffff;
+}
+#content .question .taggs label {
+    background: #ff4500;
     color: #ffffff;
 }
 #content .question .tutorial a {
