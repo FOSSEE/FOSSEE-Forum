@@ -65,14 +65,22 @@
             <p>{{ question.body| safe}}</p>
         </div>
         <br>
-
-        <span class="category">
             <small>
+            <span class="category">
+
                 <a href="{% url 'website:filter' question.category %}">
                     {{ question.category }}
                 </a>
+            </span>
+            <span class="category">
+                {%for tag in question.tags.all %}
+                <a href="{% url 'website:filter_tags' tag %}">
+                    {{tag}}
+                </a>
+                {%endfor%}
+            </span>
             </small>
-        </span>
+
         {% if sub_category %}
          <span class="tutorial">
             <small>
@@ -107,7 +115,6 @@
 
     </div> <!-- /.question -->
     </div>
-     
 </div> <!-- /.row -->
 
 
@@ -233,7 +240,7 @@
                     Login to add comment
                 </a>
                 {% endif %}
-                 
+
             </div> <!-- comments -->
         </div> <!-- /.row -->
         <br> <hr>
@@ -244,7 +251,7 @@
 {% if user.is_authenticated %}
     <form action="{% url 'website:question_answer' question.id %}" method="POST"> {% csrf_token %}
         {% with WIDGET_ERROR_CLASS='field_error' %}
-            <div class="row"> 
+            <div class="row">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                  {{ form.body.errors }}
                     <div class="form-group">

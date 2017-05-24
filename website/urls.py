@@ -20,7 +20,7 @@ urlpatterns = patterns(
     #     'website.views.filter', name='filter')
     url(r'^filter/(?P<category>[^/]+)/(?P<tutorial>[^/]+)/$',
         'website.views.filter', name='filter'),
-
+    url(r'^filter_tags/(?P<tag>[^/]+)/$', 'website.views.tags', name='filter_tags'),
     # url(r'^filter/(?P<category>[^/]+)/(?P<tutorial>[^/]+)'
     #    '/(?P<minute_range>[^/]+)/$',
     #    'website.views.filter', name='filter'),

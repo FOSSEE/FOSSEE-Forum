@@ -67,6 +67,8 @@ def get_question(request, question_id=None, pretty_url=None):
                                     pretty_title)
     answers = question.answer_set.all()
     ans_count = question.answer_set.count()
+
+    print question.tags.all()
     form = AnswerQuestionForm()
     thisuserupvote = question.userUpVotes.filter(id=request.user.id).count()
     thisuserdownvote = question.userDownVotes\
@@ -92,7 +94,8 @@ def get_question(request, question_id=None, pretty_url=None):
         'thisUserDownvote': thisuserdownvote,
         'net_count': net_count,
         'num_votes': question.num_votes,
-        'ans_votes': ans_votes
+        'ans_votes': ans_votes,
+
     }
     context.update(csrf(request))
     # updating views count
@@ -138,7 +141,6 @@ def question_answer(request, qid):
                 notification.qid = qid
                 notification.aid = answer.id
                 notification.save()
-                
                 user = User.objects.get(id=question.user_id)
 
             # Sending email when a new question is asked
@@ -199,7 +201,7 @@ def answer_comment(request):
         if form.is_valid():
             body = request.POST['body']
             body = str(body)
-        
+
             # body = body.replace("\\r", '')
             # body = body.replace("\\n", '')
             # body = body.replace("\\t", '')
@@ -207,10 +209,10 @@ def answer_comment(request):
             comment.uid = request.user.id
             comment.answer = answer
             comment.body = body.encode('unicode_internal')
-            
+
             comment.save()
             # notifying the answer owner
-            
+
             if answer.uid != request.user.id:
                 notification = Notification()
                 notification.uid = answer.uid
@@ -219,72 +221,75 @@ def answer_comment(request):
                 notification.aid = answer.id
                 notification.cid = comment.id
                 notification.save()
-                
-                user = User.objects.get(id=answer.uid)
-            sender_name = "FOSSEE Forums"
-            sender_email = "forums@fossee.in"
-            subject = "FOSSEE Forums - {0} - Comment for your answer"\
-                      .format(answer.question.category)
-            to = [answer_creator.email, 'forum-notifications@fossee.in', ]
-            url = settings.EMAIL_URL
-            message = """
-                A comment has been posted on your answer. \n\n
-                Title: {0}\n
-                Category: {1}\n
-                Link: {2}\n\n
-                Regards,\nFOSSEE Team,\nIIT Bombay.
-                """.format(
-                answer.question.title,
-                answer.question.category,
-                # question.tutorial,
-                'http://forums.fossee.in/question/' + str(answer.question.id) +\
-                "#answer" + str(answer.id)
-                )
-            send_mail(subject, message, sender_email, to)
-            # notifying other users in the comment thread
-            uids = answer.answercomment_set\
-                         .filter(answer=answer).values_list('uid', flat=True)
-            answer_comments = answer.answercomment_set.filter(answer=answer)
-            comment_creator_emails = []
-            for c in answer_comments:
-                comment_creator = c.user()
-                email = comment_creator.email
-                comment_creator_emails.append(email)
-                comment_creator_emails.append('forum-notifications@fossee.in')
-            # getting distinct uids
-            uids = set(uids)
-            uids.remove(request.user.id)
-            for uid in uids:
-                notification = Notification()
-                notification.uid = uid
-                notification.pid = request.user.id
-                notification.qid = answer.question.id
-                notification.aid = answer.id
-                notification.cid = comment.id
-                notification.save()
-                
-                user = User.objects.get(id=uid)
-            sender_name = "FOSSEE Forums"
-            sender_email = "forums@fossee.in"
-            subject = "FOSSEE Forums - {0} - Comment has a reply"\
-                      .format(answer.question.category)
-            to = comment_creator_emails
-            url = settings.EMAIL_URL
-            message = """
-                A reply has been posted on your comment.\n\n
-                Title: {0}\n
-                Category: {1}\n
-                Link: {2}\n\n
-                Regards,\nFOSSEE Team,\nIIT Bombay.
-                """.format(
-                answer.question.title,
-                answer.question.category,
-                # question.tutorial,
-                'http://forums.fossee.in/question/' +
-                str(answer.question.id) + "#answer" + str(answer.id)
-            )
 
-            send_mail(subject, message, sender_email, to)
+                user = User.objects.get(id=answer.uid)
+            try:
+                sender_name = "FOSSEE Forums"
+                sender_email = "forums@fossee.in"
+                subject = "FOSSEE Forums - {0} - Comment for your answer"\
+                          .format(answer.question.category)
+                to = [answer_creator.email, 'forum-notifications@fossee.in', ]
+                url = settings.EMAIL_URL
+                message = """
+                    A comment has been posted on your answer. \n\n
+                    Title: {0}\n
+                    Category: {1}\n
+                    Link: {2}\n\n
+                    Regards,\nFOSSEE Team,\nIIT Bombay.
+                    """.format(
+                    answer.question.title,
+                    answer.question.category,
+                    # question.tutorial,
+                    'http://forums.fossee.in/question/' + str(answer.question.id) +\
+                    "#answer" + str(answer.id)
+                    )
+                send_mail(subject, message, sender_email, to)
+                # notifying other users in the comment thread
+                uids = answer.answercomment_set\
+                             .filter(answer=answer).values_list('uid', flat=True)
+                answer_comments = answer.answercomment_set.filter(answer=answer)
+                comment_creator_emails = []
+                for c in answer_comments:
+                    comment_creator = c.user()
+                    email = comment_creator.email
+                    comment_creator_emails.append(email)
+                    comment_creator_emails.append('forum-notifications@fossee.in')
+                # getting distinct uids
+                uids = set(uids)
+                uids.remove(request.user.id)
+                for uid in uids:
+                    notification = Notification()
+                    notification.uid = uid
+                    notification.pid = request.user.id
+                    notification.qid = answer.question.id
+                    notification.aid = answer.id
+                    notification.cid = comment.id
+                    notification.save()
+
+                    user = User.objects.get(id=uid)
+                sender_name = "FOSSEE Forums"
+                sender_email = "forums@fossee.in"
+                subject = "FOSSEE Forums - {0} - Comment has a reply"\
+                          .format(answer.question.category)
+                to = comment_creator_emails
+                url = settings.EMAIL_URL
+                message = """
+                    A reply has been posted on your comment.\n\n
+                    Title: {0}\n
+                    Category: {1}\n
+                    Link: {2}\n\n
+                    Regards,\nFOSSEE Team,\nIIT Bombay.
+                    """.format(
+                    answer.question.title,
+                    answer.question.category,
+                    # question.tutorial,
+                    'http://forums.fossee.in/question/' +
+                    str(answer.question.id) + "#answer" + str(answer.id)
+                )
+
+                send_mail(subject, message, sender_email, to)
+            except:
+                pass
             return HttpResponseRedirect("/question/" + str(answer.question.id))
             # print "------success in comment ---------"
         else:
@@ -354,6 +359,19 @@ def filter(request,  category=None, tutorial=None, minute_range=None,
         
     return render(request, 'website/templates/filter.html', dict_context)
 
+def tags(request, tag=None):
+    # filter the questions according to their tags
+    tag_s = str(tag)    # converting tag from unicode to string type
+    context={}
+
+    questions = Question.objects.filter(tags__name__in=[tag_s])
+
+    context = {'questions': questions,
+                'tag': tag_s
+               }
+    return render(request, 'website/templates/filter_tags.html', context)
+
+
 
 # post a new question on to forums,
 # notification is sent to mailing list team@fossee.in
@@ -366,10 +384,17 @@ def new_question(request):
     if request.method == 'POST':
         form = NewQuestionForm(request.POST)
         if form.is_valid():
+
             cleaned_data = form.cleaned_data
-            question = Question()
-            question.user = request.user
-            question.category = cleaned_data['category']
+            # for referencing foreign key and taggit-tables
+            question = Question.objects.create(title=cleaned_data['title'],
+                                               user = request.user,
+                                               category = cleaned_data['category'],
+                                                )
+            # question = Question(title=cleaned_data['title'])
+            # question = form.save(commit=False)
+            # question.user = request.user
+            # question.category = cleaned_data['category']
             question.sub_category = cleaned_data['tutorial']
             if (question.sub_category == "Select a Sub Category"):
                 if str(question.category) == "Scilab Toolbox":
@@ -387,45 +412,59 @@ def new_question(request):
                     pass
                 question.sub_category = ""
                 question.save()
-            question.title = cleaned_data['title']
+            #question.title = cleaned_data['title']
             question.body = cleaned_data['body']
+            # question.tags = cleaned_data['tag']
+            dummy_tag = cleaned_data['tag']
+            print dummy_tag
+            for t in dummy_tag:
+                question.tags.add(t)
+
+            # question.tags.add(dummy_tag)
+
             # question.body = question.body.replace("\\r", '')
             # question.body = question.body.replace("\\n", '')
             # question.body = question.body.replace("\\t", '')
             body = strip_tags(question.body)
             question.views = 1
+
+
             question.save()
             if str(question.sub_category) == 'None':
                 question.sub_category = ""
                 question.save()
+            # form.save_m2m()
             # print(question.category) 
             # Sending email when a new question is asked
-            sender_name = "FOSSEE Forums"
-            sender_email = "forums@fossee.in"
-            subject = "FOSSEE Forums - {0} - New Question"\
-                      .format(question.category)
-            to = (question.category.email, 'forum-notifications@fossee.in')
-            url = settings.EMAIL_URL
+            try:
+                sender_name = "FOSSEE Forums"
+                sender_email = "forums@fossee.in"
+                subject = "FOSSEE Forums - {0} - New Question"\
+                          .format(question.category)
+                to = (question.category.email, 'forum-notifications@fossee.in')
+                url = settings.EMAIL_URL
 
-            message = """
-                The following new question has been posted in the FOSSEE Forum: <br>
-                <b> Title: </b>{0}<br>
-                <b> Category: </b>{1}<br>
-                <b> Link: </b><a href="{3}">{3}</a><br>
-                <b> Question : </b>{2}<br>
-            """.format(
-                question.title,
-                question.category,
-                question.body,
-                'http://forums.fossee.in/question/'+str(question.id),
-            )
-            email = EmailMultiAlternatives(
-                subject, '',
-                sender_email, to,
-                headers={"Content-type": "text/html;charset=iso-8859-1"}
-            )
-            email.attach_alternative(message, "text/html")
-            email.send(fail_silently=True)
+                message = """
+                    The following new question has been posted in the FOSSEE Forum: <br>
+                    <b> Title: </b>{0}<br>
+                    <b> Category: </b>{1}<br>
+                    <b> Link: </b><a href="{3}">{3}</a><br>
+                    <b> Question : </b>{2}<br>
+                """.format(
+                    question.title,
+                    question.category,
+                    question.body,
+                    'http://forums.fossee.in/question/'+str(question.id),
+                )
+                email = EmailMultiAlternatives(
+                    subject, '',
+                    sender_email, to,
+                    headers={"Content-type": "text/html;charset=iso-8859-1"}
+                )
+                email.attach_alternative(message, "text/html")
+                email.send(fail_silently=True)
+            except:
+                pass
             return HttpResponseRedirect('/')
         else:
             context.update(csrf(request))
@@ -435,10 +474,11 @@ def new_question(request):
             context['tutorial'] = tutorial
             context['form'] = form
             context['toolbox'] = toolbox
+
             return render(request, 'website/templates/new-question.html',
                           context)
     else:
-       
+
         category = request.GET.get('category')
         if category == 12:
             toolbox = True
@@ -447,7 +487,8 @@ def new_question(request):
         context['category'] = category
         context['tutorial'] = tutorial
         context['toolbox'] = toolbox
-        
+        context['FossCategory'] = FossCategory.objects.get(id=category)
+        print context['FossCategory'].default_tags.all()
     context['form'] = form   
     context.update(csrf(request))
     return render(request, 'website/templates/new-question.html', context)
@@ -457,9 +498,9 @@ def new_question(request):
 # user who asked the question,cannot vote his/or anwser,
 # other users can post votes
 def vote_post(request):
-    
+
     post_id = int(request.POST.get('id'))
-    
+
     vote_type = request.POST.get('type')
     vote_action = request.POST.get('action')
     question_id = request.POST.get('id')
@@ -472,7 +513,7 @@ def vote_post(request):
                             .userDownVotes.count()
     if request.user.id != question.user_id:
         # if request.user.id == question_id:
-        
+
         if vote_action == 'vote':
             if (thisuserupvote == 0) and (thisuserdownvote == 0):
                 if vote_type == 'up':
@@ -512,12 +553,12 @@ def vote_post(request):
     else:
         return HttpResponse(initial_votes)
 
-    
+
 # return number of votes and initial votes
 # user who posted the answer, cannot vote his/or anwser,
 # other users can post votes
 def ans_vote_post(request):
-    
+
     post_id = int(request.POST.get('id'))
     vote_type = request.POST.get('type')
     vote_action = request.POST.get('action')
@@ -593,7 +634,7 @@ def user_questions(request, user_id):
                             .filter(user_id=user_id)\
                             .order_by('date_created')\
                             .reverse()[marker:marker+10]
-        
+
         context = {
             'questions': questions,
             'total': total,
@@ -794,9 +835,9 @@ def ajax_notification_remove(request):
 def ajax_keyword_search(request):
     if request.method == "POST":
         key = request.POST['key']
-        
+
         questions = Question.objects.filter(title__contains=key)
-        
+
         context = {
             'questions': questions
         }

@@ -2,8 +2,7 @@
 FOSSEE Forum 
 ============
 
-A **WebApp** to provide online discussion, question and answer for professional 
-and programmers. 
+Documentation for installation of requirements for FOSSEE-forum project
 
 Clone
 -----
@@ -11,35 +10,36 @@ Clone
 - Make sure your Internet is working.
 - Clone this repo by typing ::
 
-   git clone -b fossee-forum https://github.com/FOSSEE/spoken-tutorial-forums.git
-   
+   git clone https://github.com/FOSSEE/FOSSEE-Forum.git
+
 
 Installation
 ------------
 
-- Install Virtual Environment using the following command ::
+- Install Virtual Environment. Virtual environment is used to make the installation easier, and will help to avoid clutter in the system
+  wide libraries. Use the following command ::
 
     sudo apt-get install python-virtualenv
 
 - Create a Virtual Environment ::
 
-    virtualenv /path/to/virtualenv
+    virtualenv /path/to/virtualenv-name
 
 - Activate the virtualenv using the command ::
 
     source /path/to/virtualenv-name/bin/activate
 
-- Change the directory to the `spoken-tutorial-forums/` project using the command ::
+- Change the directory to the `FOSSEE-forum/` project using the command ::
 
-    cd /path/to/spoken-tutorial-forums
+    cd /path/to/FOSSEE-forum
 
 - Install pre-requisites using the command (please don't use sudo) ::
 
-    pip install -r requirement.txt
+    pip install -r requirements.txt
 
-  or you can also type ::
+-Install MySQL using the following command ::
 
-    easy_install `cat requirement.txt`
+    sudo apt-get install mysql-server
 
 
 Usage
@@ -49,6 +49,13 @@ Usage
   server. See `settings.py` file for usage.
 
 - Create 'forum' database in 'MySQL'.
+  Open 'MySQL' using the following command ::
+
+	mysql -u root -p
+
+  and then create database using following command ::
+
+	create database forum
 
 - Only for Server deployment, open `spoken-tutorial-forums/forums/settings.py` file and make the following changes ::
 
@@ -67,10 +74,18 @@ Usage
 - For development on your machine, create a file `config.py` in `spoken-tutorial-forums/forums/` and add ::
 
     db_user='root' #(MySql username)
-    
+
     db_pass = 'root' #(MySql password)
-    
-- For development on your machine, open `spoken-tutorial-forums/forums/settings.py` file and make the following changes ::
+
+  Then open file FOSSEE_forums/forums/layout.py and change following to yours ::
+
+    DB_USER
+    DB_PASS
+    TO_EMAIL_ID
+
+
+
+- For development on your machine, open `FOSSEE-forums/forums/settings.py` file and make the following changes ::
 
     DATABASES = {
         'default': {
@@ -83,65 +98,29 @@ Usage
         }
     }
 
-	
-- Populate the database using the following command ::
 
-    cd /path/to/spoken-tutorial-forums
-    
-    python manage.py syncdb
+- Migrate the database using the following command ::
+
+    cd /path/to/FOSSEE-forum
+
+    python manage.py makemigrations
+
+    python manage.py migrate
+
+    python manage.py makemigrations website
+
+    python manage.py migrate website
 
 
-- Run the script populate_category.py which enters lists of foss categories into the table category from the `category_names.txt` file ::
-    
-    python populate_category.py
+- Run the following command to populate the category in the database ::
+
+    python manage.py populatecategory
+
 
 - Start the server using the command ::
 
     python manage.py runserver
 
-
-**Not for first time users and only for developers**
-Migration
-----------
-(How to add a new model field to an existing table using South without having to drop a table)
-
-- Enter into virual environment
-
-- install south ::
-     
-    pip install south
-
-- Add south to INSTALLED_APPS in settings.py
-
-- Change the directory to the `spoken-tutorial-forums/` project using the command ::
-
-    cd /path/to/spoken-tutorial-forums
-
-- Run below command to create south_migrationhistory table ::
-
-    python manage.py syncdb
-
-- Create the initial migration with South ::
-   
-    python manage.py schemamigration --initial website
-
-- Apply it as a fake migration ::
-
-    python manage.py migrate website --fake
-
-- Make the change to the website model, in this case ::
-    
-    git pull
-
-- Create a migration for your new change ::
-
-    python manage.py schemamigration --auto website
-
-- Apply new migration ::
-
-    python manage.py migrate website
-
-    
 
 
 Contributing

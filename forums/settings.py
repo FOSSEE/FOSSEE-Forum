@@ -157,6 +157,7 @@ INSTALLED_APPS = (
     # 'spoken_auth',
     'debug_toolbar',
     'captcha',
+    'taggit',
     # 'vote',
     # 'ratings',
     # 'migrate_spoken',

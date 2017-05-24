@@ -1,5 +1,6 @@
 from django import forms
 from website.models import *
+from taggit.forms import *
 # from spoken_auth.models import TutorialDetails
 from django.db.models import Q
 import re
@@ -29,6 +30,11 @@ class NewQuestionForm(forms.ModelForm):
 
     body = forms.CharField(
                       widget=forms.Textarea(),
+                      required=True,
+                      error_messages={'required': 'Question field required.'})
+
+    tag = TagField(
+                      help_text=("Please seperate tags by comma"),
                       required=True,
                       error_messages={'required': 'Question field required.'})
 

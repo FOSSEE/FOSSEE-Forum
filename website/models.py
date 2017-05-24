@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import User
 
 from django.contrib.auth import get_user_model
+from taggit.managers import TaggableManager
 
 
 class FossCategory(models.Model):
@@ -11,7 +12,7 @@ class FossCategory(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
     email = models.CharField(max_length=50)
-
+    default_tags = TaggableManager()
     def __unicode__(self):
         return self.name
 
@@ -51,6 +52,7 @@ class Question(models.Model):
                                            blank=True,
                                            related_name='postDownVotes')
     num_votes = models.IntegerField(default=0)
+    tags = TaggableManager()
 
     def __unicode__(self):
         return '{0} - {1} - {2} - {3} - {4}'.format(self.id,
