@@ -36,4 +36,5 @@ def latest_question(category):
         'question': question
     }
     return context
-register.inclusion_tag('website/templates/latest_question.html')(latest_question)
+register.inclusion_tag('website/templates/latest_question.html'
+                       )(latest_question)

@@ -4,7 +4,7 @@ import re
 def get_video_info(path):
     """Uses ffmpeg to determine information about a video. This has not been
     broadly tested and your milage may vary"""
- 
+
     from decimal import Decimal
     import subprocess
     import re

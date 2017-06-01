@@ -1,6 +1,5 @@
 # Custom settings
 from os.path import *
-# from config import *
 from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS
 from local import *
 from forums.settings import TO_EMAIL_ID
@@ -158,8 +157,6 @@ INSTALLED_APPS = (
     'debug_toolbar',
     'captcha',
     'taggit',
-    # 'vote',
-    # 'ratings',
     # 'migrate_spoken',
 )
 

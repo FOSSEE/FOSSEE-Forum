@@ -1,0 +1,41 @@
+<script>
+$(function(){ // DOM ready
+
+  // ::: TAGS BOX
+
+  $("#tags input").on({
+    focusout : function() {
+      var txt = this.value.replace(/[^a-z0-9\+\-\.\#]/ig,''); // allowed characters
+      if(txt) $("<span/>", {text:txt.toLowerCase(), insertBefore:this});
+      this.value = "";
+    },
+    keyup : function(ev) {
+      // if: comma|enter (delimit more keyCodes with | pipe)
+      if(/(188|13)/.test(ev.which)) $(this).focusout(); 
+    }
+  });
+  $('#tags').on('click', 'span', function() {
+    if(confirm("Remove "+ $(this).text() +"?")) $(this).remove(); 
+  });
+
+});
+</script>
+<script>
+function ButtonClick(id_tagg,tag_name)
+{   
+    var tag_text = document.getElementById('id_tag').value;
+    if(tag_text.search(tag_name)==-1)
+    {
+        tag_text = tag_text + tag_name+", ";
+        document.getElementById(id_tagg).value = tag_text;
+    }
+    
+    
+}
+</script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+                <div id="tags">
+                  <span>php</span>
+                  <span>c++</span>
+                  <span>jquery</span>
+                  

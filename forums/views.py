@@ -33,10 +33,8 @@ def account_register(request):
             user = User.objects.create_user(username, email, password)
             user.is_active = False
             user.save()
-            confirmation_code = ''.join(random.choice(
-                                                      string.ascii_uppercase +
-                                                      string.digits +
-                                                      string.ascii_lowercase)
+            confirmation_code = ''.join(random.choice(string.ascii_uppercase +
+                                        string.digits + string.ascii_lowercase)
                                         for x in range(33))
             p = Profile(user=user, confirmation_code=confirmation_code)
             p.save()
@@ -67,8 +65,6 @@ def confirm(request, confirmation_code, username):
     try:
         user = User.objects.get(username=username)
         profile = Profile.objects.get(user=user)
-        # if profile.confirmation_code == confirmation_code and
-        # user.date_joined > (timezone.now()-timezone.timedelta(days=1)):
         if profile.confirmation_code == confirmation_code:
             user.is_active = True
             user.save()
@@ -78,7 +74,8 @@ def confirm(request, confirmation_code, username):
             messages.success(
                 request,
                 "Your account has been activated!."
-                " Please update your profile to complete your registration")
+                " Please update your profile to complete your registration"
+                )
             return HttpResponseRedirect('/accounts/profile/'+user.username)
         else:
 
@@ -167,16 +164,14 @@ def account_profile(request, username):
 # view all profile details saved for the user, when clicked on my profile
 @login_required
 def account_view_profile(request, user_id):
-    # user_id = username
+
     user = User.objects.get(pk=user_id)
     profile = Profile.objects.get(user=user)
     flag = False
-    # prof = None
+
     marker = 0
     if 'marker' in request.GET:
         marker = int(request.GET['marker'])
-    # if profile:
-    #     prof = profile[0]
 
     total = Question.objects.filter(user_id=user_id).count()
     total = int(total - (total % 10 - 10))
@@ -221,7 +216,7 @@ def send_registration_confirmation(user):
     IIT Bombay.
     """.format(
         user.username,
-        "http://fossee.in",
+        "http://forums.fossee.in",
         "http://forums.fossee.in/accounts/confirm/" +
         str(p.confirmation_code) + "/" + user.username
     )
@@ -235,7 +230,6 @@ def send_registration_confirmation(user):
     try:
         result = email.send(fail_silently=False)
     except Exception as e:
-        print "email can't be sent"+str(e)
         pass
 
 
@@ -258,7 +252,7 @@ def user_login(request):
                 else:
                     return render_to_response('forums/templates/user-login.html',
                                               context)
-                print request.POST, request.GET.get('next')
+
                 if 'next' in request.POST:
                     next_url = request.POST.get('next')
                     return HttpResponseRedirect(next_url)

@@ -1,7 +1,6 @@
 from django import forms
 from website.models import *
 from taggit.forms import *
-# from spoken_auth.models import TutorialDetails
 from django.db.models import Q
 import re
 
@@ -34,9 +33,8 @@ class NewQuestionForm(forms.ModelForm):
                       error_messages={'required': 'Question field required.'})
 
     tag = TagField(
-                      help_text=("Please seperate tags by comma"),
-                      required=True,
-                      error_messages={'required': 'Question field required.'})
+                  required=True,
+                  error_messages={'required': 'Tag field required.'})
 
     def clean_title(self):
         title = self.cleaned_data['title']
@@ -69,7 +67,7 @@ class NewQuestionForm(forms.ModelForm):
         category = kwargs.pop('category', None)
         selecttutorial = kwargs.pop('tutorial', None)
 
-        # print "category", category
+
         super(NewQuestionForm, self).__init__(*args, **kwargs)
         tutorial_choices = (
                 ("Select a Sub Category", "Select a Sub Category"),
@@ -77,13 +75,11 @@ class NewQuestionForm(forms.ModelForm):
         super(NewQuestionForm, self).__init__(*args, **kwargs)
         if category == '12':
             if FossCategory.objects.filter(id=category).exists():
-                # print "category exists", category
+
                 self.fields['category'].initial = category
                 children = SubFossCategory.objects.filter(parent_id=category)
                 for child in children:
-                    # print "child", child
                     tutorial_choices += ((child.name, child.name),)
-                    # print tutorial_choices
                 self.fields['tutorial'] = (forms
                                            .CharField(widget=forms.Select(
                                                              choices=
@@ -92,7 +88,7 @@ class NewQuestionForm(forms.ModelForm):
                 if SubFossCategory.objects.filter(name=selecttutorial).exists():
                     self.fields['tutorial'].initial = selecttutorial
             else:
-                # print "category dont exist"
+
                 self.fields['tutorial'] = forms.CharField(widget=
                                                           forms.Select(
                                                                choices=
@@ -104,7 +100,7 @@ class NewQuestionForm(forms.ModelForm):
                                                       widget=forms.Select(
                                                           choices=
                                                           tutorial_choices))
-            # print "not a toolbox"
+
 
 
 class AnswerQuestionForm(forms.ModelForm):

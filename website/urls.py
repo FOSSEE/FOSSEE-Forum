@@ -15,19 +15,9 @@ urlpatterns = patterns(
         views.answer_comment, name='answer_comment'),
     url(r'^filter/(?P<category>[^/]+)/$',
         views.filter, name='filter'),
-    # url(r'^filter/$', 'website.views.filter', name='filter'),
-    # url(r'^filter/(?P<category>[^/]+)/$',
-    #     'website.views.filter', name='filter')
     url(r'^filter/(?P<category>[^/]+)/(?P<tutorial>[^/]+)/$',
         'website.views.filter', name='filter'),
     url(r'^filter_tags/(?P<tag>[^/]+)/$', 'website.views.tags', name='filter_tags'),
-    # url(r'^filter/(?P<category>[^/]+)/(?P<tutorial>[^/]+)'
-    #    '/(?P<minute_range>[^/]+)/$',
-    #    'website.views.filter', name='filter'),
-    # url(r'^filter/(?P<category>[^/]+)/(?P<tutorial>[^/]+)/'
-    # '(?P<minute_range>[^/]+)/(?P<second_range>[^/]+)/$',
-    # 'website.views.filter'
-    # , name='filter'),
     url(r'^new-question/$', views.new_question, name='new_question'),
     url(r'^user/(?P<user_id>\d+)/notifications/$',
         views.user_notifications, name='user_notifications'),
@@ -38,10 +28,9 @@ urlpatterns = patterns(
     url(r'^clear-notifications/$',
         views.clear_notifications, name='clear_notifications'),
     url(r'^search/$', views.search, name='search'),
-    # url(r'^unanswerednotification/$',
-    #     views.unanswered_notification, name='unanswered_notification'),
     url(r'^vote_post/$', views.vote_post, name='vote_post'),
     url(r'^ans_vote_post/$', views.ans_vote_post, name='ans_vote_post'),
+    url(r'^category_tags/$', views.category_tags, name='category_tags'),
 
     # Ajax helpers
     url(r'^ajax-tutorials/$', views.ajax_tutorials, name='ajax_tutorials'),

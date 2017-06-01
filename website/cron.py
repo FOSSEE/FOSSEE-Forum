@@ -7,7 +7,6 @@ from django.db.models import Count
 from django.core.mail import send_mail
 from django.core.mail import EmailMultiAlternatives
 
-# os.environ.setdefault("DJANGO_SETTINGS_MODULE", "forums.settings")
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "forums.settings")
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -36,7 +35,7 @@ class Cron(object):
                 print "error occured >> "
                 print e
             if not uque.exists():
-                i = i+1
+                i = i + 1
                 category_id = question.category.id
                 if category_id in body_cat.keys():
                     body_cat[category_id].append(question)
@@ -56,7 +55,6 @@ class Cron(object):
             mail_body += "Please do the needful.\n\nRegards,"\
                          "\nFOSSEE Team,\nIIT Bombay."
             to = (item.category.email,)
-            # to = ('priyanka@fossee.in', 'rohan@fossee.in',)
             subject = "FOSSEE Forums - " + str(item.category) +\
                       " - Unanswered Question"
             send_mail(subject, mail_body, sender_email, to)

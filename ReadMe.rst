@@ -2,6 +2,7 @@
 FOSSEE Forum 
 ============
 
+A **WebApp** to provide online discussion, question and answer for professional and programmers.
 Documentation for installation of requirements for FOSSEE-forum project
 
 Clone
@@ -16,8 +17,7 @@ Clone
 Installation
 ------------
 
-- Install Virtual Environment. Virtual environment is used to make the installation easier, and will help to avoid clutter in the system
-  wide libraries. Use the following command ::
+- Install Virtual Environment. Virtual environment is used to make the installation easier, and will help to avoid clutter in the system wide libraries. Use the following command ::
 
     sudo apt-get install python-virtualenv
 
@@ -57,7 +57,7 @@ Usage
 
 	create database forum
 
-- Only for Server deployment, open `spoken-tutorial-forums/forums/settings.py` file and make the following changes ::
+- Only for Server deployment, open `FOSSEE-forums/forums/settings.py` file and make the following changes ::
 
     DATABASES = {
         'default': {
@@ -71,13 +71,13 @@ Usage
     }
 
 
-- For development on your machine, create a file `config.py` in `spoken-tutorial-forums/forums/` and add ::
+- For development on your machine, create a file `config.py` in `FOSSEE-forums/forums/` and add ::
 
     db_user='root' #(MySql username)
 
     db_pass = 'root' #(MySql password)
 
-  Then open file FOSSEE_forums/forums/layout.py and change following to yours ::
+  Then open file FOSSEE_forums/forums/local.py and change following to yours ::
 
     DB_USER
     DB_PASS

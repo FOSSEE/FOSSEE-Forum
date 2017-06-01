@@ -5,7 +5,6 @@ from django.contrib.auth.models import (
 )
 
 
-#from drupal_auth.managers import DrupalUserManager
 class Users(AbstractBaseUser):
     id = models.IntegerField(primary_key=True)
     username = models.CharField(max_length=100L, unique=True)

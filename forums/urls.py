@@ -4,8 +4,9 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from forums import views
 from django.contrib.auth.views import password_reset, password_reset_confirm,\
-password_reset_done, password_reset_complete, password_change,\
-password_change_done
+    password_reset_done, password_reset_complete, password_change,\
+    password_change_done
+
 admin.autodiscover()
 
 urlpatterns = patterns(
@@ -70,7 +71,7 @@ urlpatterns = patterns(
         name='view_profile'),
     # url(r'^ratings/', include('ratings.urls')),
     # url(r'^accounts/forgot-password/$', views.forgotpassword,
-	# name='forgotpassword'),
+    # name='forgotpassword'),
     # url(r'^accounts/update-password/$', views.updatepassword,
     # name='updatepassword'),
 )

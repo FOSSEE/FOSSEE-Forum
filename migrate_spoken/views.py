@@ -1,6 +1,5 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
-# from website.models import Question, Answer, AnswerComment, Notification
 from migrate_spoken.models import OldUsers
 from spoken_auth.models import Users
 # Create your views here.
@@ -24,10 +23,8 @@ def get_current_user_from_old_email(mail):
 def get_current_user_id_from_old_uerid(uid):
     old_user = get_old_user(uid)
     if old_user:
-        # print old_user.uid, " => ", old_user.mail
         current_user = get_current_user_from_old_email(old_user.mail)
         if current_user:
-            # print current_user.id, " => ", current_user.email
             return current_user
     return None
 

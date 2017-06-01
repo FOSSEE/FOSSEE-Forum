@@ -10,4 +10,5 @@ def recent_questions():
     return {'recent_questions': recent_questions}
 
 
-register.inclusion_tag('website/templates/recent_questions.html')(recent_questions)
+register.inclusion_tag('website/templates/recent_questions.html'
+	                   )(recent_questions)
