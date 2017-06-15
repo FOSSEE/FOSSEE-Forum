@@ -189,6 +189,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
     'website',
+    'moderator',
     # 'django.contrib.admindocs',
     'widget_tweaks',
     # 'spoken_auth',
@@ -196,6 +197,7 @@ INSTALLED_APPS = (
     'captcha',
     'taggit',
     'social_django',
+    'graphos',
     # 'migrate_spoken',
 )
 
