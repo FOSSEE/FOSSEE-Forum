@@ -21,7 +21,7 @@ urlpatterns = patterns(
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
     url(r'^', include('website.urls', namespace='website')),
-
+    url(r'^moderator/', include('moderator.urls', namespace='moderator')),
     url(r'^', include('django.contrib.auth.urls')),
     # for social authentication
     url(r'^oauth/', include('social_django.urls', namespace='social')),
