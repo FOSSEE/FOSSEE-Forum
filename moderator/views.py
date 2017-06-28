@@ -18,6 +18,8 @@ from django.core.context_processors import csrf
 from forums import settings
 from django.core.mail import send_mail
 from models import NotificationEmail
+from moderator.util import delete_question_util, delete_answer_util,\
+    delete_comment_util
 
 
 def get_emails():
@@ -213,6 +215,156 @@ def new_category(request):
             return HttpResponseRedirect('/moderator/category')
         else:
             return HttpResponseRedirect('/moderator/category')
+
+
+@staff_member_required
+def questions(request):
+    questions = Question.objects.all().order_by('date_created'
+            ).reverse()
+    context = {'questions': questions}
+    return render(request, 'moderator/templates/questions.html',
+                  context)
+
+
+@csrf_exempt
+@staff_member_required
+def delete_question(request):
+    """To delete the questions or questions selected
+
+    the moderator may choose to  one or more question """
+
+    # get list of all question id from post request
+    for ques_id in request.POST.getlist('Question_id'):
+
+        # delete all answers of the questions
+
+        (question_title, user_email) = delete_question_util(ques_id)
+        Subject = 'Question Deletion Notification'
+        sender_email = settings.EMAIL_HOST_USER
+        to = get_emails()
+        to.extend([request.user.email, user_email])
+        to = set(to)
+        to = list(to)
+
+        message = \
+            """Sir/Madam ,
+
+                Following Question has been deleted from database of FOSSEE Forum
+                Title: {0}
+                By: {1}
+                On: {2}
+
+                """.format(question_title,
+                request.user.username, datetime.now())
+
+        send_mail(Subject, message, sender_email, to,
+                  fail_silently=False)
+
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+
+@csrf_exempt
+@staff_member_required
+def get_question(request, question_id, pretty_url=None):
+    if request.method == 'GET':
+        question = get_object_or_404(Question, id=question_id)
+        sub_category = True
+        if question.sub_category == '' or str(question.sub_category) \
+            == 'None':
+            sub_category = False
+        else:
+            sub_category = True
+        pretty_title = prettify(question.title)
+
+        answers = question.answer_set.all()
+        ans_count = question.answer_set.count()
+
+        context = {
+            'ans_count': ans_count,
+            'question': question,
+            'sub_category': sub_category,
+            'main_list': answers,
+            }
+
+        context.update(csrf(request))
+
+        # updating views count
+
+        question.save()
+
+        return render(request, 'moderator/templates/get-question.html',
+                      context)
+    else:
+        if 'Whole' in request.POST:
+
+            # delete complete question
+
+            question_title = delete_question_util(question_id)
+            Subject = 'Question Deletion Notification'
+            sender_email = settings.EMAIL_HOST_USER
+            to = [request.user.email]
+
+            message = \
+                """Sir/Madam ,
+
+                Following Question has been deleted from database of FOSSEE Forum
+                Title: {0}
+                By: {1}
+                On: {2}
+
+
+                """.format(question_title,
+                    request.user.username, datetime.now())
+
+            send_mail(Subject, message, sender_email, to,
+                      fail_silently=False)
+
+            return HttpResponseRedirect('/moderator/questions')
+        else:
+
+            # delete comments first
+
+            for comment_id in request.POST.getlist('AnswerComment'):
+                body = delete_comment_util(comment_id)
+                Subject = 'Question Deletion Notification'
+                sender_email = settings.EMAIL_HOST_USER
+                to = [request.user.email]
+
+                message = \
+                    """Sir/Madam ,
+
+                    Following comment has been deleted from database of FOSSEE Forum
+                    Comment: {0}
+                    By: {1}
+                    On: {2}
+
+
+                    """.format(body,
+                        request.user.username, datetime.now())
+
+                send_mail(Subject, message, sender_email, to,
+                          fail_silently=False)
+            for answer_id in request.POST.getlist('Answer'):
+                ans_body = delete_answer_util(answer_id)
+                Subject = 'Question Deletion Notification'
+                sender_email = settings.EMAIL_HOST_USER
+                to = [request.user.email]
+
+                message = \
+                    """Sir/Madam ,
+
+                    Following answer has been deleted from database of FOSSEE Forum
+                    Answer: {0}
+                    By: {1}
+                    On: {2}
+
+                    """.format(ans_body,
+                        request.user.username, datetime.now())
+
+                send_mail(Subject, message, sender_email, to,
+                          fail_silently=False)
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'
+                    , '/'))
 
 
 @csrf_exempt
