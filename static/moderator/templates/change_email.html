@@ -1,0 +1,102 @@
+{% extends 'moderator/templates/base.html' %}
+{% load static %}
+{% load count_tags %}
+{% load widget_tweaks %}
+
+{% block title %}
+     Notification Email Form - FOSSEE Forums
+{% endblock %}
+{% block content %}
+    <br>
+
+    {% if message %}
+      {{message}}
+    {% else %}
+    <form  action="" method="POST" autocomplete="off" enctype="multipart/form-data" >{% csrf_token %}
+    {% with WIDGET_ERROR_CLASS='field_error' %}
+
+    <div class="row">
+        <div class="col-lg-12">
+         {{ form.username.errors }}
+            <div class="form-group">
+                <label for="id_title">Username:</label>
+                {% render_field form.username class+="form-control title" %}
+            </div>
+
+            {{ form.email.errors }}
+             <div class="form-group">
+                <label for="id_body" >email: </label>
+
+                {% render_field form.email class+="form-control body" %}
+            </div>
+
+
+           </div>
+    </div>
+
+    <input class="btn btn-success" type="submit" value="Save">
+    {% endwith %}
+    </form>
+    {% endif %}
+
+    <!-- Modal -->
+    <div class="modal fade" id="similarModal" tabindex="-1" role="dialog" aria-labelledby="similarModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title" id="myModalLabel">Similar Questions</h4>
+          </div>
+          <div class="modal-body" id="modal-body">
+            ...
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'website/js/nicEdit.js' %}" type="text/javascript"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+<script type="text/javascript">
+bkLib.onDomLoaded(function() {
+    new nicEditor({
+        fullPanel : true,
+        iconsPath: "{% static 'website/js/nicEditorIcons.gif' %}",
+        buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link', 'forecolor', 'bgcolor']
+    }).panelInstance('id_body');
+});
+</script>
+<script>
+window.onload = function(){
+
+    $(".tag_button").hide();
+    Q_tags = "";
+
+    var c2= "{{ category }}";
+
+    if (c2 != '12'){
+
+        $(".tutorial" ).hide()
+    }
+    else {
+         $(".tutorial" ).show()
+
+    }
+    if (c2 == "None"){
+         $( "#id_category option" ).prop('disabled',false);
+    }
+
+    else  if(c2 != ""){
+
+         $("#id_category").val(c2);
+         $( "#id_category option:not(:selected)" ).prop('disabled',true);
+    }
+
+}
+
+</script>
+
+{% endblock %}
+
