@@ -14,6 +14,8 @@ $(document).ready(function() {
      * question edit section
      * set the jquery variables 
     */
+    var tag_list = "";
+
     $saving = $(".saving");
     $saved= $(".saved");
     $question = $(".question");
@@ -27,6 +29,10 @@ $(document).ready(function() {
     $questionNicPanel = $("#questionNicPanel");
     $questionInstance = $("#questionInstance");
     $question_details_edit = $("#question-details-edit");
+    $question_tag = $(".tag");
+    $question_tag_editable = $(".tag-editable");
+    $question_tag_edit = $("#tag-edit");
+    $question_tag_edit_input = $('#tag-edit input');
 
     /* make the question editable and show modify */
     //$question.addClass("editable");
@@ -42,26 +48,86 @@ $(document).ready(function() {
         $question_title_edit.show();
         $question_edit.hide();
         $question_save.show();
-        
         $questionNicPanel.show();
         $questionInstance.focus();
         $question_details_edit.show();
+
+
+        $question_tag.hide();
+        $question_tag_edit.show();
+
+        tag_list = $($question_tag).text();
+        tag_list = tag_list.replace(/\s\s+/g, ' '); // remove extra spaces
+        tag_list = tag_list.trim();                 // trim spaces
+        var tag_array = tag_list.split(" ");        // split the list of tags into seperate tags
+
+        tag_list = "";
+        // Load all previous tags to input field
+        for(var i=0;i<tag_array.length;i++)
+        {
+            $question_tag_edit_input.val(tag_array[i]);
+            $question_tag_edit_input.focusout();
+        }
+
     }
+/* Tag input */
+$(function(){
+
+// Handle conversion of tags into buttons
+  $question_tag_edit_input.on({
+    focusout : function() {
+      var txt = this.value.replace(/[^a-z0-9\+\-\.\#]/ig,''); // allowed characters
+      if(txt) $("<span/>", {text:txt.toLowerCase(), insertBefore:this});
+      tag_list = this.value.trim()+" "+tag_list;
+
+      this.value = "";
+    },
+
+    //Handles event when space is fired
+    keyup : function(ev) {
+      $('.tag_button').show();
+      if(/(32)/.test(ev.which))
+        var written_tags = tag_list;
+        if(written_tags.search(this.value)==-1)
+          $(this).focusout();
+        else
+          this.value = "";
+    }
+    });
+  // Handles event for deleting tags when cancel button is clicked
+  $question_tag_edit.on('click', 'span', function() {
+
+    var tag_text = tag_list;
+    var span_text = $(this).text();
+    tag_text = tag_text.replace(span_text+" ","");
+
+    tag_list = tag_text;
+    $(this).remove();
+    });
+
+});
     $question_title_editable.click(function(){
         modify($question_edit);
     });
     $question_edit.click(function () {
         modify($question_edit);
     });
-    $questionInstance.click(function() {
-        modify($question_edit);
-    });
-    $question_save.click(function () {
+
+   $question_save.click(function () {
         $saving.show();
         $(this).hide();
         $question_title.text($question_title_edit_input.val());
+        tag_list = tag_list.trim()
+        var tag_array = tag_list.split(" ");
+        $question_tag.html('');
+        for(var i=0;i<tag_array.length;i++){
+            $question_tag.html($question_tag.html()+"<span class='category'>\
+                                <a href='/filter_tags/"+tag_array[i]+"/' >"+tag_array[i]+"</a></span>");
+        }
         $question_title_edit.hide();
         $question_title.show();
+        $question_tag_edit.hide();
+        $question_tag.show();
         $questionNicPanel.hide();
         $question_details_edit.hide();
         $(this).prev().css("display", "block");
@@ -72,12 +138,17 @@ $(document).ready(function() {
         var question_id = parseInt($question_save.data("qid"));
         var question_title = $question_title.text();
         var question_body = $questionInstance.html();
+        var question_tag = tag_list;
+
+        tag_list = "";
+        $("#Tags").find("span").remove();
         $.ajax({
             url: "/ajax-question-update/",
             data:{
                 question_id: question_id,
                 question_title: question_title,
                 question_body: question_body,
+                question_tag: question_tag,
             },
             type: "POST",
             dataType: "html",
@@ -179,7 +250,7 @@ $(document).ready(function() {
     });
 
     $answer_save.click(function() {
-        $saving.show();
+
         var target = $(this).data("target");
         answerNicEditor.removeInstance(target);
         $answerPanelWrapper.hide();
@@ -308,17 +379,13 @@ $(document).ready(function() {
 
     $post_comment.click(function(e) {
         var target = $(this).data("target");
-       // alert(target);
         var answer_id = $(this).data("aid");
         var form = $(this).data("form");
         $form = $("#"+form);
         nics[target].instanceById(target).saveContent();
         var text = (nics[target].instanceById(target).getContent());
-        // alert(text)
         text = text.replace(/<br ?\/?>/g, "\n")
         text = text.replace(/&nbsp;/g, ' ');
-        // alert(text+"after");
-        // alert(text.trim().length);
         if(text.trim().length > 0 ){
             $form.submit();
             e.preventDefault;

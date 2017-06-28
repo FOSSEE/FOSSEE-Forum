@@ -64,22 +64,33 @@
         <div id="{% if user|can_edit:question and not ans_count %}questionInstance{% endif %}" class="body"  style="margin-left : 60px">
             <p>{{ question.body| safe}}</p>
         </div>
+
         <br>
             <small>
-            <span class="category">
-
+                <span class="category">
                 <a href="{% url 'website:filter' question.category %}">
                     {{ question.category }}
                 </a>
-            </span>
-            <span class="category">
+                </span>
+            <div class="tag {% if user|can_edit:question and not ans_count %}tag-editable{% endif %}" style="float: left">
+                <span class="category">
+
                 {%for tag in question.tags.all %}
                 <a href="{% url 'website:filter_tags' tag %}">
                     {{tag}}
                 </a>
                 {%endfor%}
-            </span>
+                </span>
+
+            </div>
             </small>
+        <div id="tag-edit" class="hideme">
+            <h5>Tags</h5>
+            <div id="Tags">
+            <input class="form-control" type="text">
+            </div>
+        </div>
+
 
         {% if sub_category %}
          <span class="tutorial">

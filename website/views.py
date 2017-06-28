@@ -727,14 +727,19 @@ def ajax_question_update(request):
         qid = request.POST['question_id']
         title = request.POST['question_title']
         body = request.POST['question_body']
+        tags = request.POST['question_tag']
+
         question = get_object_or_404(Question, pk=qid)
         if question:
-            if question.user.id == request.user.id or\
-               request.user.id in admins:
+            if question.user.id == request.user.id or request.user.id \
+                in admins:
                 question.title = title
                 question.body = body.encode('unicode_escape')
+                question.tags.clear()
+                for tag in tags.split(' '):
+                    question.tags.add(tag)
                 question.save()
-        return HttpResponse("saved")
+        return HttpResponse('saved')
 
 
 @csrf_exempt
@@ -856,7 +861,12 @@ def ajax_time_search(request):
 
 @csrf_exempt
 def category_tags(request):
-    category = request.GET.get("category")
+    """ Ajax request for default tags
+
+    Default tags for categories are sent through this function when
+    call for them is done asynchronously.
+    Made for situation when the category name is not known in advance """
+    category = request.GET.get('category')
     FossCategory_selected = FossCategory.objects.get(id=category)
     list_of_tags = ''
     for t in FossCategory_selected.default_tags.all():
