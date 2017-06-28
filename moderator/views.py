@@ -367,6 +367,19 @@ def get_question(request, question_id, pretty_url=None):
                     , '/'))
 
 
+@staff_member_required
+def unanswered_questions(request):
+    question = Question.objects.all().order_by('date_created').reverse()
+    Unanswered = []
+    for q in question:
+        if q.answer_set.count() == 0:
+            Unanswered.append(q)
+    context = {'questions': Unanswered}
+    return render(request,
+                  'moderator/templates/unanswered_questions.html',
+                  context)
+
+
 @csrf_exempt
 @staff_member_required
 def notification_email(request):
