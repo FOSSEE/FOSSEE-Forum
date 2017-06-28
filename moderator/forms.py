@@ -17,3 +17,10 @@ class Category(forms.ModelForm):
                 }
             }
         }
+
+
+class Emails(forms.ModelForm):
+
+	class Meta:
+		model = NotificationEmail
+		fields = "__all__"
