@@ -249,7 +249,7 @@
 {% endfor %}
 
 {% if user.is_authenticated %}
-    <form action="{% url 'website:question_answer' question.id %}" method="POST"> {% csrf_token %}
+    <form action="{% url 'website:question_answer' question.id %}" method="POST" enctype="multipart/form-data"> {% csrf_token %}
         {% with WIDGET_ERROR_CLASS='field_error' %}
             <div class="row">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
@@ -259,30 +259,8 @@
                         <label for="id_body"><h4><u>Your Answer:</u></h4></label>
                         {% render_field form.body class+="form-control body" %}
                         </div>
-         <!--
-        Codemirro implementation
-          <div><link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/codemirror/CodeMirror/master/lib/codemirror.css">
-        <script type="text/javascript" src="https://cdn.rawgit.com/codemirror/CodeMirror/master/lib/codemirror.js"></script>
-        <!-- <script type="text/javascript" src="https://cdn.rawgit.com/codemirror/CodeMirror/master/mode/python/python.js"></script>
-        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-        <script type="text/javascript" src="https://cdn.rawgit.com/carlo/jquery-base64/master/jquery.base64.min.js"></script>
-    <body>
-        <!-- <textarea id="editor"></textarea> 
-    </body>
-    <script>
-        var editor = CodeMirror.fromTextArea(document.getElementById("id_body"), {
-            lineNumbers: true,
-            tabMode: "indent"
-        }).panelInstance("id_body");
-        function submit_html()
-        {
-            editor.save();
-            var code = document.getElementById("id_body").value;
-            var data_url = "data:text/html;charset=utf-8;base64," + $.base64.encode(code);
-        }
-    </script></div>  -->         
-        </div> 
-            </div>
+                    </div>
+                </div>
 
 
         {% endwith %}
@@ -326,6 +304,7 @@
 <script type="text/javascript">
     bkLib.onDomLoaded(function() {
         new nicEditor({
+            uploadURI: "{% url 'website:image_upload' %}",
             fullPanel : true,   
             iconsPath: "{% static 'website/js/nicEditorIcons.gif' %}",
             buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link']
@@ -512,7 +491,6 @@
      
  
   </script>
-   
-    <script src="{% static 'website/js/thread-user.js' %}"></script>
-    <script src="{% static 'website/js/custom.js' %}"></script>
+<script src="{% static 'website/js/thread-user.js' %}"></script>
+<script src="{% static 'website/js/custom.js' %}"></script>
 {% endblock %}

@@ -123,10 +123,12 @@ def question_answer(request, qid):
             cleaned_data = form.cleaned_data
             qid = cleaned_data['question']
             body = str(cleaned_data['body'])
+            body = body.replace('\n','<br/>')
             answer.body = body.splitlines()
             answer.question = question
             answer.body = body.encode('unicode_internal')
             answer.save()
+
             if question.user_id != request.user.id:
                 notification = Notification()
                 notification.uid = question.user_id
@@ -867,3 +869,47 @@ def category_tags(request):
 def ajax_vote(request):
     # for future use
     pass
+
+
+@csrf_exempt
+def image_upload(request):
+    """ Image Uplooad using ajax
+
+    This function is used to upload an image while writing
+    question, answering question or editing. 
+    It takes images from nicEditor """
+    if 'nicImage' in request.FILES:
+        msg = \
+            """<script>        try {
+            top.nicUploadButton.statusCb(%s);
+            } catch(e) { alert(e.message); }
+            </script>"""
+        file = request.FILES['nicImage'].read()
+
+        # make a filename
+        fname = ''.join([choice('1234567890qwertyuiopasdfghjklzxcvbnm')
+                        for i in range(5)])
+        fname = '%s_%s' % (str(request.user), fname)
+        x = open('static/website/images/questions/%s.jpg' % fname, 'wb')
+        x.write(file)
+        x.close()
+        ff = '/static/website/images/questions/%s.jpg' % fname
+
+        # return the file url, size etc.
+        ret = {
+            'noprogress': True,
+            'done': 1,
+            'width': '500',
+            'url': '/static/website/images/questions/%s.jpg' % fname,
+            }
+        ret = json.dumps(ret)
+        return HttpResponse(msg % ret)
+
+    msg = \
+        """<script>        try {
+            nicUploadButton.statusCb('%s');
+        } catch(e) { alert(e.message); }
+    </script>"""
+    ret = {'noprogress': True}
+    ret = json.dumps(ret)
+    return HttpResponse(msg % ret)

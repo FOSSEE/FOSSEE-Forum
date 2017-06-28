@@ -11,7 +11,7 @@
         </span> Create a new question . . .
     </h4>
     <hr>
-    <form role="form" action="" method="POST" autocomplete="off" >{% csrf_token %}
+    <form role="form" action="" method="POST" autocomplete="off" enctype="multipart/form-data"  >{% csrf_token %}
     {% with WIDGET_ERROR_CLASS='field_error' %}
     <p>
     Select the category.
@@ -52,18 +52,18 @@
 
                 {% render_field form.body class+="form-control body" %}
             </div>
+
             {{ form.tag.errors }}
             <div class="form-group">
                 <label> Tags: </label>
                 <br>
                 <small>
                 <div id="tags">
-
-
                   {% render_field form.tag class+="form-control title" %}
                 </div>
                 </small>
             </div>
+
             <br>
             <div class="form-group">
                 <div id='popup'>
@@ -85,8 +85,9 @@
 
                 </div>
            </div>
-           </div>
+
     </div>
+    <br>
 
     <input class="btn btn-success" type="submit"  onclick = "submit_button()" value="Submit Question">
     {% endwith %}
@@ -115,6 +116,7 @@
 <script type="text/javascript">
 bkLib.onDomLoaded(function() {
     new nicEditor({
+        uploadURI:  "{% url 'website:image_upload' %}",
         fullPanel : true,
         iconsPath: "{% static 'website/js/nicEditorIcons.gif' %}",
         buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link', 'forecolor', 'bgcolor']
@@ -197,6 +199,8 @@ window.onload = function(){
 
     $(".tag_button").hide();
     Q_tags = "";
+    document.getElementById('id_tag').value = '';
+
 
     var c2= "{{ category }}";
     
@@ -220,8 +224,8 @@ window.onload = function(){
 
 }
 
-</script>
 
+</script>
 
 <script src="{% static 'website/js/custom.js' %}"></script>
 {% endblock %}

@@ -1,5 +1,6 @@
 bkLib.onDomLoaded(function() {
     var questionNicEditor = new nicEditor({
+        uploadURI: "/image_upload/",
         fullPanel : true,
         buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link', 'forecolor', 'bgcolor'],
         iconsPath: "/static/website/js/nicEditorIcons.gif",
@@ -157,6 +158,7 @@ $(document).ready(function() {
     $answerPanelWrapper = $("#answerPanelWrapper");
 
     var answerNicEditor = new nicEditor({
+        uploadURI: "/image_upload/",
         fullPanel : true,
         buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link', 'forecolor', 'bgcolor'],
         iconsPath: "/static/website/js/nicEditorIcons.gif",
@@ -219,6 +221,7 @@ $(document).ready(function() {
         $(this).find(".modify-wrapper").hide();
     });
     var commentNicEditor = new nicEditor({
+       uploadURI: "/image_upload/",
         fullPanel : true,
         buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link', 'forecolor', 'bgcolor'],
         iconsPath: "/static/website/js/nicEditorIcons.gif",
@@ -282,6 +285,7 @@ $(document).ready(function() {
         $("#"+target).show();
         
         nics[target] = new nicEditor({
+            uploadURI: "/image_upload/",
             fullPanel : true,
             buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link'],
             iconsPath: "/static/website/js/nicEditorIcons.gif",

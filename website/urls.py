@@ -31,6 +31,7 @@ urlpatterns = patterns(
     url(r'^vote_post/$', views.vote_post, name='vote_post'),
     url(r'^ans_vote_post/$', views.ans_vote_post, name='ans_vote_post'),
     url(r'^category_tags/$', views.category_tags, name='category_tags'),
+    url(r'^image_upload/$', views.image_upload, name='image_upload'),
 
     # Ajax helpers
     url(r'^ajax-tutorials/$', views.ajax_tutorials, name='ajax_tutorials'),
