@@ -1,0 +1,141 @@
+{% extends 'moderator/templates/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% load permission_tags %}
+
+{% block title %}
+    {{ question.category }} - {{ question.title }} - FOSSEE Forums
+{% endblock %}
+
+{% block extra_head %} <link rel="stylesheet" href="{{ STATIC_URL }}css/code.css"> {% endblock %}
+
+
+{% block content %}
+    <form method='POST' action="">
+
+        <input type="submit"  class="btn btn-xs btn-success pull-right" style="margin: 10px;" value="Delete" name="Selection">
+        <input type="submit"  class="btn btn-xs btn-success pull-right" style="margin: 10px;" value="Delete Question" name="Whole">
+<div class="row">
+
+    <div class="question-wrapper col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <div class="question {% if user|can_edit:question and not ans_count %}editable{% endif %}" >
+           <h4>
+           {{ question.title }}
+           </h4>
+           <br>
+
+
+            <p>{{ question.body| safe}}</p>
+
+        <br>
+            <small>
+            <span class="category">
+
+                <a href="{% url 'website:filter' question.category %}">
+                    {{ question.category }}
+                </a>
+            </span>
+            <span class="category">
+                {%for tag in question.tags.all %}
+                <a href="{% url 'website:filter_tags' tag %}">
+                    {{tag}}
+                </a>
+                {%endfor%}
+            </span>
+            </small>
+
+        {% if sub_category %}
+         <span class="tutorial">
+            <small>
+                <a href="{% url 'website:filter' question.category question.sub_category %}">
+                    {{ question.sub_category}}
+                </a>
+            </small>
+        </span>
+        {% endif%}
+        <a id="question-details-edit" data-toggle="modal" data-target="#detailsModal" href="#" class="hideme">
+            <span class="glyphicon glyphicon-edit"></span>
+        </a>
+
+        <span class="meta">
+            <small>
+                <i>
+                    {{ question.date_created|date:"d-m-y" }}, {{ question.date_created|time }}
+                </i>
+            </small>
+
+            <span class="user">
+                <a href="/accounts/view-profile/{{ question.user.id }}"> {{question.user}} </a>
+            </span>
+        </span>
+
+    </div> <!-- /.question -->
+    </div>
+</div> <!-- /.row -->
+
+
+<h4><u>Answers:</u></h4>
+
+
+{% for answer in main_list %}
+
+<div class="row">
+    <div class="answer-wrapper col-lg-12 col-md-12 col-sm-12 col-xs-12">
+
+        <div class="answer {% if user|can_edit:answer  %}editable{% endif %}" id="answer{{answer.id}}" style="margin-left: 63px;">
+
+
+            <div class="body" id="body{{ answer.id }}" style="padding-bottom: 12px">
+            <input type="checkbox" name="Answer" value="{{ answer.id}}">
+                <p>{{ answer.body| safe }}</p>
+            </div>
+
+            <span class="meta">
+                <small>
+                    <i>
+                        {{ answer.date_created|date:"d-m-y" }}, {{ answer.date_created|time }}
+                    </i>
+                </small>
+
+                <span class="user" style="background-color: #FFFFFF;padding: 2px 7px">
+                    <a href="/accounts/view-profile/{{ answer.user.id }}"> {{answer.user}} </a>
+                </span>
+            </span>
+
+        </div> <!-- /.answer -->
+
+        <div class="row" style="padding-left: 40px">
+            <div class="comments pull-right col-lg-11 col-md-11 col-sm-11 col-xs-11" >
+                <!-- displaying comments -->
+                {% for comment in answer.answercomment_set.all %}
+                <div class="comment comment{{ comment.id }}">
+                    <div class="body" id="cbody{{ comment.id }}">
+                        <input type="checkbox" name="AnswerComment" value="{{ comment.id}}">
+                        <p>{{ comment.body| safe }}</p>
+                    </div>
+            <br>
+
+                    <span class="meta_co" style="position: absolute;right: 0px; bottom: 0px;">
+                        <small>
+                            <i>
+                                {{ comment.date_created|date:"d-m-y" }}, {{ comment.date_created|time }}
+                            </i>
+                        </small>
+
+                        <span style="padding: 2px 7px">
+                            <a href="/accounts/view-profile/{{ comment.user.id }}"> {{comment.user}} </a>
+                        </span>
+                    </span>
+
+                </div> <!-- /.comment -->
+                {% endfor %}
+
+            </div> <!-- comments -->
+        </div> <!-- /.row -->
+        <br> <hr>
+    </div> <!-- /.answer-wrapper -->
+</div> <!-- /.row -->
+{% endfor %}
+</form>
+
+{% endblock %}
