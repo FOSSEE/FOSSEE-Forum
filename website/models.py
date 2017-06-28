@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 
 from django.contrib.auth import get_user_model
 from taggit.managers import TaggableManager
+from .storage import OverwriteStorage
 
 
 class FossCategory(models.Model):
@@ -13,6 +14,10 @@ class FossCategory(models.Model):
     date_modified = models.DateTimeField(auto_now=True)
     email = models.CharField(max_length=50)
     default_tags = TaggableManager()
+    category_image = models.ImageField(upload_to='static/website/images',
+                                       default = 'static/website/images/no-img.jpg',
+                                       storage=OverwriteStorage(),
+                                       )
     def __unicode__(self):
         return self.name
 
@@ -147,3 +152,4 @@ class Profile(models.Model):
 
     class Meta:
         app_label = 'website'
+

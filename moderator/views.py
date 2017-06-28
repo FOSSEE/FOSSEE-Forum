@@ -112,3 +112,94 @@ def user_update(request):
                     user.save()
 
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+
+@staff_member_required
+def category(request):
+    """Display the various categories and their information"""
+
+    category = FossCategory.objects.all().order_by('date_created'
+            ).reverse()
+
+    context = {'FossCategory': category}
+    return render(request, 'moderator/templates/category.html', context)
+
+
+@csrf_exempt
+@staff_member_required
+def category_form(request, category_id=0):
+    """Display and recieve form for editing a category"""
+
+    instance = FossCategory.objects.get(id=category_id)
+    context = {}
+    if request.method == 'GET':
+
+        form = Category(instance=instance)
+
+        context = {'form': form}
+
+        return render(request, 'moderator/templates/category-form.html',
+                      context)
+    else:
+
+        if request.FILES:
+
+            form = Category(request.POST, request.FILES,
+                            instance=instance)
+
+            if form.is_valid():
+
+                cleaned_data = form.cleaned_data
+                image = request.FILES['category_image']
+                name = cleaned_data['name']
+
+                form.save()
+            else:
+
+                context['form'] = form
+                context.update(csrf(request))
+                return render(request,
+                              'moderator/templates/category-form.html',
+                              context)
+        else:
+            form = Category(request.POST, instance=instance)
+            if form.is_valid():
+                form.save()
+            else:
+
+                context['form'] = form
+                context.update(csrf(request))
+
+                return render(request,
+                              'moderator/templates/category-form.html',
+                              context)
+
+        return HttpResponseRedirect('/moderator/category')
+
+
+@csrf_exempt
+@staff_member_required
+def new_category(request):
+    """Display and recieve form for new category and store data into database"""
+
+    if request.method == 'GET':
+        form = Category()
+        context = {}
+        context = {'form': form}
+
+        return render(request, 'moderator/templates/category-form.html'
+                      , context)
+    else:
+
+        form = Category(request.POST, request.FILES)
+        if form.is_valid():
+
+            cleaned_data = form.cleaned_data
+            image = request.FILES['category_image']
+            name = cleaned_data['name']
+            image.rename(name + '.jpg')
+
+            form.save()
+            return HttpResponseRedirect('/moderator/category')
+        else:
+            return HttpResponseRedirect('/moderator/category')
