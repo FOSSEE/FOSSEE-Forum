@@ -68,3 +68,47 @@ def home(request):
     return render(request, "moderator/templates/index.html", context)
 
 
+
+@staff_member_required
+def user_info(request):
+    """Display the user information"""
+
+    user = User.objects.all().order_by('date_joined').reverse()
+
+    context = {'User': user}
+    return render(request, 'moderator/templates/users.html', context)
+
+
+@csrf_exempt
+def user_update(request):
+    """To delete or modify the data of user"""
+
+    if request.POST:
+        if 'Activate' in request.POST:
+            for id in request.POST.getlist('User_id'):
+                user = User.objects.get(id=id)
+                user.is_active = 1
+                user.save()
+
+        if 'Deactivate' in request.POST:
+            for id in request.POST.getlist('User_id'):
+                user = User.objects.get(id=id)
+                user.is_active = 0
+                user.save()
+
+        if 'Add in Staff' in request.POST:
+            for id in request.POST.getlist('User_id'):
+                user = User.objects.get(id=id)
+                user.is_staff = 1
+                user.save()
+
+        if 'Remove from Staff' in request.POST:
+            for id in request.POST.getlist('User_id'):
+                if int(id) != int(request.user.id):
+                    print request.user.id
+                    print id
+                    user = User.objects.get(id=id)
+                    user.is_staff = 0
+                    user.save()
+
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
