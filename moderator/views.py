@@ -9,15 +9,25 @@ from graphos.renderers.gchart import PieChart
 from graphos.renderers.gchart import LineChart
 from graphos.sources.simple import SimpleDataSource
 from datetime import datetime, timedelta
-from .forms import Category
+from forms import Category, Emails
 from django.shortcuts import render, get_object_or_404, \
     render_to_response
 from website.helpers import get_video_info, prettify
-from website.forms import NewQuestionForm, AnswerQuestionForm, \
-    AnswerCommentForm
+
 from django.core.context_processors import csrf
 from forums import settings
 from django.core.mail import send_mail
+from models import NotificationEmail
+
+
+def get_emails():
+    emails = NotificationEmail.objects.all()
+    to_list = []
+    for email in emails:
+        to_list.append(email.email)
+
+    return to_list
+
 
 @staff_member_required
 def home(request):
@@ -203,4 +213,96 @@ def new_category(request):
             return HttpResponseRedirect('/moderator/category')
         else:
             return HttpResponseRedirect('/moderator/category')
+
+
+@csrf_exempt
+@staff_member_required
+def notification_email(request):
+    if request.method == 'GET':
+
+        notification_emails = NotificationEmail.objects.all()
+
+        context = {'notification_emails': notification_emails}
+        return render(request,
+                      'moderator/templates/notification_email.html',
+                      context)
+    else:
+
+        ids = request.POST.getlist('id')
+        for id in ids:
+            if int(id) != 1:
+                email = NotificationEmail.objects.filter(id=id)
+                email.delete()
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'
+                                    ))
+
+
+@csrf_exempt
+@staff_member_required
+def change_email(request, id):
+
+    instance = get_object_or_404(NotificationEmail, id=id)
+    message = ''
+    context = {}
+    if request.method == 'GET':
+
+        if int(id) == 1:
+
+            if NotificationEmail.objects.get(id=id).email \
+                == request.user.email:
+                form = Emails(instance=instance)
+                context = {'form': form}
+            else:
+                message = "You can't edit the information of admin"
+                context1 = {'message': message}
+                return render(request,
+                              'moderator/templates/change_email.html',
+                              context1)
+        else:
+
+            form = Emails(instance=instance)
+            context = {'form': form}
+
+        return render(request, 'moderator/templates/change_email.html',
+                      context)
+    else:
+        form = Emails(request.POST, instance=instance)
+        if form.is_valid():
+
+            form.save()
+
+            return HttpResponseRedirect('/moderator/notification_email')
+        else:
+
+            context['form'] = form
+            context.update(csrf(request))
+
+            return render(request,
+                          'moderator/templates/change_email.html',
+                          context)
+
+
+@csrf_exempt
+@staff_member_required
+def new_email(request):
+
+    context = {}
+    if request.method == 'GET':
+        form = Emails()
+        context = {'form': form}
+    else:
+
+        form = Emails(request.POST)
+        if form.is_valid():
+
+            form.save()
+
+            return HttpResponseRedirect('/moderator/notification_email')
+        else:
+
+            context['form'] = form
+    context.update(csrf(request))
+
+    return render(request, 'moderator/templates/change_email.html',
+                  context)
 
