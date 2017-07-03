@@ -305,3 +305,4 @@ def new_email(request):
 
     return render(request, 'moderator/templates/change_email.html',
                   context)
+
