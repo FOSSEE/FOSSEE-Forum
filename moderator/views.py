@@ -18,6 +18,7 @@ from django.core.context_processors import csrf
 from forums import settings
 from django.core.mail import send_mail
 from models import NotificationEmail
+
 from moderator.util import delete_question_util, delete_answer_util,\
     delete_comment_util
 
@@ -215,6 +216,7 @@ def new_category(request):
             return HttpResponseRedirect('/moderator/category')
         else:
             return HttpResponseRedirect('/moderator/category')
+
 
 
 @staff_member_required
@@ -457,3 +459,4 @@ def new_email(request):
 
     return render(request, 'moderator/templates/change_email.html',
                   context)
+
