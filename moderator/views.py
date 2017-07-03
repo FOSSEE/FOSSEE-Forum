@@ -18,6 +18,8 @@ from django.core.context_processors import csrf
 from forums import settings
 from django.core.mail import send_mail
 from models import NotificationEmail
+from moderator.util import delete_question_util, delete_answer_util,\
+    delete_comment_util
 
 from moderator.util import delete_question_util, delete_answer_util,\
     delete_comment_util
@@ -218,7 +220,6 @@ def new_category(request):
             return HttpResponseRedirect('/moderator/category')
 
 
-
 @staff_member_required
 def questions(request):
     questions = Question.objects.all().order_by('date_created'
@@ -367,6 +368,19 @@ def get_question(request, question_id, pretty_url=None):
                           fail_silently=False)
             return HttpResponseRedirect(request.META.get('HTTP_REFERER'
                     , '/'))
+
+
+@staff_member_required
+def unanswered_questions(request):
+    question = Question.objects.all().order_by('date_created').reverse()
+    Unanswered = []
+    for q in question:
+        if q.answer_set.count() == 0:
+            Unanswered.append(q)
+    context = {'questions': Unanswered}
+    return render(request,
+                  'moderator/templates/unanswered_questions.html',
+                  context)
 
 
 @csrf_exempt

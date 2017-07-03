@@ -1,0 +1,122 @@
+{% extends 'moderator/templates/base.html' %}
+{% load static %}
+{% load count_tags %}
+
+{% block title %}
+     Questions - FOSSEE Forums
+{% endblock %}
+{% block content %}
+
+<!-- <script type="text/javascript" src="dataTables.scrollingPagination.js"></script> -->
+	<script>
+
+	    $(document).ready(function()
+		{
+		$("#myTable").DataTable({
+          // 'sPaginationType': "scrolling"
+          });
+      });
+
+    </script>
+         <form action="/moderator/questions/delete_question/" method="post">
+        <input type="submit"  class="btn btn-xs btn-success pull-right" style="margin: 10px;" value="Delete">
+
+       <table id="myTable" class="tablesorter-blue">
+        <colgroup>
+        <col width="5%" />
+        <col width="20%" />
+        <col width="42%" />
+        <col width="8%" />
+        <col width="8%" />
+        <col width="8%" />
+        <col width="8%" />
+        <col width="8%" />
+        <col width="8%" />
+        <col width="8%" />
+        </colgroup>
+        <thead>
+	<tr>
+		<th>No.</th>
+	    <th>FOSS</th>
+		<th>Question Title </th>
+		<th>Date</th>
+		<th>Views</th>
+		<th>Votes</th>
+		<th>Answers</th>
+		<th>User</th>
+        <th>Select</th>
+	</tr>
+	</thead>
+	<tbody>
+
+        {% for question in questions %}
+        {% if question.category.name != "Sandhi" %}
+        <tr>
+        <td> </td>
+            <td>
+                <span class="category" data-toggle="tooltip" data-placement="top" >
+                {% if question.sub_category %}
+                <a class="pull-left" href="{% url 'website:filter' question.category question.sub_category %}?qid={{ question.id }}">
+                 {{ question.sub_category }}
+                </a>
+                {% else %}
+                 <a class="pull-left" href="{% url 'website:filter' question.category|lower %}?qid={{ question.id }}">
+                 {{ question.category|truncatechars:12 }}
+                </a>
+                {% endif %}
+                </span>
+            </td>
+
+            <td>
+                <span class="question" data-toggle="tooltip" data-placement="top" >
+                    <a href="{% url 'moderator:get_question' question.id %}">{{ question.title|truncatechars:40 }}</a>
+                </span>
+            </td>
+
+            <td>
+                <span style="display: none;">{{ question.date_created |date:"Y-m-d" }}</span>
+                    {{ question.date_created|date:"d/m/y" }}
+
+            </td>
+
+            <td>
+                {{ question.views}}
+            </td>
+            <td>
+
+                {{ question.num_votes}}
+
+            </td>
+
+            <td>
+                {{ question.answer_set.count }}
+            </td>
+            <td>
+
+                <span class="title" data-toggle="tooltip" data-placement="top" >
+                    <a href="{% url 'view_profile' question.user.id %}">{{ question.user|truncatechars:10 }}
+                </span>
+            </td>
+            <td>
+                <input type="checkbox" name="Question_id" value="{{ question.id }}" onclick="delete_question(this.value)"> <br>
+            </td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+
+    </tbody>
+    </form>
+    </table>
+
+
+{% endblock %}
+
+{% block javascript %}
+<script>
+    $('span').tooltip();
+    $('table tbody tr').each(function(idx){
+                $(this).children(":eq(0)").html(idx + 1);
+    });
+</script>
+
+{% endblock %}
