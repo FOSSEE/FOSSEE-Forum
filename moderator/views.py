@@ -21,6 +21,9 @@ from models import NotificationEmail
 from moderator.util import delete_question_util, delete_answer_util,\
     delete_comment_util
 
+from moderator.util import delete_question_util, delete_answer_util,\
+    delete_comment_util
+
 
 def get_emails():
     emails = NotificationEmail.objects.all()
@@ -470,3 +473,4 @@ def new_email(request):
 
     return render(request, 'moderator/templates/change_email.html',
                   context)
+
