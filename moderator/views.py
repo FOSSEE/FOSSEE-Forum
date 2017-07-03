@@ -203,3 +203,4 @@ def new_category(request):
             return HttpResponseRedirect('/moderator/category')
         else:
             return HttpResponseRedirect('/moderator/category')
+
