@@ -25,3 +25,5 @@ class Emails(forms.ModelForm):
 		model = NotificationEmail
 		fields = "__all__"
 
+
+
