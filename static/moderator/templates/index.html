@@ -1,0 +1,68 @@
+{% extends 'moderator/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block content %}
+<style>
+table {
+
+    width: 100%;
+    background-color: #f2f2f2;
+}
+
+ td {
+    text-align: left;
+    padding: 8px;
+}
+
+tr:nth-child(odd){background-color: #333;
+                   color: white;
+                  }
+
+
+</style>
+
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+    google.load("visualization", "1", {packages:["corechart"]});
+</script>
+ <div align="left" style='float: left; font-size: 20px; padding-left: 10px'>
+<br>
+ <table>
+
+  <tr>
+    <td>No of Questions</td>
+    <td>{{ question_count }}</td>
+  </tr>
+  <tr>
+    <td>No of Questions Answered</td>
+    <td>{{ answered }}</td>
+
+  </tr>
+  <tr>
+    <td>No of <a href="{% url 'moderator:unanswered_questions' %}">Questions Unanswered</a></td>
+    <td>{{ unanswered }}</td>
+
+  </tr>
+  <tr>
+    <td>No of Users</td>
+    <td>{{ user_count }}</td>
+
+</tr>
+</table>
+</div>
+<div align="right" style='float: left;'>
+
+
+  {{ chart.as_html }}
+
+</div>
+
+<br> <br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+<hr>
+<div align="center">
+  {{ graph.as_html }}
+
+</div>
+
+
+{% endblock %}

@@ -1,6 +1,5 @@
-#Custom settings
+# Custom settings
 from os.path import *
-#from config import *
 from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS
 from local import *
 from forums.settings import TO_EMAIL_ID
@@ -28,6 +27,8 @@ TEMPLATES = [
                     'django.template.context_processors.static',
                     'django.template.context_processors.tz',
                     'django.contrib.messages.context_processors.messages',
+                    'social_django.context_processors.backends',
+                    'social_django.context_processors.login_redirect',
             ],
             'loaders':[
                     'django.template.loaders.filesystem.Loader',
@@ -36,9 +37,6 @@ TEMPLATES = [
         },
     },
 ]
-
-
-
 
 DEBUG = True
 
@@ -53,8 +51,8 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'abcd',                      # Or path to database file if using sqlite3.
+        'ENGINE': 'django.db.backends.mysql',   # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': 'forum',                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': DB_USER,
         'PASSWORD': DB_PASS,
@@ -120,7 +118,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -138,14 +136,48 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'htmlmin.middleware.HtmlMinifyMiddleware',
     'htmlmin.middleware.MarkRequestMiddleware',
+    'social_django.middleware.SocialAuthExceptionMiddleware',
 )
+
+# Used as backend for processing social authentication
+AUTHENTICATION_BACKENDS = (
+
+    'social_core.backends.facebook.FacebookOAuth2',
+    'social_core.backends.google.GoogleOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+)
+SOCIAL_AUTH_URL_NAMESPACE = 'social'
+SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/'
+
+# custom pipeline for social authentication
+SOCIAL_AUTH_PIPELINE = (
+    'social_core.pipeline.social_auth.social_details',
+    'social_core.pipeline.social_auth.social_uid',
+    'social_core.pipeline.social_auth.social_user',
+    'social_core.pipeline.user.get_username',
+    'social_core.pipeline.user.create_user',
+    'social_core.pipeline.social_auth.associate_user',
+    'social_core.pipeline.social_auth.load_extra_data',
+    'social_core.pipeline.user.user_details',
+    'social_core.pipeline.social_auth.associate_by_email',\
+    # used for making profile of the user login in by social login
+    'forums.pipeline.social_authentication_profile',
+)
+
 
 ROOT_URLCONF = 'forums.urls'
 
+# add authentiation keys here for facebook
+SOCIAL_AUTH_FACEBOOK_KEY = ''  # App ID
+SOCIAL_AUTH_FACEBOOK_SECRET = ''  # App Secret
+
+
+# add authentiation keys here for facebook
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = ''
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = ''
+
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'forums.wsgi.application'
-
-
 
 INSTALLED_APPS = (
     'django.contrib.admin',
@@ -157,14 +189,16 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
     'website',
+    'moderator',
     # 'django.contrib.admindocs',
     'widget_tweaks',
     # 'spoken_auth',
     'debug_toolbar',
     'captcha',
-    # 'vote',
-    # 'ratings',
-    #'migrate_spoken',
+    'taggit',
+    'social_django',
+    'graphos',
+    # 'migrate_spoken',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -215,4 +249,6 @@ EMAIL_HOST_USER = 't16614'
 EMAIL_HOST_PASSWORD = 'ldap@16614'
 EMAIL_USE_TLS = True
 
-#this setting is for smtp dummy server for testing purpose
+# this setting is for smtp dummy server for testing purpose
+
+

@@ -1,0 +1,112 @@
+{% extends 'website/templates/base.html' %}
+{% load helpers %}
+{% block title %}
+    {{ tag }} - FOSSEE Forums
+{% endblock %}
+{% block content %}
+
+<script>
+
+        $(document).ready(function()
+        {
+        $("#myTable").DataTable({
+          // 'sPaginationType': "scrolling"
+          });
+      });
+
+     </script>
+
+{% if questions %}
+<h5 style="padding-top: 15px;">
+   All questions under the tag:
+    
+     {{ tag }}
+
+    <a class="btn btn-xs btn-success pull-right" href="{% url 'website:new_question' %}?category={{ category.id |urlencode }}">Ask a question</a>
+     
+</h5>
+<br>
+<div class="clearfix"></div>
+
+    <table id="myTable" class="tablesorter-blue">
+       <thead> 
+	<tr> 
+		<th>No.</th>
+	        <th>FOSS</th>
+		<th>Question </th>
+		<th>Date</th>
+		<th>Views</th>
+		<th>Answers</th>
+		<th>User</th>  
+	</tr> 
+	</thead> 
+
+	<tbody> 
+        {% for question in questions %}
+        <tr {% if question.id == qid %}class="parent-filter"{% endif %}>
+	    <td></td>
+            <td>
+                <span class="category" data-toggle="tooltip" data-placement="top" >
+                {% if question.sub_category %}
+                <a class="pull-left" href="{% url 'website:filter' question.category question.sub_category %}?qid={{ question.id }}">
+                 {{ question.sub_category|truncatechars:12 }}   
+                </a> 
+                {% else %}
+                 <a class="pull-left" href="{% url 'website:filter' question.category|lower %}?qid={{ question.id }}">
+                 {{ question.category|truncatechars:12 }}   
+                </a> 
+                {% endif %}
+                </span>
+            </td>
+
+            <td>
+                <span class="question" data-toggle="tooltip" data-placement="top" >
+                    <a href="{% url 'website:get_question' question.id %}{% prettify question.title %}">{{ question.title|truncatechars:40 }}</a>
+                </span>            
+            </td>
+
+            <td>    
+                <span>
+                    <i>
+                        {{ question.date_created|date:"d-m-y" }}
+                    </i>
+                </span>
+            </td>
+                    
+            <td>
+                {{ question.views}}
+            </td>
+
+            <td>
+                {{ question.answer_set.count }}
+            </td>
+
+            <td>
+                    <span class="title" data-toggle="tooltip" data-placement="top" >
+                    <a href="{% url 'view_profile' question.user.id %}">{{ question.user|truncatechars:10 }}
+                </span>
+            </td>
+
+        </tr>
+        {% endfor %}
+    <tbody> 
+    </table>
+{% else %}
+<h4>There are no similar questions.</h4>
+{% endif %}
+{% endblock %}
+
+{% block javascript %}
+<script>
+
+     $('table tbody tr').each(function(idx){
+                $(this).children(":eq(0)").html(idx + 1);
+    });
+
+
+    $(document).ready(function() {
+        $('span').tooltip();
+        $('.parent-filter').css("background", "#ffffe0");
+    });
+</script>
+{% endblock %}

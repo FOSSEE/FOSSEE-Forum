@@ -20,7 +20,7 @@
     <div class="question-wrapper col-lg-12 col-md-12 col-sm-12 col-xs-12">
     <div class="question {% if user|can_edit:question and not ans_count %}editable{% endif %}" >
      <!-- VOTE CELL -->
-               
+
                    <div class="votecell" style="padding-top: 0.0cm;">
                 <div class="vote">
                             {% ifequal thisUserUpvote 0 %}
@@ -32,7 +32,7 @@
                             <span class="vote-count-post" id="show_vote_count">
                                 {{ net_count }}
                             </span>
-                           
+
 
                             {% ifequal thisUserDownvote 0 %}
                                 <img src="{% static 'website/images/down1-off.png' %}" class="vote-down" />
@@ -40,7 +40,7 @@
                                 <img src="{% static 'website/images/down1-on.png' %}" class="vote-down selected" />
                             {% endifequal %}
                         </div>
-                       
+
                   </div>
         <div class="title {% if user|can_edit:question and not ans_count %}title-editable{% endif %}">
            {{ question.title }}
@@ -64,15 +64,34 @@
         <div id="{% if user|can_edit:question and not ans_count %}questionInstance{% endif %}" class="body"  style="margin-left : 60px">
             <p>{{ question.body| safe}}</p>
         </div>
+
         <br>
-        
-        <span class="category">
             <small>
+                <span class="category">
                 <a href="{% url 'website:filter' question.category %}">
                     {{ question.category }}
                 </a>
+                </span>
+            <div class="tag {% if user|can_edit:question and not ans_count %}tag-editable{% endif %}" style="float: left">
+                <span class="category">
+
+                {%for tag in question.tags.all %}
+                <a href="{% url 'website:filter_tags' tag %}">
+                    {{tag}}
+                </a>
+                {%endfor%}
+                </span>
+
+            </div>
             </small>
-        </span>
+        <div id="tag-edit" class="hideme">
+            <h5>Tags</h5>
+            <div id="Tags">
+            <input class="form-control" type="text">
+            </div>
+        </div>
+
+
         {% if sub_category %}
          <span class="tutorial">
             <small>
@@ -85,29 +104,28 @@
         <a id="question-details-edit" data-toggle="modal" data-target="#detailsModal" href="#" class="hideme">
             <span class="glyphicon glyphicon-edit"></span>
         </a>
-        
+
         <span class="modify">
             {% if user|can_edit:question and not ans_count  %}
                 <a class="edit btn btn-xs btn-info" href="#">Edit</a>
                 <a class="save btn btn-xs btn-success" data-qid="{{ question.id }}" href="#">Save</a>
             {% endif %}
         </span>
-        
+
         <span class="meta">
             <small>
                 <i>
                     {{ question.date_created|date:"d-m-y" }}, {{ question.date_created|time }}
                 </i>
             </small>
-            
+
             <span class="user">
                 <a href="/accounts/view-profile/{{ question.user.id }}"> {{question.user}} </a>
             </span>
         </span>
-       
+
     </div> <!-- /.question -->
     </div>
-     
 </div> <!-- /.row -->
 
 
@@ -127,15 +145,15 @@
 <div class="row">
     <div class="answer-wrapper col-lg-12 col-md-12 col-sm-12 col-xs-12">
 <div class="votecell" style="padding-top: 9px;">
-                
+
                 <div class="ans-vote" >
-                
+
                             {% ifequal ans_vote.0 0 %}
                                 <img src="{% static 'website/images/up1-off.png' %}" class="ans-vote-up"  id="up{{ answer.id }}" title="This question shows research effort; it is useful and clear"/>
                             {% else %}
                                 <img src="{% static 'website/images/up1-on.png' %}" class="ans-vote-up selected" id="up{{ answer.id }}" title="This question shows research effort; it is useful and clear"/>
                             {% endifequal %}
-                
+
                             <span class="vote-count-post" id="span{{ answer.id }}" >
                                 {{ ans_vote.2 }}
                             </span>
@@ -147,12 +165,12 @@
                         </div>
                         </div>
         <div class="answer {% if user|can_edit:answer  %}editable{% endif %}" id="answer{{answer.id}}" style="margin-left: 63px;">
-                              
-                  
+
+
             <div class="body" id="body{{ answer.id }}" style="padding-bottom: 12px">
                 <p>{{ answer.body| safe }}</p>
             </div>
-            
+
             <span class="meta">
                 <small>
                     <i>
@@ -171,7 +189,7 @@
             </span>
             {% endif %}
         </div> <!-- /.answer -->
-        
+
         <div class="row" style="padding-left: 40px">
             <div class="comments pull-right col-lg-11 col-md-11 col-sm-11 col-xs-11" >
                 <!-- displaying comments -->
@@ -203,8 +221,8 @@
                     {% endif %} -->
                 </div> <!-- /.comment -->
                 {% endfor %}
-                
-                
+
+
                 <!-- form to add comment -->
                 {% if user.is_authenticated %}
                  
@@ -212,8 +230,8 @@
                     <input type="hidden" name="answer_id" value="{{ answer.id }}">
                     <textarea name="body" class="new-comment form-control" id="comment{{ answer.id }}" rows="2"></textarea>
                 </form>
-                
-               
+
+
                 <a class="add-comment" style="background: #46B8DA none repeat scroll 0% 0%;color: #FFF;border-radius: 3px;padding: 5px 12px;" href="#" data-target="comment{{ answer.id }}">
                     <small>add comment</small>
                 </a>
@@ -226,14 +244,14 @@
                 <a class="cancel-comment" href="#" data-target="comment{{ answer.id }}">
                     <small>cancel comment</small>
                 </a>
-               
+
                 {% else %}
                 <br>
                 <a class="btn btn-xs btn-success vs" href="/accounts/login">
                     Login to add comment
                 </a>
                 {% endif %}
-                 
+
             </div> <!-- comments -->
         </div> <!-- /.row -->
         <br> <hr>
@@ -242,9 +260,9 @@
 {% endfor %}
 
 {% if user.is_authenticated %}
-    <form action="{% url 'website:question_answer' question.id %}" method="POST"> {% csrf_token %}
+    <form action="{% url 'website:question_answer' question.id %}" method="POST" enctype="multipart/form-data"> {% csrf_token %}
         {% with WIDGET_ERROR_CLASS='field_error' %}
-            <div class="row"> 
+            <div class="row">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                  {{ form.body.errors }}
                     <div class="form-group">
@@ -252,32 +270,10 @@
                         <label for="id_body"><h4><u>Your Answer:</u></h4></label>
                         {% render_field form.body class+="form-control body" %}
                         </div>
-         <!--
-        Codemirro implementation
-          <div><link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/codemirror/CodeMirror/master/lib/codemirror.css">
-        <script type="text/javascript" src="https://cdn.rawgit.com/codemirror/CodeMirror/master/lib/codemirror.js"></script>
-        <!-- <script type="text/javascript" src="https://cdn.rawgit.com/codemirror/CodeMirror/master/mode/python/python.js"></script>
-        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-        <script type="text/javascript" src="https://cdn.rawgit.com/carlo/jquery-base64/master/jquery.base64.min.js"></script>
-    <body>
-        <!-- <textarea id="editor"></textarea> 
-    </body>
-    <script>
-        var editor = CodeMirror.fromTextArea(document.getElementById("id_body"), {
-            lineNumbers: true,
-            tabMode: "indent"
-        }).panelInstance("id_body");
-        function submit_html()
-        {
-            editor.save();
-            var code = document.getElementById("id_body").value;
-            var data_url = "data:text/html;charset=utf-8;base64," + $.base64.encode(code);
-        }
-    </script></div>  -->         
-        </div> 
-            </div>
-            
-             
+                    </div>
+                </div>
+
+
         {% endwith %}
         <input class="btn btn-sm btn-info" type="submit" value="Submit Answer">
     </form>
@@ -310,7 +306,7 @@
     </div><!-- /.modal -->
 <!-- AJAX SCRIPT -->
 
-   
+
 
 {% endblock %}
 
@@ -319,6 +315,7 @@
 <script type="text/javascript">
     bkLib.onDomLoaded(function() {
         new nicEditor({
+            uploadURI: "{% url 'website:image_upload' %}",
             fullPanel : true,   
             iconsPath: "{% static 'website/js/nicEditorIcons.gif' %}",
             buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link']
@@ -349,7 +346,7 @@
             data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
         });
     /* VOTE FOR QUESTION */
-    
+
         $('div.vote img.vote-up').click(function() {
             var id = {{ question.pk }};
             var vote_type = 'up';
@@ -357,12 +354,12 @@
             /* USER HAS ALREADY VOTED */
             if ($(this).hasClass('selected')) {
                 var vote_action = 'recall-vote'
-                $.post('/vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
+                $.post('/vote_post/', {id:id, type:vote_type, action:vote_action},function(response) {
                     $('img.vote-up').removeAttr('src')
                         .attr('src', '{% static 'website/images/up1-off.png' %}')
                         .removeClass('selected');
                     $('div.vote span.vote-count-post').html(response);
-                    $('img.vote-down').css('pointer-events','all');
+                //   $('img.vote-down').css('pointer-events','all');
                 });
             }
             /* USER WISHES TO VOTE */
@@ -373,7 +370,10 @@
                         .attr('src', '{% static 'website/images/up1-on.png' %}')
                         .addClass('selected');
                     $('div.vote span.vote-count-post').html(response);
-                    $('img.vote-down').css('pointer-events','none');
+                    $('img.vote-down').removeAttr('src')
+                        .attr('src', '{% static 'website/images/down1-off.png' %}')
+                        .removeClass('selected');
+                //    $('img.vote-down').css('pointer-events','none');
                 });
             }
         });
@@ -381,7 +381,7 @@
         $('div.vote img.vote-down').click(function() {
             var id = {{ question.pk }};
             var vote_type = 'down';
-        
+
             /* USER HAS ALREADY DOWN-VOTED */
             if ($(this).hasClass('selected')) {
                 var vote_action = 'recall-vote'
@@ -390,24 +390,27 @@
                         .attr('src', '{% static 'website/images/down1-off.png' %}')
                         .removeClass('selected');
                     $('div.vote span.vote-count-post').html(response);
-                    $('img.vote-up').css('pointer-events','all');
+                //    $('img.vote-up').css('pointer-events','all');
                 });
             }
             /* USER WISHES TO VOTE */
             else {
                 var vote_action = 'vote'
-                $.post('/vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
+                $.post( '/vote_post/', {id:id, type:vote_type, action:vote_action},function(response) {
                     $('img.vote-down').removeAttr('src')
                         .attr('src', '{% static 'website/images/down1-on.png' %}')
                         .addClass('selected');
                     $('div.vote span.vote-count-post').html(response);
-                    $('img.vote-up').css('pointer-events','none');
+                    $('img.vote-up').removeAttr('src')
+                        .attr('src', '{% static 'website/images/up1-off.png' %}')
+                        .removeClass('selected');
+                //    $('img.vote-up').css('pointer-events','none');
                 });
             }
         });
-        
+
        /* VOTE FOR ANSWERS */
-        
+
        /* UP VOTE */
        $('div.ans-vote img.ans-vote-up').click(function(event) {
        
@@ -425,12 +428,12 @@
                    
                     $('span#span'+id).html(response);
                    
-                    $('img#down'+id).css('pointer-events','all');
+                //    $('img#down'+id).css('pointer-events','all');
                    
                 });
                 
             }
-            
+
             /* USER WISHES TO VOTE */
             else {
             
@@ -441,36 +444,39 @@
                         .addClass('selected');
                    
                     $('span#span'+id).html(response);
-                    $('img#down'+id).css('pointer-events','none');
-                    
-                    
+                    $('img#down'+id).removeAttr('src')
+                        .attr('src', '{% static 'website/images/down1-off.png' %}')
+                        .removeClass('selected');
+                //    $('img#down'+id).css('pointer-events','none');
+
+
                 });
             }
           
         }); /* END OF UP VOTE FOR ANSWERS */
-        
+
         /* DOWNVOTE */
         $('div.ans-vote img.ans-vote-down').click(function(event) {
             var down_id = event.target.id;
             var vote_type = 'down';
             
             var id = down_id.replace('down','');
-           
-           
+
+
             /* USER HAS ALREADY DOWN-VOTED */
-    
+
             if ($('img#'+down_id).hasClass('selected')) {
                 var vote_action = 'recall-vote'
         
                 $.post('/ans_vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
-           
+
                     $('img#'+down_id).removeAttr('src')
                         .attr('src', '{% static 'website/images/down1-off.png' %}')
                         .removeClass('selected');
                   
                     $('div.ans-vote span#span'+id).html(response);
                   
-                    $('img#up'+id).css('pointer-events','all')
+                //    $('img#up'+id).css('pointer-events','all')
                     
                 });
             }
@@ -481,10 +487,13 @@
                     $('img#'+down_id).removeAttr('src')
                         .attr('src', '{% static 'website/images/down1-on.png' %}')
                         .addClass('selected');
-                   
+
                     $('div.ans-vote span#span'+id).html(response);
-                    $('img#up'+id).css('pointer-events','none')
-                    
+                    $('img#up'+id).removeAttr('src')
+                        .attr('src', '{% static 'website/images/up1-off.png' %}')
+                        .removeClass('selected');
+                //    $('img#up'+id).css('pointer-events','none')
+
                 });
             }
         });
@@ -493,7 +502,6 @@
      
  
   </script>
-   
-    <script src="{% static 'website/js/thread-user.js' %}"></script>
-    <script src="{% static 'website/js/custom.js' %}"></script>
+<script src="{% static 'website/js/thread-user.js' %}"></script>
+<script src="{% static 'website/js/custom.js' %}"></script>
 {% endblock %}

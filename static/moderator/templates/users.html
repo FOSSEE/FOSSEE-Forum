@@ -1,0 +1,114 @@
+{% extends 'moderator/templates/base.html' %}
+{% load static %}
+{% load count_tags %}
+
+{% block title %}
+     Users - FOSSEE Forums
+{% endblock %}
+{% block content %}
+
+<!-- <script type="text/javascript" src="dataTables.scrollingPagination.js"></script> -->
+    <script>
+
+        $(document).ready(function()
+        {
+        $("#myTable").DataTable({
+          // 'sPaginationType': "scrolling"
+          });
+      });
+
+    </script>
+    <form action="user_update/" method="post">
+    <div style="margin: 10px;">
+        <input type="submit"  class="btn btn-xs btn-success pull-right" align="top|right" value="Activate" name="Activate">
+        <input type="submit"  class="btn btn-xs btn-success pull-right" align="top|right" value="Deactivate" name="Deactivate">
+        <input type="submit"  class="btn btn-xs btn-success pull-right" align="top|right" value="Add in Staff" name="Add in Staff">
+        <input type="submit"  class="btn btn-xs btn-success pull-right" align="top|right" value="Remove from Staff" name="Remove from Staff">
+    </div>
+    <br>
+    <h4>
+        <h5>
+        </h5>
+    </h4>
+       <table id="myTable" class="tablesorter-blue">
+        <colgroup>
+        <col width="5%" />
+        <col width="30%" />
+        <col width="10%" />
+        <col width="10%" />
+        <col width="5%" />
+        <col width="5%" />
+
+        <col width="20%" />
+        <col width="10%"
+
+    </colgroup>
+        <thead>
+    <tr>
+        <th>No.</th>
+        <th>Username</th>
+        <th>Date Joined</th>
+        <th>Last Login</th>
+        <th>Is Active</th>
+        <th>Is Staff</th>
+        <th>email</th>
+        <th>Select</th>
+
+    </tr>
+    </thead>
+    <tbody>
+        {% for user in User %}
+
+        <tr>
+        <td> </td>
+
+            <td>
+                <span class="question" data-toggle="tooltip" data-placement="top" >
+                    <a href="">{{ user.username|truncatechars:40 }}</a>
+                </span>
+            </td>
+
+            <td>
+                <span style="display: none;">{{ category.date_created |date:"Y-m-d" }}</span>
+                    {{ user.date_joined|date:"d/m/y" }}
+
+            </td>
+                <td>
+                <span style="display: none;">{{ category.date_created |date:"Y-m-d" }}</span>
+                    {{ user.last_login|date:"d/m/y" }}
+
+            </td>
+            <td>
+                {{ user.is_active }}
+
+            </td>
+            <td>
+                {{ user.is_staff }}
+
+            </td>
+
+            <td>
+                <span class="question" data-toggle="tooltip" data-placement="top" >
+                    <a href="">{{ user.email|truncatechars:40 }}</a>
+                </span>
+            </td>
+            <td>
+                <input type="checkbox" name="User_id" value="{{ user.id }}" "> <br>
+            </td>
+         </tr>
+
+        {% endfor %}
+    </tbody>
+    </table>
+    </form>
+
+{% endblock %}
+
+{% block javascript %}
+<script>
+    $('span').tooltip();
+    $('table tbody tr').each(function(idx){
+                $(this).children(":eq(0)").html(idx + 1);
+    });
+</script>
+{% endblock %}

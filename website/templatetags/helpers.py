@@ -7,6 +7,7 @@ import os.path
 
 register = template.Library()
 
+
 def get_category_image(category):
     base_path = settings.PROJECT_DIR + '/static/website/images/'
     file_name = category.name.replace(' ', '') + '.jpg'
