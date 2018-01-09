@@ -15,8 +15,9 @@ framework.
 """
 import os
 import sys
+from django.core.wsgi import get_wsgi_application
 
-#sys.path.append('/Sites/forums_fossee_in/django/lib/python2.6/site-packages')
+# sys.path.append('/Sites/forums_fossee_in/django/lib/python2.6/site-packages')
 sys.path.append('/Site/forums_fossee_in/spoken-tutorial-forums')
 
 # We defer to a DJANGO_SETTINGS_MODULE already in the environment. This breaks
@@ -25,13 +26,12 @@ sys.path.append('/Site/forums_fossee_in/spoken-tutorial-forums')
 # os.environ["DJANGO_SETTINGS_MODULE"] = "forums.settings"
 os.environ["DJANGO_SETTINGS_MODULE"] = "forums.settings"
 
-#activate_this = '/Sites/forums_fossee_in/django/bin/activate_this.py'
-#execfile(activate_this, dict(__file__=activate_this))
+# activate_this = '/Sites/forums_fossee_in/django/bin/activate_this.py'
+# execfile(activate_this, dict(__file__=activate_this))
 
 # This application object is used by any WSGI server configured to use this
 # file. This includes Django's development server, if the WSGI_APPLICATION
 # setting points here.
-from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
 
 # Apply WSGI middleware here.

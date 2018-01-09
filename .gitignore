@@ -2,7 +2,10 @@
 *.swp
 *.pyc
 config.py
+migrations
+website/migrations
 forums/wsgi.py
+forums/local.py
 static/CACHE/*
 *.py[cod]
 robots.txt

@@ -1,7 +1,10 @@
 import unittest
-from models import FossCategory, Issue, Question, QuestionVote, QuestionComment, Answer, AnswerVote, AnswerComment, Notification, Profile
+from models import FossCategory, Issue, Question, QuestionVote,\
+                   QuestionComment, Answer, AnswerVote,\
+                   AnswerComment, Notification, Profile
 from django.utils import timezone
 from django.core.urlresolvers import reverse
+
 
 class ProfileTestCases(unittest.TestCase):
     def setUp(self):

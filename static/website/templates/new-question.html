@@ -5,12 +5,13 @@
     Ask a question - FOSSEE Forums
 {% endblock %}
 {% block content %}
+
     <h4 style="padding-top: 15px;">
         <span class="glyphicon glyphicon-pencil">
         </span> Create a new question . . .
     </h4>
     <hr>
-    <form role="form" action="" method="POST" >{% csrf_token %}
+    <form role="form" action="" method="POST" autocomplete="off" >{% csrf_token %}
     {% with WIDGET_ERROR_CLASS='field_error' %}
     <p>
     Select the category.
@@ -18,7 +19,8 @@
     </p>
     <div class="row">
     	{{ form.category.errors }}
-        <div class="col-lg-3 col-md-3 col-sm-3">
+        <div class="col-l
+        g-3 col-md-3 col-sm-3">
             {% render_field form.category class+="form-control category"%} 
         </div>
         <div id = 'tutorial' class="col-lg-3 col-md-3 col-sm-3">
@@ -42,19 +44,51 @@
          {{ form.title.errors }}
             <div class="form-group">
                 <label for="id_title">Question Title:</label>
-                {% render_field form.title class+="form-control title" %} 
+                {% render_field form.title class+="form-control title" %}
             </div>
             {{ form.body.errors }}
              <div class="form-group">
                 <label for="id_body" >Question Description:</label>
-        
+
                 {% render_field form.body class+="form-control body" %}
             </div>
+            {{ form.tag.errors }}
+            <div class="form-group">
+                <label> Tags: </label>
+                <br>
+                <small>
+                <div id="tags">
 
-           
-        </div>
+
+                  {% render_field form.tag class+="form-control title" %}
+                </div>
+                </small>
+            </div>
+            <br>
+            <div class="form-group">
+                <div id='popup'>
+
+                <label> What is a tag?<span>Tags:<br>Tags are words which describes the contents of the questions and helps to catagories them into different sections<br>e.g. How to make LinkList in java?, Can have tags <br> java, linklist  </span></label>
+                </div>
+                <div class="tag_button">
+
+                <br>
+                <label>Suggested Tags:</label>
+                <br>
+
+                {%  for tag in FossCategory.default_tags.all %}
+
+                <input type="button" value="{{ tag }}" class="taggs" id="tag_button"onClick="ButtonClick('{{ form.tag.auto_id}}', '{{ tag }}')">
+
+
+                {% endfor %}
+
+                </div>
+           </div>
+           </div>
     </div>
-    <input class="btn btn-success" type="submit"  onclick = "return validate_dd();" value="Submit Question"> 
+
+    <input class="btn btn-success" type="submit"  onclick = "submit_button()" value="Submit Question">
     {% endwith %}
     </form>
 
@@ -72,8 +106,12 @@
         </div><!-- /.modal-content -->
       </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
+{% endblock %}
 
+{% block javascript %}
 <script src="{% static 'website/js/nicEdit.js' %}" type="text/javascript"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
 <script type="text/javascript">
 bkLib.onDomLoaded(function() {
     new nicEditor({
@@ -83,41 +121,107 @@ bkLib.onDomLoaded(function() {
     }).panelInstance('id_body');
 });
 </script>
-
-
-
 <script>
+
+var Q_tags = '';
+$(function(){
+
+  $("#tags input").on({
+    focusout : function() {
+      var txt = this.value.replace(/[^a-z0-9\+\-\.\#]/ig,''); // allowed characters
+      if(txt) $("<span/>", {text:txt.toLowerCase(), insertBefore:this});
+      Q_tags = this.value+Q_tags;
+
+      this.value = "";
+    },
+    keyup : function(ev) {
+      $('.tag_button').show();
+      if(/(32)/.test(ev.which))
+        var written_tags = Q_tags;
+        if(written_tags.search(this.value)==-1)
+          $(this).focusout();
+        else
+          this.value = "";
+    }
+    });
+
+  $('#tags').on('click', 'span', function() {
+    var tag_text = Q_tags;
+    var span_text = $(this).text();
+    tag_text = tag_text.replace(span_text+" ","");
+    span_text=span_text+",";
+    tag_text = tag_text.replace(span_text,"");
+    Q_tags = tag_text;
+    $(this).remove();
+  });
+
+});
+
+function ButtonClick(id_tagg,tag_name){
+
+  var tag_text = Q_tags;
+
+  if(tag_text.search(tag_name)==-1)
+  {
+    document.getElementById(id_tagg).value = tag_name+" ";
+    $('#tags input').focusout();
+  }
+}
+
+function submit_button(){
+  document.getElementById('id_tag').value = Q_tags;
+  Q_tags = "";
+  return validate_dd();
+}
+
+$({{form.category.auto_id}}).change(function(response){
+
+  $.get('/category_tags/', {category: $({{form.category.auto_id}}).val()}, function(response){
+  var string_of_tags = $(response).text();
+  var tag_array = string_of_tags.split(" ");
+  var i;
+  var x;
+  x = '';
+
+  $('.tag_button').html("<br>Suggested Tags:<br>");
+
+  for(i=0;i<tag_array.length;i++){
+    x = '<input type="button" value="'+tag_array[i]+'" class="taggs" id="tag_button" onClick="ButtonClick(\'id_tag\',\''+tag_array[i]+'\')">';
+    $('.tag_button').html($('.tag_button').html()+x);
+  }
+  });
+
+});
+
 window.onload = function(){
-    
+
+    $(".tag_button").hide();
+    Q_tags = "";
+
     var c2= "{{ category }}";
     
     if (c2 != '12'){
       
         $(".tutorial" ).hide()    
-     }
-     else {
+    }
+    else {
          $(".tutorial" ).show()    
 
-     }
+    }
     if (c2 == "None"){
-      
-         // $("#id_category").val(c2);
          $( "#id_category option" ).prop('disabled',false);         
-     }   
+    }
 
-     else  if(c2 != ""){
-       
+    else  if(c2 != ""){
+
          $("#id_category").val(c2);
          $( "#id_category option:not(:selected)" ).prop('disabled',true);     
-     }
+    }
+
 }
+
 </script>
 
 
-
-
-{% endblock %}
-
-{% block javascript %}
-    <script src="{% static 'website/js/custom.js' %}"></script>
+<script src="{% static 'website/js/custom.js' %}"></script>
 {% endblock %}
