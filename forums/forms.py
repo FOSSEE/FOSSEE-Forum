@@ -116,8 +116,6 @@ class RegisterForm(forms.Form):
 		widget = forms.TextInput(),
 		required=True
 	)
-	captcha = ReCaptchaField()
-	
 	
 	def clean_username(self):
 		try:
