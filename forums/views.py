@@ -1,6 +1,6 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth import login, logout, authenticate
-from django.shortcuts import render_to_response , render
+from django.shortcuts import render_to_response , render, redirect
 from django.core.context_processors import csrf
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
@@ -13,6 +13,10 @@ from django.core.mail import send_mail
 from django.contrib.auth.views import password_reset, password_reset_confirm
 from django.core.urlresolvers import reverse
 
+import urllib
+import urllib2
+import json
+
 import random, string
 from forums.forms import *
 from website.models import *
@@ -22,15 +26,34 @@ def account_register(request):
     context = {}
     if request.method == 'POST':
         form = RegisterForm(request.POST)
+        print "ok"
         
         if form.is_valid():
-        
+
+            ''' Begin reCAPTCHA validation '''
+            recaptcha_response = request.POST.get('g-recaptcha-response')
+            url = 'https://www.google.com/recaptcha/api/siteverify'
+            values = {
+                'secret': settings.GOOGLE_RECAPTCHA_SECRET_KEY,
+                'response': recaptcha_response
+            }
+            data = urllib.urlencode(values)
+            req = urllib2.Request(url, data)
+            response = urllib2.urlopen(req)
+            result = json.load(response)
+            ''' End reCAPTCHA validation '''
+            print result['success']
             username = request.POST['username']
             password = request.POST['password']
             email = request.POST['email']
             user = User.objects.create_user(username, email, password)
             user.is_active = False
-            user.save()
+            print result['success']
+            if result['success']:
+                user.save()
+            else:
+                messages.error(request, 'Invalid reCAPTCHA. Please try again.')
+
             confirmation_code = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for x in range(33))
             p = Profile(user=user, confirmation_code=confirmation_code)
             p.save()
@@ -39,12 +62,14 @@ def account_register(request):
                 Please confirm your registration by clicking on the activation link which has been sent to your registered email id.
             """)
             return render(request, 'forums/templates/message.html')
-        context = {'form':form}
+        context = {'form':form,
+                    'SITE_KEY': settings.GOOGLE_RECAPTCHA_SITE_KEY }
         return render_to_response('forums/templates/user-register.html', context,context_instance = RequestContext(request))
     else:
         form = RegisterForm()
         context = {
-            'form': form
+            'form': form,
+            'SITE_KEY': settings.GOOGLE_RECAPTCHA_SITE_KEY
         }
         context.update(csrf(request))
         return render_to_response('forums/templates/user-register.html', context)
@@ -191,13 +216,13 @@ def send_registration_confirmation(user):
     IIT Bombay.
     """.format(
         user.username,
-        "http://fossee.in",
-        "http://forums.fossee.in/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
+        settings.DOMAIN_NAME,
+        settings.DOMAIN_NAME + "/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
     )
     email = EmailMultiAlternatives(
-        subject, message, 'forums@fossee.in',
-        to = [user.email], bcc = [], cc = ['forum-notifications@fossee.in',],
-        headers={'Reply-To': 'forums@fossee.in', "Content-type":"text/html;charset=iso-8859-1"}
+        subject, message, settings.SENDER_EMAIL,
+        to = [user.email], bcc = [], cc = [settings.FORUM_NOTIFICATION],
+        headers={'Reply-To': settings.SENDER_EMAIL, "Content-type":"text/html;charset=iso-8859-1"}
     )
     email.attach_alternative(message, "text/html")
     try:
@@ -266,7 +291,7 @@ def user_logout(request):
 #             user.set_password(password)
 #             user.save()
 #             sender_name = "FOSSEE Forums"
-#             sender_email = "forums@fossee.in"
+#             sender_email = settings.SENDER_EMAIL
 #             subject = "FOSSEE Forums - Password Reset"
 #             to = (user.email, )
 #       url = settings.EMAIL_URL
