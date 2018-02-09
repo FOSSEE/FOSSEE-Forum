@@ -55,14 +55,19 @@
             <div class="form-group">
                 <div class="col-xs-12">
                     <div class="input-group captcha-group">
-                        {% render_field form.captcha class+="form-control captcha" placeholder="Enter Captcha" %}
+                    <script src='https://www.google.com/recaptcha/api.js'></script>
+                    <div class="g-recaptcha" data-sitekey="{{ SITE_KEY }}" data-callback="enableBtn"></div>
                     </div>
-                    {{ form.captcha.errors }}
                 </div>
             </div>
-           
+
+           <script>
+            function enableBtn(){
+    document.getElementById("regstr").disabled = false;
+   }
+           </script>
              <div class="col-sm-5 submitWrap">
-                    <button type="submit" class="btn btn-primary btn-sm ">Register</button>
+                    <button type="submit" class="btn btn-primary btn-sm " id="regstr" disabled>Register</button>
                 </div>
 
               
