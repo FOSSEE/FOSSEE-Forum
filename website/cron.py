@@ -14,9 +14,10 @@ from website.models import Question, Answer, FossCategory
 from django.db.models import Count
 from django.core.mail import send_mail
 from django.core.mail import EmailMultiAlternatives
+
 class Cron(object):
     def unanswered_notification(self):
-        
+        from django.conf import settings
         import datetime as DT
 
         try:
@@ -44,12 +45,12 @@ class Cron(object):
             category_name = FossCategory.objects.get(id=key)
             mail_body = "Dear " + str(category_name) + " Team," + " \n\nThe following questions are left unanswered : \n\n"
             for item in value:
-                string = "Question : " + str(item.title) + "\n" + str(item.category) + "\n" + "http://forums.fossee.in/question/" + str(item.id) +"\n\n"
+                string = "Question : " + str(item.title) + "\n" + str(item.category) + "\n" + settings.DOMAIN_NAME + "/question/" + str(item.id) +"\n\n"
                 mail_body += string
-            sender_email = "forums@fossee.in"    
+            sender_email = settings.SENDER_EMAIL    
             mail_body += "Please do the needful.\n\nRegards,\nFOSSEE Team,\nIIT Bombay."
-            to = (item.category.email,)
-            # to = ('priyanka@fossee.in', 'rohan@fossee.in',)
+            #to = (item.category.email,)
+            to = ["prashantsinalkar@gmail.com",]
             subject =  "FOSSEE Forums - " + str(item.category) +" - Unanswered Question"
             send_mail(subject,mail_body, sender_email, to)
 
