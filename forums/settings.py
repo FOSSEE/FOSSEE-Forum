@@ -54,7 +54,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'abcd',                      # Or path to database file if using sqlite3.
+        'NAME': 'forums_fossee_current',                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': DB_USER,
         'PASSWORD': DB_PASS,
@@ -202,17 +202,45 @@ COMPRESS_ENABLED = True 	# disable in production Env
 HTML_MINIFY = True 		# disable in production Env
 
 HTML_MINIFY = HTML_MINIFY
+#RECAPTCHA_PROXY = 'http://127.0.0.1:8000'
+#NOCAPTCHA = True
 RECAPTCHA_PUBLIC_KEY = PUB_KEY
 RECAPTCHA_PRIVATE_KEY = PRIV_KEY
+
+#Google recaptcha for forum
+GOOGLE_RECAPTCHA_SECRET_KEY = FORUM_GOOGLE_RECAPTCHA_SECRET_KEY 
+GOOGLE_RECAPTCHA_SITE_KEY = FORUM_GOOGLE_RECAPTCHA_SITE_KEY
+
 RECAPTCHA_USE_SSL = True
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
-EMAIL_URL = "http://forums.fossee.aero.iitb.ac.in"
+EMAIL_URL = EMAIL_URL
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
-EMAIL_HOST = 'smtp-auth.iitb.ac.in'
-EMAIL_PORT = 25
-EMAIL_HOST_USER = 't16614'
-EMAIL_HOST_PASSWORD = 'ldap@16614'
-EMAIL_USE_TLS = True
+#Sender email, forum notification email, domain name
+SENDER_EMAIL = SENDER_EMAIL
+FORUM_NOTIFICATION = FORUM_NOTIFICATION
+DOMAIN_NAME = DOMAIN_NAME
+
+
+# Host for sending e-mail.
+EMAIL_HOST = EMAIL_HOST_SERVER
+
+# Port for sending e-mail.
+EMAIL_PORT = EMAIL_PORT_SERVER
+
+# Optional SMTP authentication information for EMAIL_HOST.
+EMAIL_HOST_USER = EMAIL_HOST_USER_SERVER
+EMAIL_HOST_PASSWORD = EMAIL_HOST_PASSWORD_SERVER
+EMAIL_USE_TLS = EMAIL_USE_TLS_SERVER
+
+SENDER_EMAIL = SENDER_EMAIL
+FORUM_NOTIFICATION = FORUM_NOTIFICATION
+DOMAIN_NAME = DOMAIN_NAME
+
+#EMAIL_HOST = 'smtp-auth.iitb.ac.in'
+#EMAIL_PORT = 25
+#EMAIL_HOST_USER = 't16614'
+#EMAIL_HOST_PASSWORD = 'ldap@16614'
+#EMAIL_USE_TLS = True
 
 #this setting is for smtp dummy server for testing purpose
