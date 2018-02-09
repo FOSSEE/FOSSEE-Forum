@@ -31,6 +31,7 @@ admins = (
 categories = FossCategory.objects.order_by('name')
 # for home page
 def home(request):
+    print settings.DOMAIN_NAME
     questions = Question.objects.all().order_by('date_created').reverse()[:10]
     context = {
         'categories': categories,
@@ -132,9 +133,9 @@ def question_answer(request,qid):
 
             #Sending email when a new question is asked
             sender_name = "FOSSEE Forums"
-            sender_email = "forums@fossee.in"
+            sender_email = settings.SENDER_EMAIL
             subject = "FOSSEE Forums - {0} - Your question has been answered".format(question.category)
-            to = [question.user.email,'forum-notifications@fossee.in',]
+            to = [question.user.email,settings.FORUM_NOTIFICATION,]
             url = settings.EMAIL_URL
             message = "  "
             message =""" The following new question has been posted in the FOSSEE Forum: \n\n
@@ -146,7 +147,7 @@ Regards,\nFOSSEE Team,\nIIT Bombay.
                 question.title,
                 question.category, 
                 #question.tutorial, 
-                'http://forums.fossee.in/question/' + str(question.id) + "#answer" + str(answer.id)
+                settings.DOMAIN_NAME + '/question/' + str(question.id) + "#answer" + str(answer.id)
             ) 
 
             send_mail(subject, message, sender_email, to)
@@ -207,9 +208,9 @@ def answer_comment(request):
                 
                 user = User.objects.get(id=answer.uid)
             sender_name = "FOSSEE Forums"
-            sender_email = "forums@fossee.in"
+            sender_email = settings.SENDER_EMAIL
             subject = "FOSSEE Forums - {0} - Comment for your answer".format(answer.question.category)
-            to = [answer_creator.email, 'forum-notifications@fossee.in',]
+            to = [answer_creator.email, settings.FORUM_NOTIFICATION,]
             url = settings.EMAIL_URL
             message =""" 
                 A comment has been posted on your answer. \n\n
@@ -221,7 +222,7 @@ Regards,\nFOSSEE Team,\nIIT Bombay.
                 answer.question.title,
                 answer.question.category, 
                 #question.tutorial, 
-                'http://forums.fossee.in/question/' + str(answer.question.id) + "#answer" + str(answer.id)
+                settings.DOMAIN_NAME + '/question/' + str(answer.question.id) + "#answer" + str(answer.id)
             ) 
             send_mail(subject, message, sender_email, to)
             # notifying other users in the comment thread
@@ -232,7 +233,7 @@ Regards,\nFOSSEE Team,\nIIT Bombay.
                 comment_creator = c.user()
                 email = comment_creator.email
                 comment_creator_emails.append(email)
-                comment_creator_emails.append('forum-notifications@fossee.in')
+                comment_creator_emails.append(settings.FORUM_NOTIFICATION)
             #getting distinct uids
             uids = set(uids)
             uids.remove(request.user.id)
@@ -247,7 +248,7 @@ Regards,\nFOSSEE Team,\nIIT Bombay.
                 
                 user = User.objects.get(id=uid)
             sender_name = "FOSSEE Forums"
-            sender_email = "forums@fossee.in"
+            sender_email = settings.SENDER_EMAIL
             subject = "FOSSEE Forums - {0} - Comment has a reply".format(answer.question.category)
             to = comment_creator_emails
             url = settings.EMAIL_URL
@@ -261,7 +262,7 @@ Regards,\nFOSSEE Team,\nIIT Bombay.
                 answer.question.title,
                 answer.question.category, 
                 #question.tutorial, 
-                'http://forums.fossee.in/question/' + str(answer.question.id) + "#answer" + str(answer.id)
+                settings.DOMAIN_NAME + '/question/' + str(answer.question.id) + "#answer" + str(answer.id)
             )
 
             send_mail(subject, message, sender_email, to)                
@@ -321,6 +322,7 @@ def new_question(request):
     context = {}
     toolbox = False
     user = request.user
+    context['SITE_KEY'] = settings.GOOGLE_RECAPTCHA_SITE_KEY
     all_category = FossCategory.objects.all()
     if request.method == 'POST':
         form = NewQuestionForm(request.POST)
@@ -339,6 +341,7 @@ def new_question(request):
                     context['tutorial'] = tutorial
                     context['form'] = form
                     context['toolbox'] = toolbox
+
                     return render(request, 'website/templates/new-question.html', context)
                 else:
                     pass
@@ -358,9 +361,9 @@ def new_question(request):
             # print(question.category) 
             #Sending email when a new question is asked
             sender_name = "FOSSEE Forums"
-            sender_email = "forums@fossee.in"
+            sender_email = settings.SENDER_EMAIL
             subject = "FOSSEE Forums - {0} - New Question".format(question.category)
-            to = (question.category.email,'forum-notifications@fossee.in')
+            to = (question.category.email, settings.FORUM_NOTIFICATION)
             url = settings.EMAIL_URL
 
             message = """
@@ -373,7 +376,7 @@ def new_question(request):
                 question.title,
                 question.category,
                 question.body,
-                'http://forums.fossee.in/question/'+str(question.id),
+                settings.DOMAIN_NAME + '/question/'+ str(question.id),
             )
             email = EmailMultiAlternatives(
                 subject,'',
