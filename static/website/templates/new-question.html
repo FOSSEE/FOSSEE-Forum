@@ -54,7 +54,14 @@
            
         </div>
     </div>
-    <input class="btn btn-success" type="submit"  onclick = "return validate_dd();" value="Submit Question"> 
+    <script src='https://www.google.com/recaptcha/api.js'></script>
+                    <div class="g-recaptcha" data-sitekey="{{ SITE_KEY }}" data-callback="enableBtn"></div>
+                             <script>
+            function enableBtn(){
+    document.getElementById("submit_question").disabled = false;
+   }
+           </script>
+    <input id="submit_question" class="btn btn-success" type="submit"  onclick = "return validate_dd();" value="Submit Question" disabled> 
     {% endwith %}
     </form>
 
