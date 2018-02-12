@@ -21,7 +21,7 @@ class Cron(object):
         import datetime as DT
 
         try:
-            weekago = DT.date.today() - DT.timedelta(days=7)
+            weekago = DT.date.today() - DT.timedelta(days=2)
             questions = Question.objects.filter(date_created__lte=weekago)
         except Exception, e:
             print "No questions found"
@@ -49,8 +49,7 @@ class Cron(object):
                 mail_body += string
             sender_email = settings.SENDER_EMAIL    
             mail_body += "Please do the needful.\n\nRegards,\nFOSSEE Team,\nIIT Bombay."
-            #to = (item.category.email,)
-            to = ["prashantsinalkar@gmail.com",]
+            to = (item.category.email,)
             subject =  "FOSSEE Forums - " + str(item.category) +" - Unanswered Question"
             send_mail(subject,mail_body, sender_email, to)
 
