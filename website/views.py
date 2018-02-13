@@ -89,7 +89,7 @@ def get_question(request, question_id=None, pretty_url=None):
     # updating views count
     question.views += 1
     question.save()
-   
+    context['SITE_KEY'] = settings.GOOGLE_RECAPTCHA_SITE_KEY
     return render(request, 'website/templates/get-question.html', context)
     
 # post answer to a question, send notification to the user, whose question is answered
@@ -164,7 +164,7 @@ Regards,\nFOSSEE Team,\nIIT Bombay.
         context['question'] = question
 
     context['form'] = form
-   
+    context['SITE_KEY'] = settings.GOOGLE_RECAPTCHA_SITE_KEY
     context.update(csrf(request))
     return render(request, 'website/templates/get-question.html', context)   
 
@@ -545,6 +545,8 @@ def user_questions(request, user_id):
 # to get all answers of a specific users
 @login_required
 def user_answers(request, user_id):
+    context= {}
+    context['SITE_KEY'] = settings.GOOGLE_RECAPTCHA_SITE_KEY
     marker = 0
     if 'marker' in request.GET:
         marker = int(request.GET['marker'])

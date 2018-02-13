@@ -220,6 +220,7 @@
               
                  
                 <a class="post-comment" href="#" data-target="comment{{ answer.id }}" data-aid="{{ answer.id }}" data-form="form{{ answer.id }}">
+
                     <small>post comment</small>
                 </a>
                 
@@ -279,7 +280,14 @@
             
              
         {% endwith %}
-        <input class="btn btn-sm btn-info" type="submit" value="Submit Answer">
+         <script src='https://www.google.com/recaptcha/api.js'></script>
+                    <div class="g-recaptcha" data-sitekey="{{ SITE_KEY }}" data-callback="enableBtn"></div>
+                             <script>
+            function enableBtn(){
+    document.getElementById("submit_answer").disabled = false;
+   }
+           </script>
+        <input id="submit_answer" class="btn btn-sm btn-info" onclick = "return validate_dd();" type="submit" value="Submit Answer" disabled>
     </form>
 {% else %}
     <h4>
