@@ -43,12 +43,12 @@ class Cron(object):
                     body_cat[category_id] = [question]
         for key, value in body_cat.items():
             category_name = FossCategory.objects.get(id=key)
-            mail_body = "Dear " + str(category_name) + " Team," + " \n\nThe following questions are left unanswered : \n\n"
+            mail_body = "*** This is an automatically generated email, please do not reply ***" + " \n\nThe following questions are left unanswered : \n\n"
             for item in value:
                 string = "Question : " + str(item.title) + "\n" + str(item.category) + "\n" + settings.DOMAIN_NAME + "/question/" + str(item.id) +"\n\n"
                 mail_body += string
             sender_email = settings.SENDER_EMAIL    
-            mail_body += "Please do the needful.\n\nRegards,\nFOSSEE Team,\nIIT Bombay."
+            mail_body += "Please do the needful.\n\n"
             to = (item.category.email, 'forum-notifications@fossee.in')
             subject =  "FOSSEE Forums - " + str(item.category) +" - Unanswered Question"
             send_mail(subject,mail_body, sender_email, to)

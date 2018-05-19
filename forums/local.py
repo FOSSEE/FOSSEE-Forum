@@ -1,16 +1,16 @@
-DB_USER='forum_user'
-DB_PASS='F0rum$F0$$33@my$qlp@$$wd'
-PUB_KEY='6LemngMTAAAAAAC0Fkv0CQcavkTIIJ3LTDzi9gMq'
-PRIV_KEY='6LemngMTAAAAAHZsIaY-G98QegM3htdGVEWbEJYL'
-TO_EMAIL_ID = 'team@fossee.in'
+DB_USER='db_user'
+DB_PASS='db_pass'
+PUB_KEY='public key'
+PRIV_KEY='private key'
+TO_EMAIL_ID = 'to@email.id'
 SET_SITE_ID = 2
 
-SENDER_EMAIL = "forums@fossee.in"
-FORUM_NOTIFICATION = "forum-notifications@fossee.in"
+SENDER_EMAIL = "sender@email.id"
+FORUM_NOTIFICATION = "forumnotifications@email.id"
 
-EMAIL_URL = "http://forums.fossee.in"
+EMAIL_URL = "Site URL for email content"
 
-DOMAIN_NAME = "http://forums.fossee.in" #http://abc@in
+DOMAIN_NAME = "#http://abc@in"
 # Host for sending e-mail.
 EMAIL_HOST_SERVER = 'localhost'
 
@@ -23,5 +23,5 @@ EMAIL_PORT_SERVER = 25
 #EMAIL_USE_TLS_SERVER = 'Use TLS'
 
 
-FORUM_GOOGLE_RECAPTCHA_SECRET_KEY = 'google recaptcha secret'
-FORUM_GOOGLE_RECAPTCHA_SITE_KEY = 'google recaptcha site key'
+FORUM_GOOGLE_RECAPTCHA_SECRET_KEY = 'FORUM_GOOGLE_RECAPTCHA_SECRET_KEY'
+FORUM_GOOGLE_RECAPTCHA_SITE_KEY = 'FORUM_GOOGLE_RECAPTCHA_SITE_KEY'
