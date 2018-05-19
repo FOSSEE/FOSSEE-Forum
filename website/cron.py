@@ -10,6 +10,7 @@ sys.path.append(base_path)
 import django
 django.setup()
 
+from forums.local import FORUM_NOTIFICATION
 from website.models import Question, Answer, FossCategory
 from django.db.models import Count
 from django.core.mail import send_mail
@@ -49,7 +50,7 @@ class Cron(object):
                 mail_body += string
             sender_email = settings.SENDER_EMAIL    
             mail_body += "Please do the needful.\n\n"
-            to = (item.category.email, 'forum-notifications@fossee.in')
+            to = (item.category.email, FORUM_NOTIFICATION)
             subject =  "FOSSEE Forums - " + str(item.category) +" - Unanswered Question"
             send_mail(subject,mail_body, sender_email, to)
 
