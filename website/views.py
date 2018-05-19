@@ -476,6 +476,10 @@ def ans_vote_post(request):
     answer = Answer.objects.get(pk=answer_id)
     cur_post = get_object_or_404(Answer, id=post_id)
 
+    thisuserupvote = cur_post.userUpVotes.filter(id=request.user.id).count()
+    thisuserdownvote = cur_post.userDownVotes\
+                               .filter(id=request.user.id).count()
+
     userupvote = cur_post.userUpVotes.filter(id=request.user.id).count()
     userdownvote = cur_post.userDownVotes.filter(id=request.user.id).count()
 
