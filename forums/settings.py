@@ -40,8 +40,7 @@ TEMPLATES = [
 
 
 
-DEBUG = False
-#DEBUG = True
+DEBUG = True
 
 SITE_ID = SET_SITE_ID
 SET_TO_EMAIL_ID = TO_EMAIL_ID
@@ -55,7 +54,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'new_forums',                      # Or path to database file if using sqlite3.
+        'NAME': 'forums',                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': DB_USER,
         'PASSWORD': DB_PASS,
@@ -233,5 +232,3 @@ EMAIL_PORT = EMAIL_PORT_SERVER
 #EMAIL_HOST_PASSWORD = EMAIL_HOST_PASSWORD_SERVER
 #EMAIL_USE_TLS = EMAIL_USE_TLS_SERVER
 
-ADMINS = ADMINS_EMAIL_ADDRESS
-SERVER_EMAIL = SERVER_EMAIL_ADDRESS

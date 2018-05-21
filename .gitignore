@@ -6,6 +6,7 @@ forums/wsgi.py
 static/CACHE/*
 *.py[cod]
 robots.txt
+settings.json
 # C extensions
 *.so
 

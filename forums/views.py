@@ -26,7 +26,7 @@ def account_register(request):
     context = {}
     if request.method == 'POST':
         form = RegisterForm(request.POST)
-        print "ok"
+        print ("ok")
         
         if form.is_valid():
 

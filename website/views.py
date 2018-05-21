@@ -177,7 +177,7 @@ def answer_comment(request):
     context = {}
     # question = get_object_or_404(Question, id=qid)
     if request.method == 'POST':
-        answer_id = request.POST['answer_id'];
+        answer_id = request.POST['answer_id']
         answer = Answer.objects.get(pk=answer_id)
         answers = answer.question.answer_set.all()
         answer_creator = answer.user()
