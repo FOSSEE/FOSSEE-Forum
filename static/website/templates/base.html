@@ -101,21 +101,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                                 </a>
 
                                 <ul class="dropdown-menu">
-                                    
-                                <li>
-                                    <a href="{% url 'website:user_questions' user.id %}">My Questions</a>
-                                </li>
-                                <li>
-                                    <a href="{% url 'website:user_answers' user.id %}">My Answers</a>
-                                </li>
-
+                                
 				                <li>
                                     <a href="/accounts/view-profile/{{ user.id }}">My Profile</a>
                                 </li>
                                 <li>
                                     <a href="{% url 'user_logout' %}">Logout</a>
                                 </li>
-                                
+
                                 </ul>
                               </li> 
                               {% else %}
