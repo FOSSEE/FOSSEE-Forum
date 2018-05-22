@@ -1,6 +1,5 @@
 from django import forms
 from website.models import *
-#from spoken_auth.models import TutorialDetails
 from django.db.models import Q
 import re
 
@@ -28,7 +27,7 @@ class NewQuestionForm(forms.ModelForm):
     def clean_title(self):
         title = self.cleaned_data['title']
         if len(title) < 12:
-            raise forms.ValidationError("Title should be longer than 12 characteres")
+            raise forms.ValidationError("Title should be longer than 12 characters")
         if Question.objects.filter(title=title).exists():
             raise forms.ValidationError("This title already exist.")
        

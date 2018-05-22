@@ -13,17 +13,15 @@ from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.contrib import messages 
 from django.utils.html import strip_tags
-
-User = get_user_model()
-  
 from website.models import Question, Answer, Notification, AnswerComment, FossCategory, Profile, SubFossCategory
-# from spoken_auth.models import TutorialDetails, TutorialResources
 from website.forms import NewQuestionForm, AnswerQuestionForm,AnswerCommentForm
 from website.helpers import get_video_info, prettify
 from django.db.models import Count
 from django.core.mail import send_mail
 from django.core.mail import EmailMultiAlternatives
 from forums.settings import SET_TO_EMAIL_ID
+
+User = get_user_model()
 
 admins = (
    9, 4376, 4915, 14595, 12329, 22467, 5518, 30705
@@ -185,10 +183,6 @@ def answer_comment(request):
         if form.is_valid():
             body = request.POST['body']
             body = str(body)
-        
-            # body = body.replace("\\r", '')
-            # body = body.replace("\\n", '')
-            # body = body.replace("\\t", '') 
             comment = AnswerComment()
             comment.uid = request.user.id
             comment.answer = answer
@@ -220,8 +214,7 @@ def answer_comment(request):
 Regards,\nFOSSEE Team,\nIIT Bombay.
              """.format(
                 answer.question.title,
-                answer.question.category, 
-                #question.tutorial, 
+                answer.question.category,
                 settings.DOMAIN_NAME + '/question/' + str(answer.question.id) + "#answer" + str(answer.id)
             ) 
             send_mail(subject, message, sender_email, to)
@@ -312,6 +305,7 @@ def filter(request,  category=None, tutorial=None, minute_range=None, second_ran
             'questions':questions,
             'categories': categories,
             'tutorial': sub_category,
+            'title_category': category,
            }
         
     return render(request, 'website/templates/filter.html',  dict_context)
