@@ -275,13 +275,7 @@ Regards,\nFOSSEE Team,\nIIT Bombay.
     return render(request, 'website/templates/get-question.html', context)
 
 def filter(request,  category=None, tutorial=None, minute_range=None, second_range=None):
-    dict_context = {}
-    context = {
-        'category': category,
-        'tutorial': tutorial,
-        'minute_range': minute_range,
-        'second_range': second_range
-    }
+
     if category and tutorial and minute_range and second_range:
         questions = Question.objects.filter(category=category).filter(tutorial=tutorial).filter(minute_range=minute_range).filter(second_range=second_range).order_by('date_created').reverse()
     elif tutorial is None:
@@ -291,24 +285,18 @@ def filter(request,  category=None, tutorial=None, minute_range=None, second_ran
     else:
         questions = Question.objects.filter(category=category).filter(sub_category=tutorial).filter(minute_range=minute_range).order_by('date_created').reverse()
 
+    context = {
+        'questions': questions,
+        'category': category,
+        'tutorial': tutorial,
+        'minute_range': minute_range,
+        'second_range': second_range
+    }
+
     if 'qid' in request.GET:
         context['qid']  = int(request.GET['qid'])
-     
-    categories = FossCategory.objects.filter(name=category)
-    sub_category = SubFossCategory.objects.filter(name = tutorial)
-    try:
-        name = SubFossCategory.objects.get(name = tutorial)
-        dict_context['name'] = name
-    except:
-        pass        
-    dict_context = {
-            'questions':questions,
-            'categories': categories,
-            'tutorial': sub_category,
-            'title_category': category,
-           }
         
-    return render(request, 'website/templates/filter.html',  dict_context)
+    return render(request, 'website/templates/filter.html',  context)
 
 # post a new question on to forums, notification is sent to mailing list team@fossee.in
 @login_required

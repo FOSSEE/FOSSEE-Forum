@@ -1,7 +1,7 @@
 {% extends 'website/templates/base.html' %}
 {% load helpers %}
 {% block title %}
-    {{ title_category }} - FOSSEE Forums
+    {{ category }} - FOSSEE Forums
 {% endblock %}
 {% block content %}
 
@@ -20,8 +20,7 @@
 <h5 style="padding-top: 15px;">
    All questions under the category:
     
-     {% for category in categories %}
-     {% if category %}
+    {% if category %}
         {{ category }}
     {% endif %}
     {% if tutorial %}
@@ -36,7 +35,6 @@
        {{ second_range }} sec
     {% endif %}
     <a class="btn btn-xs btn-success pull-right" href="{% url 'website:new_question' %}?category={{ category.id |urlencode }}">Ask a question</a>
-     {% endfor %}
 </h5>
 <br>
 <div class="clearfix"></div>
