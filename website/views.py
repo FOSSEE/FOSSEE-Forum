@@ -274,23 +274,17 @@ Regards,\nFOSSEE Team,\nIIT Bombay.
     print "-----------end---------"
     return render(request, 'website/templates/get-question.html', context)
 
-def filter(request,  category=None, tutorial=None, minute_range=None, second_range=None):
+def filter(request,  category=None, tutorial=None):
 
-    if category and tutorial and minute_range and second_range:
-        questions = Question.objects.filter(category=category).filter(tutorial=tutorial).filter(minute_range=minute_range).filter(second_range=second_range).order_by('date_created').reverse()
+    if category and tutorial:
+        questions = Question.objects.filter(category=category).filter(tutorial=tutorial).order_by('date_created').reverse()
     elif tutorial is None:
         questions = Question.objects.filter(category__name=category).order_by('date_created').reverse()
-    elif minute_range is None:
-        questions = Question.objects.filter(category__name=category).filter(sub_category=tutorial).order_by('date_created').reverse()
-    else:
-        questions = Question.objects.filter(category=category).filter(sub_category=tutorial).filter(minute_range=minute_range).order_by('date_created').reverse()
 
     context = {
         'questions': questions,
         'category': category,
         'tutorial': tutorial,
-        'minute_range': minute_range,
-        'second_range': second_range
     }
 
     if 'qid' in request.GET:
@@ -398,7 +392,6 @@ def new_question(request):
 # other users can post votes
 def vote_post(request):
 
-    
     post_id = int(request.POST.get('id'))
     
     vote_type = request.POST.get('type')
@@ -410,9 +403,7 @@ def vote_post(request):
     thisuserdownvote = cur_post.userDownVotes.filter(id=request.user.id).count()
     initial_votes = cur_post.userUpVotes.count() - cur_post.userDownVotes.count()
 
-
     if request.user.id != question.user_id:
-    #if request.user.id == question_id:
         
         if vote_action == 'vote':
             if (thisuserupvote == 0) and (thisuserdownvote == 0):
@@ -459,8 +450,7 @@ def ans_vote_post(request):
     cur_post = get_object_or_404(Answer, id=post_id)
 
     thisuserupvote = cur_post.userUpVotes.filter(id=request.user.id).count()
-    thisuserdownvote = cur_post.userDownVotes\
-                               .filter(id=request.user.id).count()
+    thisuserdownvote = cur_post.userDownVotes.filter(id=request.user.id).count()
 
     userupvote = cur_post.userUpVotes.filter(id=request.user.id).count()
     userdownvote = cur_post.userDownVotes.filter(id=request.user.id).count()
@@ -502,7 +492,6 @@ def ans_vote_post(request):
             
     
     else:
-    #else:
         return HttpResponse(initial_votes)
 
 # Notification Section
@@ -580,7 +569,7 @@ def search(request):
 @csrf_exempt
 def ajax_category(request):
     context = {
-        'categories': categories
+        'categories': categories,
     }
     return render(request, 'website/templates/ajax_tutorials.html', context)
 
@@ -604,8 +593,6 @@ def ajax_duration(request):
         category = request.POST['category']
         tutorial =request.POST['tutorial']
         video_detail = SubFossCategory.objects.filter(parent_id =category)        
-        # convert minutes to 1 if less than 0
-        # convert seconds to nearest upper 10th number eg(23->30)
         return render(request, 'website/templates/ajax-duration.html')
 
 @csrf_exempt
@@ -628,15 +615,11 @@ def ajax_details_update(request):
         qid = request.POST['qid']
         category = request.POST['category']
         tutorial = request.POST['tutorial']
-        minute_range = request.POST['minute_range']
-        second_range = request.POST['second_range']
         question = get_object_or_404(Question, pk=qid)
         if question:
             if question.uid == request.user.id or request.user.id in admins:
                 question.category = category
                 question.tutorial = tutorial
-                question.minute_range = minute_range
-                question.second_range = second_range
                 question.save()
             return HttpResponse("saved")
 
@@ -670,15 +653,13 @@ def ajax_similar_questions(request):
     if request.method == 'POST':
         category = request.POST['category']
         tutorial = request.POST['tutorial']
-        minute_range = request.POST['minute_range']
-        second_range = request.POST['second_range']
         
         # add more filtering when the forum grows
         questions = Question.objects.filter(category=category).filter(tutorial=tutorial)
         context = {
             'questions': questions
         }
-        return render(request, 'website/templates/ajax-similar-questions.html', context);
+        return render(request, 'website/templates/ajax-similar-questions.html', context)
 
 @csrf_exempt
 def ajax_notification_remove(request):
@@ -710,17 +691,11 @@ def ajax_time_search(request):
     if request.method == "POST":
         category = request.POST.get('category')
         tutorial = request.POST.get('tutorial')
-        minute_range= request.POST.get('minute_range')
-        second_range = request.POST.get('second_range')
         questions = None
         if category:
             questions = Question.objects.filter(category=category.replace(' ', '-'))
         if tutorial:
             questions = questions.filter(tutorial=tutorial.replace(' ', '-'))
-        if minute_range:
-            questions = questions.filter(category=category.replace(' ', '-'), tutorial=tutorial.replace(' ', '-'), minute_range=minute_range)
-        if second_range:
-            questions = questions.filter(category=category.replace(' ', '-'), tutorial=tutorial.replace(' ', '-'),second_range=second_range)
         context = {
             'questions': questions
         }

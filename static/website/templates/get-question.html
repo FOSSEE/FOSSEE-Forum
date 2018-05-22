@@ -351,14 +351,17 @@
         var hue = 'rgb(' + (Math.floor((256-199)*Math.random()) + 200) + ',' + (Math.floor((256-199)*Math.random()) + 200) + ',' + (Math.floor((256-199)*Math.random()) + 200) + ')';
         $(this).css("background-color", hue);
     });
-        $(document).ready(function() {
+    
+    $(document).ready(function() {
         
-     $.ajaxSetup({
+        $.ajaxSetup({
             data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
         });
-    /* VOTE FOR QUESTION */
+
+        /* VOTE FOR QUESTION */
     
         $('div.vote img.vote-up').click(function() {
+            
             var id = {{ question.pk }};
             var vote_type = 'up';
         
@@ -367,7 +370,7 @@
                 var vote_action = 'recall-vote'
                 $.post('/vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
                     $('img.vote-up').removeAttr('src')
-                        .attr('src', '{% static 'website/images/up1-off.png' %}')
+                        .attr('src', "{% static 'website/images/up1-off.png' %}")
                         .removeClass('selected');
                     $('div.vote span.vote-count-post').html(response);
                     $('img.vote-down').css('pointer-events','all');
@@ -378,7 +381,7 @@
                 var vote_action = 'vote'
                 $.post('/vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
                     $('img.vote-up').removeAttr('src')
-                        .attr('src', '{% static 'website/images/up1-on.png' %}')
+                        .attr('src', "{% static 'website/images/up1-on.png' %}")
                         .addClass('selected');
                     $('div.vote span.vote-count-post').html(response);
                     $('img.vote-down').css('pointer-events','none');
@@ -395,7 +398,7 @@
                 var vote_action = 'recall-vote'
                 $.post('/vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
                     $('img.vote-down').removeAttr('src')
-                        .attr('src', '{% static 'website/images/down1-off.png' %}')
+                        .attr('src', "{% static 'website/images/down1-off.png' %}")
                         .removeClass('selected');
                     $('div.vote span.vote-count-post').html(response);
                     $('img.vote-up').css('pointer-events','all');
@@ -406,7 +409,7 @@
                 var vote_action = 'vote'
                 $.post('/vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
                     $('img.vote-down').removeAttr('src')
-                        .attr('src', '{% static 'website/images/down1-on.png' %}')
+                        .attr('src', "{% static 'website/images/down1-on.png' %}")
                         .addClass('selected');
                     $('div.vote span.vote-count-post').html(response);
                     $('img.vote-up').css('pointer-events','none');
@@ -428,7 +431,7 @@
                 var vote_action = 'recall-vote'
                 $.post('/ans_vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
                     $('img#'+up_id).removeAttr('src')
-                        .attr('src', '{% static 'website/images/up1-off.png' %}')
+                        .attr('src', "{% static 'website/images/up1-off.png' %}")
                         .removeClass('selected');
                    
                     $('span#span'+id).html(response);
@@ -445,7 +448,7 @@
                  var vote_action = 'vote'
                  $.post('/ans_vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
                     $('img#'+up_id).removeAttr('src')
-                        .attr('src', '{% static 'website/images/up1-on.png' %}')
+                        .attr('src', "{% static 'website/images/up1-on.png' %}")
                         .addClass('selected');
                    
                     $('span#span'+id).html(response);
@@ -473,7 +476,7 @@
                 $.post('/ans_vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
            
                     $('img#'+down_id).removeAttr('src')
-                        .attr('src', '{% static 'website/images/down1-off.png' %}')
+                        .attr('src', "{% static 'website/images/down1-off.png' %}")
                         .removeClass('selected');
                   
                     $('div.ans-vote span#span'+id).html(response);
@@ -487,7 +490,7 @@
                 var vote_action = 'vote'
                 $.post('/ans_vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
                     $('img#'+down_id).removeAttr('src')
-                        .attr('src', '{% static 'website/images/down1-on.png' %}')
+                        .attr('src', "{% static 'website/images/down1-on.png' %}")
                         .addClass('selected');
                    
                     $('div.ans-vote span#span'+id).html(response);
