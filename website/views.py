@@ -90,7 +90,7 @@ def get_question(request, question_id=None, pretty_url=None):
     context.update(csrf(request))
 
     # updating views count
-    if (not request.user.is_authenticated()):  # if no one logged in
+    if (request.user.is_anonymous()):  # if no one logged in
         question.views += 1
     elif (question.userViews.filter(id=request.user.id).count() == 0):
         question.views += 1
@@ -751,5 +751,5 @@ def ajax_time_search(request):
         context = {
             'questions': questions
         }
-        
+
         return render(request, 'website/templates/ajax-time-search.html', context)
