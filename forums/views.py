@@ -177,7 +177,7 @@ def account_view_profile(request, user_id):
     if str(user_id) == str(request.user.id):
         flag = True
 
-    form = ProfileForm(user, instance = instance)
+    form = ProfileForm(user, instance = profile)
     context = {
         'show': flag,
         'profile' : profile,
