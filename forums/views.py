@@ -171,13 +171,13 @@ def account_view_profile(request, user_id):
     total = int(total - (total % 10 - 10))
     questions = Question.objects.filter(user_id=user_id).order_by('date_created').reverse()[marker:marker+10]
     total1 = Answer.objects.filter(uid=user_id).count()
-    total1= int(total1 - (total1 % 10 - 10))
-    answers =Answer.objects.filter(uid=user_id).order_by('date_created').reverse()[marker:marker+10]
+    total1 = int(total1 - (total1 % 10 - 10))
+    answers = Answer.objects.filter(uid=user_id).order_by('date_created').reverse()[marker:marker+10]
+    form = ProfileForm(user, instance = profile)
 
     if str(user_id) == str(request.user.id):
         flag = True
 
-    form = ProfileForm(user, instance = profile)
     context = {
         'show': flag,
         'profile' : profile,
@@ -185,8 +185,7 @@ def account_view_profile(request, user_id):
         'questions' : questions,
         'answers' : answers,
         'form' : form,
-        'user_show':user,
-        
+        'user_show':user,   
     }
     return render(request, 'forums/templates/view-profile.html', context)
     
