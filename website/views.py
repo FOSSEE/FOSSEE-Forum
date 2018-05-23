@@ -86,8 +86,14 @@ def get_question(request, question_id=None, pretty_url=None):
     context.update(csrf(request))
 
     # updating views count
-    question.views += 1
-    question.save()
+    if (question.userViews.filter(id=request.user.id).count() == 1\
+        or (not request.user.is_authenticated())): # if no user logged in
+        pass
+    else:
+        question.views += 1
+        question.userViews.add(request.user)
+        question.save()
+
     context['SITE_KEY'] = settings.GOOGLE_RECAPTCHA_SITE_KEY
     return render(request, 'website/templates/get-question.html', context)
     

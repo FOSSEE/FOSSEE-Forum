@@ -40,6 +40,7 @@ class Question(models.Model):
     views = models.IntegerField(default=1)
     userUpVotes = models.ManyToManyField(User, blank=True, related_name='postUpVotes')
     userDownVotes = models.ManyToManyField(User, blank=True, related_name='postDownVotes')
+    userViews = models.ManyToManyField(User, blank=True, related_name='postViews')
     num_votes = models.IntegerField(default=0)
 
 
