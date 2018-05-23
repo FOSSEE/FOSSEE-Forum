@@ -20,7 +20,6 @@ urlpatterns = patterns('',
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
     url(r'^', include('website.urls', namespace='website')),
-    url(r'^', include('django.contrib.auth.urls')),
 
     url(r'^forgotpassword/$', password_reset, {'template_name': 'forums/templates/registration/password_reset_form.html'}, name="password_reset"),
     url(r'^password_reset/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
@@ -29,8 +28,8 @@ urlpatterns = patterns('',
         name='password_reset_done'),
     url(r'^password_reset/complete/$', password_reset_complete, {'template_name': 'forums/templates/registration/password_reset_complete.html'},
         name='password_reset_complete'),
-    url(r'^changepassword/$', password_change, {'template_name': 'forums/templates/registration/password_change_form.html'},
-        name='password_change'),
+    url(r'^changepassword/$', password_change, {'template_name': 'forums/templates/registration/password_change_form.html',\
+        'post_change_redirect':'password_change_done'}, name='password_change'),
     url(r'^password_change/done/$', password_change_done, {'template_name': 'forums/templates/registration/password_change_done.html'},
         name='password_change_done'),
     

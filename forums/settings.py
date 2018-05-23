@@ -148,6 +148,7 @@ WSGI_APPLICATION = 'forums.wsgi.application'
 
 
 INSTALLED_APPS = (
+    'website',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -155,10 +156,8 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'website',
     # 'django.contrib.admindocs',
     'widget_tweaks',
-    # 'spoken_auth',
     'debug_toolbar',
     'captcha',
     
@@ -212,7 +211,7 @@ RECAPTCHA_USE_SSL = True
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
 
 EMAIL_URL = EMAIL_URL
-#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 #Sender email, forum notification email, domain name
 SENDER_EMAIL = SENDER_EMAIL

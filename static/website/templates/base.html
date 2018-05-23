@@ -106,9 +106,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                                     <a href="/accounts/view-profile/{{ user.id }}">My Profile</a>
                                 </li>
                                 <li>
+                                    <a href="{% url 'password_change' %}">Change password</a>
+                                </li>
+                                <li>
                                     <a href="{% url 'user_logout' %}">Logout</a>
                                 </li>
-
                                 </ul>
                               </li> 
                               {% else %}

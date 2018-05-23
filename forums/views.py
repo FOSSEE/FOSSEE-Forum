@@ -181,7 +181,6 @@ def account_view_profile(request, user_id):
     context = {
         'show': flag,
         'profile' : profile,
-        'media_url' : settings.MEDIA_URL,
         'questions' : questions,
         'answers' : answers,
         'form' : form,
