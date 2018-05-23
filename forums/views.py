@@ -12,11 +12,9 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.contrib.auth.views import password_reset, password_reset_confirm
 from django.core.urlresolvers import reverse
-
 import urllib
 import urllib2
 import json
-
 import random, string
 from forums.forms import *
 from website.models import *
@@ -95,12 +93,7 @@ def confirm(request, confirmation_code, username):
     except Exception, e:
         messages.success(request, "Your account not activated!. Please try again!")
         return HttpResponseRedirect('/')
-        
-@login_required
-def account_logout(request):
-    context = RequestContext(request)
-    logout(request)
-    return HttpResponseRedirect('/')
+
 
 # add details to the profile table of the user
 # update profile after registration confirmation
@@ -161,6 +154,7 @@ def account_profile(request, username):
         instance = Profile.objects.get(user_id=user.id)
         context['form'] = ProfileForm(user, instance = instance)
         return render(request, 'forums/templates/profile.html', context) 
+        
 # view all profile details saved for the user, when clicked on my profile  
 @login_required
 def account_view_profile(request, user_id):
@@ -228,40 +222,45 @@ def send_registration_confirmation(user):
 
 # user login        
 def user_login(request):
+
     if request.user.is_anonymous():
-        
+
         if request.method == 'POST':
             form = UserLoginForm(request.POST)
-           
+
+            # Valid credentials are entered
             if form.is_valid():
                 
                 cleaned_data = form.cleaned_data
-                
                 user = cleaned_data.get("user")
-                
                 login(request, user)
-                if user.is_active:
-                    login(request, user)
-                else:
-                    return render_to_response('forums/templates/user-login.html', context)
-                print request.POST, request.GET.get('next')
+
                 if 'next' in request.POST:
                     next_url = request.POST.get('next')
                     return HttpResponseRedirect(next_url)
+
                 return HttpResponseRedirect('/')
+            
+            # Invalid credentials entered
+            else:
+                url = '/accounts/login/'
+                if ('next' in request.POST):
+                    url += ('?next=' + request.POST.get('next'))
+                return HttpResponseRedirect(url)
+        
         else:
             form = UserLoginForm()
         
         next_url = request.GET.get('next')
-
         context = {
             'form': form,
             'next': next_url,
             #'password_reset': True if next_url else False
         }
-        
         context.update(csrf(request))
+
         return render_to_response('forums/templates/user-login.html', context)
+
     else:
         return HttpResponseRedirect('/')
 
