@@ -27,6 +27,7 @@ admins = (
    9, 4376, 4915, 14595, 12329, 22467, 5518, 30705
 )
 categories = FossCategory.objects.order_by('name')
+
 # for home page
 def home(request):
     print settings.DOMAIN_NAME
@@ -43,32 +44,35 @@ def questions(request):
     context = {
         'questions': questions,
     }
-    
     return render(request, 'website/templates/questions.html', context)
     
 # get particular question, with votes,anwsers
 def get_question(request, question_id=None, pretty_url=None):
+
     question = get_object_or_404(Question, id=question_id)
     sub_category = True
+
     if question.sub_category == "" or str(question.sub_category) == 'None':
         sub_category = False
     else:
         sub_category = True
+
     pretty_title = prettify(question.title)
     if pretty_url != pretty_title:
         return HttpResponseRedirect('/question/'+ question_id + '/' + pretty_title)
+
     answers = question.answer_set.all()
     ans_count = question.answer_set.count()
     form = AnswerQuestionForm()
     thisuserupvote = question.userUpVotes.filter(id=request.user.id).count()
     thisuserdownvote = question.userDownVotes.filter(id=request.user.id).count()
     net_count = question.userUpVotes.count() - question.userDownVotes.count()
-    
-    ans_votes = []
 
+    ans_votes = []
     for vote in answers:
         net_ans_count  = vote.userUpVotes.count() - vote.userDownVotes.count()
         ans_votes.append([vote.userUpVotes.filter(id=request.user.id).count(),vote.userDownVotes.filter(id=request.user.id).count(),net_ans_count])
+
     #for (f,b) in zip(foo, bar):
     main_list = zip(answers,ans_votes)
     context = {
@@ -115,24 +119,22 @@ def question_answer(request,qid):
             cleaned_data = form.cleaned_data
             qid = cleaned_data['question']
             body = str(cleaned_data['body'])
-            #print body
-            # body = body.replace("\\r", '')
-            # body = body.replace("\\n", '')
-            # body = body.replace("\\t", '')
             answer.body = body.splitlines()    
             answer.question = question
             answer.body = body.encode('unicode_internal')     
             answer.save()
+
             # if user_id of question not matches to user_id of answer that
             # question , no
             if question.user_id != request.user.id:
+
                 notification = Notification()
                 notification.uid = question.user_id
                 notification.pid = request.user.id
                 notification.qid = qid
                 notification.aid = answer.id
                 notification.save()
-                
+
                 user = User.objects.get(id=question.user_id)
             
 
@@ -147,19 +149,19 @@ def question_answer(request,qid):
                 Title: {0} \n
                 Category: {1}\n
                 Link: {2}\n\n
-Regards,\nFOSSEE Team,\nIIT Bombay.
-             """.format(
-                question.title,
-                question.category, 
-                #question.tutorial, 
-                settings.DOMAIN_NAME + '/question/' + str(question.id) + "#answer" + str(answer.id)
-            ) 
 
+                Regards,\nFOSSEE Team,\nIIT Bombay.
+                """.format(
+                question.title,
+                question.category,  
+                settings.DOMAIN_NAME + '/question/' + str(question.id) + "#answer" + str(answer.id)
+            )
             send_mail(subject, message, sender_email, to)
+
             return HttpResponseRedirect("/question/" + str(question.id))
+
         else:
             context['form'] = form
-            # context['category'] = category
             context['question'] = question
 
     else:
@@ -208,6 +210,8 @@ def answer_comment(request):
                 notification.save()
                 
                 user = User.objects.get(id=answer.uid)
+
+            
             sender_name = "FOSSEE Forums"
             sender_email = settings.SENDER_EMAIL
             subject = "FOSSEE Forums - {0} - Comment for your answer".format(answer.question.category)
@@ -218,22 +222,25 @@ def answer_comment(request):
                 Title: {0}\n
                 Category: {1}\n
                 Link: {2}\n\n
-Regards,\nFOSSEE Team,\nIIT Bombay.
-             """.format(
+                Regards,\nFOSSEE Team,\nIIT Bombay.
+                """.format(
                 answer.question.title,
                 answer.question.category,
                 settings.DOMAIN_NAME + '/question/' + str(answer.question.id) + "#answer" + str(answer.id)
             ) 
             send_mail(subject, message, sender_email, to)
+
             # notifying other users in the comment thread
             uids = answer.answercomment_set.filter(answer=answer).values_list('uid', flat=True)
             answer_comments = answer.answercomment_set.filter(answer=answer)
+
             comment_creator_emails = []
             for c in answer_comments:
                 comment_creator = c.user()
                 email = comment_creator.email
                 comment_creator_emails.append(email)
                 comment_creator_emails.append(settings.FORUM_NOTIFICATION)
+            
             #getting distinct uids
             uids = set(uids)
             uids.remove(request.user.id)
@@ -247,6 +254,7 @@ Regards,\nFOSSEE Team,\nIIT Bombay.
                 notification.save()
                 
                 user = User.objects.get(id=uid)
+        
             sender_name = "FOSSEE Forums"
             sender_email = settings.SENDER_EMAIL
             subject = "FOSSEE Forums - {0} - Comment has a reply".format(answer.question.category)
@@ -257,28 +265,31 @@ Regards,\nFOSSEE Team,\nIIT Bombay.
                 Title: {0}\n
                 Category: {1}\n
                 Link: {2}\n\n
-Regards,\nFOSSEE Team,\nIIT Bombay.
-             """.format(
+                Regards,\nFOSSEE Team,\nIIT Bombay.
+                """.format(
                 answer.question.title,
                 answer.question.category, 
                 #question.tutorial, 
                 settings.DOMAIN_NAME + '/question/' + str(answer.question.id) + "#answer" + str(answer.id)
             )
+            send_mail(subject, message, sender_email, to)  
 
-            send_mail(subject, message, sender_email, to)                
             return HttpResponseRedirect("/question/" + str(answer.question.id))
             print "------success in comment ---------"
+
         else:
             print "---------form not valid else part---------"
             context.update({'form':form,
                 'question':answer.question,
                 'answers':answers})
             return render(request, 'website/templates/get-question.html', context)
+
     context.update(csrf(request))
     context.update({'form':form,
        'question':answer.question,
        'answers':answers})
     print "-----------end---------"
+    
     return render(request, 'website/templates/get-question.html', context)
 
 def filter(request,  category=None, tutorial=None):
@@ -302,20 +313,26 @@ def filter(request,  category=None, tutorial=None):
 # post a new question on to forums, notification is sent to mailing list team@fossee.in
 @login_required
 def new_question(request):
+
     context = {}
     toolbox = False
     user = request.user
     context['SITE_KEY'] = settings.GOOGLE_RECAPTCHA_SITE_KEY
     all_category = FossCategory.objects.all()
+
     if request.method == 'POST':
+
         form = NewQuestionForm(request.POST)
+
         if form.is_valid():
             cleaned_data = form.cleaned_data
             question = Question()
             question.user = request.user
             question.category = cleaned_data['category']
             question.sub_category = cleaned_data['tutorial']
+
             if (question.sub_category == "Select a Sub Category"):
+
                 if str(question.category) == "Scilab Toolbox":
                     context.update(csrf(request))
                     category = request.POST.get('category', None)
@@ -326,22 +343,23 @@ def new_question(request):
                     context['toolbox'] = toolbox
 
                     return render(request, 'website/templates/new-question.html', context)
+
                 else:
                     pass
+
                 question.sub_category = ""
                 question.save()
+
             question.title = cleaned_data['title']
             question.body = cleaned_data['body']
-            # question.body = question.body.replace("\\r", '')
-            # question.body = question.body.replace("\\n", '')
-            # question.body = question.body.replace("\\t", '')
             body = strip_tags(question.body)
-            question.views= 1 
+            question.views = 1 
             question.save()
+
             if str(question.sub_category) == 'None':
                 question.sub_category = ""
                 question.save()
-            # print(question.category) 
+            
             #Sending email when a new question is asked
             sender_name = "FOSSEE Forums"
             sender_email = settings.SENDER_EMAIL
@@ -355,7 +373,7 @@ def new_question(request):
                 <b> Category: </b>{1}<br>
                 <b> Link: </b><a href="{3}">{3}</a><br>
                 <b> Question : </b>{2}<br>
-            """.format(
+                """.format(
                 question.title,
                 question.category,
                 question.body,
@@ -368,7 +386,9 @@ def new_question(request):
             )
             email.attach_alternative(message, "text/html")
             email.send(fail_silently=True)
+
             return HttpResponseRedirect('/')
+    
         else:
              context.update(csrf(request))
              category = request.POST.get('category', None)
@@ -378,11 +398,13 @@ def new_question(request):
              context['form'] = form
              context['toolbox'] = toolbox
              return render(request, 'website/templates/new-question.html', context)
+
     else:
-       
         category = request.GET.get('category')
+
         if category == 12:
             toolbox = True
+
         tutorial = request.GET.get('tutorial')
         form = NewQuestionForm(category=category,tutorial = tutorial)
         context['category'] = category
@@ -494,10 +516,9 @@ def ans_vote_post(request):
             elif (vote_type == 'down') and (thisuserdownvote == 1):
                 cur_post.userDownVotes.remove(request.user)
             else:
-                # "Error - Unknown vote type or no vote to recall"
                 return HttpResponse(initial_votes)
         else:
-            return HttpResponse("Error: Bad Action.")
+            return HttpResponse(initial_votes)
 
         num_votes = cur_post.userUpVotes.count() - cur_post.userDownVotes.count()
         cur_post.num_votes = num_votes
@@ -529,6 +550,7 @@ def user_questions(request, user_id):
         }
        
         return render(request, 'website/templates/user-questions.html', context)
+    
     return HttpResponse("go away")
 
 # to get all answers of a specific users
@@ -550,21 +572,25 @@ def user_answers(request, user_id):
             'marker': marker
         }
         return render(request, 'website/templates/user-answers.html', context)
+    
     return HttpResponse("go away")
 
 # notification if any on header, when user logs in to the account 
 @login_required
 def user_notifications(request, user_id):
     if str(user_id) == str(request.user.id):
+
         try :
             notifications = Notification.objects.filter(uid=user_id).order_by('date_created').reverse()
             context = {
                 'notifications': notifications
             }
             return render(request, 'website/templates/notifications.html', context)
+
         except:
             Notification.objects.filter(uid=request.user.id).delete()
             return HttpResponseRedirect("/user/{0}/notifications/".format(request.user.id))
+
 
 # to clear notification from header, once viewed or cancelled
 @login_required
@@ -590,13 +616,16 @@ def ajax_category(request):
 @csrf_exempt
 def ajax_tutorials(request):
     if request.method == 'POST':
+
         category = request.POST.get('category')
+
         if category == '12':
             tutorials = SubFossCategory.objects.filter(parent_id =category)
             context = {
-                'tutorials': tutorials
+                'tutorials': tutorials,
             }
             return render(request, 'website/templates/ajax-tutorials.html', context)
+
         else:
             return HttpResponse("changed")
             pass
@@ -616,11 +645,13 @@ def ajax_question_update(request):
         title = request.POST['question_title']
         body = request.POST['question_body']
         question = get_object_or_404(Question, pk=qid)
+
         if question:
             if question.user.id == request.user.id or request.user.id in admins:
                 question.title = title
                 question.body = body.encode('unicode_escape')
                 question.save()
+        
         return HttpResponse("saved")
 
 @csrf_exempt
@@ -630,11 +661,13 @@ def ajax_details_update(request):
         category = request.POST['category']
         tutorial = request.POST['tutorial']
         question = get_object_or_404(Question, pk=qid)
+
         if question:
             if question.uid == request.user.id or request.user.id in admins:
                 question.category = category
                 question.tutorial = tutorial
                 question.save()
+
             return HttpResponse("saved")
 
 @csrf_exempt
@@ -643,10 +676,12 @@ def ajax_answer_update(request):
         aid = request.POST['answer_id']
         body = request.POST['answer_body']
         answer= get_object_or_404(Answer, pk=aid)
+
         if answer:
             if answer.uid == request.user.id or request.user.id in admins:
                 answer.body = body.encode('unicode_escape')
                 answer.save()
+
         return HttpResponse("saved")
 
 @csrf_exempt
@@ -655,10 +690,12 @@ def ajax_answer_comment_update(request):
         comment_id = request.POST["comment_id"]
         comment_body = request.POST["comment_body"]
         comment = get_object_or_404(AnswerComment, pk=comment_id)
+
         if comment:
             if comment.uid == request.user.id or request.user.id in admins:
                 comment.body = comment_body.encode('unicode_escape')
                 comment.save()
+
         return HttpResponse("saved")
 
 
@@ -680,24 +717,24 @@ def ajax_notification_remove(request):
     if request.method == "POST":
         nid = request.POST["notification_id"]
         notification = Notification.objects.get(pk=nid)
+
         if notification:
             if notification.uid == request.user.id:
                 notification.delete()
                 return HttpResponse("removed")
+
     return HttpResponse("failed")
 
 @csrf_exempt
 def ajax_keyword_search(request):
     if request.method == "POST":
         key = request.POST['key']
-        
+
         questions = Question.objects.filter(title__contains=key)
-        
         context = {
             'questions': questions
         }
-     
-        
+
         return render(request, 'website/templates/ajax-keyword-search.html', context)
 
 @csrf_exempt
@@ -706,6 +743,7 @@ def ajax_time_search(request):
         category = request.POST.get('category')
         tutorial = request.POST.get('tutorial')
         questions = None
+
         if category:
             questions = Question.objects.filter(category=category.replace(' ', '-'))
         if tutorial:
@@ -713,9 +751,5 @@ def ajax_time_search(request):
         context = {
             'questions': questions
         }
+        
         return render(request, 'website/templates/ajax-time-search.html', context)
-
-@csrf_exempt
-def ajax_vote(request):
-    #for future use
-    pass
