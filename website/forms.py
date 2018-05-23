@@ -6,6 +6,7 @@ import re
 tutorials = (
     ("Select a Tutorial", "Select a Tutorial"),
 )
+
 class NewQuestionForm(forms.ModelForm):
     
     category = forms.ModelChoiceField(widget = forms.Select(attrs = {}), 
@@ -24,6 +25,7 @@ class NewQuestionForm(forms.ModelForm):
     
     def clean_title(self):
         title = self.cleaned_data['title']
+
         if len(title) < 12:
             raise forms.ValidationError("Title should be longer than 12 characters")
         if Question.objects.filter(title=title).exists():
@@ -34,15 +36,20 @@ class NewQuestionForm(forms.ModelForm):
     def clean_body(self):
         body_list = []
         body = self.cleaned_data['body']
+
         if len(body) < 12:
             raise forms.ValidationError("Body should be min. 12 characters long")
+
         body = body.replace('&nbsp;', ' ')
         body = body.replace('<br>', '\n')
+
         if body.isspace():
             raise forms.ValidationError("Body Can not be only Spaces")
+
         return body
 
     class Meta:
+
         model = Question
         fields = ['category', 'title', 'body']
 
@@ -56,6 +63,7 @@ class NewQuestionForm(forms.ModelForm):
                 ("Select a Sub Category", "Select a Sub Category"),
         )
         super(NewQuestionForm, self).__init__(*args, **kwargs)
+
         if category == '12':
             if FossCategory.objects.filter(id=category).exists():
                 print "category exists", category
@@ -77,11 +85,13 @@ class NewQuestionForm(forms.ModelForm):
             print "not a toolbox"
 
 class AnswerQuestionForm(forms.ModelForm):
+
     question = forms.IntegerField(widget=forms.HiddenInput())
     body = forms.CharField(widget=forms.Textarea(),
-            required = True,    
-            error_messages = {'required':'Answer field required.'}
-            )
+        required = True,    
+        error_messages = {'required':'Answer field required.'}
+    )
+
     def clean_body(self):
         body = self.cleaned_data['body']
         body = body.replace('&nbsp;', ' ')
@@ -91,9 +101,11 @@ class AnswerQuestionForm(forms.ModelForm):
         return body
 
     class Meta:
+
         model = Question
         fields = ['question', 'body']
 
 class AnswerCommentForm(forms.Form):
+    
     body = forms.CharField(widget=forms.Textarea(),required = True,
         error_messages = {'required':'Comment field required.'})
