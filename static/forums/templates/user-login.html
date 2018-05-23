@@ -28,7 +28,7 @@
           <div class="clearfix"></div>
         {% endif %} -->
    </br>
-        <form action="accounts/login/" method="POST"> {% csrf_token %}
+        <form action="{% url 'user_login' %}" method="POST"> {% csrf_token %}
             {% if form.errors %}
             <div class="alert alert-danger">
                 <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>

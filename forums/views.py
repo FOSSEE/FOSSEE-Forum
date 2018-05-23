@@ -243,11 +243,15 @@ def user_login(request):
             
             # Invalid credentials entered
             else:
-                url = '/accounts/login/'
-                if ('next' in request.POST):
-                    url += ('?next=' + request.POST.get('next'))
-                return HttpResponseRedirect(url)
-        
+                next_url = request.POST.get('next')
+                context = {
+                    'form': form,
+                    'next': next_url,
+                    #'password_reset': True if next_url else False
+                }
+                context.update(csrf(request))
+                return render_to_response('forums/templates/user-login.html', context)
+                
         else:
             form = UserLoginForm()
         
@@ -258,7 +262,6 @@ def user_login(request):
             #'password_reset': True if next_url else False
         }
         context.update(csrf(request))
-
         return render_to_response('forums/templates/user-login.html', context)
 
     else:
