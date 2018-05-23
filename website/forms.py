@@ -7,9 +7,7 @@ tutorials = (
     ("Select a Tutorial", "Select a Tutorial"),
 )
 class NewQuestionForm(forms.ModelForm):
-    class Meta:
-        model = Question
-        fields = ('title')
+    
     category = forms.ModelChoiceField(widget = forms.Select(attrs = {}), 
                         queryset = FossCategory.objects.order_by('name'), 
                         empty_label = "Select a Foss category", 

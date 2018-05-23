@@ -21,8 +21,8 @@
     <div class="question {% if user|can_edit:question and not ans_count %}editable{% endif %}" >
      <!-- VOTE CELL -->
                
-                   <div class="votecell" style="padding-top: 0.0cm;">
-                <div class="vote">
+                <div class="votecell" style="padding-top: 0.0cm;">
+                    <div class="vote">
                             {% ifequal thisUserUpvote 0 %}
                                 <img src="{% static 'website/images/up1-off.png' %}" class="vote-up"/>
                             {% else %}
@@ -39,9 +39,8 @@
                             {% else %}
                                 <img src="{% static 'website/images/down1-on.png' %}" class="vote-down selected" />
                             {% endifequal %}
-                        </div>
-                       
-                  </div>
+                    </div>                   
+                </div>
         <div class="title {% if user|can_edit:question and not ans_count %}title-editable{% endif %}">
            {{ question.title }}
         </div>
@@ -122,7 +121,7 @@
 
 
 
-{% for answer,ans_vote in main_list %}
+{% for answer, ans_vote in main_list %}
 
 <div class="row">
     <div class="answer-wrapper col-lg-12 col-md-12 col-sm-12 col-xs-12">
@@ -131,18 +130,18 @@
                 <div class="ans-vote" >
                 
                             {% ifequal ans_vote.0 0 %}
-                                <img src="{% static 'website/images/up1-off.png' %}" class="ans-vote-up"  id="up{{ answer.id }}" title="This question shows research effort; it is useful and clear"/>
+                                <img src="{% static 'website/images/up1-off.png' %}" class="ans-vote-up {{ answer.uid }}"  id="up{{ answer.id }}" title="This question shows research effort; it is useful and clear"/>
                             {% else %}
-                                <img src="{% static 'website/images/up1-on.png' %}" class="ans-vote-up selected" id="up{{ answer.id }}" title="This question shows research effort; it is useful and clear"/>
+                                <img src="{% static 'website/images/up1-on.png' %}" class="ans-vote-up selected {{ answer.uid }}" id="up{{ answer.id }}" title="This question shows research effort; it is useful and clear"/>
                             {% endifequal %}
                 
                             <span class="vote-count-post" id="span{{ answer.id }}" >
                                 {{ ans_vote.2 }}
                             </span>
                             {% ifequal ans_vote.1 0 %}
-                                <img type="image" src="{% static 'website/images/down1-off.png' %}" class="ans-vote-down"  id="down{{ answer.id }}" title="This question does not show any research effort; it is not useful and unclear" />
+                                <img type="image" src="{% static 'website/images/down1-off.png' %}" class="ans-vote-down {{ answer.uid }}"  id="down{{ answer.id }}" title="This question does not show any research effort; it is not useful and unclear" />
                             {% else %}
-                                <img src="{% static 'website/images/down1-on.png' %}" class="ans-vote-down selected" id="down{{ answer.id }}" title="This question does not show any research effort; it is not useful and unclear"/>
+                                <img src="{% static 'website/images/down1-on.png' %}" class="ans-vote-down selected {{ answer.uid }}" id="down{{ answer.id }}" title="This question does not show any research effort; it is not useful and unclear"/>
                             {% endifequal %}
                         </div>
                         </div>
@@ -252,29 +251,7 @@
                         {% render_field form.question value=question.id %}
                         <label for="id_body"><h4><u>Your Answer:</u></h4></label>
                         {% render_field form.body class+="form-control body" %}
-                        </div>
-         <!--
-        Codemirro implementation
-          <div><link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/codemirror/CodeMirror/master/lib/codemirror.css">
-        <script type="text/javascript" src="https://cdn.rawgit.com/codemirror/CodeMirror/master/lib/codemirror.js"></script>
-        <!-- <script type="text/javascript" src="https://cdn.rawgit.com/codemirror/CodeMirror/master/mode/python/python.js"></script>
-        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-        <script type="text/javascript" src="https://cdn.rawgit.com/carlo/jquery-base64/master/jquery.base64.min.js"></script>
-    <body>
-        <!-- <textarea id="editor"></textarea> 
-    </body>
-    <script>
-        var editor = CodeMirror.fromTextArea(document.getElementById("id_body"), {
-            lineNumbers: true,
-            tabMode: "indent"
-        }).panelInstance("id_body");
-        function submit_html()
-        {
-            editor.save();
-            var code = document.getElementById("id_body").value;
-            var data_url = "data:text/html;charset=utf-8;base64," + $.base64.encode(code);
-        }
-    </script></div>  -->         
+                        </div>       
         </div> 
             </div>
             
@@ -335,176 +312,230 @@
 </script>
    
     <script type="text/javascript">
-// function checkAndConfirm() {
-//     var x = document.getElementsByTagName("textarea")[0].getAttribute("id");           
-//   // var val = $.trim($("body").val());
-//   var y = x;
-//  // alert("out");
-//  alert(y);
-//     if (val != "") {
-//         alert("in");
-//         alert(val);
-//     }
-// }
-        /* For random color */
+
     $(".user_co").each(function() {
         var hue = 'rgb(' + (Math.floor((256-199)*Math.random()) + 200) + ',' + (Math.floor((256-199)*Math.random()) + 200) + ',' + (Math.floor((256-199)*Math.random()) + 200) + ')';
         $(this).css("background-color", hue);
     });
     
+    
+    // Run below code only when document is completely loaded
     $(document).ready(function() {
         
         $.ajaxSetup({
             data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
         });
 
+        // CSS property to allow mouse-handling functions
+        $('div.vote img.vote-up').css('pointer-events','auto');
+        $('div.vote img.vote-down').css('pointer-events','auto');
+        $('div.ans-vote img.ans-vote-up').css('pointer-events','auto');
+        $('div.ans-vote img.ans-vote-down').css('pointer-events','auto');
+
+
         /* VOTE FOR QUESTION */
-    
         $('div.vote img.vote-up').click(function() {
             
+            var question_user_id = {{ question.user_id }};
+            var current_user_id = {{ request.user.id }};
             var id = {{ question.pk }};
             var vote_type = 'up';
         
-            /* USER HAS ALREADY VOTED */
-            if ($(this).hasClass('selected')) {
-                var vote_action = 'recall-vote'
-                $.post('/vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
-                    $('img.vote-up').removeAttr('src')
-                        .attr('src', "{% static 'website/images/up1-off.png' %}")
-                        .removeClass('selected');
-                    $('div.vote span.vote-count-post').html(response);
-                    $('img.vote-down').css('pointer-events','all');
-                });
+            if (question_user_id != current_user_id) {
+
+                /* USER HAS ALREADY VOTED */
+                if ($(this).hasClass('selected')) {
+                    var vote_action = 'recall-vote'
+                    $.post('/vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
+                        $('img.vote-up').removeAttr('src')
+                            .attr('src', "{% static 'website/images/up1-off.png' %}")
+                            .removeClass('selected');
+                        $('div.vote span.vote-count-post').html(response);
+                    });
+                }
+                
+                /* USER WISHES TO VOTE */
+                else {
+                    var vote_action = 'vote'
+                    $.post('/vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
+                        if ($('img.vote-down').hasClass('selected')) {
+                            $('img.vote-down').removeAttr('src')
+                                .attr('src', "{% static 'website/images/down1-off.png' %}")
+                                .removeClass('selected');
+                        }
+                        $('img.vote-up').removeAttr('src')
+                            .attr('src', "{% static 'website/images/up1-on.png' %}")
+                            .addClass('selected');
+                        $('div.vote span.vote-count-post').html(response);
+                    });
+                }
             }
-            /* USER WISHES TO VOTE */
+
             else {
-                var vote_action = 'vote'
-                $.post('/vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
-                    $('img.vote-up').removeAttr('src')
-                        .attr('src', "{% static 'website/images/up1-on.png' %}")
-                        .addClass('selected');
-                    $('div.vote span.vote-count-post').html(response);
-                    $('img.vote-down').css('pointer-events','none');
-                });
+                $(this).attr("title", "User who posted cannot vote");
             }
+
         });
+
         /* DOWNVOTE */
         $('div.vote img.vote-down').click(function() {
+
+            var question_user_id = {{ question.user_id }};
+            var current_user_id = {{ request.user.id }};
             var id = {{ question.pk }};
             var vote_type = 'down';
         
-            /* USER HAS ALREADY DOWN-VOTED */
-            if ($(this).hasClass('selected')) {
-                var vote_action = 'recall-vote'
-                $.post('/vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
-                    $('img.vote-down').removeAttr('src')
-                        .attr('src', "{% static 'website/images/down1-off.png' %}")
-                        .removeClass('selected');
-                    $('div.vote span.vote-count-post').html(response);
-                    $('img.vote-up').css('pointer-events','all');
-                });
+            if (question_user_id != current_user_id) {
+            
+                /* USER HAS ALREADY DOWN-VOTED */
+                if ($(this).hasClass('selected')) {
+                    var vote_action = 'recall-vote'
+                    $.post('/vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
+                        $('img.vote-down').removeAttr('src')
+                            .attr('src', "{% static 'website/images/down1-off.png' %}")
+                            .removeClass('selected');
+                        $('div.vote span.vote-count-post').html(response);
+                    });
+                }
+
+                /* USER WISHES TO VOTE */
+                else {
+                    var vote_action = 'vote'
+                    $.post('/vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
+                        if ($('img.vote-up').hasClass('selected')) {
+                            $('img.vote-up').removeAttr('src')
+                                .attr('src', "{% static 'website/images/up1-off.png' %}")
+                                .removeClass('selected');
+                        }
+                        $('img.vote-down').removeAttr('src')
+                            .attr('src', "{% static 'website/images/down1-on.png' %}")
+                            .addClass('selected');
+                        $('div.vote span.vote-count-post').html(response);
+                    });
+                }
             }
-            /* USER WISHES TO VOTE */
-            else {
-                var vote_action = 'vote'
-                $.post('/vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
-                    $('img.vote-down').removeAttr('src')
-                        .attr('src', "{% static 'website/images/down1-on.png' %}")
-                        .addClass('selected');
-                    $('div.vote span.vote-count-post').html(response);
-                    $('img.vote-up').css('pointer-events','none');
-                });
-            }
+
         });
-        
-       /* VOTE FOR ANSWERS */
-        
-       /* UP VOTE */
-       $('div.ans-vote img.ans-vote-up').click(function(event) {
-       
-            var up_id = event.target.id;
-            var vote_type = 'up';
-            
-            var id = up_id.replace('up','');
-           
-            if ($('img#'+up_id).hasClass('selected')) {
-                var vote_action = 'recall-vote'
-                $.post('/ans_vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
-                    $('img#'+up_id).removeAttr('src')
-                        .attr('src', "{% static 'website/images/up1-off.png' %}")
-                        .removeClass('selected');
-                   
-                    $('span#span'+id).html(response);
-                   
-                    $('img#down'+id).css('pointer-events','all');
-                   
-                });
-                
+
+        /* TO DISPLAY ERROR TEXT IF SAME USER VOTES */
+        $('div.vote').hover(function() {
+
+            var question_user_id = {{ question.user_id }};
+            var current_user_id = {{ request.user.id }};
+
+            if (question_user_id == current_user_id) {
+                $(this).attr("title", "User who posted cannot vote.");
             }
+
+        });
+
+
+        
+        /* VOTE FOR ANSWERS */
+        
+        /* UP VOTE */
+        $('div.ans-vote img.ans-vote-up').click(function(event) {
+       
+            var vote_type = 'up';
+            var up_id = event.target.id;
+            var id = up_id.replace('up','');
+            var down_id = up_id.replace('up','down');
+            var current_user_id = {{ request.user.id }};
+
+            // Getting the user ID of current answer
+            if ($(this).hasClass('selected'))
+                var answer_user_id = event.target.classList.item(2);
+            else
+                var answer_user_id = event.target.classList.item(1);
+           
+            if (answer_user_id != current_user_id) {
             
-            /* USER WISHES TO VOTE */
-            else {
-            
-                 var vote_action = 'vote'
-                 $.post('/ans_vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
-                    $('img#'+up_id).removeAttr('src')
-                        .attr('src', "{% static 'website/images/up1-on.png' %}")
-                        .addClass('selected');
-                   
-                    $('span#span'+id).html(response);
-                    $('img#down'+id).css('pointer-events','none');
-                    
-                    
-                });
+                /* USER WISHES TO RECALL VOTE */
+                if ($('img#'+up_id).hasClass('selected')) {
+                    var vote_action = 'recall-vote'
+                    $.post('/ans_vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
+                        $('img#'+up_id).removeAttr('src')
+                            .attr('src', "{% static 'website/images/up1-off.png' %}")
+                            .removeClass('selected');  
+                        $('span#span'+id).html(response);   
+                    });
+                }
+                
+                /* USER WISHES TO VOTE */
+                else {
+                    var vote_action = 'vote'
+                    $.post('/ans_vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
+                        if ($('img#'+down_id).hasClass('selected')) {
+                            $('img#'+down_id).removeAttr('src')
+                                .attr('src', "{% static 'website/images/down1-off.png' %}")
+                                .removeClass('selected');
+                        }
+                        $('img#'+up_id).removeAttr('src')
+                            .attr('src', "{% static 'website/images/up1-on.png' %}")
+                            .addClass('selected');
+                        $('span#span'+id).html(response);
+                    });
+                }
             }
           
-        }); /* END OF UP VOTE FOR ANSWERS */
+        }); 
+        /* END OF UP VOTE FOR ANSWERS */
         
+
         /* DOWNVOTE */
         $('div.ans-vote img.ans-vote-down').click(function(event) {
-            var down_id = event.target.id;
+
             var vote_type = 'down';
-            
+            var down_id = event.target.id;
             var id = down_id.replace('down','');
+            var up_id = down_id.replace('down','up');
+            var current_user_id = {{ request.user.id }};
+
+            // Getting the user ID of current answer
+            if ($(this).hasClass('selected'))
+                var answer_user_id = event.target.classList.item(2);
+            else
+                var answer_user_id = event.target.classList.item(1);
            
-           
-            /* USER HAS ALREADY DOWN-VOTED */
-    
-            if ($('img#'+down_id).hasClass('selected')) {
-                var vote_action = 'recall-vote'
-        
-                $.post('/ans_vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
-           
-                    $('img#'+down_id).removeAttr('src')
-                        .attr('src', "{% static 'website/images/down1-off.png' %}")
-                        .removeClass('selected');
-                  
-                    $('div.ans-vote span#span'+id).html(response);
-                  
-                    $('img#up'+id).css('pointer-events','all')
-                    
-                });
-            }
-            /* USER WISHES TO VOTE */
-            else {
-                var vote_action = 'vote'
-                $.post('/ans_vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
-                    $('img#'+down_id).removeAttr('src')
-                        .attr('src', "{% static 'website/images/down1-on.png' %}")
-                        .addClass('selected');
-                   
-                    $('div.ans-vote span#span'+id).html(response);
-                    $('img#up'+id).css('pointer-events','none')
-                    
-                });
+            
+            if (answer_user_id != current_user_id) {
+
+                /* USER HAS ALREADY DOWN-VOTED */
+                if ($('img#'+down_id).hasClass('selected')) {
+                    var vote_action = 'recall-vote'
+            
+                    $.post('/ans_vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
+                        $('img#'+down_id).removeAttr('src')
+                            .attr('src', "{% static 'website/images/down1-off.png' %}")
+                            .removeClass('selected');
+                        $('div.ans-vote span#span'+id).html(response);
+                    });
+                }
+
+                /* USER WISHES TO VOTE */
+                else {
+                    var vote_action = 'vote'
+                    $.post('/ans_vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
+                        if ($('img#'+up_id).hasClass('selected')) {
+                            $('img#'+up_id).removeAttr('src')
+                                .attr('src', "{% static 'website/images/up1-off.png' %}")
+                                .removeClass('selected');
+                        }
+                        $('img#'+down_id).removeAttr('src')
+                            .attr('src', "{% static 'website/images/down1-on.png' %}")
+                            .addClass('selected');
+                        $('div.ans-vote span#span'+id).html(response);
+                    });
+                }
             }
         });
-           
-     });
+
+    });
      
  
-  </script>
+</script>
    
-    <script src="{% static 'website/js/thread-user.js' %}"></script>
-    <script src="{% static 'website/js/custom.js' %}"></script>
+<script src="{% static 'website/js/thread-user.js' %}"></script>
+<script src="{% static 'website/js/custom.js' %}"></script>
+
 {% endblock %}

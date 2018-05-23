@@ -84,6 +84,7 @@ def get_question(request, question_id=None, pretty_url=None):
         'ans_votes':ans_votes
     }
     context.update(csrf(request))
+
     # updating views count
     question.views += 1
     question.save()
@@ -396,15 +397,15 @@ def vote_post(request):
     
     vote_type = request.POST.get('type')
     vote_action = request.POST.get('action')
-    question_id =  request.POST.get('id') 
-    question = get_object_or_404(Question, id=question_id)
+    question_id =  request.POST.get('id')
     cur_post = get_object_or_404(Question, id=post_id)
     thisuserupvote = cur_post.userUpVotes.filter(id=request.user.id).count()
     thisuserdownvote = cur_post.userDownVotes.filter(id=request.user.id).count()
     initial_votes = cur_post.userUpVotes.count() - cur_post.userDownVotes.count()
 
-    if request.user.id != question.user_id:
+    if request.user.id != cur_post.user_id:
         
+        # This condition is for adding vote
         if vote_action == 'vote':
             if (thisuserupvote == 0) and (thisuserdownvote == 0):
                 if vote_type == 'up':
@@ -412,10 +413,18 @@ def vote_post(request):
                 elif vote_type == 'down':
                     cur_post.userDownVotes.add(request.user)
                 else:
-                    return HttpResponse("Error: Unknown vote-type passed.")
+                    return HttpResponse(initial_votes)
             else:
-                return HttpResponse(initial_votes)
-        #This loop is for canceling vote
+                if (thisuserupvote == 1) and (vote_type == 'down'):
+                    cur_post.userUpVotes.remove(request.user)
+                    cur_post.userDownVotes.add(request.user)
+                elif (thisuserdownvote == 1) and (vote_type == 'up'):
+                    cur_post.userDownVotes.remove(request.user)
+                    cur_post.userUpVotes.add(request.user)
+                else:
+                    return HttpResponse(initial_votes)
+
+        # This condition is for canceling vote
         elif vote_action == 'recall-vote':
             if (vote_type == 'up') and (thisuserupvote == 1):
                 cur_post.userUpVotes.remove(request.user)
@@ -445,22 +454,15 @@ def ans_vote_post(request):
     vote_type = request.POST.get('type')
     vote_action = request.POST.get('action')
     answer_id =  request.POST.get('id') 
-
-    answer = Answer.objects.get(pk=answer_id)
     cur_post = get_object_or_404(Answer, id=post_id)
 
     thisuserupvote = cur_post.userUpVotes.filter(id=request.user.id).count()
     thisuserdownvote = cur_post.userDownVotes.filter(id=request.user.id).count()
-
-    userupvote = cur_post.userUpVotes.filter(id=request.user.id).count()
-    userdownvote = cur_post.userDownVotes.filter(id=request.user.id).count()
-
     initial_votes = cur_post.userUpVotes.count() - cur_post.userDownVotes.count()
 
+    if request.user.id != cur_post.uid:
 
-    if request.user.id != answer.uid:
-
-        #This loop is for voting
+        # This condition is for voting
         if vote_action == 'vote':
             if (thisuserupvote == 0) and (thisuserdownvote == 0):
                 if vote_type == 'up':
@@ -468,10 +470,18 @@ def ans_vote_post(request):
                 elif vote_type == 'down':
                     cur_post.userDownVotes.add(request.user)
                 else:
-                    return HttpResponse("Error: Unknown vote-type passed.")
+                    return HttpResponse(initial_votes)
             else:
-                return HttpResponse(initial_votes)
-        #This loop is for canceling vote
+                if (thisuserupvote == 1) and (vote_type == 'down'):
+                    cur_post.userUpVotes.remove(request.user)
+                    cur_post.userDownVotes.add(request.user)
+                elif (thisuserdownvote == 1) and (vote_type == 'up'):
+                    cur_post.userDownVotes.remove(request.user)
+                    cur_post.userUpVotes.add(request.user)
+                else:
+                    return HttpResponse(initial_votes)
+    
+        # This condition is for canceling vote
         elif vote_action == 'recall-vote':
             if (vote_type == 'up') and (thisuserupvote == 1):
                 cur_post.userUpVotes.remove(request.user)
@@ -486,10 +496,8 @@ def ans_vote_post(request):
         num_votes = cur_post.userUpVotes.count() - cur_post.userDownVotes.count()
         cur_post.num_votes = num_votes
         cur_post.save()
-       
 
         return HttpResponse(num_votes)
-            
     
     else:
         return HttpResponse(initial_votes)
