@@ -7,7 +7,7 @@
 {% block content %}
     <h4 style="padding-top: 15px;">
         <span class="glyphicon glyphicon-pencil">
-        </span> Create a new question . . .
+        </span> {% block pagetitle %} Create a new question . . . {% endblock %}
     </h4>
     <hr>
     <form role="form" action="" method="POST" >{% csrf_token %}
@@ -59,7 +59,11 @@
     document.getElementById("submit_question").disabled = false;
    }
            </script>
-    <input id="submit_question" class="btn btn-success" type="submit" onclick = "return validate_dd();" value="Submit Question" disabled>
+
+    {% block submitbutton %}
+        <input id="submit_question" class="btn btn-success" type="submit" onclick = "return validate_dd();" value="Submit Question" disabled>
+    {% endblock %}
+    
     {% endwith %}
     </form>
 
