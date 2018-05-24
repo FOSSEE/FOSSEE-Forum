@@ -2,6 +2,7 @@ from django.conf.urls import patterns, include, url
 from website import views
 
 urlpatterns = [
+    
     url(r'^$', views.home, name='home'),
     url(r'^questions/$', views.questions, name='questions'),
     url(r'^question/(?P<question_id>\d+)/$', views.get_question, name='get_question'),
@@ -11,9 +12,6 @@ urlpatterns = [
     url(r'^answer-comment/$', views.answer_comment, name='answer_comment'),
     url(r'^filter/(?P<category>[^/]+)/$', views.filter, name='filter'),
     url(r'^filter/(?P<category>[^/]+)/(?P<tutorial>[^/]+)/$', views.filter, name='filter'),
-
-    #url(r'^filter/(?P<category>[^/]+)/(?P<tutorial>[^/]+)/(?P<minute_range>[^/]+)/$', 'website.views.filter', name='filter'),
-    #url(r'^filter/(?P<category>[^/]+)/(?P<tutorial>[^/]+)/(?P<minute_range>[^/]+)/(?P<second_range>[^/]+)/$', 'website.views.filter', name='filter'),
     url(r'^new-question/$', views.new_question, name='new_question'),
     url(r'^user/(?P<user_id>\d+)/notifications/$', views.user_notifications, name='user_notifications'),
     url(r'^user/(?P<user_id>\d+)/questions/$', views.user_questions, name='user_questions'),

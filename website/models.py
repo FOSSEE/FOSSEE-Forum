@@ -1,11 +1,11 @@
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
-
 from django.contrib.auth import get_user_model
 
 
 class FossCategory(models.Model):
+
     name = models.CharField(max_length=100)
     description = models.TextField()
     date_created = models.DateTimeField(auto_now_add=True)
@@ -15,6 +15,7 @@ class FossCategory(models.Model):
         return self.name
 
 class SubFossCategory(models.Model):
+
     parent = models.ForeignKey(FossCategory)
     name = models.CharField(max_length=100)
     date_created = models.DateTimeField(auto_now_add=True)
@@ -22,14 +23,8 @@ class SubFossCategory(models.Model):
     def __unicode__(self):
         return self.name
 
-class Issue(models.Model):
-    name = models.CharField(max_length=100)
-    date_created = models.DateTimeField(auto_now_add=True)
-    date_modified = models.DateTimeField(auto_now=True)
-    def __unicode__(self):
-        return self.name
-
 class Question(models.Model):
+
     user  = models.ForeignKey(User)
     category = models.ForeignKey(FossCategory)
     sub_category = models.CharField(max_length = 200)
@@ -43,7 +38,6 @@ class Question(models.Model):
     userViews = models.ManyToManyField(User, blank=True, related_name='postViews')
     num_votes = models.IntegerField(default=0)
 
-
     def __unicode__(self):
              return '{0} - {1} - {2} - {3} - {4}'.format(self.id, self.category.name, self.sub_category, self.title, self.user)
 
@@ -51,13 +45,16 @@ class Question(models.Model):
         return self.body
 
     class Meta:
+
         get_latest_by = "date_created"
 
 class QuestionVote(models.Model):
+
     uid = models.IntegerField()
     question = models.ForeignKey(Question)
 
 class QuestionComment(models.Model):
+
     uid = models.IntegerField()
     question = models.ForeignKey(Question)
     body = models.TextField()
@@ -65,6 +62,7 @@ class QuestionComment(models.Model):
     date_modified = models.DateTimeField(auto_now=True)
 
 class Answer(models.Model):
+
     uid  = models.IntegerField()
     question = models.ForeignKey(Question)
     body = models.TextField()
@@ -87,10 +85,12 @@ class Answer(models.Model):
 
 
 class AnswerVote(models.Model):
+
     uid = models.IntegerField()
     answer = models.ForeignKey(Answer)
 
 class AnswerComment(models.Model):
+
     uid = models.IntegerField()
     answer = models.ForeignKey(Answer)
     body = models.TextField(blank=False)
@@ -102,6 +102,7 @@ class AnswerComment(models.Model):
         return user
 
 class Notification(models.Model):
+
     uid = models.IntegerField()
     pid = models.IntegerField()
     qid = models.IntegerField()
@@ -114,6 +115,7 @@ class Notification(models.Model):
         return user.username
         
 class Profile(models.Model):
+    
     user = models.ForeignKey(User)
     confirmation_code = models.CharField(max_length=255)
     phone = models.CharField(max_length=20, null=True)
