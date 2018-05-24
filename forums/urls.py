@@ -9,7 +9,7 @@ from django.contrib.auth.views import password_reset, password_reset_confirm,\
 
 admin.autodiscover()
 
-urlpatterns = patterns('',
+urlpatterns = [
     # Examples:
     # url(r'^$', 'forums.views.home', name='home'),
     # url(r'^forums/', include('forums.foo.urls')),
@@ -44,6 +44,5 @@ urlpatterns = patterns('',
     #url(r'^ratings/', include('ratings.urls')),   
     # url(r'^accounts/forgot-password/$', views.forgotpassword, name='forgotpassword'),
     # url(r'^accounts/update-password/$', views.updatepassword, name='updatepassword'), 
-   
-    
-)
+      
+]

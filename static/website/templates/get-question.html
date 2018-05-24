@@ -11,14 +11,11 @@
 
 
 {% block content %}
- 
-<span class="saving hideme">saving . . .</span>
-<span class="saved hideme">saved</span>
 
 <div class="row">
                         
     <div class="question-wrapper col-lg-12 col-md-12 col-sm-12 col-xs-12">
-    <div class="question {% if user|can_edit:question and not ans_count %}editable{% endif %}" >
+    <div class="question">
      <!-- VOTE CELL -->
                
                 <div class="votecell" style="padding-top: 0.0cm;">
@@ -41,17 +38,11 @@
                             {% endifequal %}
                     </div>                   
                 </div>
-        <div class="title {% if user|can_edit:question and not ans_count %}title-editable{% endif %}">
+        <div class="title">
            {{ question.title }}
         </div>
         
-        <div id="title-edit" class="hideme">
         
-            
-            <h5>Title</h5>
-            <input class="form-control" type="text">
-            <h5>Question</h5>
-        </div>
         <script src="//cdn.tinymce.com/4/tinymce.min.js"></script>
   <script type="text/javascript">
   tinymce.init({
@@ -59,8 +50,7 @@
     inline: true
   });
   </script>
-        <div id="questionNicPanel"></div>
-        <div id="{% if user|can_edit:question and not ans_count %}questionInstance{% endif %}" class="body"  style="margin-left : 60px">
+        <div class="body" style="margin-left : 60px">
             <p>{{ question.body| safe}}</p>
         </div>
         <br>
@@ -80,15 +70,11 @@
                 </a>
             </small>
         </span>
-        {% endif%}
-        <a id="question-details-edit" data-toggle="modal" data-target="#detailsModal" href="#" class="hideme">
-            <span class="glyphicon glyphicon-edit"></span>
-        </a>
-        
+        {% endif %}
+
         <span class="modify">
-            {% if user|can_edit:question and not ans_count  %}
-                <a class="edit btn btn-xs btn-info" href="#">Edit</a>
-                <a class="save btn btn-xs btn-success" data-qid="{{ question.id }}" href="#">Save</a>
+            {% if user|can_edit:question and not ans_count %}
+            <a class="edit btn btn-xs btn-info" href="{% url 'website:edit_question' question.id %}">Edit</a>
             {% endif %}
         </span>
         
@@ -272,31 +258,6 @@
     </h4> 
 {% endif %}
 
-    <div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h4 class="modal-title" id="myModalLabel">Edit Question Details</h4>
-          </div>
-          <div class="modal-body">
-            
-            <h5>The Current question is under:</h5>
-            {{ question.category }}
-            <hr>
-            <div class="pull-right">
-                <a id="question-details-ok" class="btn btn-sm btn-success hideme" data-qid={{ question.id }} href="#">Ok</a>
-                <a class="btn btn-sm btn-default" data-dismiss="modal" href="#">Close</a>
-            </div>
-            <div class="clearfix"></div>
-          </div> <!-- /.modal-body -->
-        </div><!-- /.modal-content -->
-      </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
-<!-- AJAX SCRIPT -->
-
-   
-
 {% endblock %}
 
 {% block javascript %}
@@ -354,7 +315,7 @@
                     });
                 }
                 
-                /* USER WISHES TO VOTE */
+                /* USER WISHES TO VOTE *
                 else {
                     var vote_action = 'vote'
                     $.post('/vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {

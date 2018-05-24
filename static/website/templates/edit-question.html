@@ -1,0 +1,128 @@
+{% extends 'website/templates/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% block title %}
+    Ask a question - FOSSEE Forums
+{% endblock %}
+{% block content %}
+    <h4 style="padding-top: 15px;">
+        <span class="glyphicon glyphicon-pencil">
+        </span> Edit your question . . .
+    </h4>
+    <hr>
+    <form role="form" action="" method="POST" >{% csrf_token %}
+    {% with WIDGET_ERROR_CLASS='field_error' %}
+    <p>
+    Select the category.
+        <img id="ajax-loader" src="{% static 'website/images/ajax-loader.gif' %}" style="display:none;">
+    </p>
+    <div class="row">
+    	{{ form.category.errors }}
+        <div class="col-lg-3 col-md-3 col-sm-3">
+            {% render_field form.category class+="form-control category"%} 
+        </div>
+        <div id = 'tutorial' class="col-lg-3 col-md-3 col-sm-3">
+            {% if category %}
+                {% render_field form.tutorial class+="form-control tutorial" %}
+            {% else %}
+                {% render_field form.tutorial class+="form-control" %} 
+            {% endif %}
+        </div>
+        <div class="col-lg-2 col-md-2 col-sm-2">
+            <small><strong>
+            <a id="similar-link" data-toggle="modal" data-target="#similarModal" href="#">
+                0 similar questions
+            </a>
+            </strong></small>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col-lg-12">
+         {{ form.title.errors }}
+            <div class="form-group">
+                <label for="id_title">Question Title:</label>
+                {% render_field form.title class+="form-control title" %} 
+            </div>
+            {{ form.body.errors }}
+             <div class="form-group">
+                <label for="id_body" >Question Description:</label>
+                {% render_field form.body class+="form-control body" %}
+            </div>
+           
+        </div>
+    </div>
+    <script src='https://www.google.com/recaptcha/api.js'></script>
+                    <div class="g-recaptcha" data-sitekey="{{ SITE_KEY }}" data-callback="enableBtn"></div>
+                             <script>
+            function enableBtn(){
+    document.getElementById("submit_question").disabled = false;
+   }
+           </script>
+    <input id="submit_question" class="btn btn-success" type="submit" onclick = "return validate_dd();" value="Save Question" disabled>
+    {% endwith %}
+    </form>
+
+    <!-- Modal -->
+    <div class="modal fade" id="similarModal" tabindex="-1" role="dialog" aria-labelledby="similarModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title" id="myModalLabel">Similar Questions</h4>
+          </div>
+          <div class="modal-body" id="modal-body">
+            ...
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+<script src="{% static 'website/js/nicEdit.js' %}" type="text/javascript"></script>
+<script type="text/javascript">
+bkLib.onDomLoaded(function() {
+    new nicEditor({
+        fullPanel : true,
+        iconsPath: "{% static 'website/js/nicEditorIcons.gif' %}",
+        buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link', 'forecolor', 'bgcolor']
+    }).panelInstance('id_body');
+});
+</script>
+
+
+
+<script>
+window.onload = function(){
+    
+    var c2= "{{ category }}";
+    
+    if (c2 != '12'){
+      
+        $(".tutorial" ).hide()    
+     }
+     else {
+         $(".tutorial" ).show()    
+
+     }
+    if (c2 == "None"){
+      
+         // $("#id_category").val(c2);
+         $( "#id_category option" ).prop('disabled',false);         
+     }   
+
+     else  if(c2 != ""){
+       
+         $("#id_category").val(c2);
+         $( "#id_category option:not(:selected)" ).prop('disabled',true);     
+     }
+}
+</script>
+
+
+
+
+{% endblock %}
+
+{% block javascript %}
+    <script src="{% static 'website/js/custom.js' %}"></script>
+{% endblock %}

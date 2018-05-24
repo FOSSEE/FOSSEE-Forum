@@ -1,15 +1,16 @@
 from django.conf.urls import patterns, include, url
 from website import views
 
-urlpatterns = patterns('',
+urlpatterns = [
     url(r'^$', views.home, name='home'),
     url(r'^questions/$', views.questions, name='questions'),
     url(r'^question/(?P<question_id>\d+)/$', views.get_question, name='get_question'),
     url(r'^question/(?P<question_id>\d+)/(?P<pretty_url>.+)/$', views.get_question, name='get_question'),
+    url(r'^question/edit/(?P<question_id>\d+)/$', views.edit_question, name='edit_question'),
     url(r'^question-answer/(?P<qid>\d+)/$', views.question_answer, name='question_answer'),
     url(r'^answer-comment/$', views.answer_comment, name='answer_comment'),
     url(r'^filter/(?P<category>[^/]+)/$', views.filter, name='filter'),
-    url(r'^filter/(?P<category>[^/]+)/(?P<tutorial>[^/]+)/$', 'website.views.filter', name='filter'),
+    url(r'^filter/(?P<category>[^/]+)/(?P<tutorial>[^/]+)/$', views.filter, name='filter'),
 
     #url(r'^filter/(?P<category>[^/]+)/(?P<tutorial>[^/]+)/(?P<minute_range>[^/]+)/$', 'website.views.filter', name='filter'),
     #url(r'^filter/(?P<category>[^/]+)/(?P<tutorial>[^/]+)/(?P<minute_range>[^/]+)/(?P<second_range>[^/]+)/$', 'website.views.filter', name='filter'),
@@ -34,4 +35,4 @@ urlpatterns = patterns('',
     url(r'^ajax-notification-remove/$', views.ajax_notification_remove, name='ajax_notification_remove'),
     url(r'^ajax-keyword-search/$', views.ajax_keyword_search, name='ajax_keyword_search'),
     url(r'^ajax-time-search/$', views.ajax_time_search, name='ajax_time_search'),
-)
+]

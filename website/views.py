@@ -1,7 +1,7 @@
 import re
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404,render_to_response
-from django.core.context_processors import csrf
+from django.template.context_processors import csrf
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
@@ -64,6 +64,7 @@ def get_question(request, question_id=None, pretty_url=None):
     answers = question.answer_set.all()
     ans_count = question.answer_set.count()
     form = AnswerQuestionForm()
+    new_question_form = NewQuestionForm()
     thisuserupvote = question.userUpVotes.filter(id=request.user.id).count()
     thisuserdownvote = question.userDownVotes.filter(id=request.user.id).count()
     net_count = question.userUpVotes.count() - question.userDownVotes.count()
@@ -81,6 +82,7 @@ def get_question(request, question_id=None, pretty_url=None):
         'sub_category':sub_category,
         'main_list': main_list,
         'form': form,
+        'new_question_form': new_question_form,
         'thisUserUpvote': thisuserupvote,
         'thisUserDownvote': thisuserdownvote,
         'net_count': net_count,
@@ -156,7 +158,7 @@ def question_answer(request,qid):
                 question.category,  
                 settings.DOMAIN_NAME + '/question/' + str(question.id) + "#answer" + str(answer.id)
             )
-            send_mail(subject, message, sender_email, to)
+            send_mail(subject, message, sender_email, to, fail_silently=True)
 
             return HttpResponseRedirect("/question/" + str(question.id))
 
@@ -414,6 +416,89 @@ def new_question(request):
     context['form'] = form   
     context.update(csrf(request))
     return render(request, 'website/templates/new-question.html', context)
+
+# Edit a question on forums, notification is sent to mailing list team@fossee.in
+@login_required
+def edit_question(request, question_id=None):
+
+    context = {}
+    toolbox = False
+    user = request.user
+    context['SITE_KEY'] = settings.GOOGLE_RECAPTCHA_SITE_KEY
+    all_category = FossCategory.objects.all()
+    question = get_object_or_404(Question, id=question_id)
+
+    if request.method == 'POST':
+
+        form = NewQuestionForm(request.POST, instance=question)
+        question.title = '' # To prevent same title error in form
+        question.save()
+
+        if form.is_valid():
+
+            cleaned_data = form.cleaned_data
+            question.user = request.user
+            question.category = cleaned_data['category']
+            question.sub_category = cleaned_data['tutorial']
+
+            if (question.sub_category == "Select a Sub Category"):
+
+                if str(question.category) == "Scilab Toolbox":
+                    context.update(csrf(request))
+                    category = request.POST.get('category', None)
+                    tutorial = request.POST.get('tutorial', None)
+                    context['category'] = category
+                    context['tutorial'] = tutorial
+                    context['form'] = form
+                    context['toolbox'] = toolbox
+
+                    return render(request, 'website/templates/edit-question.html', context)
+
+                else:
+                    pass
+
+                question.sub_category = ""
+                question.save()
+
+            question.title = cleaned_data['title']
+            question.body = cleaned_data['body']
+            body = strip_tags(question.body)
+            question.save()
+
+            if str(question.sub_category) == 'None':
+                question.sub_category = ""
+                question.save()
+
+            return HttpResponseRedirect('/')
+    
+        else:
+            
+             context.update(csrf(request))
+             category = request.POST.get('category', None)
+             tutorial = request.POST.get('tutorial', None)
+             context['category'] = category
+             context['tutorial'] = tutorial
+             context['form'] = form
+             context['toolbox'] = toolbox
+             return render(request, 'website/templates/edit-question.html', context)
+
+    else:
+
+        form = NewQuestionForm(instance=question)
+
+        category = request.GET.get('category')
+
+        if category == 12:
+            toolbox = True
+
+        tutorial = request.GET.get('tutorial')
+        context['category'] = category
+        context['tutorial'] = tutorial
+        context['toolbox'] = toolbox
+        
+    context['form'] = form   
+    context.update(csrf(request))
+    return render(request, 'website/templates/edit-question.html', context)
 
 
 # return number of votes and initial votes
