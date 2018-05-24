@@ -1,17 +1,20 @@
 {% extends 'website/templates/base.html' %}
 {% load notify %}
+
+{% block title %}
+    Notificatons - FOSSEE Forums
+{% endblock %}
+
 {% block content%}
     <h4 class="pull-left">Notifications</h4>
-    <a class="btn btn-xs btn-warning pull-right" href="{% url "website:clear_notifications" %}" style="margin-top: 7px;">
+    <a class="btn btn-xs btn-warning pull-right" href="{% url 'website:clear_notifications' %}" style="margin-top: 7px;">
         Clear All
     </a>
     <div class="clearfix"></div> 
+
     {% for notification in notifications %}
         {% get_notification notification.id %}
     {% endfor %}
-{% endblock %}
-{% block title %}
-    Notificatons - FOSSEE Forums
 {% endblock %}
 
 {% block javascript %}
@@ -33,7 +36,7 @@
             });
             
             $(".rmc").click(function() {
-            	 $(this).parent(".notification").slideUp();
+            	$(this).parent(".notification").slideUp();
                
                 var notification_id = $(this).data("nid");
                 $.ajax({

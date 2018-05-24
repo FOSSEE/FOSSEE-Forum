@@ -21,7 +21,9 @@ from website.models import *
 
 # to register new user and send confirmation link to registerd email id
 def account_register(request):
+
     context = {}
+
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         print ("ok")
@@ -40,13 +42,13 @@ def account_register(request):
             response = urllib2.urlopen(req)
             result = json.load(response)
             ''' End reCAPTCHA validation '''
-            print result['success']
+
             username = request.POST['username']
             password = request.POST['password']
             email = request.POST['email']
             user = User.objects.create_user(username, email, password)
             user.is_active = False
-            print result['success']
+
             if result['success']:
                 user.save()
             else:
@@ -59,10 +61,15 @@ def account_register(request):
             messages.success(request, """
                 Please confirm your registration by clicking on the activation link which has been sent to your registered email id.
             """)
+
             return render(request, 'forums/templates/message.html')
-        context = {'form':form,
-                    'SITE_KEY': settings.GOOGLE_RECAPTCHA_SITE_KEY }
+
+        context = {
+            'form':form,
+            'SITE_KEY': settings.GOOGLE_RECAPTCHA_SITE_KEY 
+        }
         return render_to_response('forums/templates/user-register.html', context,context_instance = RequestContext(request))
+    
     else:
         form = RegisterForm()
         context = {
@@ -74,10 +81,11 @@ def account_register(request):
 
 # alert user after user account confirmation
 def confirm(request, confirmation_code, username):
+
     try:
         user = User.objects.get(username=username)
         profile = Profile.objects.get(user=user)
-        #if profile.confirmation_code == confirmation_code and user.date_joined > (timezone.now()-timezone.timedelta(days=1)):
+        
         if profile.confirmation_code == confirmation_code:
             user.is_active = True
             user.save()
@@ -86,10 +94,11 @@ def confirm(request, confirmation_code, username):
            
             messages.success(request, "Your account has been activated!. Please update your profile to complete your registration")
             return HttpResponseRedirect('/accounts/profile/'+user.username)
+
         else:
-            
             messages.success(request, "Something went wrong!. Please try again!")
             return HttpResponseRedirect('/')
+
     except Exception, e:
         messages.success(request, "Your account not activated!. Please try again!")
         return HttpResponseRedirect('/')
@@ -99,13 +108,18 @@ def confirm(request, confirmation_code, username):
 # update profile after registration confirmation
 @login_required
 def account_profile(request, username):
+    
     user = request.user
     profile = Profile.objects.get(user_id=user.id)
     #old_file_path = settings.MEDIA_ROOT + str(profile.picture)
     #new_file_path = None
+
     if request.method == 'POST':
+
         form = ProfileForm(user, request.POST)
+
         if form.is_valid():
+
             user.first_name = request.POST['first_name']
             user.last_name = request.POST['last_name']
             profile.address = request.POST['address']
@@ -125,6 +139,7 @@ def account_profile(request, username):
             #form_data.save()
             #profile.address = address
             #profile.phone = phone
+
             profile.save()
             
             """if 'picture' in request.FILES:
@@ -142,12 +157,16 @@ def account_profile(request, username):
                     im.save(settings.MEDIA_ROOT + "user/" + str(user.id) + "/" + str(user.id) + "-thumb." + ext, mimeType)
                     form_data.thumb = 'user/' + str(user.id)+ '/' + str(user.id) + '-thumb.' + ext
                     form_data.save()"""
+
+            
             messages.success(request, "Your profile has been updated!")
             return HttpResponseRedirect("/accounts/view-profile/{0}".format(user.id))
+
         # return account_view_profile(request, user.id)
 
         context = {'form':form}
         return render(request, 'forums/templates/profile.html', context)
+
     else:
         context = {}
         context.update(csrf(request))
@@ -192,6 +211,7 @@ def account_view_profile(request, user_id):
                 
 # send confirm registration link    
 def send_registration_confirmation(user):
+
     p = Profile.objects.get(user=user)
      
     # Sending email when an answer is posted
@@ -268,69 +288,3 @@ def user_login(request):
 def user_logout(request):
     logout(request)
     return HttpResponseRedirect('/')
-
-# def forgotpassword(request):
-#     context = {}
-#     user_emails = []
-#     context.update(csrf(request))
-#     if request.method == 'POST':
-#         users = User.objects.all()
-#         for user in users:
-#             user_emails.append(user.email)
-#         email = request.POST['email']
-#         if email == "":
-#             context['invalid_email'] = True
-#             return render_to_response("forums/templates/forgot-password.html", context)
-#         if email in user_emails:
-#             user = User.objects.get(email=email)
-#             password = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8))
-#             user.set_password(password)
-#             user.save()
-#             sender_name = "FOSSEE Forums"
-#             sender_email = settings.SENDER_EMAIL
-#             subject = "FOSSEE Forums - Password Reset"
-#             to = (user.email, )
-#       url = settings.EMAIL_URL
-#             message = """Dear """+user.username+""",\nYour password for FOSSEE Forums has been reset. Your credentials are:\nUsername: """+user.username+"""\nPassword: """+password+"""\n\nWe recommend you to login with the given credentials & update your password immediately.\nLink to set new password: """+url+"""/accounts/login/?next=/accounts/update-password/\nThank You !\nRegards,\nFOSSEE Team,\n IIT Bombay."""
-#       send_mail(subject, message, sender_email, to)
-#             form = UserLoginForm()
-#             context['form'] = form
-#             #context['password_reset'] = True
-#             return HttpResponseRedirect('/accounts/login/?next=/accounts/update-password/')
-#             #return render_to_response("forums/templates/user-login.html", context)
-#         else:
-#             context['invalid_email'] = True
-#             return render_to_response("forums/templates/forgot-password.html", context)
-#     else:
-#         return render_to_response('forums/templates/forgot-password.html', context)
-
-# def updatepassword(request):
-#     context = {}
-#     user = request.user
-#     context.update(csrf(request))
-#     if user.is_authenticated():
-#         if request.method == 'POST':
-#             new_password = request.POST['new_password']
-#             confirm = request.POST['confirm_new_password']
-#             if new_password == "" or confirm == "":
-#                 context['empty'] = True
-#                 return render_to_response("update-password.html", context)
-#             if new_password == confirm:
-#                 user.set_password(new_password)
-#                 user.save()
-#                 context['password_updated'] = True
-#                 logout(request)
-#                 form = UserLoginForm()
-#                 context['form'] = form
-#                 #return render_to_response('website/templates/index.html', context)
-#       return HttpResponseRedirect('/')
-#             else:
-#                 context['no_match'] = True
-#                 return render_to_response("forums/templates/update-password.html", context)
-#         else:
-#             return render_to_response("forums/templates/update-password.html", context)
-#     else:
-#         form = UserLoginForm()
-#         context['form'] = form
-#         context['for_update_password'] = True
-#         return render_to_response('website/templates/index.html', context)

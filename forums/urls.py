@@ -10,6 +10,7 @@ from django.contrib.auth.views import password_reset, password_reset_confirm,\
 admin.autodiscover()
 
 urlpatterns = [
+    
     # Examples:
     # url(r'^$', 'forums.views.home', name='home'),
     # url(r'^forums/', include('forums.foo.urls')),
@@ -21,6 +22,7 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^', include('website.urls', namespace='website')),
 
+    # URLs for password reset and password change
     url(r'^forgotpassword/$', password_reset, {'template_name': 'forums/templates/registration/password_reset_form.html'}, name="password_reset"),
     url(r'^password_reset/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
         password_reset_confirm, {'template_name': 'forums/templates/registration/password_reset_confirm.html'}, name='password_reset_confirm'),
@@ -33,16 +35,12 @@ urlpatterns = [
     url(r'^password_change/done/$', password_change_done, {'template_name': 'forums/templates/registration/password_change_done.html'},
         name='password_change_done'),
     
-    # User account urls
+    # User account URLs
     url(r'^accounts/login/', views.user_login, name='user_login'),
     url(r'^accounts/logout/', views.user_logout, name='user_logout'),
     url(r'^accounts/register/', views.account_register, name='user_register'),
-    # url(r'^migrate', 'migrate_spoken.views.chenage_drupal_userid_spoken', name='chenage_drupal_userid_spoken'),
     url(r"^accounts/confirm/(?P<confirmation_code>\w+)/(?P<username>[\w. @-]+)/$", views.confirm, name='confirm'),
     url(r"^accounts/profile/(?P<username>[\w. @-]+)/$", views.account_profile, name='profile'),
-    url(r"^accounts/view-profile/(?P<user_id>[\w. @-]+)/$", views.account_view_profile, name='view_profile'),
-    #url(r'^ratings/', include('ratings.urls')),   
-    # url(r'^accounts/forgot-password/$', views.forgotpassword, name='forgotpassword'),
-    # url(r'^accounts/update-password/$', views.updatepassword, name='updatepassword'), 
+    url(r"^accounts/view-profile/(?P<user_id>[\w. @-]+)/$", views.account_view_profile, name='view_profile'), 
       
 ]

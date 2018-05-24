@@ -104,7 +104,6 @@ class AnswerComment(models.Model):
 class Notification(models.Model):
 
     uid = models.IntegerField()
-    pid = models.IntegerField()
     qid = models.IntegerField()
     aid = models.IntegerField(default=0)
     cid = models.IntegerField(default=0)

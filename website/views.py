@@ -22,7 +22,6 @@ from django.core.mail import EmailMultiAlternatives
 from forums.settings import SET_TO_EMAIL_ID
 
 User = get_user_model()
-
 admins = (
    9, 4376, 4915, 14595, 12329, 22467, 5518, 30705
 )
@@ -184,36 +183,33 @@ def question_answer(request,qid):
 def answer_comment(request):
 
     context = {}
-    # question = get_object_or_404(Question, id=qid)
+    
     if request.method == 'POST':
+
         answer_id = request.POST['answer_id']
         answer = Answer.objects.get(pk=answer_id)
         answers = answer.question.answer_set.all()
         answer_creator = answer.user()
         form = AnswerCommentForm(request.POST)
+
         if form.is_valid():
-            body = request.POST['body']
-            body = str(body)
+
+            body = str(request.POST['body'])
             comment = AnswerComment()
             comment.uid = request.user.id
             comment.answer = answer
             comment.body = body.encode('unicode_internal')
-            
             comment.save()
+
             # notifying the answer owner
-            
             if answer.uid != request.user.id:
                 notification = Notification()
                 notification.uid = answer.uid
-                notification.pid = request.user.id
                 notification.qid = answer.question.id
                 notification.aid = answer.id
                 notification.cid = comment.id
                 notification.save()
-                
-                user = User.objects.get(id=answer.uid)
 
-            
             sender_name = "FOSSEE Forums"
             sender_email = settings.SENDER_EMAIL
             subject = "FOSSEE Forums - {0} - Comment for your answer".format(answer.question.category)
@@ -243,19 +239,16 @@ def answer_comment(request):
                 comment_creator_emails.append(email)
                 comment_creator_emails.append(settings.FORUM_NOTIFICATION)
             
-            #getting distinct uids
+            # getting distinct uids
             uids = set(uids)
             uids.remove(request.user.id)
             for uid in uids:
                 notification = Notification()
                 notification.uid = uid
-                notification.pid = request.user.id
                 notification.qid = answer.question.id
                 notification.aid = answer.id
                 notification.cid = comment.id
                 notification.save()
-                
-                user = User.objects.get(id=uid)
         
             sender_name = "FOSSEE Forums"
             sender_email = settings.SENDER_EMAIL
@@ -277,24 +270,26 @@ def answer_comment(request):
             send_mail(subject, message, sender_email, to)  
 
             return HttpResponseRedirect("/question/" + str(answer.question.id))
-            print "------success in comment ---------"
 
         else:
-            print "---------form not valid else part---------"
-            context.update({'form':form,
-                'question':answer.question,
-                'answers':answers})
+
+            context.update({
+                'form': form,
+                'question': answer.question,
+                'answers': answers,
+            })
             return render(request, 'website/templates/get-question.html', context)
 
     context.update(csrf(request))
-    context.update({'form':form,
-       'question':answer.question,
-       'answers':answers})
-    print "-----------end---------"
+    context.update({
+        'form': form,
+        'question': answer.question,
+        'answers': answers,
+    })
     
     return render(request, 'website/templates/get-question.html', context)
 
-def filter(request,  category=None, tutorial=None):
+def filter(request, category=None, tutorial=None):
 
     if category and tutorial:
         questions = Question.objects.filter(category=category).filter(tutorial=tutorial).order_by('date_created').reverse()
@@ -651,13 +646,15 @@ def user_questions(request, user_id):
        
         return render(request, 'website/templates/user-questions.html', context)
     
-    return HttpResponse("go away")
+    return HttpResponse("Not authorized.")
 
 # to get all answers of a specific users
 @login_required
 def user_answers(request, user_id):
+
     context= {}
     context['SITE_KEY'] = settings.GOOGLE_RECAPTCHA_SITE_KEY
+
     marker = 0
     if 'marker' in request.GET:
         marker = int(request.GET['marker'])
@@ -673,17 +670,18 @@ def user_answers(request, user_id):
         }
         return render(request, 'website/templates/user-answers.html', context)
     
-    return HttpResponse("go away")
+    return HttpResponse("Not authorized.")
 
 # notification if any on header, when user logs in to the account 
 @login_required
 def user_notifications(request, user_id):
+
     if str(user_id) == str(request.user.id):
 
         try :
             notifications = Notification.objects.filter(uid=user_id).order_by('date_created').reverse()
             context = {
-                'notifications': notifications
+                'notifications': notifications,
             }
             return render(request, 'website/templates/notifications.html', context)
 
@@ -729,14 +727,6 @@ def ajax_tutorials(request):
         else:
             return HttpResponse("changed")
             pass
-
-@csrf_exempt
-def ajax_duration(request):
-    if request.method == 'POST':
-        category = request.POST['category']
-        tutorial =request.POST['tutorial']
-        video_detail = SubFossCategory.objects.filter(parent_id =category)        
-        return render(request, 'website/templates/ajax-duration.html')
 
 @csrf_exempt
 def ajax_question_update(request):
