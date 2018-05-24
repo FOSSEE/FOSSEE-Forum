@@ -21,6 +21,7 @@ urlpatterns = [
     # url(r'^unanswerednotification/$', views.unanswered_notification, name='unanswered_notification'),
     url(r'^vote_post/$', views.vote_post, name='vote_post'),
     url(r'^ans_vote_post/$', views.ans_vote_post, name='ans_vote_post'),
+    url(r'^question/delete/(?P<question_id>\d+)/$', views.question_delete, name='question_delete'),
     
     # Ajax helpers
     url(r'^ajax-tutorials/$', views.ajax_tutorials, name='ajax_tutorials'),

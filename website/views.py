@@ -473,14 +473,14 @@ def edit_question(request, question_id=None):
     
         else:
             
-             context.update(csrf(request))
-             category = request.POST.get('category', None)
-             tutorial = request.POST.get('tutorial', None)
-             context['category'] = category
-             context['tutorial'] = tutorial
-             context['form'] = form
-             context['toolbox'] = toolbox
-             return render(request, 'website/templates/edit-question.html', context)
+            context.update(csrf(request))
+            category = request.POST.get('category', None)
+            tutorial = request.POST.get('tutorial', None)
+            context['category'] = category
+            context['tutorial'] = tutorial
+            context['form'] = form
+            context['toolbox'] = toolbox
+            return render(request, 'website/templates/edit-question.html', context)
 
     else:
 
@@ -500,6 +500,15 @@ def edit_question(request, question_id=None):
     context.update(csrf(request))
     return render(request, 'website/templates/edit-question.html', context)
 
+# View for deleting question
+@login_required
+def question_delete(request, question_id):
+
+    question = get_object_or_404(Question, id=question_id)
+    title = question.title
+    question.delete()
+
+    return render(request, 'website/templates/question-delete.html', {'title': title})
 
 # return number of votes and initial votes
 # user who asked the question,cannot vote his/or anwser, 

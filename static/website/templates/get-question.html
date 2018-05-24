@@ -15,40 +15,36 @@
 <div class="row">
                         
     <div class="question-wrapper col-lg-12 col-md-12 col-sm-12 col-xs-12">
-    <div class="question">
+    <div class="question {% if user|can_edit:question and not ans_count %}editable{% endif %}">
      <!-- VOTE CELL -->
                
-                <div class="votecell" style="padding-top: 0.0cm;">
-                    <div class="vote">
-                            {% ifequal thisUserUpvote 0 %}
-                                <img src="{% static 'website/images/up1-off.png' %}" class="vote-up"/>
-                            {% else %}
-                                <img src="{% static 'website/images/up1-on.png' %}" class="vote-up selected"/>
-                            {% endifequal %}
+        <div class="votecell" style="padding-top: 0.0cm;">
+            <div class="vote">
 
-                            <span class="vote-count-post" id="show_vote_count">
-                                {{ net_count }}
-                            </span>
-                           
+                {% ifequal thisUserUpvote 0 %}
+                <img src="{% static 'website/images/up1-off.png' %}" class="vote-up"/>
+                {% else %}
+                <img src="{% static 'website/images/up1-on.png' %}" class="vote-up selected"/>
+                {% endifequal %}
 
-                            {% ifequal thisUserDownvote 0 %}
-                                <img src="{% static 'website/images/down1-off.png' %}" class="vote-down" />
-                            {% else %}
-                                <img src="{% static 'website/images/down1-on.png' %}" class="vote-down selected" />
-                            {% endifequal %}
-                    </div>                   
-                </div>
+                <span class="vote-count-post" id="show_vote_count">
+                    {{ net_count }}
+                </span>
+                    
+                {% ifequal thisUserDownvote 0 %}
+                <img src="{% static 'website/images/down1-off.png' %}" class="vote-down" />
+                {% else %}
+                <img src="{% static 'website/images/down1-on.png' %}" class="vote-down selected" />
+                {% endifequal %}
+            </div>                   
+        </div>
+
         <div class="title">
            {{ question.title }}
         </div>
-        
-        
-        <script src="//cdn.tinymce.com/4/tinymce.min.js"></script>
+
   <script type="text/javascript">
-  tinymce.init({
-    selector: '#myeditablediv',
-    inline: true
-  });
+
   </script>
         <div class="body" style="margin-left : 60px">
             <p>{{ question.body| safe}}</p>
@@ -75,6 +71,7 @@
         <span class="modify">
             {% if user|can_edit:question and not ans_count %}
             <a class="edit btn btn-xs btn-info" href="{% url 'website:edit_question' question.id %}">Edit</a>
+            <a class="delete btn btn-xs btn-info" href="{% url 'website:question_delete' question.id %}">Delete</a>
             {% endif %}
         </span>
         
@@ -490,7 +487,6 @@
                 }
             }
         });
-
     });
      
  
