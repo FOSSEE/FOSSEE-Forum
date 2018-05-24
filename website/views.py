@@ -428,6 +428,9 @@ def edit_question(request, question_id=None):
     all_category = FossCategory.objects.all()
     question = get_object_or_404(Question, id=question_id)
 
+    if (request.user.id != question.user.id):
+        return HttpResponse("Not authorized to edit question.")
+
     if request.method == 'POST':
 
         form = NewQuestionForm(request.POST, instance=question)
@@ -505,6 +508,9 @@ def edit_question(request, question_id=None):
 def question_delete(request, question_id):
 
     question = get_object_or_404(Question, id=question_id)
+    if (request.user.id != question.user.id):
+        return HttpResponse("Not authorized to delete question.")
+
     title = question.title
     question.delete()
 
