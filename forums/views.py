@@ -265,7 +265,6 @@ def user_login(request):
                 context = {
                     'form': form,
                     'next': next_url,
-                    #'password_reset': True if next_url else False
                 }
                 context.update(csrf(request))
                 return render_to_response('forums/templates/user-login.html', context)
@@ -277,7 +276,6 @@ def user_login(request):
         context = {
             'form': form,
             'next': next_url,
-            #'password_reset': True if next_url else False
         }
         context.update(csrf(request))
         return render_to_response('forums/templates/user-login.html', context)

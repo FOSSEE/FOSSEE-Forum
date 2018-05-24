@@ -25,7 +25,6 @@ urlpatterns = [
     
     # Ajax helpers
     url(r'^ajax-tutorials/$', views.ajax_tutorials, name='ajax_tutorials'),
-    url(r'^ajax-duration/$', views.ajax_duration, name='ajax_duration'),
     url(r'^ajax-question-update/$', views.ajax_question_update, name='ajax_question_update'),
     url(r'^ajax-details-update/$', views.ajax_details_update, name='ajax_details_update'),
     url(r'^ajax-answer-update/$', views.ajax_answer_update, name='ajax_answer_update'),
