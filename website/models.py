@@ -110,7 +110,7 @@ class Notification(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     
     def poster(self):
-        user = User.objects.get(id=self.pid)
+        user = User.objects.get(id=self.uid)
         return user.username
         
 class Profile(models.Model):

@@ -113,9 +113,9 @@ def question_answer(request,qid):
     if request.method == 'POST':
         form = AnswerQuestionForm(request.POST)
         answers = question.answer_set.all()
-        answer = Answer()
-        
+        answer = Answer() 
         answer.uid = request.user.id
+
         if form.is_valid():
             cleaned_data = form.cleaned_data
             qid = cleaned_data['question']
@@ -131,13 +131,9 @@ def question_answer(request,qid):
 
                 notification = Notification()
                 notification.uid = question.user_id
-                notification.pid = request.user.id
                 notification.qid = qid
                 notification.aid = answer.id
                 notification.save()
-
-                user = User.objects.get(id=question.user_id)
-            
 
             #Sending email when a new question is asked
             sender_name = "FOSSEE Forums"
@@ -350,6 +346,7 @@ def new_question(request):
             question.body = cleaned_data['body']
             body = strip_tags(question.body)
             question.views = 1
+            question.userViews.add(request.user)
             if str(question.sub_category) == 'None':
                 question.sub_category = ""
 
@@ -729,6 +726,9 @@ def user_notifications(request, user_id):
             Notification.objects.filter(uid=request.user.id).delete()
             return HttpResponseRedirect("/user/{0}/notifications/".format(request.user.id))
 
+    else:
+        return HttpResponse("Not authorized to view notifications.")
+
 
 # to clear notification from header, once viewed or cancelled
 @login_required
@@ -793,7 +793,7 @@ def ajax_details_update(request):
         question = get_object_or_404(Question, pk=qid)
 
         if question:
-            if question.uid == request.user.id or request.user.id in admins:
+            if question.user_id == request.user.id or request.user.id in admins:
                 question.category = category
                 question.tutorial = tutorial
                 question.save()
