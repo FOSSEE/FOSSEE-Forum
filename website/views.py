@@ -1,4 +1,5 @@
 import re
+from django import forms
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404,render_to_response
 from django.template.context_processors import csrf
@@ -63,7 +64,6 @@ def get_question(request, question_id=None, pretty_url=None):
     answers = question.answer_set.all()
     ans_count = question.answer_set.count()
     form = AnswerQuestionForm()
-    new_question_form = NewQuestionForm()
     thisuserupvote = question.userUpVotes.filter(id=request.user.id).count()
     thisuserdownvote = question.userDownVotes.filter(id=request.user.id).count()
     net_count = question.userUpVotes.count() - question.userDownVotes.count()
@@ -81,7 +81,6 @@ def get_question(request, question_id=None, pretty_url=None):
         'sub_category':sub_category,
         'main_list': main_list,
         'form': form,
-        'new_question_form': new_question_form,
         'thisUserUpvote': thisuserupvote,
         'thisUserDownvote': thisuserdownvote,
         'net_count': net_count,
@@ -285,6 +284,7 @@ def answer_comment(request):
     
     return render(request, 'website/templates/get-question.html', context)
 
+# View used to filter question according to category
 def filter(request, category=None, tutorial=None):
 
     if category and tutorial:
@@ -325,7 +325,6 @@ def new_question(request):
             question.sub_category = cleaned_data['tutorial']
 
             if (question.sub_category == "Select a Sub Category"):
-
                 if str(question.category) == "Scilab Toolbox":
                     context.update(csrf(request))
                     category = request.POST.get('category', None)
@@ -333,19 +332,12 @@ def new_question(request):
                     context['category'] = category
                     context['tutorial'] = tutorial
                     context['form'] = form
-
                     return render(request, 'website/templates/new-question.html', context)
-
-                else:
-                    pass
-
-                question.sub_category = ""
-                question.save()
 
             question.title = cleaned_data['title']
             question.body = cleaned_data['body']
-            body = strip_tags(question.body)
             question.views = 1
+            question.save()
             question.userViews.add(request.user)
             if str(question.sub_category) == 'None':
                 question.sub_category = ""
@@ -430,7 +422,6 @@ def edit_question(request, question_id=None):
             question.sub_category = cleaned_data['tutorial']
 
             if (question.sub_category == "Select a Sub Category"):
-
                 if str(question.category) == "Scilab Toolbox":
                     context.update(csrf(request))
                     category = request.POST.get('category', None)
@@ -438,18 +429,11 @@ def edit_question(request, question_id=None):
                     context['category'] = category
                     context['tutorial'] = tutorial
                     context['form'] = form
-
                     return render(request, 'website/templates/edit-question.html', context)
-
-                else:
-                    pass
-
-                question.sub_category = ""
-                question.save()
 
             question.title = cleaned_data['title']
             question.body = cleaned_data['body']
-            body = strip_tags(question.body)
+            question.views = 1
             if str(question.sub_category) == 'None':
                 question.sub_category = ""
 
@@ -661,53 +645,6 @@ def ans_vote_post(request):
     else:
         return HttpResponse(initial_votes)
 
-# Notification Section
-# to get all questions of a specific users
-@login_required
-def user_questions(request, user_id):
-    
-    marker = 0
-    if 'marker' in request.GET:
-        marker = int(request.GET['marker'])
-
-    if str(user_id) == str(request.user.id):
-        total = Question.objects.filter(user_id=user_id).count()
-        total = int(total - (total % 10 - 10))
-        questions = Question.objects.filter(user_id=user_id).order_by('date_created').reverse()[marker:marker+10]
-        
-        context = {
-            'questions': questions,
-            'total': total,
-            'marker': marker
-        }
-       
-        return render(request, 'website/templates/user-questions.html', context)
-    
-    return HttpResponse("Not authorized.")
-
-# to get all answers of a specific users
-@login_required
-def user_answers(request, user_id):
-
-    context= {}
-    context['SITE_KEY'] = settings.GOOGLE_RECAPTCHA_SITE_KEY
-
-    marker = 0
-    if 'marker' in request.GET:
-        marker = int(request.GET['marker'])
-
-    if str(user_id) == str(request.user.id):
-        total = Answer.objects.filter(uid=user_id).count()
-        total = int(total - (total % 10 - 10))
-        answers =Answer.objects.filter(uid=user_id).order_by('date_created').reverse()[marker:marker+10]
-        context = {
-            'answers': answers,
-            'total': total,
-            'marker': marker
-        }
-        return render(request, 'website/templates/user-answers.html', context)
-    
-    return HttpResponse("Not authorized.")
 
 # notification if any on header, when user logs in to the account 
 @login_required

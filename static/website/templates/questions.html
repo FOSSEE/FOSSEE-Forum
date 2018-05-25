@@ -48,7 +48,6 @@
 	</thead> 
 	<tbody> 
         {% for question in questions %}
-        {% if question.category.name != "Sandhi" %}
         <tr>
 	    <td> </td>
             <td>
@@ -98,7 +97,6 @@
                 </span>
             </td>
         </tr>
-        {% endif %}
         {% endfor %}
     </tbody> 
     </table>

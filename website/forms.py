@@ -38,13 +38,13 @@ class NewQuestionForm(forms.ModelForm):
         body = self.cleaned_data['body']
 
         if len(body) < 12:
-            raise forms.ValidationError("Body should be min. 12 characters long")
+            raise forms.ValidationError("Body should be minimum 12 characters long")
 
         body = body.replace('&nbsp;', ' ')
         body = body.replace('<br>', '\n')
 
         if body.isspace():
-            raise forms.ValidationError("Body Can not be only Spaces")
+            raise forms.ValidationError("Body cannot be only spaces")
 
         return body
 
@@ -56,8 +56,6 @@ class NewQuestionForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         category = kwargs.pop('category', None)
         selecttutorial = kwargs.pop('tutorial', None)
-
-        print "category", category
         super(NewQuestionForm, self).__init__(*args, **kwargs)
         tutorial_choices = (
                 ("Select a Sub Category", "Select a Sub Category"),
@@ -66,23 +64,20 @@ class NewQuestionForm(forms.ModelForm):
 
         if category == '12':
             if FossCategory.objects.filter(id=category).exists():
-                print "category exists", category
                 self.fields['category'].initial = category
                 children = SubFossCategory.objects.filter(parent_id = category)
+
                 for child in children:
-                    print "child", child
                     tutorial_choices += ((child.name, child.name),)
-                    print tutorial_choices
+
                 self.fields['tutorial'] = forms.CharField(widget=forms.Select(choices=tutorial_choices))
                 if SubFossCategory.objects.filter(name = selecttutorial).exists():
                     self.fields['tutorial'].initial = selecttutorial
             else:
-                print "category dont exist"
                 self.fields['tutorial'] = forms.CharField(widget=forms.Select(choices=tutorial_choices))
         else:
             self.fields['category'].initial = category
             self.fields['tutorial'] = forms.CharField(widget=forms.Select(choices=tutorial_choices))
-            print "not a toolbox"
 
 class AnswerQuestionForm(forms.ModelForm):
 
