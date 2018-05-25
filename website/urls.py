@@ -1,4 +1,6 @@
 from django.conf.urls import patterns, include, url
+from django.conf.urls.static import static
+from django.conf import settings
 from website import views
 
 urlpatterns = [
@@ -32,3 +34,5 @@ urlpatterns = [
     url(r'^ajax-keyword-search/$', views.ajax_keyword_search, name='ajax_keyword_search'),
     url(r'^ajax-time-search/$', views.ajax_time_search, name='ajax_time_search'),
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

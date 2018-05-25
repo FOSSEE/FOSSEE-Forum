@@ -22,6 +22,8 @@ class NewQuestionForm(forms.ModelForm):
     body = forms.CharField(widget=forms.Textarea(),
             required = True,
             error_messages = {'required':'Question field required.'})
+
+    image = forms.ImageField(help_text="Upload image: ", required=False)
     
     def clean_title(self):
         title = self.cleaned_data['title']
@@ -51,7 +53,7 @@ class NewQuestionForm(forms.ModelForm):
     class Meta:
 
         model = Question
-        fields = ['category', 'title', 'body']
+        fields = ['category', 'title', 'body', 'image']
 
     def __init__(self, *args, **kwargs):
         category = kwargs.pop('category', None)

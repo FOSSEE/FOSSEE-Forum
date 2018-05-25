@@ -15,7 +15,7 @@
 <div class="row">
                         
     <div class="question-wrapper col-lg-12 col-md-12 col-sm-12 col-xs-12">
-    <div class="question {% if user|can_edit:question and not ans_count %}editable{% endif %}">
+    <div class="question">
      <!-- VOTE CELL -->
                
         <div class="votecell" style="padding-top: 0.0cm;">
@@ -40,17 +40,17 @@
         </div>
 
         <div class="title">
-           {{ question.title }}
+            {{ question.title }}
         </div>
 
-  <script type="text/javascript">
-
-  </script>
         <div class="body" style="margin-left : 60px">
             <p>{{ question.body| safe}}</p>
+            {% if question.image %}
+                <img src = {{ question.image.url }} />
+            {% endif %}
         </div>
         <br>
-        
+         
         <span class="category">
             <small>
                 <a href="{% url 'website:filter' question.category %}">
@@ -58,6 +58,7 @@
                 </a>
             </small>
         </span>
+
         {% if sub_category %}
          <span class="tutorial">
             <small>

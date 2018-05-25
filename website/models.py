@@ -37,6 +37,7 @@ class Question(models.Model):
     userDownVotes = models.ManyToManyField(User, blank=True, related_name='postDownVotes')
     userViews = models.ManyToManyField(User, blank=True, related_name='postViews')
     num_votes = models.IntegerField(default=0)
+    image = models.ImageField(upload_to="images/", blank=True)
 
     def __unicode__(self):
              return '{0} - {1} - {2} - {3} - {4}'.format(self.id, self.category.name, self.sub_category, self.title, self.user)

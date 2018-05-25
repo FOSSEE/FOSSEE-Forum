@@ -314,7 +314,7 @@ def new_question(request):
 
     if request.method == 'POST':
 
-        form = NewQuestionForm(request.POST)
+        form = NewQuestionForm(request.POST, request.FILES)
 
         if form.is_valid():
 
@@ -324,7 +324,11 @@ def new_question(request):
             question.category = cleaned_data['category']
             question.sub_category = cleaned_data['tutorial']
 
+            if ('image' in request.FILES):
+                question.image = request.FILES['image']
+
             if (question.sub_category == "Select a Sub Category"):
+
                 if str(question.category) == "Scilab Toolbox":
                     context.update(csrf(request))
                     category = request.POST.get('category', None)
@@ -333,6 +337,8 @@ def new_question(request):
                     context['tutorial'] = tutorial
                     context['form'] = form
                     return render(request, 'website/templates/new-question.html', context)
+
+                question.sub_category = ""
 
             question.title = cleaned_data['title']
             question.body = cleaned_data['body']
@@ -371,7 +377,7 @@ def new_question(request):
             email.attach_alternative(message, "text/html")
             email.send(fail_silently=True)
 
-            return HttpResponseRedirect('/')
+            return HttpResponseRedirect('/question/'+ str(question.id))
     
         else:
             context.update(csrf(request))
@@ -410,7 +416,7 @@ def edit_question(request, question_id=None):
     if request.method == 'POST':
 
         previous_title = question.title
-        form = NewQuestionForm(request.POST, instance=question)
+        form = NewQuestionForm(request.POST, request.FILES, instance=question)
         question.title = '' # To prevent same title error in form
         question.save()
 
@@ -421,6 +427,9 @@ def edit_question(request, question_id=None):
             question.category = cleaned_data['category']
             question.sub_category = cleaned_data['tutorial']
 
+            if ('image' in request.FILES):
+                question.image = request.FILES['image']
+
             if (question.sub_category == "Select a Sub Category"):
                 if str(question.category) == "Scilab Toolbox":
                     context.update(csrf(request))
@@ -430,6 +439,8 @@ def edit_question(request, question_id=None):
                     context['tutorial'] = tutorial
                     context['form'] = form
                     return render(request, 'website/templates/edit-question.html', context)
+                
+                question.sub_category = ""
 
             question.title = cleaned_data['title']
             question.body = cleaned_data['body']
@@ -466,9 +477,9 @@ def edit_question(request, question_id=None):
                 headers={"Content-type":"text/html;charset=iso-8859-1"}
             )
             email.attach_alternative(message, "text/html")
-            email.send(fail_silently=True)
+            # email.send(fail_silently=True)
 
-            return HttpResponseRedirect('/')
+            return HttpResponseRedirect('/question/'+ str(question.id))
     
         else:
             
@@ -527,7 +538,7 @@ def question_delete(request, question_id):
         headers={"Content-type":"text/html;charset=iso-8859-1"}
     )
     email.attach_alternative(message, "text/html")
-    email.send(fail_silently=True)
+    # email.send(fail_silently=True)
 
     question.delete()
     return render(request, 'website/templates/question-delete.html', {'title': title})
