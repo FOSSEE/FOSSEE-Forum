@@ -292,7 +292,7 @@ def answer_comment(request):
 def filter(request, category=None, tutorial=None):
 
     if category and tutorial:
-        questions = Question.objects.filter(category=category).filter(tutorial=tutorial).order_by('date_created').reverse()
+        questions = Question.objects.filter(category__name=category).filter(sub_category=tutorial).order_by('date_created').reverse()
     elif tutorial is None:
         questions = Question.objects.filter(category__name=category).order_by('date_created').reverse()
 
@@ -312,7 +312,6 @@ def filter(request, category=None, tutorial=None):
 def new_question(request):
 
     context = {}
-    toolbox = False
     user = request.user
     context['SITE_KEY'] = settings.GOOGLE_RECAPTCHA_SITE_KEY
     all_category = FossCategory.objects.all()
@@ -322,6 +321,7 @@ def new_question(request):
         form = NewQuestionForm(request.POST)
 
         if form.is_valid():
+
             cleaned_data = form.cleaned_data
             question = Question()
             question.user = request.user
@@ -337,7 +337,6 @@ def new_question(request):
                     context['category'] = category
                     context['tutorial'] = tutorial
                     context['form'] = form
-                    context['toolbox'] = toolbox
 
                     return render(request, 'website/templates/new-question.html', context)
 
@@ -350,12 +349,11 @@ def new_question(request):
             question.title = cleaned_data['title']
             question.body = cleaned_data['body']
             body = strip_tags(question.body)
-            question.views = 1 
-            question.save()
-
+            question.views = 1
             if str(question.sub_category) == 'None':
                 question.sub_category = ""
-                question.save()
+
+            question.save()
             
             #Sending email when a new question is asked
             sender_name = "FOSSEE Forums"
@@ -387,26 +385,20 @@ def new_question(request):
             return HttpResponseRedirect('/')
     
         else:
-             context.update(csrf(request))
-             category = request.POST.get('category', None)
-             tutorial = request.POST.get('tutorial', None)
-             context['category'] = category
-             context['tutorial'] = tutorial
-             context['form'] = form
-             context['toolbox'] = toolbox
-             return render(request, 'website/templates/new-question.html', context)
+            context.update(csrf(request))
+            category = request.POST.get('category', None)
+            tutorial = request.POST.get('tutorial', None)
+            context['category'] = category
+            context['tutorial'] = tutorial
+            context['form'] = form
+            return render(request, 'website/templates/new-question.html', context)
 
     else:
         category = request.GET.get('category')
-
-        if category == 12:
-            toolbox = True
-
         tutorial = request.GET.get('tutorial')
         form = NewQuestionForm(category=category,tutorial = tutorial)
         context['category'] = category
         context['tutorial'] = tutorial
-        context['toolbox'] = toolbox
         
     context['form'] = form   
     context.update(csrf(request))
@@ -417,17 +409,18 @@ def new_question(request):
 def edit_question(request, question_id=None):
 
     context = {}
-    toolbox = False
     user = request.user
     context['SITE_KEY'] = settings.GOOGLE_RECAPTCHA_SITE_KEY
     all_category = FossCategory.objects.all()
     question = get_object_or_404(Question, id=question_id)
 
+    # To prevent random user from manually entering the link and editing
     if (request.user.id != question.user.id):
         return HttpResponse("Not authorized to edit question.")
 
     if request.method == 'POST':
 
+        previous_title = question.title
         form = NewQuestionForm(request.POST, instance=question)
         question.title = '' # To prevent same title error in form
         question.save()
@@ -448,7 +441,6 @@ def edit_question(request, question_id=None):
                     context['category'] = category
                     context['tutorial'] = tutorial
                     context['form'] = form
-                    context['toolbox'] = toolbox
 
                     return render(request, 'website/templates/edit-question.html', context)
 
@@ -461,11 +453,39 @@ def edit_question(request, question_id=None):
             question.title = cleaned_data['title']
             question.body = cleaned_data['body']
             body = strip_tags(question.body)
-            question.save()
-
             if str(question.sub_category) == 'None':
                 question.sub_category = ""
-                question.save()
+
+            question.save()
+
+            # Sending email when a new question is asked
+            sender_name = "FOSSEE Forums"
+            sender_email = settings.SENDER_EMAIL
+            subject = "FOSSEE Forums - {0} - New Question".format(question.category)
+            to = (question.category.email, settings.FORUM_NOTIFICATION)
+            url = settings.EMAIL_URL
+
+            message = """
+                The following question has been edited by the user in the FOSSEE Forum: <br>
+                <b> Original title: </b>{0}<br>
+                <b> New title: </b?{1}<br>
+                <b> Category: </b>{2}<br>
+                <b> Link: </b><a href="{4}">{4}</a><br>
+                <b> Question : </b>{3}<br>
+                """.format(
+                question.title,
+                previous_title,
+                question.category,
+                question.body,
+                settings.DOMAIN_NAME + '/question/'+ str(question.id),
+            )
+            email = EmailMultiAlternatives(
+                subject,'',
+                sender_email, to,
+                headers={"Content-type":"text/html;charset=iso-8859-1"}
+            )
+            email.attach_alternative(message, "text/html")
+            email.send(fail_silently=True)
 
             return HttpResponseRedirect('/')
     
@@ -477,7 +497,6 @@ def edit_question(request, question_id=None):
             context['category'] = category
             context['tutorial'] = tutorial
             context['form'] = form
-            context['toolbox'] = toolbox
             return render(request, 'website/templates/edit-question.html', context)
 
     else:
@@ -485,30 +504,51 @@ def edit_question(request, question_id=None):
         form = NewQuestionForm(instance=question)
 
         category = request.GET.get('category')
-
-        if category == 12:
-            toolbox = True
-
         tutorial = request.GET.get('tutorial')
         context['category'] = category
         context['tutorial'] = tutorial
-        context['toolbox'] = toolbox
         
     context['form'] = form   
     context.update(csrf(request))
     return render(request, 'website/templates/edit-question.html', context)
 
-# View for deleting question
+# View for deleting question, notification is sent to mailing list team@fossee.in
 @login_required
 def question_delete(request, question_id):
 
     question = get_object_or_404(Question, id=question_id)
+    title = question.title
+
+    # To prevent random user from manually entering the link and deleting
     if (request.user.id != question.user.id):
         return HttpResponse("Not authorized to delete question.")
 
-    title = question.title
-    question.delete()
+    # Sending email when a question is deleted
+    sender_name = "FOSSEE Forums"
+    sender_email = settings.SENDER_EMAIL
+    subject = "FOSSEE Forums - {0} - New Question".format(question.category)
+    to = (question.category.email, settings.FORUM_NOTIFICATION)
+    url = settings.EMAIL_URL
 
+    message = """
+        The following question has been deleted by the user in the FOSSEE Forum: <br>
+        <b> Title: </b>{0}<br>
+        <b> Category: </b>{1}<br>
+        <b> Question : </b>{2}<br>
+        """.format(
+        title,
+        question.category,
+        question.body,
+    )
+    email = EmailMultiAlternatives(
+        subject,'',
+        sender_email, to,
+        headers={"Content-type":"text/html;charset=iso-8859-1"}
+    )
+    email.attach_alternative(message, "text/html")
+    email.send(fail_silently=True)
+
+    question.delete()
     return render(request, 'website/templates/question-delete.html', {'title': title})
 
 # return number of votes and initial votes
