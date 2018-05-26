@@ -110,7 +110,7 @@ def question_answer(request,qid):
     question = get_object_or_404(Question, id=qid)
    
     if request.method == 'POST':
-        form = AnswerQuestionForm(request.POST)
+        form = AnswerQuestionForm(request.POST, request.FILES)
         answers = question.answer_set.all()
         answer = Answer() 
         answer.uid = request.user.id
@@ -121,7 +121,9 @@ def question_answer(request,qid):
             body = str(cleaned_data['body'])
             answer.body = body.splitlines()    
             answer.question = question
-            answer.body = body.encode('unicode_internal')     
+            answer.body = body.encode('unicode_internal')  
+            if ('image' in request.FILES):
+                answer.image = request.FILES['image']
             answer.save()
 
             # if user_id of question not matches to user_id of answer that
@@ -152,7 +154,7 @@ def question_answer(request,qid):
                 question.category,  
                 settings.DOMAIN_NAME + '/question/' + str(question.id) + "#answer" + str(answer.id)
             )
-            send_mail(subject, message, sender_email, to, fail_silently=True)
+            # send_mail(subject, message, sender_email, to, fail_silently=True)
 
             return HttpResponseRedirect("/question/" + str(question.id))
 

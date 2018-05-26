@@ -103,7 +103,7 @@ class AnswerQuestionForm(forms.ModelForm):
     class Meta:
 
         model = Question
-        fields = ['question', 'body']
+        fields = ['question', 'body', 'image']
 
 class AnswerCommentForm(forms.Form):
     
