@@ -2,6 +2,7 @@ from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
+from django_resized import ResizedImageField
 
 
 class FossCategory(models.Model):
@@ -37,7 +38,7 @@ class Question(models.Model):
     userDownVotes = models.ManyToManyField(User, blank=True, related_name='postDownVotes')
     userViews = models.ManyToManyField(User, blank=True, related_name='postViews')
     num_votes = models.IntegerField(default=0)
-    image = models.ImageField(upload_to="images/", blank=True)
+    image = ResizedImageField(size=[400,400], upload_to="images/", blank=True)
 
     def __unicode__(self):
              return '{0} - {1} - {2} - {3} - {4}'.format(self.id, self.category.name, self.sub_category, self.title, self.user)
@@ -48,7 +49,6 @@ class Question(models.Model):
     class Meta:
 
         get_latest_by = "date_created"
-
 
 class QuestionComment(models.Model):
 
@@ -69,7 +69,7 @@ class Answer(models.Model):
     userDownVotes = models.ManyToManyField(User, blank=True, related_name='postAnswerDownVotes')
     upvotes = models.IntegerField(default=0)
     num_votes = models.IntegerField(default=0)
-    image = models.ImageField(upload_to="images/", blank=True)
+    image = ResizedImageField(size=[400,400], upload_to="images/", blank=True)
 
     def user(self):
         user = User.objects.get(id=self.uid)

@@ -117,7 +117,6 @@ def question_answer(request,qid):
 
         if form.is_valid():
             cleaned_data = form.cleaned_data
-            qid = cleaned_data['question']
             body = str(cleaned_data['body'])
             answer.body = body.splitlines()    
             answer.question = question
@@ -132,7 +131,7 @@ def question_answer(request,qid):
 
                 notification = Notification()
                 notification.uid = question.user_id
-                notification.qid = qid
+                notification.qid = question.id
                 notification.aid = answer.id
                 notification.save()
 
@@ -264,7 +263,7 @@ def answer_comment(request):
                 #question.tutorial, 
                 settings.DOMAIN_NAME + '/question/' + str(answer.question.id) + "#answer" + str(answer.id)
             )
-            send_mail(subject, message, sender_email, to)  
+            # send_mail(subject, message, sender_email, to)  
 
             return HttpResponseRedirect("/question/" + str(answer.question.id))
 
@@ -377,7 +376,7 @@ def new_question(request):
                 headers={"Content-type":"text/html;charset=iso-8859-1"}
             )
             email.attach_alternative(message, "text/html")
-            email.send(fail_silently=True)
+            # email.send(fail_silently=True)
 
             return HttpResponseRedirect('/question/'+ str(question.id))
     
@@ -479,7 +478,7 @@ def edit_question(request, question_id=None):
                 headers={"Content-type":"text/html;charset=iso-8859-1"}
             )
             email.attach_alternative(message, "text/html")
-            email.send(fail_silently=True)
+            # email.send(fail_silently=True)
 
             return HttpResponseRedirect('/question/'+ str(question.id))
     
@@ -540,7 +539,7 @@ def question_delete(request, question_id):
         headers={"Content-type":"text/html;charset=iso-8859-1"}
     )
     email.attach_alternative(message, "text/html")
-    email.send(fail_silently=True)
+    # email.send(fail_silently=True)
 
     question.delete()
     return render(request, 'website/templates/question-delete.html', {'title': title})

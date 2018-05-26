@@ -229,7 +229,7 @@
 {% endfor %}
 
 {% if user.is_authenticated %}
-    <form action="{% url 'website:question_answer' question.id %}" method="POST"> {% csrf_token %}
+    <form action="{% url 'website:question_answer' question.id %}" method="POST" enctype="multipart/form-data"> {% csrf_token %}
         
         {% with WIDGET_ERROR_CLASS='field_error' %}
 
