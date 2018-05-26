@@ -49,10 +49,6 @@ class Question(models.Model):
 
         get_latest_by = "date_created"
 
-class QuestionVote(models.Model):
-
-    uid = models.IntegerField()
-    question = models.ForeignKey(Question)
 
 class QuestionComment(models.Model):
 
@@ -84,12 +80,6 @@ class Answer(models.Model):
 
     def __str__(self):
         return self.body
-
-
-class AnswerVote(models.Model):
-
-    uid = models.IntegerField()
-    answer = models.ForeignKey(Answer)
 
 class AnswerComment(models.Model):
 
