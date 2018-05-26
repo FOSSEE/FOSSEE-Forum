@@ -23,7 +23,7 @@ class NewQuestionForm(forms.ModelForm):
             required = True,
             error_messages = {'required':'Question field required.'})
 
-    image = forms.ImageField(help_text="Upload image: ", required=False)
+    image = forms.ImageField(widget=forms.ClearableFileInput(), help_text="Upload image: ", required=False)
     
     def clean_title(self):
         title = self.cleaned_data['title']
@@ -84,10 +84,13 @@ class NewQuestionForm(forms.ModelForm):
 class AnswerQuestionForm(forms.ModelForm):
 
     question = forms.IntegerField(widget=forms.HiddenInput())
+
     body = forms.CharField(widget=forms.Textarea(),
         required = True,    
         error_messages = {'required':'Answer field required.'}
     )
+
+    image = forms.ImageField(widget=forms.ClearableFileInput(), help_text="Upload image: ", required=False)
 
     def clean_body(self):
         body = self.cleaned_data['body']

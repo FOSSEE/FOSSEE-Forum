@@ -13,7 +13,7 @@
     <form role="form" action="" method="POST" enctype="multipart/form-data">{% csrf_token %}
     {% with WIDGET_ERROR_CLASS='field_error' %}
     <p>
-    Select the category.
+    <strong>Select the category:</strong>
         <img id="ajax-loader" src="{% static 'website/images/ajax-loader.gif' %}" style="display:none;">
     </p>
     <div class="row">
@@ -41,16 +41,16 @@
         <div class="col-lg-12">
             {{ form.title.errors }}
             <div class="form-group">
-                <label for="id_title">Question Title:</label>
+                <label for="id_title"><strong>Question Title:</strong></label>
                 {% render_field form.title class+="form-control title" %} 
             </div>
             {{ form.body.errors }}
             <div class="form-group">
-                <label for="id_body" >Question Description:</label>
+                <label for="id_body" ><strong>Question Description:</strong></label>
                 {% render_field form.body class+="form-control body" %}
             </div>
-            <div class="form-group">
-                <label for="id_body" >Picture:<br/></label>
+            <div class="form-group image-upload">
+                <label for="id_image" ><strong>Upload a picture:</strong></label>
                 {% render_field form.image class+="form-control image" %}
             </div>
         </div>
@@ -64,6 +64,7 @@
            </script>
 
     {% block submitbutton %}
+        <br>
         <input id="submit_question" class="btn btn-success" type="submit" onclick = "return validate_dd();" value="Submit Question" disabled>
     {% endblock %}
     

@@ -134,6 +134,9 @@
                   
             <div class="body" id="body{{ answer.id }}" style="padding-bottom: 12px">
                 <p>{{ answer.body| safe }}</p>
+                {% if answer.image %}
+                    <img src = {{ answer.image.url }} />
+                {% endif %}
             </div>
             
             <span class="meta">
@@ -227,7 +230,9 @@
 
 {% if user.is_authenticated %}
     <form action="{% url 'website:question_answer' question.id %}" method="POST"> {% csrf_token %}
+        
         {% with WIDGET_ERROR_CLASS='field_error' %}
+
             <div class="row"> 
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                  {{ form.body.errors }}
@@ -235,25 +240,36 @@
                         {% render_field form.question value=question.id %}
                         <label for="id_body"><h4><u>Your Answer:</u></h4></label>
                         {% render_field form.body class+="form-control body" %}
-                        </div>       
-        </div> 
+                        <br>
+                        <label for="id_image">Upload an image:</label>
+                        {% render_field form.image class+="form-control image" %}
+                    </div>       
+                </div> 
             </div>
             
              
         {% endwith %}
-         <script src='https://www.google.com/recaptcha/api.js'></script>
-                    <div class="g-recaptcha" data-sitekey="{{ SITE_KEY }}" data-callback="enableBtn"></div>
-                             <script>
+
+        <script src='https://www.google.com/recaptcha/api.js'></script>
+
+        <div class="g-recaptcha" data-sitekey="{{ SITE_KEY }}" data-callback="enableBtn"></div>
+
+        <script>
             function enableBtn(){
-    document.getElementById("submit_answer").disabled = false;
-   }
-           </script>
+                document.getElementById("submit_answer").disabled = false;
+            }
+        </script>
+        <br>
+
         <input id="submit_answer" class="btn btn-sm btn-info" onclick = "return validate_dd();" type="submit" value="Submit Answer" disabled>
     </form>
+
 {% else %}
+
     <h4>
         <a class="btn btn-xs btn-success" href="{% url 'user_login'%}?next={{ request.get_full_path|urlencode }}"><b>Log-in</b></a> to answer to this question.
     </h4> 
+
 {% endif %}
 
 {% endblock %}
@@ -313,7 +329,7 @@
                     });
                 }
                 
-                /* USER WISHES TO VOTE *
+                /* USER WISHES TO VOTE */
                 else {
                     var vote_action = 'vote'
                     $.post('/vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {

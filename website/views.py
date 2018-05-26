@@ -477,7 +477,7 @@ def edit_question(request, question_id=None):
                 headers={"Content-type":"text/html;charset=iso-8859-1"}
             )
             email.attach_alternative(message, "text/html")
-            # email.send(fail_silently=True)
+            email.send(fail_silently=True)
 
             return HttpResponseRedirect('/question/'+ str(question.id))
     
@@ -538,7 +538,7 @@ def question_delete(request, question_id):
         headers={"Content-type":"text/html;charset=iso-8859-1"}
     )
     email.attach_alternative(message, "text/html")
-    # email.send(fail_silently=True)
+    email.send(fail_silently=True)
 
     question.delete()
     return render(request, 'website/templates/question-delete.html', {'title': title})
@@ -715,38 +715,6 @@ def ajax_tutorials(request):
         else:
             return HttpResponse("changed")
             pass
-
-@csrf_exempt
-def ajax_question_update(request):
-    if request.method == 'POST':
-        qid = request.POST['question_id']
-        title = request.POST['question_title']
-        body = request.POST['question_body']
-        question = get_object_or_404(Question, pk=qid)
-
-        if question:
-            if question.user.id == request.user.id or request.user.id in admins:
-                question.title = title
-                question.body = body.encode('unicode_escape')
-                question.save()
-        
-        return HttpResponse("saved")
-
-@csrf_exempt
-def ajax_details_update(request):
-    if request.method == 'POST':
-        qid = request.POST['qid']
-        category = request.POST['category']
-        tutorial = request.POST['tutorial']
-        question = get_object_or_404(Question, pk=qid)
-
-        if question:
-            if question.user_id == request.user.id or request.user.id in admins:
-                question.category = category
-                question.tutorial = tutorial
-                question.save()
-
-            return HttpResponse("saved")
 
 @csrf_exempt
 def ajax_answer_update(request):
