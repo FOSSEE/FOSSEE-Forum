@@ -22,7 +22,7 @@ class Cron(object):
         import datetime as DT
 
         try:
-            weekago = DT.date.today() - DT.timedelta(days=2)
+            weekago = DT.date.today() - DT.timedelta(days=6)
             questions = Question.objects.filter(date_created__lte=weekago)
         except Exception, e:
             print "No questions found"
