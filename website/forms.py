@@ -11,10 +11,10 @@ class NewQuestionForm(forms.ModelForm):
     
     category = forms.ModelChoiceField(widget = forms.Select(attrs = {}), 
                         queryset = FossCategory.objects.order_by('name'), 
-                        empty_label = "Select a Foss category", 
+                        empty_label = "Select a Foss category",
                         required = True,
                         error_messages = {'required':'Select a category.'})
-                        
+                      
     title = forms.CharField(widget=forms.TextInput(),
                         required = True,
                         error_messages = {'required':'Title field required.'})

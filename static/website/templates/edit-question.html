@@ -4,6 +4,10 @@
     Edit your question . . .
 {% endblock %}
 
+{% block picturetitle %}
+    <label for="id_image" ></label>
+{% endblock %}
+
 {% block submitbutton %}
     <input id="submit_question" class="btn btn-success" type="submit" onclick = "return validate_dd();" value="Save Question" disabled>
 {% endblock %}
