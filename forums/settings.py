@@ -129,16 +129,15 @@ SECRET_KEY = 'xj+a8@48-x+h1z4bmvjt_1b+=t4+sb)kujqh!efty9t=f_g!mo'
 # List of callables that know how to import templates from various sources.
 
 MIDDLEWARE_CLASSES = (
+    'stopforumspam.middleware.StopForumSpamMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    # Uncomment the next line for simple clickjacking protection:
-    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'htmlmin.middleware.HtmlMinifyMiddleware',
     'htmlmin.middleware.MarkRequestMiddleware',
-    'stopforumspam.middleware.StopForumSpamMiddleware',
 )
 
 ROOT_URLCONF = 'forums.urls'
@@ -150,6 +149,7 @@ WSGI_APPLICATION = 'forums.wsgi.application'
 
 INSTALLED_APPS = (
     'website',
+    'stopforumspam',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -161,7 +161,6 @@ INSTALLED_APPS = (
     'widget_tweaks',
     'debug_toolbar',
     'captcha',
-    'stopforumspam',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -231,7 +230,7 @@ EMAIL_PORT = EMAIL_PORT_SERVER
 #EMAIL_HOST_PASSWORD = EMAIL_HOST_PASSWORD_SERVER
 #EMAIL_USE_TLS = EMAIL_USE_TLS_SERVER
 
-# Setting for StopForumSpam
+# Settings for StopForumSpam
 SFS_ALL_POST_REQUESTS = True
 SFS_SOURCE_ZIP = "http://www.stopforumspam.com/downloads/listed_ip_7.zip"
 SFS_CACHE_EXPIRE = 1
