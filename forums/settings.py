@@ -138,6 +138,7 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'htmlmin.middleware.HtmlMinifyMiddleware',
     'htmlmin.middleware.MarkRequestMiddleware',
+    'stopforumspam.middleware.StopForumSpamMiddleware',
 )
 
 ROOT_URLCONF = 'forums.urls'
@@ -160,7 +161,7 @@ INSTALLED_APPS = (
     'widget_tweaks',
     'debug_toolbar',
     'captcha',
-    
+    'stopforumspam',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -230,3 +231,9 @@ EMAIL_PORT = EMAIL_PORT_SERVER
 #EMAIL_HOST_PASSWORD = EMAIL_HOST_PASSWORD_SERVER
 #EMAIL_USE_TLS = EMAIL_USE_TLS_SERVER
 
+# Setting for StopForumSpam
+SFS_ALL_POST_REQUESTS = True
+SFS_SOURCE_ZIP = "http://www.stopforumspam.com/downloads/listed_ip_7.zip"
+SFS_CACHE_EXPIRE = 1
+SFS_LOG_EXPIRE = 7
+SFS_ZIP_FILENAME = "listed_ip_7.txt"
