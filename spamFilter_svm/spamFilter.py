@@ -48,13 +48,13 @@ def makeDictionary(xData):
         elif len(item) == 1:
             del dictionary[item]
 
-    dictionary = dictionary.most_common(1000)
+    dictionary = dictionary.most_common(2000)
     return dictionary
 
 # construct a feature vector for each mail
 def extractFeatures(xData, dictionary):
     
-    featureMatrix = np.zeros((len(xData), 1000))
+    featureMatrix = np.zeros((len(xData), 2000))
     emailId = 0
 
     for mail in xData:
@@ -84,21 +84,6 @@ xTrainMatrix = extractFeatures(xTrain, trainDictionary)
 model = NuSVC(nu=0.07, class_weight='balanced')
 model.fit(xTrainMatrix, yTrainMatrix)
 
-# Calculating the F-score
-def calcFScore(xTest, yTest):
-
-    xTestMatrix = extractFeatures(xTest, trainDictionary)
-    yTestMatrix = np.zeros(len(yTest))
-    for i in range(len(yTest)):
-        if (yTest[i] == 1):
-            yTestMatrix[i] = 1
-
-    result = model.predict(xTestMatrix)
-    matrix = confusion_matrix(yTestMatrix, result)
-
-    fScore = f1_score(yTestMatrix, result, pos_label = 0)
-    return fScore, matrix
-
 # Test new data for Spam
 def predict(emailBody):
 
@@ -109,5 +94,3 @@ def predict(emailBody):
         return "Spam"
     else:
         return "Not Spam"
-
-print(predict(cleanString("Swiss replica watches buy")))
