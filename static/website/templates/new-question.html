@@ -36,7 +36,9 @@
             </strong></small>
         </div>
     </div>
+
     <hr>
+
     <div class="row">
         <div class="col-lg-12">
             {{ form.title.errors }}
@@ -58,17 +60,23 @@
             </div>
         </div>
     </div>
+
     <script src='https://www.google.com/recaptcha/api.js'></script>
-                    <div class="g-recaptcha" data-sitekey="{{ SITE_KEY }}" data-callback="enableBtn"></div>
-                             <script>
-            function enableBtn(){
-    document.getElementById("submit_question").disabled = false;
-   }
-           </script>
+    <div class="g-recaptcha" data-sitekey="{{ SITE_KEY }}" data-callback="enableBtn"></div>
+
+    <script>
+        function enableBtn() {
+            document.getElementById("submit_question").disabled = false;
+        }
+        function changeText() {
+            document.getElementById("submit_question").value = "Submitting...";
+            return validate_dd();
+        }
+    </script>
 
     {% block submitbutton %}
         <br>
-        <input id="submit_question" class="btn btn-success" type="submit" onclick = "return validate_dd();" value="Submit Question" disabled>
+        <input id="submit_question" class="btn btn-success" type="submit" onclick = "changeText()" value="Submit Question" disabled>
     {% endblock %}
     
     {% endwith %}
@@ -90,43 +98,37 @@
     </div><!-- /.modal -->
 
 <script src="{% static 'website/js/nicEdit.js' %}" type="text/javascript"></script>
+
 <script type="text/javascript">
-bkLib.onDomLoaded(function() {
-    new nicEditor({
-        fullPanel : true,
-        iconsPath: "{% static 'website/js/nicEditorIcons.gif' %}",
-        buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link', 'forecolor', 'bgcolor']
-    }).panelInstance('id_body');
-});
+    bkLib.onDomLoaded(function() {
+        new nicEditor({
+            fullPanel : true,
+            iconsPath: "{% static 'website/js/nicEditorIcons.gif' %}",
+            buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link', 'forecolor', 'bgcolor']
+        }).panelInstance('id_body');
+    });
 </script>
 
 
 
 <script>
-window.onload = function(){
-    
-    var c2= "{{ category }}";
-    
-    if (c2 != '12'){
-      
-        $(".tutorial" ).hide()    
-     }
-     else {
-         $(".tutorial" ).show()    
-
-     }
-    if (c2 == "None"){
-      
-         // $("#id_category").val(c2);
-         $( "#id_category option" ).prop('disabled',false);         
-     }   
-
-     else  if(c2 != ""){
-       
-         $("#id_category").val(c2);
-         $( "#id_category option:not(:selected)" ).prop('disabled',true);     
-     }
-}
+    window.onload = function(){        
+        var c2= "{{ category }}";   
+        if (c2 != '12'){      
+            $(".tutorial" ).hide();  
+        }
+        else {
+            $(".tutorial" ).show();    
+        }
+        if (c2 == "None"){  
+            // $("#id_category").val(c2);
+            $( "#id_category option" ).prop('disabled',false);         
+        }   
+        else  if(c2 != ""){   
+            $("#id_category").val(c2);
+            $( "#id_category option:not(:selected)" ).prop('disabled',true);     
+        }      
+    }
 </script>
 
 
