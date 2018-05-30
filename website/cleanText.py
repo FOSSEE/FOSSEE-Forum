@@ -16,6 +16,9 @@ def cleanString(myString):
     # convert all hyperlinks to 'linktag'
     soup = BeautifulSoup(myString, 'html.parser')
     myString = soup.get_text()
+    numberLink = len(soup.find_all('a'))
+    numberImg = len(soup.find_all('img'))
+    myString = myString + numberLink * " linktag " + numberImg * " imgtag "
 
     # convert numbers to 'number'
     myString = re.sub(r'[0-9]+', r' number ', myString)
