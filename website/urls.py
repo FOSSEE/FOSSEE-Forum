@@ -30,7 +30,6 @@ urlpatterns = [
     url(r'^ajax-similar-questions/$', views.ajax_similar_questions, name='ajax_similar_questions'),
     url(r'^ajax-notification-remove/$', views.ajax_notification_remove, name='ajax_notification_remove'),
     url(r'^ajax-keyword-search/$', views.ajax_keyword_search, name='ajax_keyword_search'),
-    url(r'^ajax-time-search/$', views.ajax_time_search, name='ajax_time_search'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

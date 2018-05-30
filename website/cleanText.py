@@ -18,7 +18,7 @@ def cleanString(myString):
     myString = soup.get_text()
     numberLink = len(soup.find_all('a'))
     numberImg = len(soup.find_all('img'))
-    myString = myString + numberLink * " linktag " + numberImg * " imgtag "
+    myString = myString + numberLink * " linktag " + numberImg * ' imgtag '
 
     # convert numbers to 'number'
     myString = re.sub(r'[0-9]+', r' number ', myString)
@@ -26,7 +26,6 @@ def cleanString(myString):
     # convert $, ! and ? to proper words
     myString = re.sub(r'[$]', r' dollar ', myString)
     myString = re.sub(r'[!]', r' exclammark ', myString)
-    myString = re.sub(r'[?]', r' questmark ', myString)
 
     # convert other punctuation to whitespace
     myString = re.sub(r'([^\w\s]+)|([_-]+)', r' ', myString)

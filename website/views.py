@@ -21,6 +21,7 @@ from django.db.models import Count
 from django.core.mail import send_mail
 from django.core.mail import EmailMultiAlternatives
 from forums.settings import SET_TO_EMAIL_ID
+from spamFilter import predict
 
 User = get_user_model()
 admins = (
@@ -31,7 +32,7 @@ categories = FossCategory.objects.order_by('name')
 # for home page
 def home(request):
     print settings.DOMAIN_NAME
-    questions = Question.objects.all().order_by('date_created').reverse()[:10]
+    questions = Question.objects.all().order_by('date_created').filter(is_spam=0).reverse()[:10]
     context = {
         'categories': categories,
         'questions': questions
@@ -40,7 +41,7 @@ def home(request):
     
 # to get all questions posted till now and pagination, 20 questions at a time
 def questions(request):
-    questions = Question.objects.all().order_by('date_created').reverse()
+    questions = Question.objects.all().filter(is_spam=0).order_by('date_created').reverse()
     context = {
         'questions': questions,
     }
@@ -289,9 +290,9 @@ def answer_comment(request):
 def filter(request, category=None, tutorial=None):
 
     if category and tutorial:
-        questions = Question.objects.filter(category__name=category).filter(sub_category=tutorial).order_by('date_created').reverse()
+        questions = Question.objects.filter(category__name=category).filter(sub_category=tutorial).filter(is_spam=0).order_by('date_created').reverse()
     elif tutorial is None:
-        questions = Question.objects.filter(category__name=category).order_by('date_created').reverse()
+        questions = Question.objects.filter(category__name=category).filter(is_spam=0).order_by('date_created').reverse()
 
     context = {
         'questions': questions,
@@ -348,6 +349,8 @@ def new_question(request):
             question.userViews.add(request.user)
             if str(question.sub_category) == 'None':
                 question.sub_category = ""
+            if (predict(question.body) == "Spam"):
+                question.is_spam = 1
 
             question.save()
             
@@ -364,11 +367,13 @@ def new_question(request):
                 <b> Category: </b>{1}<br>
                 <b> Link: </b><a href="{3}">{3}</a><br>
                 <b> Question : </b>{2}<br>
+                <b> Classified as spam: </b>{4}<br>
                 """.format(
                 question.title,
                 question.category,
                 question.body,
                 settings.DOMAIN_NAME + '/question/'+ str(question.id),
+                question.is_spam == 1,
             )
             email = EmailMultiAlternatives(
                 subject,'',
@@ -448,6 +453,8 @@ def edit_question(request, question_id=None):
             question.views = 1
             if str(question.sub_category) == 'None':
                 question.sub_category = ""
+            if (predict(question.body) == "Spam"):
+                question.is_spam = 1
 
             question.save()
 
@@ -465,12 +472,14 @@ def edit_question(request, question_id=None):
                 <b> Category: </b>{2}<br>
                 <b> Link: </b><a href="{4}">{4}</a><br>
                 <b> Question : </b>{3}<br>
+                <b> Classified as spam: </b>{5}<br>
                 """.format(
                 question.title,
                 previous_title,
                 question.category,
                 question.body,
                 settings.DOMAIN_NAME + '/question/'+ str(question.id),
+                question.is_spam == 1,
             )
             email = EmailMultiAlternatives(
                 subject,'',
@@ -783,20 +792,3 @@ def ajax_keyword_search(request):
         }
 
         return render(request, 'website/templates/ajax-keyword-search.html', context)
-
-@csrf_exempt
-def ajax_time_search(request):
-    if request.method == "POST":
-        category = request.POST.get('category')
-        tutorial = request.POST.get('tutorial')
-        questions = None
-
-        if category:
-            questions = Question.objects.filter(category=category.replace(' ', '-'))
-        if tutorial:
-            questions = questions.filter(tutorial=tutorial.replace(' ', '-'))
-        context = {
-            'questions': questions
-        }
-
-        return render(request, 'website/templates/ajax-time-search.html', context)
