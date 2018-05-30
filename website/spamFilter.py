@@ -1,11 +1,12 @@
 # coding=utf-8
 
+import os
 import openpyxl
+import joblib
 import numpy as np
 from cleanText import cleanString
 from collections import Counter
-from sklearn.svm import NuSVC
-from sklearn.metrics import confusion_matrix, f1_score
+from sklearn.svm import LinearSVC, NuSVC, SVC
 
 # Get the original dataset
 def store():
@@ -18,7 +19,7 @@ def store():
 
     rows = dataSheetOld.max_row
 
-    for i in range(400, rows+1):
+    for i in range(2, rows+1):
 
         if (str(dataSheetOld.cell(row = i+2, column = 2).value) != 'None'):
             xData.append(cleanString((dataSheetOld.cell(row = i+2, column = 1).value).encode('utf-8')))
@@ -54,7 +55,7 @@ def makeDictionary(xData):
 # construct a feature vector for each mail
 def extractFeatures(xData, dictionary):
     
-    featureMatrix = np.zeros((len(xData), 2000))
+    featureMatrix = np.zeros((len(xData), len(dictionary)))
     emailId = 0
 
     for mail in xData:
@@ -64,25 +65,10 @@ def extractFeatures(xData, dictionary):
                 if (d[0] == word):
                     wordId = i
                     featureMatrix[emailId, wordId] = mail.count(word)
+                    break
         emailId += 1
 
     return featureMatrix
-
-# Create training data
-xTrain, yTrain = store()
-trainDictionary = makeDictionary(xTrain)
-
-# Create feature vector and matrix for yTrain and xTrain
-yTrainMatrix = np.zeros(len(yTrain))
-for i in range(len(yTrain)):
-    if (yTrain[i] == 1):
-        yTrainMatrix[i] = 1
-
-xTrainMatrix = extractFeatures(xTrain, trainDictionary)
-
-# Training SVM classifier
-model = NuSVC(nu=0.07, class_weight='balanced')
-model.fit(xTrainMatrix, yTrainMatrix)
 
 # Test new data for Spam
 def predict(emailBody):
@@ -94,3 +80,33 @@ def predict(emailBody):
         return "Spam"
     else:
         return "Not Spam"
+
+try:
+
+    # Create training data
+    xTrain, yTrain = store()
+    
+    model = joblib.load('training_model.pkl')
+    trainDictionary = makeDictionary(xTrain)
+
+except:
+
+    # Create training data
+    xTrain, yTrain = store()
+    trainDictionary = makeDictionary(xTrain)
+
+    # Create feature vector and matrix for yTrain and xTrain
+    yTrainMatrix = np.zeros(len(yTrain))
+    for i in range(len(yTrain)):
+        if (yTrain[i] == 1):
+            yTrainMatrix[i] = 1
+
+    xTrainMatrix = extractFeatures(xTrain, trainDictionary)
+
+    # Training SVM classifier
+    model = LinearSVC(class_weight='balanced')
+    model = model.fit(xTrainMatrix, yTrainMatrix)
+
+    joblib.dump(model, "training_model.pkl")
+
+print(predict("python print error DWSIM laptop fossee python python please help"))
