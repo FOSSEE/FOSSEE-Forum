@@ -70,6 +70,7 @@ class Answer(models.Model):
     userDownVotes = models.ManyToManyField(User, blank=True, related_name='postAnswerDownVotes')
     upvotes = models.IntegerField(default=0)
     num_votes = models.IntegerField(default=0)
+    is_spam = models.IntegerField(default=0)
     image = ResizedImageField(size=[400,400], upload_to="images/", blank=True)
 
     def user(self):

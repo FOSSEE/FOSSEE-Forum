@@ -62,7 +62,7 @@ def get_question(request, question_id=None, pretty_url=None):
     if pretty_url != pretty_title:
         return HttpResponseRedirect('/question/'+ question_id + '/' + pretty_title)
 
-    answers = question.answer_set.all()
+    answers = question.answer_set.filter(is_spam=0).all()
     ans_count = question.answer_set.count()
     form = AnswerQuestionForm()
     thisuserupvote = question.userUpVotes.filter(id=request.user.id).count()
@@ -112,7 +112,6 @@ def question_answer(request,qid):
    
     if request.method == 'POST':
         form = AnswerQuestionForm(request.POST, request.FILES)
-        answers = question.answer_set.all()
         answer = Answer() 
         answer.uid = request.user.id
 
@@ -124,12 +123,12 @@ def question_answer(request,qid):
             answer.body = body.encode('unicode_internal')  
             if ('image' in request.FILES):
                 answer.image = request.FILES['image']
+            if (predict(answer.body) == "Spam"):
+                answer.is_spam = 1
             answer.save()
 
-            # if user_id of question not matches to user_id of answer that
-            # question , no
-            if question.user_id != request.user.id:
-
+            # if user_id of question does not match to user_id of answer, send notification
+            if ((question.user_id != request.user.id) and (answer.is_spam == 0)):
                 notification = Notification()
                 notification.uid = question.user_id
                 notification.qid = question.id
@@ -185,7 +184,7 @@ def answer_comment(request):
 
         answer_id = request.POST['answer_id']
         answer = Answer.objects.get(pk=answer_id)
-        answers = answer.question.answer_set.all()
+        answers = answer.question.answer_set.filter(is_spam=0).all()
         answer_creator = answer.user()
         form = AnswerCommentForm(request.POST)
 

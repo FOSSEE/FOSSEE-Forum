@@ -60,21 +60,24 @@ def extractFeatures(xData, dictionary):
 
     return featureMatrix
 
-# Create training data
-xTrain, yTrain = store()
-trainDictionary = makeDictionary(xTrain)
+def train():
 
-# Create feature vector and matrix for yTrain and xTrain
-yTrainMatrix = np.zeros(len(yTrain))
-for i in range(len(yTrain)):
-    if (yTrain[i] == 1):
-        yTrainMatrix[i] = 1
+    print("Training...")
 
-xTrainMatrix = extractFeatures(xTrain, trainDictionary)
+    # Create training data
+    xTrain, yTrain = store()
+    trainDictionary = makeDictionary(xTrain)
 
-# Training SVM classifier
-model = LinearSVC(class_weight='balanced')
-model.fit(xTrainMatrix, yTrainMatrix)
+    # Create feature vector and matrix for yTrain and xTrain
+    yTrainMatrix = np.zeros(len(yTrain))
+    for i in range(len(yTrain)):
+        if (yTrain[i] == 1):
+            yTrainMatrix[i] = 1
+
+    xTrainMatrix = extractFeatures(xTrain, trainDictionary)
+
+    # Training SVM classifier
+    model.fit(xTrainMatrix, yTrainMatrix)
 
 # Calculating the F-score
 def calcFScore(xTest, yTest):
@@ -96,8 +99,13 @@ def predict(emailBody):
 
     featureMatrix = extractFeatures([cleanString(emailBody)], trainDictionary)
     result = model.predict(featureMatrix)
+    print("Predicting...")
 
     if (1 in result):
         return "Spam"
     else:
         return "Not Spam"
+
+model = LinearSVC(class_weight='balanced')
+trainDictionary = {}
+train()
