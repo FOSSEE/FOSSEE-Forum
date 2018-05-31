@@ -21,13 +21,25 @@ def store():
     for i in range(2, rows+1):
 
         if (str(dataSheetOld.cell(row = i, column = 2).value) != 'None'):
-            xData.append(cleanString(dataSheetOld.cell(row = i, column = 1).value.encode('utf-8')))
             if (str(dataSheetOld.cell(row = i, column = 2).value) == "Spam"):
-                yData.append(1)
-            else:
-                yData.append(0)
+                for k in range(4):
+                    yData.append(1)
+                    xData.append(cleanString(dataSheetOld.cell(row = i, column = 1).value.encode('utf-8')))
 
+    for i in range(2, rows+1):
+
+        if (str(dataSheetOld.cell(row = i, column = 2).value) != 'None'):
+            if (str(dataSheetOld.cell(row = i, column = 2).value) == "Not Spam"):
+                yData.append(0)
+                xData.append(cleanString(dataSheetOld.cell(row = i, column = 1).value.encode('utf-8')))
+        
+    
     return xData, yData
+
+    # # NOTE: to train data on the entire dataset, simply return xData and yData
+    # # Splitting the data like this is to obtain test cases and calculate the F-score of the learning algorithm
+    # xTrain, xTest, yTrain, yTest = train_test_split(xData, yData, test_size = 0.2, random_state = 42)
+    # return xTrain, xTest, yTrain, yTest
 
 # make a dictionary of the most common words
 def makeDictionary(xData):
@@ -62,10 +74,12 @@ def extractFeatures(xData, dictionary):
 
 def train():
 
-    print("Training...")
+    print("Training spam filter...")
 
     # Create training data
     xTrain, yTrain = store()
+
+    global trainDictionary
     trainDictionary = makeDictionary(xTrain)
 
     # Create feature vector and matrix for yTrain and xTrain
@@ -77,7 +91,8 @@ def train():
     xTrainMatrix = extractFeatures(xTrain, trainDictionary)
 
     # Training SVM classifier
-    model.fit(xTrainMatrix, yTrainMatrix)
+    global model
+    model = model.fit(xTrainMatrix, yTrainMatrix)
 
 # Calculating the F-score
 def calcFScore(xTest, yTest):
@@ -106,6 +121,6 @@ def predict(emailBody):
     else:
         return "Not Spam"
 
-model = LinearSVC(class_weight='balanced')
+model = LinearSVC()
 trainDictionary = {}
 train()

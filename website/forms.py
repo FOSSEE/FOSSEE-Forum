@@ -20,8 +20,8 @@ class NewQuestionForm(forms.ModelForm):
                         error_messages = {'required':'Title field required.'})
                         
     body = forms.CharField(widget=forms.Textarea(),
-            required = True,
-            error_messages = {'required':'Question field required.'})
+                        required = True,
+                        error_messages = {'required':'Question field required.'})
 
     image = forms.ImageField(widget=forms.ClearableFileInput(), help_text="Upload image: ", required=False)
     
@@ -36,17 +36,16 @@ class NewQuestionForm(forms.ModelForm):
         return title
     
     def clean_body(self):
-        body_list = []
         body = self.cleaned_data['body']
+
+        if body.isspace():
+            raise forms.ValidationError("Body cannot be only spaces")
 
         if len(body) < 12:
             raise forms.ValidationError("Body should be minimum 12 characters long")
 
         body = body.replace('&nbsp;', ' ')
         body = body.replace('<br>', '\n')
-
-        if body.isspace():
-            raise forms.ValidationError("Body cannot be only spaces")
 
         return body
 
@@ -97,7 +96,7 @@ class AnswerQuestionForm(forms.ModelForm):
         body = body.replace('&nbsp;', ' ')
         body = body.replace('<br>', '\n')
         if body.isspace():
-            raise forms.ValidationError("Body Can not be only Spaces")
+            raise forms.ValidationError("Body cannot be only spaces")
         return body
 
     class Meta:
