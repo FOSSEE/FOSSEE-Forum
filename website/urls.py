@@ -18,10 +18,12 @@ urlpatterns = [
     url(r'^user/(?P<user_id>\d+)/notifications/$', views.user_notifications, name='user_notifications'),
     url(r'^clear-notifications/$', views.clear_notifications, name='clear_notifications'),
     url(r'^search/$', views.search, name='search'),
-    # url(r'^unanswerednotification/$', views.unanswered_notification, name='unanswered_notification'),
     url(r'^vote_post/$', views.vote_post, name='vote_post'),
     url(r'^ans_vote_post/$', views.ans_vote_post, name='ans_vote_post'),
     url(r'^question/delete/(?P<question_id>\d+)/$', views.question_delete, name='question_delete'),
+
+    # Moderator panel
+    url(r'^moderator/$', views.moderator_home, name='moderator_home'),
     
     # Ajax helpers
     url(r'^ajax-tutorials/$', views.ajax_tutorials, name='ajax_tutorials'),

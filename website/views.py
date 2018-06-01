@@ -14,7 +14,7 @@ from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.contrib import messages 
 from django.utils.html import strip_tags
-from website.models import Question, Answer, Notification, AnswerComment, FossCategory, Profile, SubFossCategory
+from website.models import Question, Answer, Notification, AnswerComment, FossCategory, Profile, SubFossCategory, ModeratorGroup
 from website.forms import NewQuestionForm, AnswerQuestionForm,AnswerCommentForm
 from website.helpers import get_video_info, prettify
 from django.db.models import Count
@@ -700,7 +700,26 @@ def search(request):
     }
     return render(request, 'website/templates/search.html', context)
 
-# Ajax Section
+
+# MODERATOR SECTION
+# All the moderator views go below
+def moderator_home(request):
+    
+    if (request.user.is_anonymous() or request.user.groups.count() == 0):
+        return HttpResponse("Not authorized to access.")
+
+    group = ModeratorGroup.objects.get(group=request.user.groups.all()[0])
+    category = group.category
+    questions = Question.objects.filter(category__name=category.name).order_by('date_created').reverse()[:10]
+    
+    context = {
+        'questions': questions,
+        'category': category,
+    }
+
+    return render(request, 'website/templates/moderator/index.html', context)
+
+# AJAX SECTION
 # All the ajax views go below
 @csrf_exempt
 def ajax_category(request):

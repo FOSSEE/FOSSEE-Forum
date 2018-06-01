@@ -1,4 +1,4 @@
-{% extends 'website/templates/base.html' %}
+{% extends 'website/templates/moderator/base.html' %}
 {% load static %}
 {% load count_tags %}
 {% load notify %}
@@ -54,31 +54,18 @@
 
 
     <div id="carousel-container">
-
-        <div class="carousel">
-
-            {% for category in categories %}
-                <div>
-                    <div class="thumbnail">
-                        {% with file=category|get_category_image %}
-                            {% if file %}
-                                <img src="{% static category|get_category_image %}">
-                            {% else %}
-                                <div class="category-title">{{category}}</div>
-                            {% endif %}
-                        {% endwith %}
-                        <div class="caption">
-                            <small class="category">
-                                {{ category.description }}
-                            </small>
-                        <a class="btn btn-xs btn-block btn-success" href="{% url 'website:new_question' %}?category={{ category.id|urlencode }}">Ask a question</a>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
-        </div> <!-- /.carousel -->
-    </div> <!-- /#carousel-container -->
-
+        <div>
+            <div class="thumbnail">
+                {% with file=category|get_category_image %}
+                    {% if file %}
+                        <img src="{% static category|get_category_image %}">
+                    {% else %}
+                        <div class="category-title">{{ category }}</div>
+                    {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+    </div> <!-- /.carousel -->
 
 
     <div id="filter-container">
@@ -102,7 +89,7 @@
     </div> <!-- /#filter-container -->
 
 <br>
-<div class="panel panel-default">
+    <div class="panel panel-default">
         <div class="panel-heading">
             Recent questions
         </div>
@@ -127,6 +114,7 @@
                     <th>Date</th>
                     <th>Views</th>
                     <th>Answers</th>
+                    <th>Spam</th>
                 </tr> 
             </thead>
             
@@ -164,6 +152,14 @@
                     
                     <td>
                         {{ question.answer_set.count }}
+                    </td>
+
+                    <td>
+                    {% if question.is_spam %}
+                        Yes
+                    {% else %}
+                        No
+                    {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
