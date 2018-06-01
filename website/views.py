@@ -31,12 +31,13 @@ categories = FossCategory.objects.order_by('name')
 
 # for home page
 def home(request):
-    print settings.DOMAIN_NAME
+
     questions = Question.objects.all().order_by('date_created').filter(is_spam=0).reverse()[:10]
     context = {
         'categories': categories,
-        'questions': questions
+        'questions': questions,
     }
+
     return render(request, "website/templates/index.html", context)
     
 # to get all questions posted till now and pagination, 20 questions at a time
@@ -117,7 +118,7 @@ def question_answer(request,qid):
 
         if form.is_valid():
             cleaned_data = form.cleaned_data
-            body = str(cleaned_data['body'])
+            body = cleaned_data['body'].encode('utf-8')
             answer.body = body.splitlines()    
             answer.question = question
             answer.body = body.encode('unicode_internal')  
@@ -190,7 +191,7 @@ def answer_comment(request):
 
         if form.is_valid():
 
-            body = str(request.POST['body'])
+            body = request.POST['body'].encode('utf-8')
             comment = AnswerComment()
             comment.uid = request.user.id
             comment.answer = answer

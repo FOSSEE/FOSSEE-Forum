@@ -1,6 +1,7 @@
-from website.models import Question, Answer, AnswerComment, FossCategory, Profile
-from django.contrib.auth.models import User
+from website.models import Question, Answer, AnswerComment, FossCategory, Profile, ModeratorGroup
+from django.contrib.auth.models import User, Group
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.admin import GroupAdmin as BaseGroupAdmin
 from django.contrib import admin
 
 
@@ -17,12 +18,23 @@ class ProfileInline(admin.StackedInline):
     can_delete = False
     verbose_name_plural = 'profile'
 
-# Define a new User admin
+class GroupInline(admin.StackedInline):
+    model = ModeratorGroup
+    can_delete = False
+    verbose_name_plural = 'moderator group'
+
+# Define a new User, Group admin
 class UserAdmin(BaseUserAdmin):
     inlines = (ProfileInline, )
 
+class GroupAdmin(BaseGroupAdmin):
+    inlines = (GroupInline, )
+
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
+admin.site.unregister(Group)
+admin.site.register(Group, GroupAdmin)
+
 admin.site.register(Question, QuestionAdmin)
 admin.site.register(Answer, AnswerAdmin)
 admin.site.register(AnswerComment)

@@ -101,18 +101,23 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                                 </a>
 
                                 <ul class="dropdown-menu">
-                                
-				                <li>
-                                    <a href="/accounts/view-profile/{{ user.id }}">My Profile</a>
-                                </li>
-                                <li>
-                                    <a href="{% url 'password_change' %}">Change password</a>
-                                </li>
-                                <li>
-                                    <a href="{% url 'user_logout' %}">Logout</a>
-                                </li>
+                                    <li>
+                                        <a href="/accounts/view-profile/{{ user.id }}">My Profile</a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'password_change' %}">Change password</a>
+                                    </li>
+                                    {% ifnotequal request.user.groups.count 0 %}
+                                        <li>
+                                            <a href="{% url 'user_logout' %}">Moderator Panel</a>
+                                        </li>
+                                    {% endifnotequal %}
+                                    <li>
+                                        <a href="{% url 'user_logout' %}">Logout</a>
+                                    </li>
                                 </ul>
                               </li> 
+
                               {% else %}
                               <li>
                                 <a href="{% url 'user_login' %}">

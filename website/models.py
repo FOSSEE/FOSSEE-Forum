@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.contrib.auth import get_user_model
 from django_resized import ResizedImageField
 
@@ -117,3 +117,7 @@ class Profile(models.Model):
     
     class Meta:
         app_label = 'website'
+
+class ModeratorGroup(models.Model):
+    group = models.OneToOneField(Group, on_delete=models.CASCADE)
+    category = models.ForeignKey(FossCategory)
