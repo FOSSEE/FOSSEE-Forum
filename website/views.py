@@ -16,7 +16,7 @@ from django.contrib import messages
 from django.utils.html import strip_tags
 from website.models import Question, Answer, Notification, AnswerComment, FossCategory, Profile, SubFossCategory, ModeratorGroup
 from website.forms import NewQuestionForm, AnswerQuestionForm,AnswerCommentForm
-from website.helpers import get_video_info, prettify
+from website.templatetags.helpers import prettify
 from django.db.models import Count
 from django.core.mail import send_mail
 from django.core.mail import EmailMultiAlternatives
@@ -705,9 +705,11 @@ def search(request):
 # All the moderator views go below
 def moderator_home(request):
     
+    # If no user logged in or user not in any moderator group
     if (request.user.is_anonymous() or request.user.groups.count() == 0):
         return HttpResponse("Not authorized to access.")
 
+    # Finding the questions related to moderator's category
     group = ModeratorGroup.objects.get(group=request.user.groups.all()[0])
     category = group.category
     questions = Question.objects.filter(category__name=category.name).order_by('date_created').reverse()[:10]
