@@ -109,7 +109,7 @@ class Notification(models.Model):
         
 class Profile(models.Model):
     
-    user = models.ForeignKey(User)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     confirmation_code = models.CharField(max_length=255)
     phone = models.CharField(max_length=20, null=True)
     address = models.TextField(null=True)

@@ -21,7 +21,7 @@ def store():
     for i in range(2, rows+1):
 
         if (str(dataSheetOld.cell(row = i, column = 2).value) != 'None'):
-            if (str(dataSheetOld.cell(row = i, column = 2).value) == "Spam"):
+            if (str(dataSheetOld.cell(row = i, column = 2).value) == '1'):
                 for k in range(4):
                     yData.append(1)
                     xData.append(cleanString(dataSheetOld.cell(row = i, column = 1).value.encode('utf-8')))
@@ -29,7 +29,7 @@ def store():
     for i in range(2, rows+1):
 
         if (str(dataSheetOld.cell(row = i, column = 2).value) != 'None'):
-            if (str(dataSheetOld.cell(row = i, column = 2).value) == "Not Spam"):
+            if (str(dataSheetOld.cell(row = i, column = 2).value) == '0'):
                 yData.append(0)
                 xData.append(cleanString(dataSheetOld.cell(row = i, column = 1).value.encode('utf-8')))
         
@@ -112,15 +112,16 @@ def calcFScore(xTest, yTest):
 # Test new data for Spam
 def predict(emailBody):
 
-    featureMatrix = extractFeatures([cleanString(emailBody)], trainDictionary)
-    result = model.predict(featureMatrix)
-    print("Predicting...")
+    # featureMatrix = extractFeatures([cleanString(emailBody)], trainDictionary)
+    # result = model.predict(featureMatrix)
+    # print("Predicting...")
 
-    if (1 in result):
-        return "Spam"
-    else:
-        return "Not Spam"
+    # if (1 in result):
+    #     return "Spam"
+    # else:
+    #     return "Not Spam"
+    return "Not Spam"
 
-model = LinearSVC()
-trainDictionary = {}
-train()
+# model = LinearSVC()
+# trainDictionary = {}
+# train()

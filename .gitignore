@@ -9,7 +9,7 @@ robots.txt
 settings.json
 forums.sql
 local.py
-website/DataSet.xlsx
+website/DataSet.*
 # C extensions
 *.so
 
