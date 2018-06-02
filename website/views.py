@@ -145,8 +145,6 @@ def question_answer(request,qid):
             sender_email = settings.SENDER_EMAIL
             subject = "FOSSEE Forums - {0} - Your question has been answered".format(question.category)
             to = [question.user.email,settings.FORUM_NOTIFICATION,]
-            url = settings.EMAIL_URL
-            message = "  "
             message =""" The following new question has been posted in the FOSSEE Forum: \n\n
                 Title: {0} \n
                 Category: {1}\n
@@ -215,7 +213,6 @@ def answer_comment(request):
             sender_email = settings.SENDER_EMAIL
             subject = "FOSSEE Forums - {0} - Comment for your answer".format(answer.question.category)
             to = [answer_creator.email, settings.FORUM_NOTIFICATION,]
-            url = settings.EMAIL_URL
             message =""" 
                 A comment has been posted on your answer. \n\n
                 Title: {0}\n
@@ -255,7 +252,6 @@ def answer_comment(request):
             sender_email = settings.SENDER_EMAIL
             subject = "FOSSEE Forums - {0} - Comment has a reply".format(answer.question.category)
             to = comment_creator_emails
-            url = settings.EMAIL_URL
             message ="""
                 A reply has been posted on your comment.\n\n
                 Title: {0}\n
@@ -264,8 +260,7 @@ def answer_comment(request):
                 Regards,\nFOSSEE Team,\nIIT Bombay.
                 """.format(
                 answer.question.title,
-                answer.question.category, 
-                #question.tutorial, 
+                answer.question.category,
                 settings.DOMAIN_NAME + '/question/' + str(answer.question.id) + "#answer" + str(answer.id)
             )
             # send_mail(subject, message, sender_email, to)  
@@ -363,8 +358,6 @@ def new_question(request):
             sender_email = settings.SENDER_EMAIL
             subject = "FOSSEE Forums - {0} - New Question".format(question.category)
             to = (question.category.email, settings.FORUM_NOTIFICATION)
-            url = settings.EMAIL_URL
-
             message = """
                 The following new question has been posted in the FOSSEE Forum: <br>
                 <b> Title: </b>{0}<br>
@@ -467,8 +460,6 @@ def edit_question(request, question_id=None):
             sender_email = settings.SENDER_EMAIL
             subject = "FOSSEE Forums - {0} - New Question".format(question.category)
             to = (question.category.email, settings.FORUM_NOTIFICATION)
-            url = settings.EMAIL_URL
-
             message = """
                 The following question has been edited by the user in the FOSSEE Forum: <br>
                 <b> Original title: </b>{0}<br>
@@ -534,8 +525,6 @@ def question_delete(request, question_id):
     sender_email = settings.SENDER_EMAIL
     subject = "FOSSEE Forums - {0} - New Question".format(question.category)
     to = (question.category.email, settings.FORUM_NOTIFICATION)
-    url = settings.EMAIL_URL
-
     message = """
         The following question has been deleted by the user in the FOSSEE Forum: <br>
         <b> Title: </b>{0}<br>
@@ -556,6 +545,34 @@ def question_delete(request, question_id):
 
     question.delete()
     return render(request, 'website/templates/question-delete.html', {'title': title})
+
+# View for deleting answer, notification is sent to person who posted answer
+@login_required
+@user_passes_test(is_moderator)
+def answer_delete(request, answer_id):
+
+    answer = get_object_or_404(Answer, id=answer_id)
+    question_id = answer.question.id
+
+    # Sending email to user when answer is deleted
+    sender_name = "FOSSEE Forums"
+    sender_email = settings.SENDER_EMAIL
+    subject = "FOSSEE Forums - {0} - Answer Deleted".format(answer.question.category)
+    to = [answer.user().email]
+    message = """
+        The following answer has been deleted by a moderator in the FOSSEE Forum: <br>
+        <b> Answer: </b>{0}<br>
+        <b> Category: </b>{1}<br>
+        <b> Question: </b>{2}<br>
+        """.format(
+        answer.body,
+        answer.question.category,
+        answer.question.body,
+    )
+    # send_mail(subject, message, sender_email, to, fail_silently=True)
+
+    answer.delete()
+    return HttpResponseRedirect('/question/' + str(question_id))
 
 # return number of votes and initial votes
 # user who asked the question,cannot vote his/or anwser, 

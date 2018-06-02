@@ -5162,7 +5162,7 @@ a.list-group-item.active>.badge,.nav-pills>.active>a>.badge{
 	border:1px solid #ddd;
 	border-radius:0;
 	-webkit-transition:all .2s ease-in-out;
-	transition:all .2s ease-in-out
+	transition:all .2s ease-in-out;
 }
 
 .thumbnail>img,.thumbnail a>img{

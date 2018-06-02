@@ -12,6 +12,14 @@ def can_edit(user, obj):
     	   return False
     except:
         return False
-
-
 register.filter(can_edit)
+
+def is_moderator(user):
+    try:
+        if user.groups.count() > 0:
+            return True
+        else:
+            return False
+    except:
+        return False
+register.filter(is_moderator)

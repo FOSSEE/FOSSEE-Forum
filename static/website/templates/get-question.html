@@ -150,9 +150,10 @@
                     <a href="/accounts/view-profile/{{ answer.user.id }}"> {{answer.user}} </a>
                 </span>
             </span>
-            {% if user|can_edit:answer  %}
+            {% if user|is_moderator  %}
             <span class="modify" style="display:block">
-                <a class="edit btn btn-xs btn-info vs" href="#body{{ answer.id}}" data-target="body{{ answer.id }}">Edit</a>
+                <a class="delete btn btn-xs btn-info vs" href="{% url 'website:answer_delete' answer.id %}" data-target="body{{ answer.id }}">Delete</a>
+                <a class="edit btn btn-xs btn-info vs" href="#body{{ answer.id }}" data-target="body{{ answer.id }}">Edit</a>
                 <a class="save btn btn-xs btn-success vs"  data-target="body{{ answer.id }}" data-aid="{{ answer.id }}" href="#">Save</a>
             </span>
             {% endif %}
