@@ -21,6 +21,7 @@ TEMPLATES = [
             'context_processors': [
                     'django.core.context_processors.request',
                     'website.context_processors.admin_processor',
+                    'website.context_processors.moderator_activated',
                     'django.contrib.auth.context_processors.auth',
                     'django.template.context_processors.debug',
                     'django.template.context_processors.i18n',
@@ -236,3 +237,6 @@ SFS_SOURCE_ZIP = "http://www.stopforumspam.com/downloads/listed_ip_7.zip"
 SFS_CACHE_EXPIRE = 1
 SFS_LOG_EXPIRE = 7
 SFS_ZIP_FILENAME = "listed_ip_7.txt"
+
+# Variable to store if moderator using forum
+MODERATOR_ACTIVATED = False

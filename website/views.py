@@ -36,6 +36,8 @@ def is_moderator(user):
 # for home page
 def home(request):
 
+    settings.MODERATOR_ACTIVATED = False
+    
     questions = Question.objects.all().order_by('date_created').filter(is_spam=False).reverse()[:10]
     context = {
         'categories': categories,
@@ -307,6 +309,8 @@ def filter(request, category=None, tutorial=None):
 # post a new question on to forums, notification is sent to mailing list team@fossee.in
 @login_required
 def new_question(request):
+
+    settings.MODERATOR_ACTIVATED = False
 
     context = {}
     user = request.user
@@ -692,6 +696,8 @@ def ans_vote_post(request):
 @login_required
 def user_notifications(request, user_id):
 
+    settings.MODERATOR_ACTIVATED = False
+
     if str(user_id) == str(request.user.id):
 
         try :
@@ -712,13 +718,18 @@ def user_notifications(request, user_id):
 # to clear notification from header, once viewed or cancelled
 @login_required
 def clear_notifications(request):
+
+    settings.MODERATOR_ACTIVATED = False
     Notification.objects.filter(uid=request.user.id).delete()
     return HttpResponseRedirect("/user/{0}/notifications/".format(request.user.id))
 
 def search(request):
+
+    settings.MODERATOR_ACTIVATED = False
     context = {
         'categories': categories
     }
+
     return render(request, 'website/templates/search.html', context)
 
 
@@ -728,6 +739,8 @@ def search(request):
 @login_required
 @user_passes_test(is_moderator)
 def moderator_home(request):
+
+    settings.MODERATOR_ACTIVATED = True
 
     # If user is a master moderator
     if (request.user.groups.filter(name="forum_moderator").exists()):
