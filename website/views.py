@@ -36,7 +36,7 @@ def is_moderator(user):
 # for home page
 def home(request):
 
-    questions = Question.objects.all().order_by('date_created').filter(is_spam=0).reverse()[:10]
+    questions = Question.objects.all().order_by('date_created').filter(is_spam=False).reverse()[:10]
     context = {
         'categories': categories,
         'questions': questions,
@@ -46,7 +46,7 @@ def home(request):
     
 # to get all questions posted till now and pagination, 20 questions at a time
 def questions(request):
-    questions = Question.objects.all().filter(is_spam=0).order_by('date_created').reverse()
+    questions = Question.objects.all().filter(is_spam=False).order_by('date_created').reverse()
     context = {
         'questions': questions,
     }
@@ -67,7 +67,7 @@ def get_question(request, question_id=None, pretty_url=None):
     if pretty_url != pretty_title:
         return HttpResponseRedirect('/question/'+ question_id + '/' + pretty_title)
 
-    answers = question.answer_set.filter(is_spam=0).all()
+    answers = question.answer_set.filter(is_spam=False).all()
     ans_count = question.answer_set.count()
     form = AnswerQuestionForm()
     thisuserupvote = question.userUpVotes.filter(id=request.user.id).count()
@@ -129,11 +129,11 @@ def question_answer(request,qid):
             if ('image' in request.FILES):
                 answer.image = request.FILES['image']
             if (predict(answer.body) == "Spam"):
-                answer.is_spam = 1
+                answer.is_spam = True
             answer.save()
 
             # if user_id of question does not match to user_id of answer, send notification
-            if ((question.user_id != request.user.id) and (answer.is_spam == 0)):
+            if ((question.user_id != request.user.id) and (answer.is_spam == False)):
                 notification = Notification()
                 notification.uid = question.user_id
                 notification.qid = question.id
@@ -187,7 +187,7 @@ def answer_comment(request):
 
         answer_id = request.POST['answer_id']
         answer = Answer.objects.get(pk=answer_id)
-        answers = answer.question.answer_set.filter(is_spam=0).all()
+        answers = answer.question.answer_set.filter(is_spam=False).all()
         answer_creator = answer.user()
         form = AnswerCommentForm(request.POST)
 
@@ -289,9 +289,9 @@ def answer_comment(request):
 def filter(request, category=None, tutorial=None):
 
     if category and tutorial:
-        questions = Question.objects.filter(category__name=category).filter(sub_category=tutorial).filter(is_spam=0).order_by('date_created').reverse()
+        questions = Question.objects.filter(category__name=category).filter(sub_category=tutorial).filter(is_spam=False).order_by('date_created').reverse()
     elif tutorial is None:
-        questions = Question.objects.filter(category__name=category).filter(is_spam=0).order_by('date_created').reverse()
+        questions = Question.objects.filter(category__name=category).filter(is_spam=False).order_by('date_created').reverse()
 
     context = {
         'questions': questions,
@@ -349,7 +349,7 @@ def new_question(request):
             if str(question.sub_category) == 'None':
                 question.sub_category = ""
             if (predict(question.body) == "Spam"):
-                question.is_spam = 1
+                question.is_spam = True
 
             question.save()
             
@@ -370,7 +370,7 @@ def new_question(request):
                 question.category,
                 question.body,
                 settings.DOMAIN_NAME + '/question/'+ str(question.id),
-                question.is_spam == 1,
+                question.is_spam == True,
             )
             email = EmailMultiAlternatives(
                 subject,'',
@@ -451,7 +451,7 @@ def edit_question(request, question_id=None):
             if str(question.sub_category) == 'None':
                 question.sub_category = ""
             if (predict(question.body) == "Spam"):
-                question.is_spam = 1
+                question.is_spam = True
 
             question.save()
 
@@ -474,7 +474,7 @@ def edit_question(request, question_id=None):
                 question.category,
                 question.body,
                 settings.DOMAIN_NAME + '/question/'+ str(question.id),
-                question.is_spam == 1,
+                question.is_spam == True,
             )
             email = EmailMultiAlternatives(
                 subject,'',
