@@ -290,10 +290,16 @@ def answer_comment(request):
 # View used to filter question according to category
 def filter(request, category=None, tutorial=None):
 
-    if category and tutorial:
-        questions = Question.objects.filter(category__name=category).filter(sub_category=tutorial).filter(is_spam=False).order_by('date_created').reverse()
-    elif tutorial is None:
-        questions = Question.objects.filter(category__name=category).filter(is_spam=False).order_by('date_created').reverse()
+    if settings.MODERATOR_ACTIVATED:
+        if category and tutorial:
+            questions = Question.objects.filter(category__name=category).filter(sub_category=tutorial).order_by('date_created').reverse()
+        elif tutorial is None:
+            questions = Question.objects.filter(category__name=category).order_by('date_created').reverse()
+    else:
+        if category and tutorial:
+            questions = Question.objects.filter(category__name=category).filter(sub_category=tutorial).filter(is_spam=False).order_by('date_created').reverse()
+        elif tutorial is None:
+            questions = Question.objects.filter(category__name=category).filter(is_spam=False).order_by('date_created').reverse()
 
     context = {
         'questions': questions,

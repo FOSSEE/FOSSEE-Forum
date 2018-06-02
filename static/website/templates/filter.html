@@ -1,4 +1,4 @@
-{% extends 'website/templates/base.html' %}
+{% extends MODERATOR_ACTIVATED|yesno:'website/templates/moderator/base.html,website/templates/base.html' %}
 {% load helpers %}
 {% block title %}
     {{ category }} - FOSSEE Forums
@@ -37,8 +37,12 @@
 		<th>No.</th>
 	        <th>FOSS</th>
 		<th>Question </th>
-		<th>Date</th>
-		<th>Views</th>
+        <th>Date</th>
+        {% if MODERATOR_ACTIVATED %}
+            <th>Spam</th>
+        {% else %}
+            <th>Views</th>
+        {% endif %}
 		<th>Answers</th>
 		<th>User</th>  
 	</tr> 
@@ -76,9 +80,20 @@
                 </span>
             </td>
                     
+            {% if MODERATOR_ACTIVATED %}
             <td>
-                {{ question.views}}
+                {% if question.is_spam %}
+                    Yes
+                {% else %}
+                    No
+                {% endif %}
             </td>
+
+            {% else %}
+            <td>
+                {{ question.views }}
+            </td>
+            {% endif %}
 
             <td>
                 {{ question.answer_set.count }}
