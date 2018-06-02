@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import User, Group
 from django.contrib.auth import get_user_model
 from django_resized import ResizedImageField
+from django.utils.encoding import python_2_unicode_compatible
 
 
 class FossCategory(models.Model):
@@ -24,6 +25,7 @@ class SubFossCategory(models.Model):
     def __unicode__(self):
         return self.name
 
+@python_2_unicode_compatible
 class Question(models.Model):
 
     user  = models.ForeignKey(User)
@@ -59,6 +61,7 @@ class QuestionComment(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
 
+@python_2_unicode_compatible
 class Answer(models.Model):
 
     uid  = models.IntegerField()

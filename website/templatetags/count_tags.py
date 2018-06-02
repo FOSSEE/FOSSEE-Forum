@@ -70,3 +70,8 @@ def total_answer_count():
     count = Answer.objects.all().count()
     return count
 register.simple_tag(total_answer_count)
+
+# Get length of array
+def length(array):
+    return len(array)
+register.simple_tag(length)

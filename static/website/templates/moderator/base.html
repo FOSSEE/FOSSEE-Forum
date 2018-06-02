@@ -66,11 +66,31 @@
                         <!-- Collect the nav links, forms, and other content for toggling -->
                         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                             <ul class="nav navbar-nav navbar-right">
+
                               <li>
                                 <a href="{% url 'website:home' %}">
                                     User Panel
                                 </a>
                               </li>
+
+                              <li class="dropdown">
+
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                   <span class="glyphicon glyphicon-search"></span> 
+                                   View questions<b class="caret"></b>
+                                </a>
+
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a href="#">Spam</a>
+                                    </li>
+                                    <li>
+                                        <a href="#">Non-Spam</a>
+                                    </li>
+                                </ul>
+
+                            </li>
+
                             </ul>
                         </div> <!-- /.navbar-collapse -->
                     </div> <!-- /.container -->

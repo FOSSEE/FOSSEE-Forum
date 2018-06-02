@@ -30,29 +30,6 @@
   </script>
   </div>
 
-<style>
-
- .gsc-search-button
-	{
-	   
-	border-radius: 5px;
-	border-color: #666;
-
-	}
-
-	input.gsc-search-button, input.gsc-search-button:hover, input.gsc-search-button:focus {
-	    
-	    background-image: url("https://www.google.com/uds/css/v2/search_box_icon.png") !important;
-	    background-position: 50% 50%;
-	    background-repeat: no-repeat;
-	    height: 28px !important;
-	    width: 60px;
-	    filter: none;
-	    
-	}
-    </style>
-
-
     <div id="carousel-container">
 
         <div class="carousel">
@@ -71,6 +48,7 @@
                             <small class="category">
                                 {{ category.description }}
                             </small>
+                        {% latest_question category %}
                         <a class="btn btn-xs btn-block btn-success" href="{% url 'website:new_question' %}?category={{ category.id|urlencode }}">Ask a question</a>
                         </div>
                     </div>

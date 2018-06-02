@@ -1,5 +1,6 @@
 {% extends 'website/templates/moderator/base.html' %}
 {% load static %}
+{% load notify %}
 {% load count_tags %}
 {% load helpers %}
  <link rel="stylesheet" href="{% static 'website/css/main.css' %}" type="text/css" media="screen" charset="utf-8" />
@@ -29,40 +30,28 @@
   </script>
   </div>
 
-<style>
-
- .gsc-search-button
-	{
-	   
-	border-radius: 5px;
-	border-color: #666;
-
-	}
-
-	input.gsc-search-button, input.gsc-search-button:hover, input.gsc-search-button:focus {
-	    
-	    background-image: url("https://www.google.com/uds/css/v2/search_box_icon.png") !important;
-	    background-position: 50% 50%;
-	    background-repeat: no-repeat;
-	    height: 28px !important;
-	    width: 60px;
-	    filter: none;
-	    
-	}
-    </style>
-
-
     <div id="carousel-container">
-        <div>
-            <div class="thumbnail">
-                {% with file=category|get_category_image %}
-                    {% if file %}
-                        <img src="{% static category|get_category_image %}">
-                    {% else %}
-                        <div class="category-title">{{ category }}</div>
-                    {% endif %}
-                {% endwith %}
+        <div class="carousel">
+            {% for category in categories %}
+            <div>
+                <div class="thumbnail">
+                    {% with file=category|get_category_image %}
+                        {% if file %}
+                            <img src="{% static category|get_category_image %}">
+                        {% else %}
+                            <div class="category-title">{{ category }}</div>
+                        {% endif %}
+                    {% endwith %}
+                    <div class="caption">
+                        <small class="category">
+                            {{ category.description }}
+                        </small>
+                        <hr>
+                        {% latest_question category %}
+                    </div>
+                </div>
             </div>
+            {% endfor %}
         </div>
     </div> <!-- /.carousel -->
 
@@ -71,14 +60,14 @@
         <div class="row" style="margin-left: 12%;">
             <form class ="" id="filter-form" action="" role="form">
                 <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" style="width: 65%;">
-                    <a class="btn btn-block btn-primary" href="{% url 'website:questions' %}" style="margin-top: 18px;">View all questions from this category</a>
+                    <a class="btn btn-block btn-primary" href="{% url 'website:questions' %}" style="margin-top: 18px;">View all questions from your categories</a>
                 </div> <!-- /.col -->
             </form>
             <div class="col-lg-6 col-md-6 col-sm-6" style="width: 25%;">
                 <div class="row" style="margin-left: 11px;">
 
                     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" style="width: 100px; margin-right:40px; " >
-                        <h3 style="font-size: 18px" align="center"><strong>{% category_question_count category %}</strong></h3>
+                        <h3 style="font-size: 18px" align="center"><strong>{% length questions %}</strong></h3>
                         <h3 style="font-size: 18px; margin-top: 1px;" align="center" text-color="#7395d9" >Questions</h3>
                     </div>
                    
@@ -118,7 +107,7 @@
             </thead>
             
             <tbody> 
-                {% for question in questions %}
+                {% for question in questions|get_recent_questions %}
                 <tr>
                     <td></td>
                     <td>

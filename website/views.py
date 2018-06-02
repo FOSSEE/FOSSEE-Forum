@@ -5,7 +5,7 @@ from django.shortcuts import render, get_object_or_404,render_to_response
 from django.template.context_processors import csrf
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Q, Max
 from django.core.mail import EmailMultiAlternatives
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -28,6 +28,10 @@ admins = (
    9, 4376, 4915, 14595, 12329, 22467, 5518, 30705
 )
 categories = FossCategory.objects.order_by('name')
+
+# Function to check if user is in any moderator group
+def is_moderator(user):
+    return user.groups.count() > 0
 
 # for home page
 def home(request):
@@ -703,20 +707,30 @@ def search(request):
 
 # MODERATOR SECTION
 # All the moderator views go below
-def moderator_home(request):
-    
-    # If no user logged in or user not in any moderator group
-    if (request.user.is_anonymous() or request.user.groups.count() == 0):
-        return HttpResponse("Not authorized to access.")
 
-    # Finding the questions related to moderator's category
-    group = ModeratorGroup.objects.get(group=request.user.groups.all()[0])
-    category = group.category
-    questions = Question.objects.filter(category__name=category.name).order_by('date_created').reverse()[:10]
+@login_required
+@user_passes_test(is_moderator)
+def moderator_home(request):
+
+    # If user is a master moderator
+    if (request.user.groups.filter(name="forum_moderator").exists()):
+        questions = Question.objects.all().order_by('date_created').reverse()
+        categories = FossCategory.objects.order_by('name')
+    
+    else:
+        # Finding the moderator's categories
+        categories = []
+        for group in request.user.groups.all():
+            categories.append(ModeratorGroup.objects.get(group=group).category)
+
+        # Getting the questions related to moderator's categories
+        questions = []
+        for category in categories:
+            questions.extend(Question.objects.filter(category__name=category.name).order_by('date_created').reverse())
     
     context = {
         'questions': questions,
-        'category': category,
+        'categories': categories,
     }
 
     return render(request, 'website/templates/moderator/index.html', context)
