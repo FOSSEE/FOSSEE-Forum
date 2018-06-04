@@ -69,6 +69,26 @@
         </span>
         {% endif %}
 
+        {% if MODERATOR_ACTIVATED %}
+            {% if question.is_spam %}
+                <span class="spam">
+                    <small>
+                        <a href="">
+                            Spam
+                        </a>
+                    </small>
+                </span>
+            {% else %}
+                <span class="non-spam">
+                    <small>
+                        <a href="">
+                            Not Spam
+                        </a>
+                    </small>
+                </span>
+            {% endif %}
+        {% endif %}
+
         <span class="modify">
             {% if user|can_edit:question and not ans_count or user|is_moderator and MODERATOR_ACTIVATED %}
             <a class="edit btn btn-xs btn-info" href="{% url 'website:edit_question' question.id %}">Edit</a>
