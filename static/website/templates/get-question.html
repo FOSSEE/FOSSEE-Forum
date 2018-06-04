@@ -73,7 +73,7 @@
             {% if question.is_spam %}
                 <span class="spam">
                     <small>
-                        <a href="">
+                        <a href="{% url 'website:moderator_spam' %}">
                             Spam
                         </a>
                     </small>
@@ -81,7 +81,7 @@
             {% else %}
                 <span class="non-spam">
                     <small>
-                        <a href="">
+                        <a href="{% url 'website:moderator_non_spam' %}">
                             Not Spam
                         </a>
                     </small>

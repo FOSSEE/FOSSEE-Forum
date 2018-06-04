@@ -26,6 +26,8 @@ urlpatterns = [
     # Moderator panel
     url(r'^moderator/$', views.moderator_home, name='moderator_home'),
     url(r'^moderator/questions/$', views.moderator_questions, name='moderator_questions'),
+    url(r'^moderator/spam/$', views.moderator_spam, name='moderator_spam'),
+    url(r'^moderator/non-spam/$', views.moderator_non_spam, name='moderator_non_spam'),
     
     # Ajax helpers
     url(r'^ajax-tutorials/$', views.ajax_tutorials, name='ajax_tutorials'),

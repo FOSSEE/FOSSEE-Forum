@@ -801,6 +801,58 @@ def moderator_questions(request):
 
     return render(request, 'website/templates/moderator/questions.html', context)
 
+# Spam questions page for moderator
+@login_required
+@user_passes_test(is_moderator)
+def moderator_spam(request):
+
+    # If user is a master moderator
+    if (request.user.groups.filter(name="forum_moderator").exists()):
+        questions = Question.objects.all().filter(is_spam=True).order_by('date_created').reverse()
+    
+    else:
+        # Finding the moderator's categories
+        categories = []
+        for group in request.user.groups.all():
+            categories.append(ModeratorGroup.objects.get(group=group).category)
+
+        # Getting the questions related to moderator's categories
+        questions = []
+        for category in categories:
+            questions.extend(Question.objects.filter(category__name=category.name).filter(is_spam=True).order_by('date_created').reverse())
+    
+    context = {
+        'questions': questions,
+    }
+
+    return render(request, 'website/templates/moderator/spam.html', context)
+
+# Non-spam questions page for moderator
+@login_required
+@user_passes_test(is_moderator)
+def moderator_non_spam(request):
+
+    # If user is a master moderator
+    if (request.user.groups.filter(name="forum_moderator").exists()):
+        questions = Question.objects.all().filter(is_spam=False).order_by('date_created').reverse()
+    
+    else:
+        # Finding the moderator's categories
+        categories = []
+        for group in request.user.groups.all():
+            categories.append(ModeratorGroup.objects.get(group=group).category)
+
+        # Getting the questions related to moderator's categories
+        questions = []
+        for category in categories:
+            questions.extend(Question.objects.filter(category__name=category.name).filter(is_spam=False).order_by('date_created').reverse())
+    
+    context = {
+        'questions': questions,
+    }
+
+    return render(request, 'website/templates/moderator/non-spam.html', context)
+
 # AJAX SECTION
 # All the ajax views go below
 @csrf_exempt
