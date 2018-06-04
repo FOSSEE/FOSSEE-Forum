@@ -70,7 +70,7 @@
         {% endif %}
 
         <span class="modify">
-            {% if user|can_edit:question and not ans_count or user|is_moderator %}
+            {% if user|can_edit:question and not ans_count or user|is_moderator and MODERATOR_ACTIVATED %}
             <a class="edit btn btn-xs btn-info" href="{% url 'website:edit_question' question.id %}">Edit</a>
             <a class="delete btn btn-xs btn-info" href="{% url 'website:question_delete' question.id %}">Delete</a>
             {% endif %}
@@ -245,7 +245,7 @@
                             {% render_field form.body class+="form-control body" %}
                             <br>
                             <label for="id_image">Upload an image:</label>
-                            {% render_field form.image class+="form-control image" %}
+                            {% render_field form.image %}
                         </div>       
                     </div> 
                 </div>

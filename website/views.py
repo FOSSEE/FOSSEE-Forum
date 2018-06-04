@@ -423,7 +423,7 @@ def edit_question(request, question_id=None):
     question = get_object_or_404(Question, id=question_id)
 
     # To prevent random user from manually entering the link and editing
-    if (request.user.id != question.user.id or question.answer_set.count() > 0):
+    if ((request.user.id != question.user.id or question.answer_set.count() > 0) and (not is_moderator(request.user))):
         return HttpResponse("Not authorized to edit question.")
 
     if request.method == 'POST':
@@ -457,7 +457,10 @@ def edit_question(request, question_id=None):
 
             question.title = cleaned_data['title']
             question.body = cleaned_data['body']
+            question.is_spam = cleaned_data['is_spam']
             question.views = 1
+            question.save()
+            question.userViews.add(request.user)
             if str(question.sub_category) == 'None':
                 question.sub_category = ""
             if (predict(question.body) == "Spam"):
@@ -527,7 +530,7 @@ def question_delete(request, question_id):
     title = question.title
 
     # To prevent random user from manually entering the link and deleting
-    if (request.user.id != question.user.id or question.answer_set.count() > 0):
+    if ((request.user.id != question.user.id or question.answer_set.count() > 0) and (not is_moderator(request.user))):
         return HttpResponse("Not authorized to delete question.")
 
     # Sending email when a question is deleted

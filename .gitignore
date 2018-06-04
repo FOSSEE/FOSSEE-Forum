@@ -12,6 +12,7 @@ local.py
 website/DataSet.*
 # C extensions
 *.so
+media/images/*
 
 # Packages
 *.egg

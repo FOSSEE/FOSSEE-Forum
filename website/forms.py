@@ -23,6 +23,8 @@ class NewQuestionForm(forms.ModelForm):
                         required = True,
                         error_messages = {'required':'Question field required.'})
 
+    is_spam = forms.BooleanField(required=False)
+
     image = forms.ImageField(widget=forms.ClearableFileInput(), help_text="Upload image: ", required=False)
     
     def clean_title(self):
@@ -52,7 +54,7 @@ class NewQuestionForm(forms.ModelForm):
     class Meta:
 
         model = Question
-        fields = ['category', 'title', 'body', 'image']
+        fields = ['category', 'title', 'body', 'is_spam', 'image']
 
     def __init__(self, *args, **kwargs):
         category = kwargs.pop('category', None)
