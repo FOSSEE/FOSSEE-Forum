@@ -742,6 +742,7 @@ def search(request):
 # MODERATOR SECTION
 # All the moderator views go below
 
+# Moderator panel home page
 @login_required
 @user_passes_test(is_moderator)
 def moderator_home(request):
@@ -770,6 +771,32 @@ def moderator_home(request):
     }
 
     return render(request, 'website/templates/moderator/index.html', context)
+
+# All questions page for moderator
+@login_required
+@user_passes_test(is_moderator)
+def moderator_questions(request):
+
+    # If user is a master moderator
+    if (request.user.groups.filter(name="forum_moderator").exists()):
+        questions = Question.objects.all().order_by('date_created').reverse()
+    
+    else:
+        # Finding the moderator's categories
+        categories = []
+        for group in request.user.groups.all():
+            categories.append(ModeratorGroup.objects.get(group=group).category)
+
+        # Getting the questions related to moderator's categories
+        questions = []
+        for category in categories:
+            questions.extend(Question.objects.filter(category__name=category.name).order_by('date_created').reverse())
+    
+    context = {
+        'questions': questions,
+    }
+
+    return render(request, 'website/templates/moderator/questions.html', context)
 
 # AJAX SECTION
 # All the ajax views go below
