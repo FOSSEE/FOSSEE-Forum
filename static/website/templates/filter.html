@@ -86,11 +86,7 @@
                     
             {% if MODERATOR_ACTIVATED %}
             <td>
-                {% if question.is_spam %}
-                    Yes
-                {% else %}
-                    No
-                {% endif %}
+                {{ question.is_spam|yesno:"Yes, No" }}
             </td>
 
             {% else %}

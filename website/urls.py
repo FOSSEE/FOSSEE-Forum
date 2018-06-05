@@ -21,6 +21,7 @@ urlpatterns = [
     url(r'^vote_post/$', views.vote_post, name='vote_post'),
     url(r'^ans_vote_post/$', views.ans_vote_post, name='ans_vote_post'),
     url(r'^question/delete/(?P<question_id>\d+)/$', views.question_delete, name='question_delete'),
+    url(r'^mark_answer_spam/(?P<answer_id>\d+)/$', views.mark_answer_spam, name='mark_answer_spam'),
     url(r'^answer_delete/(?P<answer_id>\d+)/$', views.answer_delete, name='answer_delete'),
 
     # Moderator panel

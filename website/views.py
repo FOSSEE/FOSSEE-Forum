@@ -69,7 +69,10 @@ def get_question(request, question_id=None, pretty_url=None):
     if pretty_url != pretty_title:
         return HttpResponseRedirect('/question/'+ question_id + '/' + pretty_title)
 
-    answers = question.answer_set.filter(is_spam=False).all()
+    if (settings.MODERATOR_ACTIVATED):
+        answers = question.answer_set.all()
+    else:
+        answers = question.answer_set.filter(is_spam=False).all()
     ans_count = question.answer_set.count()
     form = AnswerQuestionForm()
     thisuserupvote = question.userUpVotes.filter(id=request.user.id).count()
@@ -587,16 +590,33 @@ def answer_delete(request, answer_id):
     answer.delete()
     return HttpResponseRedirect('/question/' + str(question_id))
 
+# View to mark answer as spam/non-spam
+@login_required
+@user_passes_test(is_moderator)
+def mark_answer_spam(request, answer_id):
+
+    answer = get_object_or_404(Answer, id=answer_id)
+    question_id = answer.question.id
+
+    if (request.method == "POST"):
+        type = request.POST['selector']
+        if (type == "spam"):
+            answer.is_spam = 1
+        else:
+            answer.is_spam = 0
+
+    answer.save()
+    return HttpResponseRedirect('/question/' + str(question_id))
+
 # return number of votes and initial votes
-# user who asked the question,cannot vote his/or anwser, 
+# user who asked the question,cannot vote his/or anwser,
 # other users can post votes
+@login_required
 def vote_post(request):
 
     post_id = int(request.POST.get('id'))
-    
     vote_type = request.POST.get('type')
     vote_action = request.POST.get('action')
-    question_id =  request.POST.get('id')
     cur_post = get_object_or_404(Question, id=post_id)
     thisuserupvote = cur_post.userUpVotes.filter(id=request.user.id).count()
     thisuserdownvote = cur_post.userDownVotes.filter(id=request.user.id).count()
@@ -646,13 +666,13 @@ def vote_post(request):
 # return number of votes and initial votes
 # user who posted the answer, cannot vote his/or anwser, 
 # other users can post votes
+@login_required
 def ans_vote_post(request):
 
     
     post_id = int(request.POST.get('id'))
     vote_type = request.POST.get('type')
     vote_action = request.POST.get('action')
-    answer_id =  request.POST.get('id') 
     cur_post = get_object_or_404(Answer, id=post_id)
 
     thisuserupvote = cur_post.userUpVotes.filter(id=request.user.id).count()

@@ -129,6 +129,7 @@
 
 <div class="row">
     <div class="answer-wrapper col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        
         <div class="votecell" style="padding-top: 9px;">      
             <div class="ans-vote" >
                 {% ifequal ans_vote.0 0 %}
@@ -150,12 +151,36 @@
 
         <div class="answer {% if user|is_moderator %}editable{% endif %}" id="answer{{answer.id}}" style="margin-left: 63px;">                               
             
-            <div class="body" id="body{{ answer.id }}" style="padding-bottom: 12px">
+            <div class="body" id="body{{ answer.id }}" style="padding-bottom: 12px; padding-top: 15px">
                 <p>{{ answer.body| safe }}</p>
                 {% if answer.image %}
                     <img src = {{ answer.image.url }} />
                 {% endif %}
             </div>
+
+            {% if MODERATOR_ACTIVATED %}
+                {% if answer.is_spam %}
+                    <span class="spam">
+                        <small>
+                            <a href="#">
+                                Spam
+                            </a>
+                        </small>
+                    </span>
+                {% else %}
+                    <span class="non-spam">
+                        <small>
+                            <a href="#">
+                                Not Spam
+                            </a>
+                        </small>
+                    </span>
+                {% endif %}
+
+            <a data-toggle="modal" data-target="#detailsModal{{ answer.id }}" href="#">
+                <span class="glyphicon glyphicon-edit"></span>
+            </a>
+            {% endif %}
             
             <span class="meta">
                 <small>
@@ -169,13 +194,44 @@
                 </span>
             </span>
 
-            {% if user|is_moderator  %}
+            {% if user|is_moderator and MODERATOR_ACTIVATED  %}
             <span class="modify" style="display:block">
                 <a class="delete btn btn-xs btn-info vs" href="{% url 'website:answer_delete' answer.id %}" data-target="body{{ answer.id }}">Delete</a>
-                <a class="edit btn btn-xs btn-info vs" href="#body{{ answer.id }}" data-target="body{{ answer.id }}">Edit</a>
+                <a class="edit btn btn-xs btn-info vs" href="#{{ answer.id }}" data-target="body{{ answer.id }}">Edit</a>
                 <a class="save btn btn-xs btn-success vs"  data-target="body{{ answer.id }}" data-aid="{{ answer.id }}" href="#">Save</a>
             </span>
             {% endif %}
+
+            <div class="modal fade" id="detailsModal{{ answer.id }}" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="myModalLabel">Edit Answer Details</h4>
+                    </div>
+                    <div class="modal-body">
+                        <h5>The current answer is marked as:</h5>
+                            <form method="POST" action="{% url 'website:mark_answer_spam' answer.id %}">
+                            {% csrf_token %}
+                                <select name="selector">
+                                    {% if answer.is_spam %}
+                                        <option value="spam" selected>Spam</option>
+                                        <option value="non-spam">Not spam</option>
+                                    {% else %}
+                                        <option value="spam">Spam</option>
+                                        <option value="non-spam" selected>Not spam</option>
+                                    {% endif %}
+                                </select>
+                                <hr>
+                                <div class="pull-right">
+                                    <input type="submit" class="btn btn-sm btn-success" value="Submit">
+                                    <a class="btn btn-sm btn-default" data-dismiss="modal" href="#">Close</a>
+                            </form>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div> <!-- /.modal-body -->
+                    </div><!-- /.modal-content -->
+                </div><!-- /.modal-dialog -->
+            </div><!-- /.modal -->
 
         </div> <!-- /.answer -->
         
@@ -201,30 +257,24 @@
                             <a href="/accounts/view-profile/{{ comment.user.id }}"> {{comment.user}} </a>
                         </span>
                     </span>
-                   <!--  {% if user|can_edit:comment %}
-                    <div class="modify-wrapper">
-                        <span class="modify" style="display:block">
-                            <a class="edit btn btn-xs btn-info vs" href="#cbody{{ comment.id }}" data-target="cbody{{ comment.id }}">Edit</a>
-                            <a class="save btn btn-xs btn-success vs"  data-target="cbody{{ comment.id }}" data-cid="{{ user.id }}" href="#">Save</a>
-                        </span>
-                    </div>
-                    {% endif %} -->
-                </div> <!-- /.comment -->
+
+                </div>
                 {% endfor %}
                 
                 
                 <!-- form to add comment -->
                 {% if user.is_authenticated %}
                  
-                <form id="form{{ answer.id }}" method="post" action="/answer-comment/" > {% csrf_token %}
-                    <input type="hidden" name="answer_id" value="{{ answer.id }}">
-                    <textarea name="body" class="new-comment form-control" id="comment{{ answer.id }}" rows="2"></textarea>
-                </form>
+                {% if not MODERATOR_ACTIVATED %}
+                    <form id="form{{ answer.id }}" method="post" action="/answer-comment/" > {% csrf_token %}
+                        <input type="hidden" name="answer_id" value="{{ answer.id }}">
+                        <textarea name="body" class="new-comment form-control" id="comment{{ answer.id }}" rows="2"></textarea>
+                    </form>
                 
-               
-                <a class="add-comment" style="background: #46B8DA none repeat scroll 0% 0%;color: #FFF;border-radius: 3px;padding: 5px 12px;" href="#" data-target="comment{{ answer.id }}">
-                    <small>add comment</small>
-                </a>
+                    <a class="add-comment" style="background: #46B8DA none repeat scroll 0% 0%;color: #FFF;border-radius: 3px;padding: 5px 12px;" href="#" data-target="comment{{ answer.id }}">
+                        <small>add comment</small>
+                    </a>
+                {% endif %}
               
                  
                 <a class="post-comment" href="#" data-target="comment{{ answer.id }}" data-aid="{{ answer.id }}" data-form="form{{ answer.id }}">
