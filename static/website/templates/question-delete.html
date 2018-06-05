@@ -6,7 +6,7 @@
 {% block pagetitle %} FOSSEE Forums {% endblock %}
 
 {% block content %}
-<h3>Your question <strong>{{ title }}</strong> has been deleted successfully.</h3>
+<h3>The question <strong>{{ title }}</strong> has been deleted successfully.</h3>
 <h4>
 	{% if MODERATOR_ACTIVATED %}
 		<a href="{% url 'website:moderator_home' %}">Go to moderator page.</a>

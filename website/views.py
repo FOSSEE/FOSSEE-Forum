@@ -536,28 +536,36 @@ def question_delete(request, question_id):
     if ((request.user.id != question.user.id or question.answer_set.count() > 0) and (not is_moderator(request.user))):
         return HttpResponse("Not authorized to delete question.")
 
-    # Sending email when a question is deleted
-    sender_name = "FOSSEE Forums"
-    sender_email = settings.SENDER_EMAIL
-    subject = "FOSSEE Forums - {0} - New Question".format(question.category)
-    to = (question.category.email, settings.FORUM_NOTIFICATION)
-    message = """
-        The following question has been deleted by the user in the FOSSEE Forum: <br>
-        <b> Title: </b>{0}<br>
-        <b> Category: </b>{1}<br>
-        <b> Question : </b>{2}<br>
-        """.format(
-        title,
-        question.category,
-        question.body,
-    )
-    email = EmailMultiAlternatives(
-        subject,'',
-        sender_email, to,
-        headers={"Content-type":"text/html;charset=iso-8859-1"}
-    )
-    email.attach_alternative(message, "text/html")
-    # email.send(fail_silently=True)
+    if (request.method == "POST"):
+    
+        # Send a delete email only when moderator does so
+        if (settings.MODERATOR_ACTIVATED):
+
+            sender_name = "FOSSEE Forums"
+            sender_email = settings.SENDER_EMAIL
+            subject = "FOSSEE Forums - {0} - New Question".format(question.category)
+            to = (question.user.email, settings.FORUM_NOTIFICATION)
+            delete_reason = str(request.POST['deleteQuestion'])
+            print (delete_reason)
+            message = """
+                The following question has been deleted by a moderator of the FOSSEE Forum: <br>
+                <b> Title: </b>{0}<br>
+                <b> Category: </b>{1}<br>
+                <b> Question: </b>{2}<br>
+                <b> Moderator comments: </b>{3}<br>
+                """.format(
+                title,
+                question.category,
+                question.body,
+                delete_reason,
+            )
+            email = EmailMultiAlternatives(
+                subject,'',
+                sender_email, to,
+                headers={"Content-type":"text/html;charset=iso-8859-1"}
+            )
+            email.attach_alternative(message, "text/html")
+            # email.send(fail_silently=True)
 
     question.delete()
     return render(request, 'website/templates/question-delete.html', {'title': title})
