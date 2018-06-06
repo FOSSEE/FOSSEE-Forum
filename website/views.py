@@ -545,7 +545,7 @@ def question_delete(request, question_id):
             sender_email = settings.SENDER_EMAIL
             subject = "FOSSEE Forums - {0} - New Question".format(question.category)
             to = (question.user.email, settings.FORUM_NOTIFICATION)
-            delete_reason = str(request.POST['deleteQuestion'])
+            delete_reason = request.POST['deleteQuestion'].encode('utf-8')
             print (delete_reason)
             message = """
                 The following question has been deleted by a moderator of the FOSSEE Forum: <br>
@@ -559,13 +559,7 @@ def question_delete(request, question_id):
                 question.body,
                 delete_reason,
             )
-            email = EmailMultiAlternatives(
-                subject,'',
-                sender_email, to,
-                headers={"Content-type":"text/html;charset=iso-8859-1"}
-            )
-            email.attach_alternative(message, "text/html")
-            # email.send(fail_silently=True)
+            # send_mail(subject, message, sender_email, to, fail_silenty=True)
 
     question.delete()
     return render(request, 'website/templates/question-delete.html', {'title': title})
@@ -578,22 +572,27 @@ def answer_delete(request, answer_id):
     answer = get_object_or_404(Answer, id=answer_id)
     question_id = answer.question.id
 
-    # Sending email to user when answer is deleted
-    sender_name = "FOSSEE Forums"
-    sender_email = settings.SENDER_EMAIL
-    subject = "FOSSEE Forums - {0} - Answer Deleted".format(answer.question.category)
-    to = [answer.user().email]
-    message = """
-        The following answer has been deleted by a moderator in the FOSSEE Forum: <br>
-        <b> Answer: </b>{0}<br>
-        <b> Category: </b>{1}<br>
-        <b> Question: </b>{2}<br>
-        """.format(
-        answer.body,
-        answer.question.category,
-        answer.question.body,
-    )
-    # send_mail(subject, message, sender_email, to, fail_silently=True)
+    if (request.method == "POST"):
+    
+        # Sending email to user when answer is deleted
+        sender_name = "FOSSEE Forums"
+        sender_email = settings.SENDER_EMAIL
+        subject = "FOSSEE Forums - {0} - Answer Deleted".format(answer.question.category)
+        to = [answer.user().email]
+        delete_reason = request.POST['deleteAnswer'].encode('utf-8')
+        message = """
+            The following answer has been deleted by a moderator in the FOSSEE Forum: <br>
+            <b> Answer: </b>{0}<br>
+            <b> Category: </b>{1}<br>
+            <b> Question: </b>{2}<br>
+            <b> Moderator comments: </b>{3}<br>
+            """.format(
+            answer.body,
+            answer.question.category,
+            answer.question.body,
+            delete_reason,
+        )
+        # send_mail(subject, message, sender_email, to, fail_silently=True)
 
     answer.delete()
     return HttpResponseRedirect('/question/' + str(question_id))

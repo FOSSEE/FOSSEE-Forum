@@ -196,7 +196,7 @@
 
             {% if user|is_moderator and MODERATOR_ACTIVATED  %}
             <span class="modify" style="display:block">
-                <a class="delete btn btn-xs btn-info vs" href="{% url 'website:answer_delete' answer.id %}" data-target="body{{ answer.id }}">Delete</a>
+                <a class="delete btn btn-xs btn-info vs" data-toggle="modal" data-target="#answerDeleteModal" href="#">Delete</a>
                 <a class="edit btn btn-xs btn-info vs" href="#{{ answer.id }}" data-target="body{{ answer.id }}">Edit</a>
                 <a class="save btn btn-xs btn-success vs"  data-target="body{{ answer.id }}" data-aid="{{ answer.id }}" href="#">Save</a>
             </span>
@@ -230,6 +230,30 @@
                             </form>
                         </div>
                         <div class="clearfix"></div>
+                    </div> <!-- /.modal-body -->
+                    </div> <!-- /.modal-content -->
+                </div> <!-- /.modal-dialog -->
+            </div> <!-- /.modal -->
+
+            <!-- Modal to delete answer -->
+            <div class="modal fade" id="answerDeleteModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="myModalLabel">Delete answer</h4>
+                    </div>
+                    <div class="modal-body">
+                        <h5>Why is this answer being deleted?</h5>
+                        <form method="POST" action="{% url 'website:question_delete' question.id %}">
+                        {% csrf_token %}
+                            <textarea name="deleteAnswer" required></textarea>
+                            <hr>
+                            <div class="pull-right">
+                                <input type="submit" class="btn btn-sm btn-success" value="Okay">
+                                <a class="btn btn-sm btn-default" data-dismiss="modal" href="#">Close</a>
+                            </div>
+                        </form>   
+                    <div class="clearfix"></div>
                     </div> <!-- /.modal-body -->
                     </div> <!-- /.modal-content -->
                 </div> <!-- /.modal-dialog -->
@@ -354,7 +378,7 @@
             <h4 class="modal-title" id="myModalLabel">Delete question</h4>
         </div>
         <div class="modal-body">
-            {% if MODERATOR_ACTIVATED %}
+            {% if MO0DERATOR_ACTIVATED %}
                 <h5>Why is this question being deleted?</h5>
             {% else %}
                 <h5>Are you sure about deleting the question?</h5>
