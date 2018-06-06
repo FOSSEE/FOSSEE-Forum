@@ -105,10 +105,6 @@ class Notification(models.Model):
     aid = models.IntegerField(default=0)
     cid = models.IntegerField(default=0)
     date_created = models.DateTimeField(auto_now_add=True)
-    
-    def poster(self):
-        user = User.objects.get(id=self.uid)
-        return user.username
         
 class Profile(models.Model):
     

@@ -109,7 +109,7 @@
             </thead>
             
             <tbody> 
-                {% for question in questions %}
+                {% for question in questions|get_recent_questions %}
                 <tr>
                     <td></td>
                     <td>

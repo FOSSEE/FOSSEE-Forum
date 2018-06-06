@@ -6,11 +6,11 @@ from django.contrib import admin
 
 
 class QuestionAdmin(admin.ModelAdmin):
-    #search_fields = ['title','user']
+    search_fields = ['title']
     list_filter = ('category','date_created','date_modified')
 
 class AnswerAdmin(admin.ModelAdmin):
-    #search_fields = ['question']
+    search_fields = ['body']
     list_filter = ('date_created','date_modified')
 
 class ProfileInline(admin.StackedInline):

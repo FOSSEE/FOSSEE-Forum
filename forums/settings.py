@@ -239,4 +239,4 @@ SFS_LOG_EXPIRE = 7
 SFS_ZIP_FILENAME = "listed_ip_7.txt"
 
 # Variable to store if moderator using forum
-MODERATOR_ACTIVATED = False
+MODERATOR_ACTIVATED = True

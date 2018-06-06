@@ -1,7 +1,5 @@
 from django import forms
 from website.models import *
-from django.db.models import Q
-import re
 
 tutorials = (
     ("Select a Tutorial", "Select a Tutorial"),
@@ -39,13 +37,10 @@ class NewQuestionForm(forms.ModelForm):
     
     def clean_body(self):
         body = self.cleaned_data['body'].encode('utf-8')
-
         if body.isspace():
             raise forms.ValidationError("Body cannot be only spaces")
-
         if len(body) < 12:
             raise forms.ValidationError("Body should be minimum 12 characters long")
-
         body = body.replace('&nbsp;', ' ')
         body = body.replace('<br>', '\n')
 

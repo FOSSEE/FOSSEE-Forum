@@ -1,12 +1,10 @@
 from django import template
 
-from website.views import admins
-
 register = template.Library()
 
 def can_edit(user, obj):
     try:
-        if user == obj.user or user.id == obj.uid or user.id in admins:  
+        if user == obj.user or user.id == obj.uid:  
            return True
         else:
     	   return False

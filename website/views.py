@@ -1,4 +1,3 @@
-import re
 from django import forms
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404,render_to_response
@@ -6,9 +5,6 @@ from django.template.context_processors import csrf
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.db.models import Q, Max
-from django.core.mail import EmailMultiAlternatives
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
 from django.conf import settings
@@ -17,10 +13,8 @@ from django.utils.html import strip_tags
 from website.models import Question, Answer, Notification, AnswerComment, FossCategory, Profile, SubFossCategory, ModeratorGroup
 from website.forms import NewQuestionForm, AnswerQuestionForm,AnswerCommentForm
 from website.templatetags.helpers import prettify
-from django.db.models import Count
 from django.core.mail import send_mail
 from django.core.mail import EmailMultiAlternatives
-from forums.settings import SET_TO_EMAIL_ID
 from spamFilter import predict
 
 User = get_user_model()
@@ -38,7 +32,7 @@ def home(request):
 
     settings.MODERATOR_ACTIVATED = False
     
-    questions = Question.objects.all().order_by('date_created').filter(is_spam=False).reverse()[:10]
+    questions = Question.objects.all().order_by('date_created').filter(is_spam=False).reverse()
     context = {
         'categories': categories,
         'questions': questions,
@@ -62,26 +56,24 @@ def get_question(request, question_id=None, pretty_url=None):
 
     if question.sub_category == "" or str(question.sub_category) == 'None':
         sub_category = False
-    else:
-        sub_category = True
 
     pretty_title = prettify(question.title)
-    if pretty_url != pretty_title:
+    if (pretty_url != pretty_title):
         return HttpResponseRedirect('/question/'+ question_id + '/' + pretty_title)
 
     if (settings.MODERATOR_ACTIVATED):
         answers = question.answer_set.all()
     else:
         answers = question.answer_set.filter(is_spam=False).all()
-    ans_count = question.answer_set.count()
+    ans_count = len(answers)
     form = AnswerQuestionForm()
     thisuserupvote = question.userUpVotes.filter(id=request.user.id).count()
     thisuserdownvote = question.userDownVotes.filter(id=request.user.id).count()
-    net_count = question.userUpVotes.count() - question.userDownVotes.count()
+    net_count = question.num_votes
 
     ans_votes = []
     for vote in answers:
-        net_ans_count  = vote.userUpVotes.count() - vote.userDownVotes.count()
+        net_ans_count  = vote.num_votes
         ans_votes.append([vote.userUpVotes.filter(id=request.user.id).count(),vote.userDownVotes.filter(id=request.user.id).count(),net_ans_count])
 
     #for (f,b) in zip(foo, bar):
@@ -95,8 +87,6 @@ def get_question(request, question_id=None, pretty_url=None):
         'thisUserUpvote': thisuserupvote,
         'thisUserDownvote': thisuserdownvote,
         'net_count': net_count,
-        'num_votes':question.num_votes,
-        'ans_votes':ans_votes
     }
     context.update(csrf(request))
 
@@ -115,10 +105,10 @@ def get_question(request, question_id=None, pretty_url=None):
 # post answer to a question, send notification to the user, whose question is answered
 # if anwser is posted by the owner of the question, no notification is sent
 @login_required
-def question_answer(request,qid):
+def question_answer(request, question_id):
    
     context = {}
-    question = get_object_or_404(Question, id=qid)
+    question = get_object_or_404(Question, id=question_id)
    
     if request.method == 'POST':
         form = AnswerQuestionForm(request.POST, request.FILES)
@@ -130,7 +120,7 @@ def question_answer(request,qid):
             body = cleaned_data['body'].encode('utf-8')
             answer.body = body.splitlines()    
             answer.question = question
-            answer.body = body.encode('unicode_internal')  
+            answer.body = body.encode('utf-8')  
             if ('image' in request.FILES):
                 answer.image = request.FILES['image']
             if (predict(answer.body) == "Spam"):
@@ -145,12 +135,12 @@ def question_answer(request,qid):
                 notification.aid = answer.id
                 notification.save()
 
-            #Sending email when a new question is asked
+            #Sending email when a new answer is posted
             sender_name = "FOSSEE Forums"
             sender_email = settings.SENDER_EMAIL
             subject = "FOSSEE Forums - {0} - Your question has been answered".format(question.category)
-            to = [question.user.email,settings.FORUM_NOTIFICATION,]
-            message =""" The following new question has been posted in the FOSSEE Forum: \n\n
+            to = [question.user.email, settings.FORUM_NOTIFICATION,]
+            message =""" The following new answer has been posted in the FOSSEE Forum: \n\n
                 Title: {0} \n
                 Category: {1}\n
                 Link: {2}\n\n
@@ -159,20 +149,18 @@ def question_answer(request,qid):
                 """.format(
                 question.title,
                 question.category,  
-                settings.DOMAIN_NAME + '/question/' + str(question.id) + "#answer" + str(answer.id)
+                settings.DOMAIN_NAME + '/question/' + str(question_id) + "#answer" + str(answer.id)
             )
             # send_mail(subject, message, sender_email, to, fail_silently=True)
 
-            return HttpResponseRedirect("/question/" + str(question.id))
+            return HttpResponseRedirect("/question/" + str(question_id))
 
         else:
             context['form'] = form
             context['question'] = question
 
     else:
-        category = request.GET.get('category')
-        form = NewQuestionForm(category=category)
-        context['category'] = category
+        form = AnswerQuestionForm()
         context['question'] = question
 
     context['form'] = form
@@ -198,11 +186,11 @@ def answer_comment(request):
 
         if form.is_valid():
 
-            body = request.POST['body'].encode('utf-8')
+            body = request.POST['body']
             comment = AnswerComment()
             comment.uid = request.user.id
             comment.answer = answer
-            comment.body = body.encode('unicode_internal')
+            comment.body = body.encode('utf-8')
             comment.save()
 
             # notifying the answer owner
@@ -229,7 +217,7 @@ def answer_comment(request):
                 answer.question.category,
                 settings.DOMAIN_NAME + '/question/' + str(answer.question.id) + "#answer" + str(answer.id)
             ) 
-            send_mail(subject, message, sender_email, to)
+            # send_mail(subject, message, sender_email, to)
 
             # notifying other users in the comment thread
             uids = answer.answercomment_set.filter(answer=answer).values_list('uid', flat=True)
@@ -240,7 +228,7 @@ def answer_comment(request):
                 comment_creator = c.user()
                 email = comment_creator.email
                 comment_creator_emails.append(email)
-                comment_creator_emails.append(settings.FORUM_NOTIFICATION)
+            comment_creator_emails.append(settings.FORUM_NOTIFICATION)
             
             # getting distinct uids
             uids = set(uids)
@@ -273,7 +261,6 @@ def answer_comment(request):
             return HttpResponseRedirect("/question/" + str(answer.question.id))
 
         else:
-
             context.update({
                 'form': form,
                 'question': answer.question,
@@ -293,25 +280,19 @@ def answer_comment(request):
 # View used to filter question according to category
 def filter(request, category=None, tutorial=None):
 
-    if settings.MODERATOR_ACTIVATED:
-        if category and tutorial:
-            questions = Question.objects.filter(category__name=category).filter(sub_category=tutorial).order_by('date_created').reverse()
-        elif tutorial is None:
-            questions = Question.objects.filter(category__name=category).order_by('date_created').reverse()
-    else:
-        if category and tutorial:
-            questions = Question.objects.filter(category__name=category).filter(sub_category=tutorial).filter(is_spam=False).order_by('date_created').reverse()
-        elif tutorial is None:
-            questions = Question.objects.filter(category__name=category).filter(is_spam=False).order_by('date_created').reverse()
+    if category and tutorial:
+        questions = Question.objects.filter(category__name=category).filter(sub_category=tutorial).order_by('date_created').reverse()
+    elif tutorial is None:
+        questions = Question.objects.filter(category__name=category).order_by('date_created').reverse()
+
+    if (not settings.MODERATOR_ACTIVATED):
+        questions = questions.filter(is_spam=False)
 
     context = {
         'questions': questions,
         'category': category,
         'tutorial': tutorial,
     }
-
-    if 'qid' in request.GET:
-        context['qid']  = int(request.GET['qid'])
         
     return render(request, 'website/templates/filter.html',  context)
 
@@ -322,11 +303,10 @@ def new_question(request):
     settings.MODERATOR_ACTIVATED = False
 
     context = {}
-    user = request.user
     context['SITE_KEY'] = settings.GOOGLE_RECAPTCHA_SITE_KEY
     all_category = FossCategory.objects.all()
 
-    if request.method == 'POST':
+    if (request.method == 'POST'):
 
         form = NewQuestionForm(request.POST, request.FILES)
 
@@ -343,7 +323,7 @@ def new_question(request):
 
             if (question.sub_category == "Select a Sub Category"):
 
-                if str(question.category) == "Scilab Toolbox":
+                if (str(question.category) == "Scilab Toolbox"):
                     context.update(csrf(request))
                     category = request.POST.get('category', None)
                     tutorial = request.POST.get('tutorial', None)
@@ -359,7 +339,7 @@ def new_question(request):
             question.views = 1
             question.save()
             question.userViews.add(request.user)
-            if str(question.sub_category) == 'None':
+            if (str(question.sub_category) == 'None'):
                 question.sub_category = ""
             if (predict(question.body) == "Spam"):
                 question.is_spam = True
@@ -406,10 +386,8 @@ def new_question(request):
 
     else:
         category = request.GET.get('category')
-        tutorial = request.GET.get('tutorial')
-        form = NewQuestionForm(category=category,tutorial = tutorial)
+        form = NewQuestionForm(category=category)
         context['category'] = category
-        context['tutorial'] = tutorial
         
     context['form'] = form   
     context.update(csrf(request))
@@ -429,10 +407,10 @@ def edit_question(request, question_id=None):
     if ((request.user.id != question.user.id or question.answer_set.count() > 0) and (not is_moderator(request.user))):
         return HttpResponse("Not authorized to edit question.")
 
-    if request.method == 'POST':
+    if (request.method == 'POST'):
 
         previous_title = question.title
-        form = NewQuestionForm(request.POST, request.FILES, instance=question)
+        form = NewQuestionForm(request.POST, request.FILES)
         question.title = '' # To prevent same title error in form
         question.save()
 
@@ -447,7 +425,7 @@ def edit_question(request, question_id=None):
                 question.image = request.FILES['image']
 
             if (question.sub_category == "Select a Sub Category"):
-                if str(question.category) == "Scilab Toolbox":
+                if (str(question.category) == "Scilab Toolbox"):
                     context.update(csrf(request))
                     category = request.POST.get('category', None)
                     tutorial = request.POST.get('tutorial', None)
@@ -490,7 +468,7 @@ def edit_question(request, question_id=None):
                 question.category,
                 question.body,
                 settings.DOMAIN_NAME + '/question/'+ str(question.id),
-                question.is_spam == True,
+                question.is_spam,
             )
             email = EmailMultiAlternatives(
                 subject,'',
@@ -513,13 +491,7 @@ def edit_question(request, question_id=None):
             return render(request, 'website/templates/edit-question.html', context)
 
     else:
-
         form = NewQuestionForm(instance=question)
-
-        category = request.GET.get('category')
-        tutorial = request.GET.get('tutorial')
-        context['category'] = category
-        context['tutorial'] = tutorial
         
     context['form'] = form   
     context.update(csrf(request))
@@ -546,7 +518,6 @@ def question_delete(request, question_id):
             subject = "FOSSEE Forums - {0} - New Question".format(question.category)
             to = (question.user.email, settings.FORUM_NOTIFICATION)
             delete_reason = request.POST['deleteQuestion'].encode('utf-8')
-            print (delete_reason)
             message = """
                 The following question has been deleted by a moderator of the FOSSEE Forum: <br>
                 <b> Title: </b>{0}<br>
@@ -613,7 +584,7 @@ def mark_answer_spam(request, answer_id):
             answer.is_spam = 0
 
     answer.save()
-    return HttpResponseRedirect('/question/' + str(question_id))
+    return HttpResponseRedirect('/question/' + str(question_id) + '#answer' + str(answer.id))
 
 # return number of votes and initial votes
 # user who asked the question,cannot vote his/or anwser,
@@ -627,9 +598,9 @@ def vote_post(request):
     cur_post = get_object_or_404(Question, id=post_id)
     thisuserupvote = cur_post.userUpVotes.filter(id=request.user.id).count()
     thisuserdownvote = cur_post.userDownVotes.filter(id=request.user.id).count()
-    initial_votes = cur_post.userUpVotes.count() - cur_post.userDownVotes.count()
+    initial_votes = cur_post.num_votes
 
-    if request.user.id != cur_post.user_id:
+    if (request.user.id != cur_post.user_id):
         
         # This condition is for adding vote
         if vote_action == 'vote':
@@ -675,21 +646,19 @@ def vote_post(request):
 # other users can post votes
 @login_required
 def ans_vote_post(request):
-
     
     post_id = int(request.POST.get('id'))
     vote_type = request.POST.get('type')
     vote_action = request.POST.get('action')
     cur_post = get_object_or_404(Answer, id=post_id)
-
     thisuserupvote = cur_post.userUpVotes.filter(id=request.user.id).count()
     thisuserdownvote = cur_post.userDownVotes.filter(id=request.user.id).count()
-    initial_votes = cur_post.userUpVotes.count() - cur_post.userDownVotes.count()
+    initial_votes = cur_post.num_votes
 
-    if request.user.id != cur_post.uid:
+    if (request.user.id != cur_post.uid):
 
         # This condition is for voting
-        if vote_action == 'vote':
+        if (vote_action == 'vote'):
             if (thisuserupvote == 0) and (thisuserdownvote == 0):
                 if vote_type == 'up':
                     cur_post.userUpVotes.add(request.user)
@@ -708,7 +677,7 @@ def ans_vote_post(request):
                     return HttpResponse(initial_votes)
     
         # This condition is for canceling vote
-        elif vote_action == 'recall-vote':
+        elif (vote_action == 'recall-vote'):
             if (vote_type == 'up') and (thisuserupvote == 1):
                 cur_post.userUpVotes.remove(request.user)
             elif (vote_type == 'down') and (thisuserdownvote == 1):
@@ -721,7 +690,6 @@ def ans_vote_post(request):
         num_votes = cur_post.userUpVotes.count() - cur_post.userDownVotes.count()
         cur_post.num_votes = num_votes
         cur_post.save()
-
         return HttpResponse(num_votes)
     
     else:
@@ -734,17 +702,14 @@ def user_notifications(request, user_id):
 
     settings.MODERATOR_ACTIVATED = False
 
-    if str(user_id) == str(request.user.id):
-
-        try :
+    if (str(user_id) == str(request.user.id)):
+        try:
             notifications = Notification.objects.filter(uid=user_id).order_by('date_created').reverse()
             context = {
                 'notifications': notifications,
             }
             return render(request, 'website/templates/notifications.html', context)
-
         except:
-            Notification.objects.filter(uid=request.user.id).delete()
             return HttpResponseRedirect("/user/{0}/notifications/".format(request.user.id))
 
     else:
@@ -754,13 +719,11 @@ def user_notifications(request, user_id):
 # to clear notification from header, once viewed or cancelled
 @login_required
 def clear_notifications(request):
-
     settings.MODERATOR_ACTIVATED = False
     Notification.objects.filter(uid=request.user.id).delete()
     return HttpResponseRedirect("/user/{0}/notifications/".format(request.user.id))
 
 def search(request):
-
     settings.MODERATOR_ACTIVATED = False
     context = {
         'categories': categories
@@ -789,7 +752,6 @@ def moderator_home(request):
         categories = []
         for group in request.user.groups.all():
             categories.append(ModeratorGroup.objects.get(group=group).category)
-
         # Getting the questions related to moderator's categories
         questions = []
         for category in categories:
@@ -914,7 +876,7 @@ def ajax_answer_update(request):
         answer= get_object_or_404(Answer, pk=aid)
 
         if answer:
-            if answer.uid == request.user.id or request.user.id in admins:
+            if answer.uid == request.user.id:
                 answer.body = body.encode('unicode_escape')
                 answer.save()
 
@@ -928,7 +890,7 @@ def ajax_answer_comment_update(request):
         comment = get_object_or_404(AnswerComment, pk=comment_id)
 
         if comment:
-            if comment.uid == request.user.id or request.user.id in admins:
+            if comment.uid == request.user.id:
                 comment.body = comment_body.encode('unicode_escape')
                 comment.save()
 
