@@ -5,7 +5,6 @@ from django.template.context_processors import csrf
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.contrib import messages 

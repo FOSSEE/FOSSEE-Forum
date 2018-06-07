@@ -1,21 +1,17 @@
-from django.http import HttpResponse, HttpResponseRedirect
-from django.contrib.auth import login, logout, authenticate
-from django.shortcuts import render_to_response , render, redirect
-from django.template.context_processors import csrf
-from django.template import RequestContext
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login, logout
-from django.core.mail import EmailMultiAlternatives
-from django.contrib import messages
-from django.utils import timezone
-from django.conf import settings
-from django.core.mail import send_mail
-from django.contrib.auth.views import password_reset, password_reset_confirm
-from django.core.urlresolvers import reverse
 import urllib
 import urllib2
 import json
 import random, string
+from django.http import HttpResponse, HttpResponseRedirect
+from django.contrib.auth import login, logout, authenticate
+from django.shortcuts import render_to_response, render, redirect
+from django.template.context_processors import csrf
+from django.template import RequestContext
+from django.contrib.auth.decorators import login_required
+from django.core.mail import EmailMultiAlternatives
+from django.contrib import messages
+from django.conf import settings
+from django.core.mail import send_mail
 from forums.forms import *
 from website.models import *
 
@@ -24,9 +20,9 @@ def account_register(request):
 
     context = {}
 
-    if request.method == 'POST':
+    if (request.method == 'POST'):
+
         form = RegisterForm(request.POST)
-        print ("ok")
         
         if form.is_valid():
 
@@ -86,7 +82,7 @@ def confirm(request, confirmation_code, username):
         user = User.objects.get(username=username)
         profile = Profile.objects.get(user=user)
         
-        if profile.confirmation_code == confirmation_code:
+        if (profile.confirmation_code == confirmation_code):
             user.is_active = True
             user.save()
             user.backend='django.contrib.auth.backends.ModelBackend' 
@@ -111,10 +107,8 @@ def account_profile(request, username):
     
     user = request.user
     profile = Profile.objects.get(user_id=user.id)
-    #old_file_path = settings.MEDIA_ROOT + str(profile.picture)
-    #new_file_path = None
 
-    if request.method == 'POST':
+    if (request.method == 'POST'):
 
         form = ProfileForm(user, request.POST)
 
@@ -127,43 +121,12 @@ def account_profile(request, username):
             user.save()
             form_data = form.save(commit=False)
             form_data.user_id = user.id
-            
-            # if 'picture-clear' in request.POST and request.POST['picture-clear']:
-            #     #if not old_file == new_file:
-            #     if os.path.isfile(old_file_path):
-            #         os.remove(old_file_path)
-            #
-            # if 'picture' in request.FILES:
-            #     form_data.picture = request.FILES['picture']
-            
-            #form_data.save()
-            #profile.address = address
-            #profile.phone = phone
-
             profile.save()
-            
-            """if 'picture' in request.FILES:
-                size = 128, 128
-                filename = str(request.FILES['picture'])
-                ext = os.path.splitext(filename)[1]
-                if ext != '.pdf' and ext != '':
-                    im = Image.open(settings.MEDIA_ROOT + str(form_data.picture))
-                    im.thumbnail(size, Image.ANTIALIAS)
-                    ext = ext[1:]
-                    
-                    mimeType = ext.upper()
-                    if mimeType == 'JPG':
-                        mimeType = 'JPEG'
-                    im.save(settings.MEDIA_ROOT + "user/" + str(user.id) + "/" + str(user.id) + "-thumb." + ext, mimeType)
-                    form_data.thumb = 'user/' + str(user.id)+ '/' + str(user.id) + '-thumb.' + ext
-                    form_data.save()"""
-
             
             messages.success(request, "Your profile has been updated!")
             return HttpResponseRedirect("/accounts/view-profile/{0}".format(user.id))
 
         # return account_view_profile(request, user.id)
-
         context = {'form':form}
         return render(request, 'forums/templates/profile.html', context)
 
@@ -171,14 +134,14 @@ def account_profile(request, username):
         context = {}
         context.update(csrf(request))
         instance = Profile.objects.get(user_id=user.id)
-        context['form'] = ProfileForm(user, instance = instance)
+        context['form'] = ProfileForm(user, instance=instance)
         return render(request, 'forums/templates/profile.html', context) 
         
 # view all profile details saved for the user, when clicked on my profile  
 @login_required
 def account_view_profile(request, user_id):
     
-    user = User.objects.get(pk = user_id)
+    user = User.objects.get(pk=user_id)
     profile = Profile.objects.get(user=user)
     flag = False
     
@@ -206,9 +169,7 @@ def account_view_profile(request, user_id):
         'user_show':user,   
     }
     return render(request, 'forums/templates/view-profile.html', context)
-    
-    
-                
+
 # send confirm registration link    
 def send_registration_confirmation(user):
 
@@ -243,7 +204,7 @@ def user_login(request):
 
     if request.user.is_anonymous():
 
-        if request.method == 'POST':
+        if (request.method == 'POST'):
             form = UserLoginForm(request.POST)
 
             # Valid credentials are entered
@@ -253,7 +214,7 @@ def user_login(request):
                 user = cleaned_data.get("user")
                 login(request, user)
 
-                if 'next' in request.POST:
+                if ('next' in request.POST):
                     next_url = request.POST.get('next')
                     return HttpResponseRedirect(next_url)
 

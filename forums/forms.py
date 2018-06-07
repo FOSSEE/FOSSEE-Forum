@@ -1,16 +1,10 @@
 from django import forms
 from django.contrib.auth import login, logout, authenticate
-from django.utils.translation import ugettext_lazy as _
-from django.core.validators import MinLengthValidator, MinValueValidator, \
-RegexValidator, URLValidator
 from captcha.fields import ReCaptchaField
 from django.contrib.auth.models import User
 from captcha.fields import ReCaptchaField
-
 from django.utils.translation import ugettext_lazy as _
-from django.core.validators import MinLengthValidator, MinValueValidator, \
-RegexValidator, URLValidator
-from django.template.defaultfilters import filesizeformat
+from django.core.validators import RegexValidator, MaxLengthValidator, MinLengthValidator
 from website.models import Profile
 
 
@@ -21,10 +15,8 @@ class UserLoginForm(forms.Form):
     def clean(self):
         cleaned_data = self.cleaned_data
         username = cleaned_data.get('username')
-        print username
         password = cleaned_data.get('password')
-        print password
-        if username is None or password is None:
+        if (username is None or password is None):
             raise forms.ValidationError("Invalid username or password")
         user = authenticate(username=username, password=password)
         
@@ -36,24 +28,18 @@ class UserLoginForm(forms.Form):
         return cleaned_data
         
 class ProfileForm(forms.ModelForm):
+
     class Meta:
         model = Profile
         exclude = ['user', 'confirmation_code']
+
     first_name = forms.CharField(widget=forms.TextInput(),
                         required = True,
                         error_messages = {'required':'First name field required.'})
     last_name = forms.CharField(widget=forms.TextInput(),
                         required = True,
                         error_messages = {'required':'Last name field required.'})
-
-    phone = forms.CharField(max_length = 12, widget=forms.TextInput(),required=False, validators = [RegexValidator(regex = '^[0-9-_+.]*$')])
-
-  #   def clean_phone(self):
-  #   	phone = self.cleaned_data['phone']
-  #   	temp = str(phone)
-  #   	if not temp.isdigit():
-  #   		raise forms.ValidationError("Enter valid contact number.")
-		# return phone
+    phone = forms.CharField(max_length = 12, widget=forms.TextInput(), required=False, validators = [RegexValidator(regex='^[0-9-_+.]*$')])
 
     def clean_last_name(self):
 
@@ -77,7 +63,6 @@ class ProfileForm(forms.ModelForm):
 
         return first_name
 	
-
     def __init__(self, user, *args, **kwargs):
 
         initial = ''
@@ -94,18 +79,21 @@ class ProfileForm(forms.ModelForm):
           
      
 class RegisterForm(forms.Form):
+
 	username = forms.CharField(
 		label = _("Username"),
 		max_length = 30,
 		widget = forms.TextInput(),
 		required = True,
 		validators = [
-		RegexValidator(
-			regex = '^[a-zA-Z0-9-_+.]*$',
-			message = 'Username required. 30 characters or fewer. \
-			Letters, digits and @/./+/-/_ only.',
-			code = 'invalid_username'
-		),
+			RegexValidator(
+				regex = '^[a-zA-Z0-9-_+.]*$',
+				message = 'Username required. 5-30 characters. \
+				Letters, digits and @/./+/-/_ only.',
+				code = 'invalid_username'
+			),
+			MinLengthValidator(5, message='Username must at least be 5 characters long.'),
+			MaxLengthValidator(30, message='Username cannot be longer than 30 characters.'),
 		]
 	)
 	password = forms.CharField(
@@ -113,7 +101,6 @@ class RegisterForm(forms.Form):
 		widget = forms.PasswordInput(render_value = False),
 		min_length = 8,
 	)
-	
 	password_confirm = forms.CharField(
 		label = _("Password (again)"),
 		widget = forms.PasswordInput(render_value = False),
@@ -130,8 +117,7 @@ class RegisterForm(forms.Form):
 			User.objects.get(username=self.cleaned_data['username'])
 			raise forms.ValidationError("This username has already existed.")
 		except User.DoesNotExist:
-			pass
-			
+			pass	
 			
 	def clean_email(self):
 		try:
