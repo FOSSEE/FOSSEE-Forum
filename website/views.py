@@ -31,7 +31,7 @@ def home(request):
 
     settings.MODERATOR_ACTIVATED = False
     
-    questions = Question.objects.all().order_by('date_created').filter(is_spam=False).reverse()
+    questions = Question.objects.all().order_by('-date_created').filter(is_spam=False)
     context = {
         'categories': categories,
         'questions': questions,
@@ -41,7 +41,7 @@ def home(request):
     
 # to get all questions posted till now and pagination, 20 questions at a time
 def questions(request):
-    questions = Question.objects.all().filter(is_spam=False).order_by('date_created').reverse()
+    questions = Question.objects.all().filter(is_spam=False).order_by('-date_created')
     context = {
         'questions': questions,
     }
@@ -280,9 +280,9 @@ def answer_comment(request):
 def filter(request, category=None, tutorial=None):
 
     if category and tutorial:
-        questions = Question.objects.filter(category__name=category).filter(sub_category=tutorial).order_by('date_created').reverse()
+        questions = Question.objects.filter(category__name=category).filter(sub_category=tutorial).order_by('-date_created')
     elif tutorial is None:
-        questions = Question.objects.filter(category__name=category).order_by('date_created').reverse()
+        questions = Question.objects.filter(category__name=category).order_by('-date_created')
 
     if (not settings.MODERATOR_ACTIVATED):
         questions = questions.filter(is_spam=False)
@@ -703,7 +703,7 @@ def user_notifications(request, user_id):
 
     if (str(user_id) == str(request.user.id)):
         try:
-            notifications = Notification.objects.filter(uid=user_id).order_by('date_created').reverse()
+            notifications = Notification.objects.filter(uid=user_id).order_by('-date_created')
             context = {
                 'notifications': notifications,
             }
@@ -743,7 +743,7 @@ def moderator_home(request):
 
     # If user is a master moderator
     if (request.user.groups.filter(name="forum_moderator").exists()):
-        questions = Question.objects.all().order_by('date_created').reverse()
+        questions = Question.objects.all().order_by('-date_created')
         categories = FossCategory.objects.order_by('name')
     
     else:
@@ -754,7 +754,7 @@ def moderator_home(request):
         # Getting the questions related to moderator's categories
         questions = []
         for category in categories:
-            questions.extend(Question.objects.filter(category__name=category.name).order_by('date_created').reverse())
+            questions.extend(Question.objects.filter(category__name=category.name).order_by('-date_created'))
     
     context = {
         'questions': questions,
@@ -770,76 +770,29 @@ def moderator_questions(request):
 
     # If user is a master moderator
     if (request.user.groups.filter(name="forum_moderator").exists()):
-        questions = Question.objects.all().order_by('date_created').reverse()
+        questions = Question.objects.all().order_by('-date_created')
+        if ('spam' in request.GET):
+            questions = questions.filter(is_spam=True)
+        elif ('non-spam' in request.GET):
+            questions = questions.filter(is_spam=False)
     
     else:
-        # Finding the moderator's categories
-        categories = []
-        for group in request.user.groups.all():
-            categories.append(ModeratorGroup.objects.get(group=group).category)
-
-        # Getting the questions related to moderator's categories
+        # Finding the moderator's category questions
         questions = []
-        for category in categories:
-            questions.extend(Question.objects.filter(category__name=category.name).order_by('date_created').reverse())
-    
+        for group in request.user.groups.all():
+            category = ModeratorGroup.objects.get(group=group).category
+            questions_to_add = Question.objects.filter(category__name=category.name).order_by('-date_created')
+            if ('spam' in request.GET):
+                questions_to_add = questions_to_add.filter(is_spam=True)
+            elif ('non-spam' in request.GET):
+                questions_to_add = questions_to_add.filter(is_spam=False)
+            questions.extend(questions_to_add)
+
     context = {
         'questions': questions,
     }
 
     return render(request, 'website/templates/moderator/questions.html', context)
-
-# Spam questions page for moderator
-@login_required
-@user_passes_test(is_moderator)
-def moderator_spam(request):
-
-    # If user is a master moderator
-    if (request.user.groups.filter(name="forum_moderator").exists()):
-        questions = Question.objects.all().filter(is_spam=True).order_by('date_created').reverse()
-    
-    else:
-        # Finding the moderator's categories
-        categories = []
-        for group in request.user.groups.all():
-            categories.append(ModeratorGroup.objects.get(group=group).category)
-
-        # Getting the questions related to moderator's categories
-        questions = []
-        for category in categories:
-            questions.extend(Question.objects.filter(category__name=category.name).filter(is_spam=True).order_by('date_created').reverse())
-    
-    context = {
-        'questions': questions,
-    }
-
-    return render(request, 'website/templates/moderator/spam.html', context)
-
-# Non-spam questions page for moderator
-@login_required
-@user_passes_test(is_moderator)
-def moderator_non_spam(request):
-
-    # If user is a master moderator
-    if (request.user.groups.filter(name="forum_moderator").exists()):
-        questions = Question.objects.all().filter(is_spam=False).order_by('date_created').reverse()
-    
-    else:
-        # Finding the moderator's categories
-        categories = []
-        for group in request.user.groups.all():
-            categories.append(ModeratorGroup.objects.get(group=group).category)
-
-        # Getting the questions related to moderator's categories
-        questions = []
-        for category in categories:
-            questions.extend(Question.objects.filter(category__name=category.name).filter(is_spam=False).order_by('date_created').reverse())
-    
-    context = {
-        'questions': questions,
-    }
-
-    return render(request, 'website/templates/moderator/non-spam.html', context)
 
 # AJAX SECTION
 # All the ajax views go below
