@@ -794,6 +794,28 @@ def moderator_questions(request):
 
     return render(request, 'website/templates/moderator/questions.html', context)
 
+# Unanswered questions page for moderator
+@login_required
+@user_passes_test(is_moderator)
+def moderator_unanswered(request):
+
+    # If user is a master moderator
+    if (request.user.groups.filter(name="forum_moderator").exists()):
+        questions = Question.objects.all().filter(is_spam=True).order_by('date_created').reverse()
+    
+    else:
+        # Finding the moderator's category questions
+        questions = []
+        for group in request.user.groups.all():
+            category = ModeratorGroup.objects.get(group=group).category
+            questions.extend(Question.objects.filter(category__name=category.name).order_by('-date_created'))
+    
+    context = {
+        'questions': questions,
+    }
+
+    return render(request, 'website/templates/moderator/unanswered.html', context)
+
 # AJAX SECTION
 # All the ajax views go below
 @csrf_exempt
