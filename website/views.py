@@ -362,7 +362,7 @@ def new_question(request):
                 question.category,
                 question.body,
                 settings.DOMAIN_NAME + '/question/'+ str(question.id),
-                question.is_spam == True,
+                question.is_spam,
             )
             email = EmailMultiAlternatives(
                 subject,'',
@@ -372,6 +372,8 @@ def new_question(request):
             email.attach_alternative(message, "text/html")
             # email.send(fail_silently=True)
 
+            if (question.is_spam):
+                return HttpResponseRedirect('/')
             return HttpResponseRedirect('/question/'+ str(question.id))
     
         else:
@@ -443,8 +445,9 @@ def edit_question(request, question_id=None):
             question.userViews.add(request.user)
             if str(question.sub_category) == 'None':
                 question.sub_category = ""
-            if (predict(question.body) == "Spam"):
-                question.is_spam = True
+            if (not settings.MODERATOR_ACTIVATED):
+                if (predict(question.body) == "Spam"):
+                    question.is_spam = True
 
             question.save()
 
@@ -477,6 +480,8 @@ def edit_question(request, question_id=None):
             email.attach_alternative(message, "text/html")
             # email.send(fail_silently=True)
 
+            if (question.is_spam):
+                return HttpResponseRedirect('/')
             return HttpResponseRedirect('/question/'+ str(question.id))
     
         else:

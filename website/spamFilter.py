@@ -2,6 +2,7 @@
 
 import openpyxl
 import numpy as np
+from django.conf import settings
 from cleanText import cleanString
 from sklearn.svm import LinearSVC
 from sklearn.metrics import confusion_matrix, f1_score, precision_score, recall_score
@@ -10,7 +11,9 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 # Get the original dataset
 def store():
 
-    workBookOld = openpyxl.load_workbook('DataSet.xlsx')
+    file_location = settings.PROJECT_DIR + '/DataSet.xlsx'
+    print ("File location: " + file_location)
+    workBookOld = openpyxl.load_workbook(file_location)
     dataSheetOld = workBookOld['Data set']
 
     xData = []
