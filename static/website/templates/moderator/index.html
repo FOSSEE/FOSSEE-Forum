@@ -3,78 +3,56 @@
 {% load notify %}
 {% load count_tags %}
 {% load helpers %}
- <link rel="stylesheet" href="{% static 'website/css/main.css' %}" type="text/css" media="screen" charset="utf-8" />
+ 
+<link rel="stylesheet" href="{% static 'website/css/main.css' %}" type="text/css" media="screen" charset="utf-8" />
+
 {% block content %}
 
-<div style="margin-left: 450px;" >
-
-<script>
-
-   $(document).ready(function() {
-    $('#myTable').tablesorter();
-} );
-
- </script>
-
- <script>
-  (function() {
-    var cx = '011342992297670206849:dfzecvqmvgc';
-    var gcse = document.createElement('script');
-    gcse.type = 'text/javascript';
-    gcse.async = true;
-    gcse.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') +
-        '//cse.google.com/cse.js?cx=' + cx;
-    var s = document.getElementsByTagName('script')[0];
-    s.parentNode.insertBefore(gcse, s);
-  })();
-  </script>
-  </div>
-
-    <div id="carousel-container">
-        <div class="carousel">
-            {% for category in categories %}
-            <div>
-                <div class="thumbnail">
-                    {% with file=category|get_category_image %}
-                        {% if file %}
-                            <img src="{% static category|get_category_image %}">
-                        {% else %}
-                            <div class="category-title">{{ category }}</div>
-                        {% endif %}
-                    {% endwith %}
-                    <div class="caption">
-                        <small class="category">
-                            {{ category.description }}
-                        </small>
-                        <hr>
-                        {% latest_question category %}
-                    </div>
+<div id="carousel-container">
+    <div class="carousel">
+        {% for category in categories %}
+        <div>
+            <div class="thumbnail">
+                {% with file=category|get_category_image %}
+                    {% if file %}
+                        <img src="{% static category|get_category_image %}">
+                    {% else %}
+                        <div class="category-title">{{ category }}</div>
+                    {% endif %}
+                {% endwith %}
+                <div class="caption">
+                    <small class="category">
+                        {{ category.description }}
+                    </small>
+                    <hr>
+                    {% latest_question category %}
                 </div>
             </div>
-            {% endfor %}
         </div>
-    </div> <!-- /.carousel -->
+        {% endfor %}
+    </div>
+</div> <!-- /.carousel -->
 
 
-    <div id="filter-container">
-        <div class="row" style="margin-left: 12%;">
-            <form class ="" id="filter-form" action="" role="form">
-                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" style="width: 65%;">
-                    <a class="btn btn-block btn-primary" href="{% url 'website:moderator_questions' %}" style="margin-top: 18px;">View all questions from your categories</a>
-                </div> <!-- /.col -->
-            </form>
-            <div class="col-lg-6 col-md-6 col-sm-6" style="width: 25%;">
-                <div class="row" style="margin-left: 11px;">
+<div id="filter-container">
+    <div class="row" style="margin-left: 12%;">
+        <form class ="" id="filter-form" action="" role="form">
+            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" style="width: 65%;">
+                <a class="btn btn-block btn-primary" href="{% url 'website:moderator_questions' %}" style="margin-top: 18px;">View all questions from your categories</a>
+            </div> <!-- /.col -->
+        </form>
+        <div class="col-lg-6 col-md-6 col-sm-6" style="width: 25%;">
+            <div class="row" style="margin-left: 11px;">
 
-                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" style="width: 100px; margin-right:40px; " >
-                        <h3 style="font-size: 18px" align="center"><strong>{% length questions %}</strong></h3>
-                        <h3 style="font-size: 18px; margin-top: 1px;" align="center" text-color="#7395d9" >Questions</h3>
-                    </div>
-                   
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" style="width: 100px; margin-right:40px; " >
+                    <h3 style="font-size: 18px" align="center"><strong>{% length questions %}</strong></h3>
+                    <h3 style="font-size: 18px; margin-top: 1px;" align="center" text-color="#7395d9" >Questions</h3>
                 </div>
+                
             </div>
-        </div> <!-- /.row -->
-    </div> <!-- /#filter-container -->
+        </div>
+    </div> <!-- /.row -->
+</div> <!-- /#filter-container -->
 
 <br>
     <div class="panel panel-default">
@@ -164,14 +142,19 @@
 
 
 
-    $(document).ready(function(){
+    $(document).ready(function() {
+
+        var length = {% length categories %};
+        if (length > 4) {
+            length = 4;
+        }
         
         $carousel = $('.carousel').slick({
             lazyLoad: 'ondemand',
             dots: false,
-            touchMove: false,
-            draggable: false,
-            slidesToShow: 4,
+            touchMove: true,
+            draggable: true,
+            slidesToShow: length,
             slidesToScroll: 1,
             speed: 2000,
             autoplay: true,
