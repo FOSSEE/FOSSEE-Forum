@@ -12,7 +12,7 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 def store():
 
     file_location = settings.PROJECT_DIR + '/DataSet.xlsx'
-    print ("File location: " + file_location)
+    print ("File location: {0}".format(file_location))
     workBookOld = openpyxl.load_workbook(file_location)
     dataSheetOld = workBookOld['Data set']
 

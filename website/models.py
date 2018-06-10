@@ -41,7 +41,7 @@ class Question(models.Model):
     userViews = models.ManyToManyField(User, blank=True, related_name='postViews')
     num_votes = models.IntegerField(default=0)
     is_spam = models.BooleanField(default=False)
-    image = ResizedImageField(size=[400,400], upload_to="images/", blank=True)
+    image = ResizedImageField(size=[400,400], upload_to="images/questions/", blank=True)
 
     def __unicode__(self):
              return '{0} - {1} - {2} - {3} - {4}'.format(self.id, self.category.name, self.sub_category, self.title, self.user)
@@ -74,7 +74,7 @@ class Answer(models.Model):
     upvotes = models.IntegerField(default=0)
     num_votes = models.IntegerField(default=0)
     is_spam = models.BooleanField(default=False)
-    image = ResizedImageField(size=[400,400], upload_to="images/", blank=True)
+    image = ResizedImageField(size=[400,400], upload_to="images/answers/", blank=True)
 
     def user(self):
         user = User.objects.get(id=self.uid)
@@ -113,6 +113,7 @@ class Profile(models.Model):
     phone = models.CharField(max_length=20, null=True)
     address = models.TextField(null=True)
     created = models.DateTimeField(auto_now_add=True)
+    image = ResizedImageField(size=[400,400], upload_to="images/profiles/", blank=True)
     
     class Meta:
         app_label = 'website'
