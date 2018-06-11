@@ -11,39 +11,39 @@ from website.models import Profile
 
 
 class UserLoginForm(forms.Form):
-    username = forms.CharField()
-    password = forms.CharField(widget = forms.PasswordInput())
+	username = forms.CharField()
+	password = forms.CharField(widget = forms.PasswordInput())
 
-    def clean(self):
-        cleaned_data = self.cleaned_data
-        username = cleaned_data.get('username')
-        password = cleaned_data.get('password')
-        if (username is None or password is None):
-            raise forms.ValidationError("Invalid username or password")
-        user = authenticate(username = username, password = password)
-        
-        if not user:
-            raise forms.ValidationError("Invalid username or password")
-        if not user.is_active:
-            raise forms.ValidationError("User is blocked")
-        cleaned_data['user'] = user
-        return cleaned_data
-        
+	def clean(self):
+		cleaned_data = self.cleaned_data
+		username = cleaned_data.get('username')
+		password = cleaned_data.get('password')
+		if (username is None or password is None):
+			raise forms.ValidationError("Invalid username or password")
+		user = authenticate(username = username, password = password)
+		
+		if not user:
+			raise forms.ValidationError("Invalid username or password")
+		if not user.is_active:
+			raise forms.ValidationError("User is blocked")
+		cleaned_data['user'] = user
+		return cleaned_data
+		
 class ProfileForm(forms.ModelForm):
 
-    class Meta(object):
-        model = Profile
-        exclude = ['user', 'confirmation_code']
+	class Meta(object):
+		model = Profile
+		exclude = ['user', 'confirmation_code']
 
-    first_name = forms.CharField(widget = forms.TextInput(), 
-                        required = True, 
-                        error_messages = {'required':'First name field required.'})
-    last_name = forms.CharField(widget = forms.TextInput(), 
-                        required = True, 
-                        error_messages = {'required':'Last name field required.'})
-    phone = forms.CharField(max_length = 12, widget = forms.TextInput(), required = False, validators = [RegexValidator(regex = '^[0-9-_+.]*$')])
+	first_name = forms.CharField(widget = forms.TextInput(), 
+						required = True, 
+						error_messages = {'required':'First name field required.'})
+	last_name = forms.CharField(widget = forms.TextInput(), 
+						required = True, 
+						error_messages = {'required':'Last name field required.'})
+	phone = forms.CharField(max_length = 12, widget = forms.TextInput(), required = False, validators = [RegexValidator(regex = '^[0-9-_+.]*$')])
 
-    def clean_last_name(self):
+	def clean_last_name(self):
 
 		last_name = self.cleaned_data['last_name'].encode('utf-8')
 		temp = last_name.replace(" ", '')
@@ -54,32 +54,32 @@ class ProfileForm(forms.ModelForm):
 
 		return last_name
 
-    def clean_first_name(self):
+	def clean_first_name(self):
 
-    	first_name = self.cleaned_data['first_name'].encode('utf-8')
-        temp = first_name.replace(" ", '')
+		first_name = self.cleaned_data['first_name'].encode('utf-8')
+		temp = first_name.replace(" ", '')
 
-        for e in str(temp):
+		for e in str(temp):
 			if not e.isalnum():
 				raise forms.ValidationError("Only Alphanuemaric")
 
-        return first_name
+		return first_name
 	
-    def __init__(self, user, *args, **kwargs):
+	def __init__(self, user, *args, **kwargs):
 
-        initial = ''
-        if 'instance' in kwargs:
-            initial = kwargs["instance"]
+		initial = ''
+		if 'instance' in kwargs:
+			initial = kwargs["instance"]
 			
-        if 'user' in kwargs:
-            user = kwargs["user"]
-            del kwargs["user"]
-            
-        super(ProfileForm, self).__init__(*args, **kwargs)
-        self.fields['first_name'].initial = user.first_name
-        self.fields['last_name'].initial = user.last_name
-          
-     
+		if 'user' in kwargs:
+			user = kwargs["user"]
+			del kwargs["user"]
+			
+		super(ProfileForm, self).__init__(*args, **kwargs)
+		self.fields['first_name'].initial = user.first_name
+		self.fields['last_name'].initial = user.last_name
+		  
+	 
 class RegisterForm(forms.Form):
 
 	username = forms.CharField(
