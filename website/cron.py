@@ -22,8 +22,8 @@ class Cron(object):
         import datetime as DT
 
         try:
-            weekago = DT.date.today() - DT.timedelta(days=6)
-            questions = Question.objects.filter(date_created__lte=weekago)
+            weekago = DT.date.today() - DT.timedelta(days = 6)
+            questions = Question.objects.filter(date_created__lte = weekago)
         except Exception, e:
             print "No questions found"
         category_count = FossCategory.objects.count()
@@ -31,19 +31,19 @@ class Cron(object):
         body_cat = {}
         for question in questions:
             try:
-                uque = Answer.objects.filter(question__id=question.id)
+                uque = Answer.objects.filter(question__id = question.id)
             except Exception, e:
-                print "error occured >> "
+                print "error occured >  > "
                 print e
             if not uque.exists():
-                i=i+1
+                i = i+1
                 category_id = question.category.id
                 if category_id in body_cat.keys():
                     body_cat[category_id].append(question)
                 else:
                     body_cat[category_id] = [question]
         for key, value in body_cat.items():
-            category_name = FossCategory.objects.get(id=key)
+            category_name = FossCategory.objects.get(id = key)
             mail_body = "*** This is an automatically generated email, please do not reply ***" + " \n\nThe following questions are left unanswered : \n\n"
             for item in value:
                 string = "Question : " + str(item.title) + "\n" + str(item.category) + "\n" + settings.DOMAIN_NAME + "/question/" + str(item.id) +"\n\n"
@@ -52,7 +52,7 @@ class Cron(object):
             mail_body += "Please do the needful.\n\n"
             to = (item.category.email, FORUM_NOTIFICATION)
             subject =  "FOSSEE Forums - " + str(item.category) +" - Unanswered Question"
-            send_mail(subject,mail_body, sender_email, to)
+            send_mail(subject, mail_body, sender_email, to)
 
 
 a = Cron() 

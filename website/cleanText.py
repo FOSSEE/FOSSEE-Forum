@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 import re
 import nltk
 
-def cleanString(myString):
+def clean_string(myString):
 
     # convert text to lowercase
     myString = myString.lower()

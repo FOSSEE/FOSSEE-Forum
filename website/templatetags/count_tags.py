@@ -6,16 +6,16 @@ register = template.Library()
 
 # Counts the number of questions in <category>
 def category_question_count(category):
-    category_question_count =Question.objects.filter(category=category).count()
+    category_question_count = Question.objects.filter(category = category).count()
     return category_question_count
 register.simple_tag(category_question_count)
 
 # Implementing range(x) function in templates
-def get_range(value, arg=''):
-    args = arg.split(',')
+def get_range(value, arg = ''):
+    args = arg.split(', ')
     n = len(args)
 
-    if n == 0 or arg =='':
+    if n == 0 or arg == '':
         # if no arguments set value as limit
         start = 0
         limit = value
@@ -34,28 +34,28 @@ def get_range(value, arg=''):
 register.filter('get_range', get_range)
 
 # Implementing increment and decrement functions
-def inc(value, arg=1):
+def inc(value, arg = 1):
     return value + int(arg)
 register.filter('inc', inc)
 
-def dec(value, arg=1):
+def dec(value, arg = 1):
     return value-int(arg)
 register.filter('dec', dec)
 
 # Implementing calculator for templates
-def add(value, arg=0):
+def add(value, arg = 0):
     return value + int(arg)
 register.filter('add', add)
 
-def sub(value, arg=0):
+def sub(value, arg = 0):
     return value - int(arg)
 register.filter('sub', sub)
 
-def mul(value, arg=1):
+def mul(value, arg = 1):
     return value * int(arg)
 register.filter('mul', mul)
 
-def div(value, arg=1):
+def div(value, arg = 1):
     return value / int(arg)
 register.filter('div', div)
 

@@ -6,8 +6,8 @@ def admin_processor(request):
 
 def booleans():
     return {
-        'True': True,
-        'False': False,
+        'True': True, 
+        'False': False, 
     }
 
 def moderator_activated(request):

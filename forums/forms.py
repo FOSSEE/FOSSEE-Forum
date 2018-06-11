@@ -10,7 +10,7 @@ from website.models import Profile
 
 class UserLoginForm(forms.Form):
     username = forms.CharField()
-    password = forms.CharField(widget=forms.PasswordInput())
+    password = forms.CharField(widget = forms.PasswordInput())
 
     def clean(self):
         cleaned_data = self.cleaned_data
@@ -18,7 +18,7 @@ class UserLoginForm(forms.Form):
         password = cleaned_data.get('password')
         if (username is None or password is None):
             raise forms.ValidationError("Invalid username or password")
-        user = authenticate(username=username, password=password)
+        user = authenticate(username = username, password = password)
         
         if not user:
             raise forms.ValidationError("Invalid username or password")
@@ -33,18 +33,18 @@ class ProfileForm(forms.ModelForm):
         model = Profile
         exclude = ['user', 'confirmation_code']
 
-    first_name = forms.CharField(widget=forms.TextInput(),
-                        required = True,
+    first_name = forms.CharField(widget = forms.TextInput(), 
+                        required = True, 
                         error_messages = {'required':'First name field required.'})
-    last_name = forms.CharField(widget=forms.TextInput(),
-                        required = True,
+    last_name = forms.CharField(widget = forms.TextInput(), 
+                        required = True, 
                         error_messages = {'required':'Last name field required.'})
-    phone = forms.CharField(max_length = 12, widget=forms.TextInput(), required=False, validators = [RegexValidator(regex='^[0-9-_+.]*$')])
+    phone = forms.CharField(max_length = 12, widget = forms.TextInput(), required = False, validators = [RegexValidator(regex = '^[0-9-_+.]*$')])
 
     def clean_last_name(self):
 
 		last_name = self.cleaned_data['last_name'].encode('utf-8')
-		temp = last_name.replace(" ",'')
+		temp = last_name.replace(" ", '')
 
 		for e in str(temp):
 			if not e.isalnum():
@@ -55,7 +55,7 @@ class ProfileForm(forms.ModelForm):
     def clean_first_name(self):
 
     	first_name = self.cleaned_data['first_name'].encode('utf-8')
-        temp = first_name.replace(" ",'')
+        temp = first_name.replace(" ", '')
 
         for e in str(temp):
 			if not e.isalnum():
@@ -81,47 +81,47 @@ class ProfileForm(forms.ModelForm):
 class RegisterForm(forms.Form):
 
 	username = forms.CharField(
-		label = _("Username"),
-		max_length = 30,
-		widget = forms.TextInput(),
-		required = True,
+		label = _("Username"), 
+		max_length = 30, 
+		widget = forms.TextInput(), 
+		required = True, 
 		validators = [
 			RegexValidator(
-				regex = '^[a-zA-Z0-9-_+.]*$',
+				regex = '^[a-zA-Z0-9-_+.]*$', 
 				message = 'Username required. 5-30 characters. \
-				Letters, digits and @/./+/-/_ only.',
+				Letters, digits and @/./+/-/_ only.', 
 				code = 'invalid_username'
-			),
-			MinLengthValidator(5, message='Username must at least be 5 characters long.'),
-			MaxLengthValidator(30, message='Username cannot be longer than 30 characters.'),
+			), 
+			MinLengthValidator(5, message = 'Username must at least be 5 characters long.'), 
+			MaxLengthValidator(30, message = 'Username cannot be longer than 30 characters.'), 
 		]
 	)
 	password = forms.CharField(
-		label = _("Password"),
-		widget = forms.PasswordInput(render_value = False),
-		min_length = 8,
+		label = _("Password"), 
+		widget = forms.PasswordInput(render_value = False), 
+		min_length = 8, 
 	)
 	password_confirm = forms.CharField(
-		label = _("Password (again)"),
-		widget = forms.PasswordInput(render_value = False),
-		min_length = 8,
+		label = _("Password (again)"), 
+		widget = forms.PasswordInput(render_value = False), 
+		min_length = 8, 
 	)
 	email = forms.EmailField(
-		label = _("Email"),
-		widget = forms.TextInput(),
-		required=True
+		label = _("Email"), 
+		widget = forms.TextInput(), 
+		required = True
 	)
 	
 	def clean_username(self):
 		try:
-			User.objects.get(username=self.cleaned_data['username'])
+			User.objects.get(username = self.cleaned_data['username'])
 			raise forms.ValidationError("This username has already existed.")
 		except User.DoesNotExist:
 			pass	
 			
 	def clean_email(self):
 		try:
-			User.objects.get(email=self.cleaned_data['email'])
+			User.objects.get(email = self.cleaned_data['email'])
 			raise forms.ValidationError("This email is already taken.")
 		except User.DoesNotExist:
 			pass	

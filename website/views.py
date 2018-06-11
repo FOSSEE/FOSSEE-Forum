@@ -1,6 +1,6 @@
 from django import forms
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404,render_to_response
+from django.shortcuts import render, get_object_or_404, render_to_response
 from django.template.context_processors import csrf
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
@@ -10,7 +10,7 @@ from django.conf import settings
 from django.contrib import messages 
 from django.utils.html import strip_tags
 from website.models import Question, Answer, Notification, AnswerComment, FossCategory, Profile, SubFossCategory, ModeratorGroup
-from website.forms import NewQuestionForm, AnswerQuestionForm,AnswerCommentForm
+from website.forms import NewQuestionForm, AnswerQuestionForm, AnswerCommentForm
 from website.templatetags.helpers import prettify
 from django.core.mail import send_mail
 from django.core.mail import EmailMultiAlternatives
@@ -31,7 +31,7 @@ def home(request):
 
     settings.MODERATOR_ACTIVATED = False
     
-    questions = Question.objects.all().order_by('-date_created').filter(is_spam=False)
+    questions = Question.objects.all().order_by('-date_created').filter(is_spam = False)
     context = {
         'categories': categories,
         'questions': questions,
@@ -41,16 +41,16 @@ def home(request):
     
 # to get all questions posted till now and pagination, 20 questions at a time
 def questions(request):
-    questions = Question.objects.all().filter(is_spam=False).order_by('-date_created')
+    questions = Question.objects.all().filter(is_spam = False).order_by('-date_created')
     context = {
         'questions': questions,
     }
     return render(request, 'website/templates/questions.html', context)
     
 # get particular question, with votes,anwsers
-def get_question(request, question_id=None, pretty_url=None):
+def get_question(request, question_id = None, pretty_url = None):
 
-    question = get_object_or_404(Question, id=question_id)
+    question = get_object_or_404(Question, id = question_id)
     sub_category = True
 
     if question.sub_category == "" or str(question.sub_category) == 'None':
@@ -63,20 +63,19 @@ def get_question(request, question_id=None, pretty_url=None):
     if (settings.MODERATOR_ACTIVATED):
         answers = question.answer_set.all()
     else:
-        answers = question.answer_set.filter(is_spam=False).all()
+        answers = question.answer_set.filter(is_spam = False).all()
     ans_count = len(answers)
     form = AnswerQuestionForm()
-    thisuserupvote = question.userUpVotes.filter(id=request.user.id).count()
-    thisuserdownvote = question.userDownVotes.filter(id=request.user.id).count()
+    thisuserupvote = question.userUpVotes.filter(id = request.user.id).count()
+    thisuserdownvote = question.userDownVotes.filter(id = request.user.id).count()
     net_count = question.num_votes
 
     ans_votes = []
     for vote in answers:
         net_ans_count  = vote.num_votes
-        ans_votes.append([vote.userUpVotes.filter(id=request.user.id).count(),vote.userDownVotes.filter(id=request.user.id).count(),net_ans_count])
+        ans_votes.append([vote.userUpVotes.filter(id = request.user.id).count(), vote.userDownVotes.filter(id = request.user.id).count(), net_ans_count])
 
-    #for (f,b) in zip(foo, bar):
-    main_list = zip(answers,ans_votes)
+    main_list = zip(answers, ans_votes)
     context = {
         'ans_count': ans_count,
         'question': question,
@@ -92,7 +91,7 @@ def get_question(request, question_id=None, pretty_url=None):
     # updating views count
     if (request.user.is_anonymous()):  # if no one logged in
         question.views += 1
-    elif (question.userViews.filter(id=request.user.id).count() == 0):
+    elif (question.userViews.filter(id = request.user.id).count() == 0):
         question.views += 1
         question.userViews.add(request.user)
     
@@ -107,7 +106,7 @@ def get_question(request, question_id=None, pretty_url=None):
 def question_answer(request, question_id):
    
     context = {}
-    question = get_object_or_404(Question, id=question_id)
+    question = get_object_or_404(Question, id = question_id)
    
     if request.method == 'POST':
         form = AnswerQuestionForm(request.POST, request.FILES)
@@ -138,19 +137,19 @@ def question_answer(request, question_id):
             sender_name = "FOSSEE Forums"
             sender_email = settings.SENDER_EMAIL
             subject = "FOSSEE Forums - {0} - Your question has been answered".format(question.category)
-            to = [question.user.email, settings.FORUM_NOTIFICATION,]
-            message =""" The following new answer has been posted in the FOSSEE Forum: \n\n
+            to = [question.user.email, settings.FORUM_NOTIFICATION, ]
+            message = """The following new answer has been posted in the FOSSEE Forum: \n\n
                 Title: {0} \n
                 Category: {1}\n
                 Link: {2}\n\n
 
-                Regards,\nFOSSEE Team,\nIIT Bombay.
+                Regards, \nFOSSEE Team, \nIIT Bombay.
                 """.format(
                 question.title,
                 question.category,  
                 settings.DOMAIN_NAME + '/question/' + str(question_id) + "#answer" + str(answer.id)
             )
-            # send_mail(subject, message, sender_email, to, fail_silently=True)
+            # send_mail(subject, message, sender_email, to, fail_silently = True)
 
             return HttpResponseRedirect("/question/" + str(question_id))
 
@@ -178,8 +177,8 @@ def answer_comment(request):
     if request.method == 'POST':
 
         answer_id = request.POST['answer_id']
-        answer = Answer.objects.get(pk=answer_id)
-        answers = answer.question.answer_set.filter(is_spam=False).all()
+        answer = Answer.objects.get(pk = answer_id)
+        answers = answer.question.answer_set.filter(is_spam = False).all()
         answer_creator = answer.user()
         form = AnswerCommentForm(request.POST)
 
@@ -204,13 +203,13 @@ def answer_comment(request):
             sender_name = "FOSSEE Forums"
             sender_email = settings.SENDER_EMAIL
             subject = "FOSSEE Forums - {0} - Comment for your answer".format(answer.question.category)
-            to = [answer_creator.email, settings.FORUM_NOTIFICATION,]
-            message =""" 
+            to = [answer_creator.email, settings.FORUM_NOTIFICATION, ]
+            message = """ 
                 A comment has been posted on your answer. \n\n
                 Title: {0}\n
                 Category: {1}\n
                 Link: {2}\n\n
-                Regards,\nFOSSEE Team,\nIIT Bombay.
+                Regards, \nFOSSEE Team, \nIIT Bombay.
                 """.format(
                 answer.question.title,
                 answer.question.category,
@@ -219,8 +218,8 @@ def answer_comment(request):
             # send_mail(subject, message, sender_email, to)
 
             # notifying other users in the comment thread
-            uids = answer.answercomment_set.filter(answer=answer).values_list('uid', flat=True)
-            answer_comments = answer.answercomment_set.filter(answer=answer)
+            uids = answer.answercomment_set.filter(answer = answer).values_list('uid', flat = True)
+            answer_comments = answer.answercomment_set.filter(answer = answer)
 
             comment_creator_emails = []
             for c in answer_comments:
@@ -244,12 +243,12 @@ def answer_comment(request):
             sender_email = settings.SENDER_EMAIL
             subject = "FOSSEE Forums - {0} - Comment has a reply".format(answer.question.category)
             to = comment_creator_emails
-            message ="""
+            message = """
                 A reply has been posted on your comment.\n\n
                 Title: {0}\n
                 Category: {1}\n
                 Link: {2}\n\n
-                Regards,\nFOSSEE Team,\nIIT Bombay.
+                Regards, \nFOSSEE Team, \nIIT Bombay.
                 """.format(
                 answer.question.title,
                 answer.question.category,
@@ -277,15 +276,15 @@ def answer_comment(request):
     return render(request, 'website/templates/get-question.html', context)
 
 # View used to filter question according to category
-def filter(request, category=None, tutorial=None):
+def filter(request, category = None, tutorial = None):
 
     if category and tutorial:
-        questions = Question.objects.filter(category__name=category).filter(sub_category=tutorial).order_by('-date_created')
+        questions = Question.objects.filter(category__name = category).filter(sub_category = tutorial).order_by('-date_created')
     elif tutorial is None:
-        questions = Question.objects.filter(category__name=category).order_by('-date_created')
+        questions = Question.objects.filter(category__name = category).order_by('-date_created')
 
     if (not settings.MODERATOR_ACTIVATED):
-        questions = questions.filter(is_spam=False)
+        questions = questions.filter(is_spam = False)
 
     context = {
         'questions': questions,
@@ -365,12 +364,12 @@ def new_question(request):
                 question.is_spam,
             )
             email = EmailMultiAlternatives(
-                subject,'',
+                subject, '', 
                 sender_email, to,
-                headers={"Content-type":"text/html;charset=iso-8859-1"}
+                headers = {"Content-type":"text/html;charset=iso-8859-1"}
             )
             email.attach_alternative(message, "text/html")
-            # email.send(fail_silently=True)
+            # email.send(fail_silently = True)
 
             if (question.is_spam):
                 return HttpResponseRedirect('/')
@@ -387,7 +386,7 @@ def new_question(request):
 
     else:
         category = request.GET.get('category')
-        form = NewQuestionForm(category=category)
+        form = NewQuestionForm(category = category)
         context['category'] = category
         
     context['form'] = form   
@@ -396,13 +395,13 @@ def new_question(request):
 
 # Edit a question on forums, notification is sent to mailing list team@fossee.in
 @login_required
-def edit_question(request, question_id=None):
+def edit_question(request, question_id = None):
 
     context = {}
     user = request.user
     context['SITE_KEY'] = settings.GOOGLE_RECAPTCHA_SITE_KEY
     all_category = FossCategory.objects.all()
-    question = get_object_or_404(Question, id=question_id)
+    question = get_object_or_404(Question, id = question_id)
 
     # To prevent random user from manually entering the link and editing
     if ((request.user.id != question.user.id or question.answer_set.count() > 0) and (not is_moderator(request.user))):
@@ -473,12 +472,12 @@ def edit_question(request, question_id=None):
                 question.is_spam,
             )
             email = EmailMultiAlternatives(
-                subject,'',
+                subject, '', 
                 sender_email, to,
-                headers={"Content-type":"text/html;charset=iso-8859-1"}
+                headers = {"Content-type":"text/html;charset=iso-8859-1"}
             )
             email.attach_alternative(message, "text/html")
-            # email.send(fail_silently=True)
+            # email.send(fail_silently = True)
 
             if (question.is_spam):
                 return HttpResponseRedirect('/')
@@ -495,7 +494,7 @@ def edit_question(request, question_id=None):
             return render(request, 'website/templates/edit-question.html', context)
 
     else:
-        form = NewQuestionForm(instance=question)
+        form = NewQuestionForm(instance = question)
         
     context['form'] = form   
     context.update(csrf(request))
@@ -505,7 +504,7 @@ def edit_question(request, question_id=None):
 @login_required
 def question_delete(request, question_id):
 
-    question = get_object_or_404(Question, id=question_id)
+    question = get_object_or_404(Question, id = question_id)
     title = question.title
 
     # To prevent random user from manually entering the link and deleting
@@ -534,7 +533,7 @@ def question_delete(request, question_id):
                 question.body,
                 delete_reason,
             )
-            # send_mail(subject, message, sender_email, to, fail_silenty=True)
+            # send_mail(subject, message, sender_email, to, fail_silenty = True)
 
     question.delete()
     return render(request, 'website/templates/question-delete.html', {'title': title})
@@ -544,7 +543,7 @@ def question_delete(request, question_id):
 @user_passes_test(is_moderator)
 def answer_delete(request, answer_id):
 
-    answer = get_object_or_404(Answer, id=answer_id)
+    answer = get_object_or_404(Answer, id = answer_id)
     question_id = answer.question.id
 
     if (request.method == "POST"):
@@ -567,7 +566,7 @@ def answer_delete(request, answer_id):
             answer.question.body,
             delete_reason,
         )
-        # send_mail(subject, message, sender_email, to, fail_silently=True)
+        # send_mail(subject, message, sender_email, to, fail_silently = True)
 
     answer.delete()
     return HttpResponseRedirect('/question/' + str(question_id))
@@ -577,7 +576,7 @@ def answer_delete(request, answer_id):
 @user_passes_test(is_moderator)
 def mark_answer_spam(request, answer_id):
 
-    answer = get_object_or_404(Answer, id=answer_id)
+    answer = get_object_or_404(Answer, id = answer_id)
     question_id = answer.question.id
 
     if (request.method == "POST"):
@@ -599,9 +598,9 @@ def vote_post(request):
     post_id = int(request.POST.get('id'))
     vote_type = request.POST.get('type')
     vote_action = request.POST.get('action')
-    cur_post = get_object_or_404(Question, id=post_id)
-    thisuserupvote = cur_post.userUpVotes.filter(id=request.user.id).count()
-    thisuserdownvote = cur_post.userDownVotes.filter(id=request.user.id).count()
+    cur_post = get_object_or_404(Question, id = post_id)
+    thisuserupvote = cur_post.userUpVotes.filter(id = request.user.id).count()
+    thisuserdownvote = cur_post.userDownVotes.filter(id = request.user.id).count()
     initial_votes = cur_post.num_votes
 
     if (request.user.id != cur_post.user_id):
@@ -654,9 +653,9 @@ def ans_vote_post(request):
     post_id = int(request.POST.get('id'))
     vote_type = request.POST.get('type')
     vote_action = request.POST.get('action')
-    cur_post = get_object_or_404(Answer, id=post_id)
-    thisuserupvote = cur_post.userUpVotes.filter(id=request.user.id).count()
-    thisuserdownvote = cur_post.userDownVotes.filter(id=request.user.id).count()
+    cur_post = get_object_or_404(Answer, id = post_id)
+    thisuserupvote = cur_post.userUpVotes.filter(id = request.user.id).count()
+    thisuserdownvote = cur_post.userDownVotes.filter(id = request.user.id).count()
     initial_votes = cur_post.num_votes
 
     if (request.user.id != cur_post.uid):
@@ -708,7 +707,7 @@ def user_notifications(request, user_id):
 
     if (str(user_id) == str(request.user.id)):
         try:
-            notifications = Notification.objects.filter(uid=user_id).order_by('-date_created')
+            notifications = Notification.objects.filter(uid = user_id).order_by('-date_created')
             context = {
                 'notifications': notifications,
             }
@@ -724,7 +723,7 @@ def user_notifications(request, user_id):
 @login_required
 def clear_notifications(request):
     settings.MODERATOR_ACTIVATED = False
-    Notification.objects.filter(uid=request.user.id).delete()
+    Notification.objects.filter(uid = request.user.id).delete()
     return HttpResponseRedirect("/user/{0}/notifications/".format(request.user.id))
 
 def search(request):
@@ -747,7 +746,7 @@ def moderator_home(request):
     settings.MODERATOR_ACTIVATED = True
 
     # If user is a master moderator
-    if (request.user.groups.filter(name="forum_moderator").exists()):
+    if (request.user.groups.filter(name = "forum_moderator").exists()):
         questions = Question.objects.all().order_by('-date_created')
         categories = FossCategory.objects.order_by('name')
     
@@ -755,11 +754,11 @@ def moderator_home(request):
         # Finding the moderator's categories
         categories = []
         for group in request.user.groups.all():
-            categories.append(ModeratorGroup.objects.get(group=group).category)
+            categories.append(ModeratorGroup.objects.get(group = group).category)
         # Getting the questions related to moderator's categories
         questions = []
         for category in categories:
-            questions.extend(Question.objects.filter(category__name=category.name).order_by('-date_created'))
+            questions.extend(Question.objects.filter(category__name = category.name).order_by('-date_created'))
     
     context = {
         'questions': questions,
@@ -774,23 +773,23 @@ def moderator_home(request):
 def moderator_questions(request):
 
     # If user is a master moderator
-    if (request.user.groups.filter(name="forum_moderator").exists()):
+    if (request.user.groups.filter(name = "forum_moderator").exists()):
         questions = Question.objects.all().order_by('-date_created')
         if ('spam' in request.GET):
-            questions = questions.filter(is_spam=True)
+            questions = questions.filter(is_spam = True)
         elif ('non-spam' in request.GET):
-            questions = questions.filter(is_spam=False)
+            questions = questions.filter(is_spam = False)
     
     else:
         # Finding the moderator's category questions
         questions = []
         for group in request.user.groups.all():
-            category = ModeratorGroup.objects.get(group=group).category
-            questions_to_add = Question.objects.filter(category__name=category.name).order_by('-date_created')
+            category = ModeratorGroup.objects.get(group = group).category
+            questions_to_add = Question.objects.filter(category__name = category.name).order_by('-date_created')
             if ('spam' in request.GET):
-                questions_to_add = questions_to_add.filter(is_spam=True)
+                questions_to_add = questions_to_add.filter(is_spam = True)
             elif ('non-spam' in request.GET):
-                questions_to_add = questions_to_add.filter(is_spam=False)
+                questions_to_add = questions_to_add.filter(is_spam = False)
             questions.extend(questions_to_add)
 
     context = {
@@ -805,15 +804,15 @@ def moderator_questions(request):
 def moderator_unanswered(request):
 
     # If user is a master moderator
-    if (request.user.groups.filter(name="forum_moderator").exists()):
-        questions = Question.objects.all().filter(is_spam=True).order_by('date_created').reverse()
+    if (request.user.groups.filter(name = "forum_moderator").exists()):
+        questions = Question.objects.all().filter(is_spam = True).order_by('date_created').reverse()
     
     else:
         # Finding the moderator's category questions
         questions = []
         for group in request.user.groups.all():
-            category = ModeratorGroup.objects.get(group=group).category
-            questions.extend(Question.objects.filter(category__name=category.name).order_by('-date_created'))
+            category = ModeratorGroup.objects.get(group = group).category
+            questions.extend(Question.objects.filter(category__name = category.name).order_by('-date_created'))
     
     context = {
         'questions': questions,
@@ -837,7 +836,7 @@ def ajax_tutorials(request):
         category = request.POST.get('category')
 
         if category == '12':
-            tutorials = SubFossCategory.objects.filter(parent_id =category)
+            tutorials = SubFossCategory.objects.filter(parent_id = category)
             context = {
                 'tutorials': tutorials,
             }
@@ -852,7 +851,7 @@ def ajax_answer_update(request):
     if request.method == 'POST':
         aid = request.POST['answer_id']
         body = request.POST['answer_body']
-        answer= get_object_or_404(Answer, pk=aid)
+        answer = get_object_or_404(Answer, pk = aid)
 
         if answer:
             if answer.uid == request.user.id:
@@ -866,7 +865,7 @@ def ajax_answer_comment_update(request):
     if request.method == "POST":
         comment_id = request.POST["comment_id"]
         comment_body = request.POST["comment_body"]
-        comment = get_object_or_404(AnswerComment, pk=comment_id)
+        comment = get_object_or_404(AnswerComment, pk = comment_id)
 
         if comment:
             if comment.uid == request.user.id:
@@ -883,7 +882,7 @@ def ajax_similar_questions(request):
         tutorial = request.POST['tutorial']
         
         # add more filtering when the forum grows
-        questions = Question.objects.filter(category=category).filter(tutorial=tutorial)
+        questions = Question.objects.filter(category = category).filter(tutorial = tutorial)
         context = {
             'questions': questions
         }
@@ -893,7 +892,7 @@ def ajax_similar_questions(request):
 def ajax_notification_remove(request):
     if request.method == "POST":
         nid = request.POST["notification_id"]
-        notification = Notification.objects.get(pk=nid)
+        notification = Notification.objects.get(pk = nid)
 
         if notification:
             if notification.uid == request.user.id:
@@ -907,7 +906,7 @@ def ajax_keyword_search(request):
     if request.method == "POST":
         key = request.POST['key']
 
-        questions = Question.objects.filter(title__contains=key)
+        questions = Question.objects.filter(title__contains = key)
         context = {
             'questions': questions
         }

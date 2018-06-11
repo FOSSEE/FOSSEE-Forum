@@ -53,7 +53,7 @@ def train():
 
 
 # Calculating the F-score
-def calcFScore(xTest, yTest, model, vectorizer):
+def calc_f_score(xTest, yTest, model, vectorizer):
 
     xTestMatrix = vectorizer.transform(xTest)
     yTestMatrix = np.asarray(yTest)
@@ -61,9 +61,9 @@ def calcFScore(xTest, yTest, model, vectorizer):
     result = model.predict(xTestMatrix)
     matrix = confusion_matrix(yTestMatrix, result)
 
-    fScore = f1_score(yTestMatrix, result, pos_label=0)
-    precision = precision_score(yTestMatrix, result, pos_label=0)
-    recall = recall_score(yTestMatrix, results, pos_label=0)
+    fScore = f1_score(yTestMatrix, result, pos_label = 0)
+    precision = precision_score(yTestMatrix, result, pos_label = 0)
+    recall = recall_score(yTestMatrix, results, pos_label = 0)
     return fScore, precision, recall, matrix
 
 # Test new data for Spam
@@ -80,6 +80,6 @@ def predict(emailBody):
     else:
         return "Not Spam"
 
-model = LinearSVC(class_weight='balanced')
-vectorizer = TfidfVectorizer(stop_words='english', max_df=75)
+model = LinearSVC(class_weight = 'balanced')
+vectorizer = TfidfVectorizer(stop_words = 'english', max_df = 75)
 train()
