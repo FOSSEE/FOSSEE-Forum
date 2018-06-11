@@ -3,7 +3,7 @@
 import openpyxl
 import numpy as np
 from django.conf import settings
-from cleanText import cleanString
+from .cleanText import clean_string
 from sklearn.svm import LinearSVC
 from sklearn.metrics import confusion_matrix, f1_score, precision_score, recall_score
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
@@ -24,7 +24,7 @@ def store():
     for i in range(2, rows+1):
 
         if (str(dataSheetOld.cell(row = i, column = 2).value) != 'None'):
-            xData.append(str(cleanString(dataSheetOld.cell(row = i, column = 1).value)))
+            xData.append(str(clean_string(dataSheetOld.cell(row = i, column = 1).value)))
             if (str(dataSheetOld.cell(row = i, column = 2).value) == "1"):
                 yData.append(1)
             else:
@@ -70,7 +70,7 @@ def calc_f_score(xTest, yTest, model, vectorizer):
 def predict(emailBody):
 
     global vectorizer
-    featureMatrix = vectorizer.transform([cleanString(emailBody)])
+    featureMatrix = vectorizer.transform([clean_string(emailBody)])
     global model
     result = model.predict(featureMatrix)
     print("Predicting...")

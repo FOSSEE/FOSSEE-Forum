@@ -14,7 +14,7 @@ from website.forms import NewQuestionForm, AnswerQuestionForm, AnswerCommentForm
 from website.templatetags.helpers import prettify
 from django.core.mail import send_mail
 from django.core.mail import EmailMultiAlternatives
-from spamFilter import predict
+from .spamFilter import predict
 
 User = get_user_model()
 admins = (

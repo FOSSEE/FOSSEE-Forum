@@ -24,17 +24,17 @@ class Cron(object):
         try:
             weekago = DT.date.today() - DT.timedelta(days = 6)
             questions = Question.objects.filter(date_created__lte = weekago)
-        except Exception, e:
-            print "No questions found"
+        except Exception as e:
+            print("No questions found")
         category_count = FossCategory.objects.count()
         i = 0
         body_cat = {}
         for question in questions:
             try:
                 uque = Answer.objects.filter(question__id = question.id)
-            except Exception, e:
-                print "error occured >  > "
-                print e
+            except Exception as e:
+                print("error occured >  > ")
+                print(e)
             if not uque.exists():
                 i = i+1
                 category_id = question.category.id
