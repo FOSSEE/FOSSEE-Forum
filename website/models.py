@@ -14,7 +14,7 @@ class FossCategory(models.Model):
 	date_created = models.DateTimeField(auto_now_add = True)
 	date_modified = models.DateTimeField(auto_now = True)
 	email = models.CharField(max_length = 50)
-	def __unicode__(self):
+	def __str__(self):
 		return self.name
 
 class SubFossCategory(models.Model):
@@ -23,7 +23,7 @@ class SubFossCategory(models.Model):
 	name = models.CharField(max_length = 100)
 	date_created = models.DateTimeField(auto_now_add = True)
 	date_modified = models.DateTimeField(auto_now = True)
-	def __unicode__(self):
+	def __str__(self):
 		return self.name
 
 @python_2_unicode_compatible
@@ -44,11 +44,8 @@ class Question(models.Model):
 	is_spam = models.BooleanField(default = False)
 	image = ResizedImageField(size = [400, 400], upload_to = "images/questions/", blank = True)
 
-	def __unicode__(self):
-			 return '{0} - {1} - {2} - {3} - {4}'.format(self.id, self.category.name, self.sub_category, self.title, self.user)
-
 	def __str__(self):
-		return self.body
+			 return '{0} - {1} - {2} - {3} - {4}'.format(self.id, self.category.name, self.sub_category, self.title, self.user)
 
 	class Meta(object):
 
@@ -81,11 +78,8 @@ class Answer(models.Model):
 		user = User.objects.get(id = self.uid)
 		return user
 
-	def __unicode__(self):
-			 return 'Answer - {0} - {1}'.format(self.question.category.name, self.question.title)
-
 	def __str__(self):
-		return self.body
+			 return 'Answer - {0} - {1}'.format(self.question.category.name, self.question.title)
 
 class AnswerComment(models.Model):
 
