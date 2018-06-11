@@ -11,30 +11,30 @@ PROJECT_DIR = abspath(dirname(__file__) + '/../')
 # Django settings for forums project.
 
 TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-                PROJECT_DIR + '/static/',
-        ],
-        'OPTIONS': {
-            'context_processors': [
-                    'django.core.context_processors.request',
-                    'website.context_processors.admin_processor',
-                    'website.context_processors.moderator_activated',
-                    'django.contrib.auth.context_processors.auth',
-                    'django.template.context_processors.debug',
-                    'django.template.context_processors.i18n',
-                    'django.template.context_processors.media',
-                    'django.template.context_processors.static',
-                    'django.template.context_processors.tz',
-                    'django.contrib.messages.context_processors.messages',
-            ],
-            'loaders':[
-                    'django.template.loaders.filesystem.Loader',
-                    'django.template.loaders.app_directories.Loader',
-            ]
-        },
-    },
+	{
+		'BACKEND': 'django.template.backends.django.DjangoTemplates',
+		'DIRS': [
+				PROJECT_DIR + '/static/',
+		],
+		'OPTIONS': {
+			'context_processors': [
+					'django.core.context_processors.request',
+					'website.context_processors.admin_processor',
+					'website.context_processors.moderator_activated',
+					'django.contrib.auth.context_processors.auth',
+					'django.template.context_processors.debug',
+					'django.template.context_processors.i18n',
+					'django.template.context_processors.media',
+					'django.template.context_processors.static',
+					'django.template.context_processors.tz',
+					'django.contrib.messages.context_processors.messages',
+			],
+			'loaders':[
+					'django.template.loaders.filesystem.Loader',
+					'django.template.loaders.app_directories.Loader',
+			]
+		},
+	},
 ]
 
 
@@ -46,21 +46,21 @@ SITE_ID = SET_SITE_ID
 SET_TO_EMAIL_ID = TO_EMAIL_ID
 
 ADMINS = (
-    # ('Your Name', 'your_email@example.com'),
+	# ('Your Name', 'your_email@example.com'),
 )
 
 MANAGERS = ADMINS
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'forums',                      # Or path to database file if using sqlite3.
-        # The following settings are not used with sqlite3:
-        'USER': DB_USER,
-        'PASSWORD': DB_PASS,
-        'HOST': '127.0.0.1',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-        'PORT': '',                      # Set to empty string for default.
-    }
+	'default': {
+		'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+		'NAME': 'forums',                      # Or path to database file if using sqlite3.
+		# The following settings are not used with sqlite3:
+		'USER': DB_USER,
+		'PASSWORD': DB_PASS,
+		'HOST': '127.0.0.1',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+		'PORT': '',                      # Set to empty string for default.
+	}
 }
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
@@ -109,17 +109,17 @@ STATIC_URL = '/static/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
-    # Put strings here, like "/home/html/static" or "C:/www/django/static".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    PROJECT_DIR + '/static/',
+	# Put strings here, like "/home/html/static" or "C:/www/django/static".
+	# Always use forward slashes, even on Windows.
+	# Don't forget to use absolute paths, not relative paths.
+	PROJECT_DIR + '/static/',
 )
 
 # List of finder classes that know how to find static files in
 # various locations.
 STATICFILES_FINDERS = (
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+	'django.contrib.staticfiles.finders.FileSystemFinder',
+	'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
@@ -129,15 +129,15 @@ SECRET_KEY = 'xj+a8@48-x+h1z4bmvjt_1b+=t4+sb)kujqh!efty9t=f_g!mo'
 # List of callables that know how to import templates from various sources.
 
 MIDDLEWARE_CLASSES = (
-    'stopforumspam.middleware.StopForumSpamMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'htmlmin.middleware.HtmlMinifyMiddleware',
-    'htmlmin.middleware.MarkRequestMiddleware',
+	'stopforumspam.middleware.StopForumSpamMiddleware',
+	'django.middleware.common.CommonMiddleware',
+	'django.contrib.sessions.middleware.SessionMiddleware',
+	'django.middleware.csrf.CsrfViewMiddleware',
+	'django.contrib.auth.middleware.AuthenticationMiddleware',
+	'django.contrib.messages.middleware.MessageMiddleware',
+	'django.middleware.clickjacking.XFrameOptionsMiddleware',
+	'htmlmin.middleware.HtmlMinifyMiddleware',
+	'htmlmin.middleware.MarkRequestMiddleware',
 )
 
 ROOT_URLCONF = 'forums.urls'
@@ -148,19 +148,19 @@ WSGI_APPLICATION = 'forums.wsgi.application'
 
 
 INSTALLED_APPS = (
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.sites',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    # 'django.contrib.admindocs',
-    'website',
-    'stopforumspam',
-    'widget_tweaks',
-    'debug_toolbar',
-    'captcha',
+	'django.contrib.admin',
+	'django.contrib.auth',
+	'django.contrib.contenttypes',
+	'django.contrib.sessions',
+	'django.contrib.sites',
+	'django.contrib.messages',
+	'django.contrib.staticfiles',
+	# 'django.contrib.admindocs',
+	'website',
+	'stopforumspam',
+	'widget_tweaks',
+	'debug_toolbar',
+	'captcha',
 )
 
 # A sample logging configuration. The only tangible logging

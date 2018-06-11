@@ -15,13 +15,13 @@ def populate():
 	f.close()
 
 def add_category(cname):
-    cat = FossCategory.objects.get_or_create(name = cname, description = cname, date_created = Date, date_modified = Date)[0]#for now description is same as category_names
-    print("category " +str(cname)+" added at "+str(Date))
-    return cat
+	cat = FossCategory.objects.get_or_create(name = cname, description = cname, date_created = Date, date_modified = Date)[0]#for now description is same as category_names
+	print("category " +str(cname)+" added at "+str(Date))
+	return cat
 
 # Start execution here!
 if __name__ == '__main__':
-    print("Starting population script for adding category...")
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'forums.settings')
-    from website.models import *
-    populate()
+	print("Starting population script for adding category...")
+	os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'forums.settings')
+	from website.models import *
+	populate()

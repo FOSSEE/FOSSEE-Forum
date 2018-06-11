@@ -6,29 +6,29 @@ from django.contrib import admin
 
 
 class QuestionAdmin(admin.ModelAdmin):
-    search_fields = ['title']
-    list_filter = ('category', 'date_created', 'date_modified')
+	search_fields = ['title']
+	list_filter = ('category', 'date_created', 'date_modified')
 
 class AnswerAdmin(admin.ModelAdmin):
-    search_fields = ['body']
-    list_filter = ('date_created', 'date_modified')
+	search_fields = ['body']
+	list_filter = ('date_created', 'date_modified')
 
 class ProfileInline(admin.StackedInline):
-    model = Profile
-    can_delete = False
-    verbose_name_plural = 'profile'
+	model = Profile
+	can_delete = False
+	verbose_name_plural = 'profile'
 
 class GroupInline(admin.StackedInline):
-    model = ModeratorGroup
-    can_delete = False
-    verbose_name_plural = 'moderator group'
+	model = ModeratorGroup
+	can_delete = False
+	verbose_name_plural = 'moderator group'
 
 # Define a new User, Group admin
 class UserAdmin(BaseUserAdmin):
-    inlines = (ProfileInline, )
+	inlines = (ProfileInline, )
 
 class GroupAdmin(BaseGroupAdmin):
-    inlines = (GroupInline, )
+	inlines = (GroupInline, )
 
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
