@@ -1,7 +1,6 @@
 #Custom settings
 from os.path import *
 #from config import *
-from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS
 from .local import *
 from forums.settings import TO_EMAIL_ID
 from .local import SET_SITE_ID
