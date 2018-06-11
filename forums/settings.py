@@ -149,8 +149,6 @@ WSGI_APPLICATION = 'forums.wsgi.application'
 
 
 INSTALLED_APPS = (
-    'website',
-    'stopforumspam',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -159,6 +157,8 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # 'django.contrib.admindocs',
+    'website',
+    'stopforumspam',
     'widget_tweaks',
     'debug_toolbar',
     'captcha',
