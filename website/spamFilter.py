@@ -1,5 +1,5 @@
-# coding=utf-8
-
+from builtins import str
+from builtins import range
 import openpyxl
 import numpy as np
 from django.conf import settings
@@ -63,7 +63,7 @@ def calc_f_score(xTest, yTest, model, vectorizer):
 
     fScore = f1_score(yTestMatrix, result, pos_label = 0)
     precision = precision_score(yTestMatrix, result, pos_label = 0)
-    recall = recall_score(yTestMatrix, results, pos_label = 0)
+    recall = recall_score(yTestMatrix, result, pos_label = 0)
     return fScore, precision, recall, matrix
 
 # Test new data for Spam

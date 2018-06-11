@@ -1,3 +1,5 @@
+from builtins import zip
+from builtins import str
 from django import forms
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, render_to_response
@@ -75,7 +77,7 @@ def get_question(request, question_id = None, pretty_url = None):
         net_ans_count  = vote.num_votes
         ans_votes.append([vote.userUpVotes.filter(id = request.user.id).count(), vote.userDownVotes.filter(id = request.user.id).count(), net_ans_count])
 
-    main_list = zip(answers, ans_votes)
+    main_list = list(zip(answers, ans_votes))
     context = {
         'ans_count': ans_count,
         'question': question,

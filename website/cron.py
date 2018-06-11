@@ -1,3 +1,5 @@
+from builtins import str
+from builtins import object
 import os
 import sys
 
@@ -38,11 +40,11 @@ class Cron(object):
             if not uque.exists():
                 i = i+1
                 category_id = question.category.id
-                if category_id in body_cat.keys():
+                if category_id in list(body_cat.keys()):
                     body_cat[category_id].append(question)
                 else:
                     body_cat[category_id] = [question]
-        for key, value in body_cat.items():
+        for key, value in list(body_cat.items()):
             category_name = FossCategory.objects.get(id = key)
             mail_body = "*** This is an automatically generated email, please do not reply ***" + " \n\nThe following questions are left unanswered : \n\n"
             for item in value:

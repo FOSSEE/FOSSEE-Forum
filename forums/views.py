@@ -1,5 +1,6 @@
+from builtins import str
+from builtins import range
 import urllib
-import urllib2
 import json
 import random, string
 from django.http import HttpResponse, HttpResponseRedirect
@@ -33,9 +34,9 @@ def account_register(request):
                 'secret': settings.GOOGLE_RECAPTCHA_SECRET_KEY, 
                 'response': recaptcha_response
             }
-            data = urllib.urlencode(values)
-            req = urllib2.Request(url, data)
-            response = urllib2.urlopen(req)
+            data = urllib.parse.urlencode(values)
+            req = urllib.request.Request(url, data)
+            response = urllib.request.urlopen(req)
             result = json.load(response)
             ''' End reCAPTCHA validation '''
 

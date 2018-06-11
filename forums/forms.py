@@ -1,3 +1,5 @@
+from builtins import str
+from builtins import object
 from django import forms
 from django.contrib.auth import login, logout, authenticate
 from captcha.fields import ReCaptchaField
@@ -29,7 +31,7 @@ class UserLoginForm(forms.Form):
         
 class ProfileForm(forms.ModelForm):
 
-    class Meta:
+    class Meta(object):
         model = Profile
         exclude = ['user', 'confirmation_code']
 

@@ -1,3 +1,5 @@
+from builtins import range
+from past.utils import old_div
 from django import template
 
 from website.models import Question, Answer
@@ -30,7 +32,7 @@ def get_range(value, arg = ''):
         step = int(args[1])
     else:
         raise TypeError('get_range() takes maximum 2 arguments, {} given'.format(n))
-    return range(start, limit, step)
+    return list(range(start, limit, step))
 register.filter('get_range', get_range)
 
 # Implementing increment and decrement functions
@@ -56,7 +58,7 @@ def mul(value, arg = 1):
 register.filter('mul', mul)
 
 def div(value, arg = 1):
-    return value / int(arg)
+    return old_div(value, int(arg))
 register.filter('div', div)
 
 # retriving total number of questions

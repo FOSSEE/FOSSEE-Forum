@@ -1,3 +1,4 @@
+from builtins import object
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User, Group
@@ -49,7 +50,7 @@ class Question(models.Model):
     def __str__(self):
         return self.body
 
-    class Meta:
+    class Meta(object):
 
         get_latest_by = "date_created"
 
@@ -113,9 +114,8 @@ class Profile(models.Model):
     phone = models.CharField(max_length = 20, null = True)
     address = models.TextField(null = True)
     created = models.DateTimeField(auto_now_add = True)
-    image = ResizedImageField(size = [400, 400], upload_to = "images/profiles/", blank = True)
     
-    class Meta:
+    class Meta(object):
         app_label = 'website'
 
 class ModeratorGroup(models.Model):

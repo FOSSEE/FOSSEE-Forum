@@ -1,3 +1,4 @@
+from builtins import object
 from django import forms
 from website.models import *
 
@@ -46,7 +47,7 @@ class NewQuestionForm(forms.ModelForm):
 
         return body
 
-    class Meta:
+    class Meta(object):
 
         model = Question
         fields = ['category', 'title', 'body', 'is_spam', 'image']
@@ -96,7 +97,7 @@ class AnswerQuestionForm(forms.ModelForm):
             raise forms.ValidationError("Body cannot be only spaces")
         return body
 
-    class Meta:
+    class Meta(object):
 
         model = Question
         fields = ['question', 'body', 'image']
