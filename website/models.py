@@ -42,7 +42,7 @@ class Question(models.Model):
 	userViews = models.ManyToManyField(User, blank = True, related_name = 'postViews')
 	num_votes = models.IntegerField(default = 0)
 	is_spam = models.BooleanField(default = False)
-	image = ResizedImageField(size = [400, 400], upload_to = "images/questions/", blank = True)
+	image = ResizedImageField(size = [800, 800], upload_to = "images/questions/", blank = True)
 
 	def __str__(self):
 			 return '{0} - {1} - {2} - {3} - {4}'.format(self.id, self.category.name, self.sub_category, self.title, self.user)
@@ -72,7 +72,7 @@ class Answer(models.Model):
 	upvotes = models.IntegerField(default = 0)
 	num_votes = models.IntegerField(default = 0)
 	is_spam = models.BooleanField(default = False)
-	image = ResizedImageField(size = [400, 400], upload_to = "images/answers/", blank = True)
+	image = ResizedImageField(size = [800, 800], upload_to = "images/answers/", blank = True)
 
 	def user(self):
 		user = User.objects.get(id = self.uid)
