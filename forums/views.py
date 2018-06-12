@@ -203,7 +203,7 @@ def send_registration_confirmation(user):
 # user login        
 def user_login(request):
 
-	if request.user.is_anonymous():
+	if request.user.is_anonymous:
 
 		if (request.method == 'POST'):
 			form = UserLoginForm(request.POST)

@@ -6,7 +6,7 @@ from forums.settings import TO_EMAIL_ID
 from .local import SET_SITE_ID
 import os
 
-PROJECT_DIR = abspath(dirname(__file__) + '/../')
+PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)) + '/../')
 
 # Django settings for forums project.
 
@@ -18,7 +18,6 @@ TEMPLATES = [
 		],
 		'OPTIONS': {
 			'context_processors': [
-					'django.core.context_processors.request',
 					'website.context_processors.admin_processor',
 					'website.context_processors.moderator_activated',
 					'django.contrib.auth.context_processors.auth',
@@ -65,7 +64,7 @@ DATABASES = {
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = ['forums.fossee.in']
+ALLOWED_HOSTS = ['forums.fossee.in', 'localhost']
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -128,17 +127,18 @@ SECRET_KEY = 'xj+a8@48-x+h1z4bmvjt_1b+=t4+sb)kujqh!efty9t=f_g!mo'
 
 # List of callables that know how to import templates from various sources.
 
-MIDDLEWARE_CLASSES = (
-	'stopforumspam.middleware.StopForumSpamMiddleware',
-	'django.middleware.common.CommonMiddleware',
-	'django.contrib.sessions.middleware.SessionMiddleware',
-	'django.middleware.csrf.CsrfViewMiddleware',
-	'django.contrib.auth.middleware.AuthenticationMiddleware',
-	'django.contrib.messages.middleware.MessageMiddleware',
-	'django.middleware.clickjacking.XFrameOptionsMiddleware',
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 	'htmlmin.middleware.HtmlMinifyMiddleware',
 	'htmlmin.middleware.MarkRequestMiddleware',
-)
+	'debug_toolbar.middleware.DebugToolbarMiddleware',
+]
 
 ROOT_URLCONF = 'forums.urls'
 
@@ -155,9 +155,7 @@ INSTALLED_APPS = (
 	'django.contrib.sites',
 	'django.contrib.messages',
 	'django.contrib.staticfiles',
-	# 'django.contrib.admindocs',
 	'website',
-	'stopforumspam',
 	'widget_tweaks',
 	'debug_toolbar',
 	'captcha',
@@ -229,13 +227,6 @@ EMAIL_PORT = EMAIL_PORT_SERVER
 #EMAIL_HOST_USER = EMAIL_HOST_USER_SERVER
 #EMAIL_HOST_PASSWORD = EMAIL_HOST_PASSWORD_SERVER
 #EMAIL_USE_TLS = EMAIL_USE_TLS_SERVER
-
-# Settings for StopForumSpam
-SFS_ALL_POST_REQUESTS = True
-SFS_SOURCE_ZIP = "http://www.stopforumspam.com/downloads/listed_ip_7.zip"
-SFS_CACHE_EXPIRE = 1
-SFS_LOG_EXPIRE = 7
-SFS_ZIP_FILENAME = "listed_ip_7.txt"
 
 # Variable to store if moderator using forum
 MODERATOR_ACTIVATED = True

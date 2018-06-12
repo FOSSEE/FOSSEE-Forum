@@ -19,7 +19,7 @@ class FossCategory(models.Model):
 
 class SubFossCategory(models.Model):
 
-	parent = models.ForeignKey(FossCategory)
+	parent = models.ForeignKey(FossCategory, on_delete = models.CASCADE)
 	name = models.CharField(max_length = 100)
 	date_created = models.DateTimeField(auto_now_add = True)
 	date_modified = models.DateTimeField(auto_now = True)
@@ -29,8 +29,8 @@ class SubFossCategory(models.Model):
 @python_2_unicode_compatible
 class Question(models.Model):
 
-	user  = models.ForeignKey(User)
-	category = models.ForeignKey(FossCategory)
+	user  = models.ForeignKey(User, on_delete = models.CASCADE)
+	category = models.ForeignKey(FossCategory, on_delete = models.CASCADE)
 	sub_category = models.CharField(max_length = 200)
 	title = models.CharField(max_length = 200)
 	body = models.TextField()
@@ -54,7 +54,7 @@ class Question(models.Model):
 class QuestionComment(models.Model):
 
 	uid = models.IntegerField()
-	question = models.ForeignKey(Question)
+	question = models.ForeignKey(Question, on_delete = models.CASCADE)
 	body = models.TextField()
 	date_created = models.DateTimeField(auto_now_add = True)
 	date_modified = models.DateTimeField(auto_now = True)
@@ -63,7 +63,7 @@ class QuestionComment(models.Model):
 class Answer(models.Model):
 
 	uid  = models.IntegerField()
-	question = models.ForeignKey(Question)
+	question = models.ForeignKey(Question, on_delete = models.CASCADE)
 	body = models.TextField()
 	date_created = models.DateTimeField(auto_now_add = True)
 	date_modified = models.DateTimeField(auto_now = True)
@@ -84,7 +84,7 @@ class Answer(models.Model):
 class AnswerComment(models.Model):
 
 	uid = models.IntegerField()
-	answer = models.ForeignKey(Answer)
+	answer = models.ForeignKey(Answer, on_delete = models.CASCADE)
 	body = models.TextField(blank = False)
 	date_created = models.DateTimeField(auto_now_add = True)
 	date_modified = models.DateTimeField(auto_now = True)
@@ -114,4 +114,4 @@ class Profile(models.Model):
 
 class ModeratorGroup(models.Model):
 	group = models.OneToOneField(Group, on_delete = models.CASCADE)
-	category = models.ForeignKey(FossCategory)
+	category = models.ForeignKey(FossCategory, on_delete = models.CASCADE)

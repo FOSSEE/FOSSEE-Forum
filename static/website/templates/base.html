@@ -1,5 +1,6 @@
 
 {% load static %}
+{% load permission_tags %}
 <html>
     <head>
         <title>
@@ -106,11 +107,11 @@
                                     <li>
                                         <a href="{% url 'password_change' %}">Change password</a>
                                     </li>
-                                    {% ifnotequal request.user.groups.count 0 %}
+                                    {% if user|is_moderator %}
                                         <li>
                                             <a href="{% url 'website:moderator_home' %}">Moderator Panel</a>
                                         </li>
-                                    {% endifnotequal %}
+                                    {% endif %}
                                     <li>
                                         <a href="{% url 'user_logout' %}">Logout</a>
                                     </li>

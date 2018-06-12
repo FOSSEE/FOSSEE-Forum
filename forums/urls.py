@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
@@ -19,8 +19,8 @@ urlpatterns = [
 	# url(r'^admin/doc/', include('django.contrib.admindocs.urls')), 
 
 	# Uncomment the next line to enable the admin:
-	url(r'^admin/', include(admin.site.urls)), 
-	url(r'^', include('website.urls', namespace = 'website')), 
+	url(r'^admin/', admin.site.urls), 
+	url(r'^', include('website.urls')), 
 
 	# URLs for password reset and password change
 	url(r'^forgotpassword/$', password_reset, {'template_name': 'forums/templates/registration/password_reset_form.html'}, name = "password_reset"), 

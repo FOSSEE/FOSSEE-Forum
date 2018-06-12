@@ -91,7 +91,7 @@ def get_question(request, question_id = None, pretty_url = None):
 	context.update(csrf(request))
 
 	# updating views count
-	if (request.user.is_anonymous()):  # if no one logged in
+	if (request.user.is_anonymous):  # if no one logged in
 		question.views += 1
 	elif (question.userViews.filter(id = request.user.id).count() == 0):
 		question.views += 1

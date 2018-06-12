@@ -1,5 +1,4 @@
 from builtins import range
-from past.utils import old_div
 from django import template
 
 from website.models import Question, Answer
@@ -58,7 +57,7 @@ def mul(value, arg = 1):
 register.filter('mul', mul)
 
 def div(value, arg = 1):
-	return old_div(value, int(arg))
+	return value/arg
 register.filter('div', div)
 
 # retriving total number of questions
