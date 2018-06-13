@@ -18,6 +18,8 @@ TEMPLATES = [
 		],
 		'OPTIONS': {
 			'context_processors': [
+					'django.template.context_processors.request',
+					'django.template.context_processors.debug',
 					'website.context_processors.admin_processor',
 					'website.context_processors.moderator_activated',
 					'django.contrib.auth.context_processors.auth',

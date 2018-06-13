@@ -353,14 +353,18 @@
 
             <div class="g-recaptcha" data-sitekey="{{ SITE_KEY }}" data-callback="enableBtn"></div>
 
-            <script>
+            <script type="text/javascript">
                 function enableBtn(){
                     document.getElementById("submit_answer").disabled = false;
+                }
+                function changeText() {
+                    document.getElementById("submit_answer").value = "Submitting...";
+                    return validate_dd();
                 }
             </script>
             <br>
 
-            <input id="submit_answer" class="btn btn-sm btn-info" onclick = "changeText()" type="submit" value="Submit Answer" disabled>
+            <input id="submit_answer" class="btn btn-sm btn-info" onclick="changeText()" type="submit" value="Submit Answer" disabled>
         </form>
 
     {% else %}
@@ -413,10 +417,6 @@
             buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link']
         }).panelInstance('id_body');
     });
-    function changeText() {
-        document.getElementById("submit_answer").value = "Submitting...";
-        return validate_dd();
-    }
 </script>
    
 <script type="text/javascript">

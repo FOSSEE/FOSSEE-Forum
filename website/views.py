@@ -2,9 +2,8 @@ from builtins import zip
 from builtins import str
 from django import forms
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404, render_to_response
+from django.shortcuts import render, get_object_or_404
 from django.template.context_processors import csrf
-from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import get_user_model
@@ -60,7 +59,7 @@ def get_question(request, question_id = None, pretty_url = None):
 
 	pretty_title = prettify(question.title)
 	if (pretty_url != pretty_title):
-		return HttpResponseRedirect('/question/'+ question_id + '/' + pretty_title)
+		return HttpResponseRedirect('/question/'+ str(question_id) + '/' + pretty_title)
 
 	if (settings.MODERATOR_ACTIVATED):
 		answers = question.answer_set.all()
@@ -110,17 +109,19 @@ def question_answer(request, question_id):
 	context = {}
 	question = get_object_or_404(Question, id = question_id)
    
-	if request.method == 'POST':
+	if (request.method == 'POST'):
+
+		print ("Submitting...")
 		form = AnswerQuestionForm(request.POST, request.FILES)
 		answer = Answer() 
 		answer.uid = request.user.id
 
 		if form.is_valid():
 			cleaned_data = form.cleaned_data
-			body = cleaned_data['body'].encode('utf-8')
+			body = cleaned_data['body']
 			answer.body = body.splitlines()    
 			answer.question = question
-			answer.body = body.encode('utf-8')  
+			answer.body = body
 			if ('image' in request.FILES):
 				answer.image = request.FILES['image']
 			if (predict(answer.body) == "Spam"):
@@ -190,7 +191,7 @@ def answer_comment(request):
 			comment = AnswerComment()
 			comment.uid = request.user.id
 			comment.answer = answer
-			comment.body = body.encode('utf-8')
+			comment.body = body
 			comment.save()
 
 			# notifying the answer owner
@@ -308,6 +309,7 @@ def new_question(request):
 
 	if (request.method == 'POST'):
 
+		print ("Submitting...")
 		form = NewQuestionForm(request.POST, request.FILES)
 
 		if form.is_valid():
@@ -411,6 +413,8 @@ def edit_question(request, question_id = None):
 
 	if (request.method == 'POST'):
 
+		print ("Editing...")
+
 		previous_title = question.title
 		form = NewQuestionForm(request.POST, request.FILES)
 		question.title = '' # To prevent same title error in form
@@ -481,8 +485,9 @@ def edit_question(request, question_id = None):
 			email.attach_alternative(message, "text/html")
 			email.send(fail_silently = True)
 
-			if (question.is_spam):
+			if (question.is_spam and not settings.MODERATOR_ACTIVATED):
 				return HttpResponseRedirect('/')
+
 			return HttpResponseRedirect('/question/'+ str(question.id))
 	
 		else:
@@ -522,7 +527,7 @@ def question_delete(request, question_id):
 			sender_email = settings.SENDER_EMAIL
 			subject = "FOSSEE Forums - {0} - New Question".format(question.category)
 			to = (question.user.email, settings.FORUM_NOTIFICATION)
-			delete_reason = request.POST['deleteQuestion'].encode('utf-8')
+			delete_reason = request.POST['deleteQuestion']
 			message = """
 				The following question has been deleted by a moderator of the FOSSEE Forum: <br>
 				<b> Title: </b>{0}<br>
@@ -555,7 +560,7 @@ def answer_delete(request, answer_id):
 		sender_email = settings.SENDER_EMAIL
 		subject = "FOSSEE Forums - {0} - Answer Deleted".format(answer.question.category)
 		to = [answer.user().email]
-		delete_reason = request.POST['deleteAnswer'].encode('utf-8')
+		delete_reason = request.POST['deleteAnswer']
 		message = """
 			The following answer has been deleted by a moderator in the FOSSEE Forum: <br>
 			<b> Answer: </b>{0}<br>

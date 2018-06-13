@@ -27,7 +27,7 @@ class NewQuestionForm(forms.ModelForm):
 	image = forms.ImageField(widget = forms.ClearableFileInput(), help_text = "Upload image: ", required = False)
 	
 	def clean_title(self):
-		title = self.cleaned_data['title'].encode('utf-8')
+		title = str(self.cleaned_data['title'])
 
 		if len(title) < 12:
 			raise forms.ValidationError("Title should be longer than 12 characters")
@@ -37,7 +37,7 @@ class NewQuestionForm(forms.ModelForm):
 		return title
 	
 	def clean_body(self):
-		body = self.cleaned_data['body'].encode('utf-8')
+		body = str(self.cleaned_data['body'])
 		if body.isspace():
 			raise forms.ValidationError("Body cannot be only spaces")
 		if len(body) < 12:
@@ -90,9 +90,9 @@ class AnswerQuestionForm(forms.ModelForm):
 	image = forms.ImageField(widget = forms.ClearableFileInput(), help_text = "Upload image: ", required = False)
 
 	def clean_body(self):
-		body = self.cleaned_data['body'].encode('utf-8')
+		body = str(self.cleaned_data['body'])
 		body = body.replace('&nbsp;', ' ')
-		body = body.replace(' <br> ', '\n')
+		body = body.replace('<br>', '\n')
 		if body.isspace():
 			raise forms.ValidationError("Body cannot be only spaces")
 		return body

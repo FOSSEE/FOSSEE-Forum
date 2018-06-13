@@ -45,19 +45,11 @@ class Question(models.Model):
 	image = ResizedImageField(size = [800, 800], upload_to = "images/questions/", blank = True)
 
 	def __str__(self):
-			 return '{0} - {1} - {2} - {3} - {4}'.format(self.id, self.category.name, self.sub_category, self.title, self.user)
+		return '{0} - {1} - {2} - {3} - {4}'.format(self.id, self.category.name, self.sub_category, self.title, self.user)
 
 	class Meta(object):
 
 		get_latest_by = "date_created"
-
-class QuestionComment(models.Model):
-
-	uid = models.IntegerField()
-	question = models.ForeignKey(Question, on_delete = models.CASCADE)
-	body = models.TextField()
-	date_created = models.DateTimeField(auto_now_add = True)
-	date_modified = models.DateTimeField(auto_now = True)
 
 @python_2_unicode_compatible
 class Answer(models.Model):
@@ -79,7 +71,7 @@ class Answer(models.Model):
 		return user
 
 	def __str__(self):
-			 return 'Answer - {0} - {1}'.format(self.question.category.name, self.question.title)
+		return 'Answer - {0} - {1}'.format(self.question.category.name, self.question.title)
 
 class AnswerComment(models.Model):
 
