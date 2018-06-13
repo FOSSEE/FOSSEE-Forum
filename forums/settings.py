@@ -11,31 +11,31 @@ PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)) + '/../
 # Django settings for forums project.
 
 TEMPLATES = [
-	{
-		'BACKEND': 'django.template.backends.django.DjangoTemplates',
-		'DIRS': [
-				PROJECT_DIR + '/static/',
-		],
-		'OPTIONS': {
-			'context_processors': [
-					'django.template.context_processors.request',
-					'django.template.context_processors.debug',
-					'website.context_processors.admin_processor',
-					'website.context_processors.moderator_activated',
-					'django.contrib.auth.context_processors.auth',
-					'django.template.context_processors.debug',
-					'django.template.context_processors.i18n',
-					'django.template.context_processors.media',
-					'django.template.context_processors.static',
-					'django.template.context_processors.tz',
-					'django.contrib.messages.context_processors.messages',
-			],
-			'loaders':[
-					'django.template.loaders.filesystem.Loader',
-					'django.template.loaders.app_directories.Loader',
-			]
-		},
-	},
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+                PROJECT_DIR + '/static/',
+        ],
+        'OPTIONS': {
+            'context_processors': [
+                    'django.template.context_processors.request',
+                    'django.template.context_processors.debug',
+                    'website.context_processors.admin_processor',
+                    'website.context_processors.moderator_activated',
+                    'django.contrib.auth.context_processors.auth',
+                    'django.template.context_processors.debug',
+                    'django.template.context_processors.i18n',
+                    'django.template.context_processors.media',
+                    'django.template.context_processors.static',
+                    'django.template.context_processors.tz',
+                    'django.contrib.messages.context_processors.messages',
+            ],
+            'loaders':[
+                    'django.template.loaders.filesystem.Loader',
+                    'django.template.loaders.app_directories.Loader',
+            ]
+        },
+    },
 ]
 
 
@@ -47,21 +47,21 @@ SITE_ID = SET_SITE_ID
 SET_TO_EMAIL_ID = TO_EMAIL_ID
 
 ADMINS = (
-	# ('Your Name', 'your_email@example.com'),
+    # ('Your Name', 'your_email@example.com'),
 )
 
 MANAGERS = ADMINS
 
 DATABASES = {
-	'default': {
-		'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-		'NAME': 'forums',                      # Or path to database file if using sqlite3.
-		# The following settings are not used with sqlite3:
-		'USER': DB_USER,
-		'PASSWORD': DB_PASS,
-		'HOST': '127.0.0.1',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-		'PORT': '',                      # Set to empty string for default.
-	}
+    'default': {
+        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': 'forums',                      # Or path to database file if using sqlite3.
+        # The following settings are not used with sqlite3:
+        'USER': DB_USER,
+        'PASSWORD': DB_PASS,
+        'HOST': '127.0.0.1',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        'PORT': '',                      # Set to empty string for default.
+    }
 }
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
@@ -110,17 +110,17 @@ STATIC_URL = '/static/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
-	# Put strings here, like "/home/html/static" or "C:/www/django/static".
-	# Always use forward slashes, even on Windows.
-	# Don't forget to use absolute paths, not relative paths.
-	PROJECT_DIR + '/static/',
+    # Put strings here, like "/home/html/static" or "C:/www/django/static".
+    # Always use forward slashes, even on Windows.
+    # Don't forget to use absolute paths, not relative paths.
+    PROJECT_DIR + '/static/',
 )
 
 # List of finder classes that know how to find static files in
 # various locations.
 STATICFILES_FINDERS = (
-	'django.contrib.staticfiles.finders.FileSystemFinder',
-	'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
@@ -137,9 +137,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-	'htmlmin.middleware.HtmlMinifyMiddleware',
-	'htmlmin.middleware.MarkRequestMiddleware',
-	'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'htmlmin.middleware.HtmlMinifyMiddleware',
+    'htmlmin.middleware.MarkRequestMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'forums.urls'
@@ -150,17 +150,17 @@ WSGI_APPLICATION = 'forums.wsgi.application'
 
 
 INSTALLED_APPS = (
-	'django.contrib.admin',
-	'django.contrib.auth',
-	'django.contrib.contenttypes',
-	'django.contrib.sessions',
-	'django.contrib.sites',
-	'django.contrib.messages',
-	'django.contrib.staticfiles',
-	'website',
-	'widget_tweaks',
-	'debug_toolbar',
-	'captcha',
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.sites',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'website',
+    'widget_tweaks',
+    'debug_toolbar',
+    'captcha',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -204,7 +204,7 @@ RECAPTCHA_PUBLIC_KEY = PUB_KEY
 RECAPTCHA_PRIVATE_KEY = PRIV_KEY
 
 #Google recaptcha for forum
-GOOGLE_RECAPTCHA_SECRET_KEY = FORUM_GOOGLE_RECAPTCHA_SECRET_KEY 
+GOOGLE_RECAPTCHA_SECRET_KEY = FORUM_GOOGLE_RECAPTCHA_SECRET_KEY
 GOOGLE_RECAPTCHA_SITE_KEY = FORUM_GOOGLE_RECAPTCHA_SITE_KEY
 
 RECAPTCHA_USE_SSL = True
