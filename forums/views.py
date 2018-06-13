@@ -146,16 +146,8 @@ def account_view_profile(request, user_id):
     profile = Profile.objects.get(user = user)
     flag = False
 
-    marker = 0
-    if 'marker' in request.GET:
-        marker = int(request.GET['marker'])
-
-    total = Question.objects.filter(user_id = user_id).count()
-    total = int(total - (total % 10 - 10))
-    questions = Question.objects.filter(user_id = user_id).order_by('date_created').reverse()[marker:marker+10]
-    total1 = Answer.objects.filter(uid = user_id).count()
-    total1 = int(total1 - (total1 % 10 - 10))
-    answers = Answer.objects.filter(uid = user_id).order_by('date_created').reverse()[marker:marker+10]
+    questions = Question.objects.filter(user_id = user_id).order_by('date_created').reverse()
+    answers = Answer.objects.filter(uid = user_id).order_by('date_created').reverse()
     form = ProfileForm(user, instance = profile)
 
     if str(user_id) == str(request.user.id):
@@ -167,7 +159,6 @@ def account_view_profile(request, user_id):
         'questions' : questions,
         'answers' : answers,
         'form' : form,
-        'user_show':user,
     }
     return render(request, 'forums/templates/view-profile.html', context)
 
@@ -229,18 +220,18 @@ def user_login(request):
                     'next': next_url,
                 }
                 context.update(csrf(request))
-                return render_to_response('forums/templates/user-login.html', context)
+                return render(request, 'forums/templates/user-login.html', context)
 
         else:
             form = UserLoginForm()
 
-        next_url = request.GET.get('next')
+        next_url = request.GET.get('nextCSRF verification failed. Request aborted.')
         context = {
             'form': form,
             'next': next_url,
         }
         context.update(csrf(request))
-        return render_to_response('forums/templates/user-login.html', context)
+        return render(request, 'forums/templates/user-login.html', context)
 
     else:
         return HttpResponseRedirect('/')

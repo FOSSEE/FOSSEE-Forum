@@ -129,9 +129,9 @@ def question_answer(request, question_id):
             answer.save()
 
             # if user_id of question does not match to user_id of answer, send notification
-            if ((question.user_id != request.user.id) and (answer.is_spam == False)):
+            if ((question.user.id != request.user.id) and (answer.is_spam == False)):
                 notification = Notification()
-                notification.uid = question.user_id
+                notification.uid = question.user.id
                 notification.qid = question.id
                 notification.aid = answer.id
                 notification.save()
@@ -423,7 +423,6 @@ def edit_question(request, question_id = None):
         if form.is_valid():
 
             cleaned_data = form.cleaned_data
-            question.user = request.user
             question.category = cleaned_data['category']
             question.sub_category = cleaned_data['tutorial']
 
@@ -610,7 +609,7 @@ def vote_post(request):
     thisuserdownvote = cur_post.userDownVotes.filter(id = request.user.id).count()
     initial_votes = cur_post.num_votes
 
-    if (request.user.id != cur_post.user_id):
+    if (request.user.id != cur_post.user.id):
 
         # This condition is for adding vote
         if vote_action == 'vote':

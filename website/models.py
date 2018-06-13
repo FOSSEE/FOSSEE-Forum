@@ -61,7 +61,6 @@ class Answer(models.Model):
     date_modified = models.DateTimeField(auto_now = True)
     userUpVotes = models.ManyToManyField(User, blank = True, related_name = 'postAnswerUpVotes')
     userDownVotes = models.ManyToManyField(User, blank = True, related_name = 'postAnswerDownVotes')
-    upvotes = models.IntegerField(default = 0)
     num_votes = models.IntegerField(default = 0)
     is_spam = models.BooleanField(default = False)
     image = ResizedImageField(size = [800, 800], upload_to = "images/answers/", blank = True)
