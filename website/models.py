@@ -4,7 +4,6 @@ from django.db import models
 from django.contrib.auth.models import User, Group
 from django.contrib.auth import get_user_model
 from django_resized import ResizedImageField
-from django.utils.encoding import python_2_unicode_compatible
 
 
 class FossCategory(models.Model):
@@ -26,7 +25,6 @@ class SubFossCategory(models.Model):
     def __str__(self):
         return self.name
 
-@python_2_unicode_compatible
 class Question(models.Model):
 
     user  = models.ForeignKey(User, on_delete = models.CASCADE)
@@ -51,7 +49,6 @@ class Question(models.Model):
 
         get_latest_by = "date_created"
 
-@python_2_unicode_compatible
 class Answer(models.Model):
 
     uid  = models.IntegerField()
@@ -70,7 +67,7 @@ class Answer(models.Model):
         return user
 
     def __str__(self):
-        return 'Answer - {0} - {1}'.format(self.question.category.name, self.question.title)
+        return 'Answer - {0} - {1} - {2}'.format(self.question.category.name, self.question.title, self.body)
 
 class AnswerComment(models.Model):
 
