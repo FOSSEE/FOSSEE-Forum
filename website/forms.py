@@ -1,5 +1,6 @@
 from builtins import object
 from django import forms
+from antispam.honeypot.forms import HoneypotField
 from website.models import *
 
 tutorials = (
@@ -24,6 +25,8 @@ class NewQuestionForm(forms.ModelForm):
 
     is_spam = forms.BooleanField(required = False)
 
+    spam_honeypot_field = HoneypotField()
+
     image = forms.ImageField(widget = forms.ClearableFileInput(), help_text = "Upload image: ", required = False)
 
     def clean_title(self):
@@ -37,13 +40,14 @@ class NewQuestionForm(forms.ModelForm):
         return title
 
     def clean_body(self):
+
         body = str(self.cleaned_data['body'])
         if body.isspace():
             raise forms.ValidationError("Body cannot be only spaces")
         if len(body) < 12:
             raise forms.ValidationError("Body should be minimum 12 characters long")
         body = body.replace('&nbsp;', ' ')
-        body = body.replace(' <br> ', '\n')
+        body = body.replace('<br>', '\n')
 
         return body
 
@@ -89,6 +93,8 @@ class AnswerQuestionForm(forms.ModelForm):
 
     image = forms.ImageField(widget = forms.ClearableFileInput(), help_text = "Upload image: ", required = False)
 
+    spam_honeypot_field = HoneypotField()
+
     def clean_body(self):
         body = str(self.cleaned_data['body'])
         body = body.replace('&nbsp;', ' ')
@@ -106,3 +112,4 @@ class AnswerCommentForm(forms.Form):
 
     body = forms.CharField(widget = forms.Textarea(), required = True,
         error_messages = {'required':'Comment field required.'})
+    spam_honeypot_field = HoneypotField()

@@ -150,6 +150,7 @@ WSGI_APPLICATION = 'forums.wsgi.application'
 
 
 INSTALLED_APPS = (
+    'antispam.honeypot',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
