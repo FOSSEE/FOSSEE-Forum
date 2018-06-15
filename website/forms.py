@@ -17,27 +17,29 @@ class NewQuestionForm(forms.ModelForm):
                         queryset = FossCategory.objects.order_by('name'),
                         empty_label = "Select a Foss category",
                         required = True,
-                        error_messages = {'required':'Select a category.'})
+                        error_messages = {'required':'Select a category'})
 
     title = forms.CharField(widget = forms.TextInput(),
                         required = True,
-                        error_messages = {'required':'Title field required.'},
+                        error_messages = {'required':'Title field required'},
                         strip=True)
 
     body = forms.CharField(widget = forms.Textarea(),
                         required = True,
-                        error_messages = {'required':'Question field required.'},
+                        error_messages = {'required':'Question field required'},
                         strip=True)
 
     is_spam = forms.BooleanField(required = False)
 
     spam_honeypot_field = HoneypotField()
 
-    image = forms.ImageField(widget = CustomClearableFileInput(), help_text = "Upload image: ", required = False)
+    image = forms.ImageField(widget = CustomClearableFileInput(), help_text = "Upload image", required = False)
 
     def clean_title(self):
         title = str(self.cleaned_data['title'])
 
+        if title.isspace():
+            raise forms.ValidationError("Title cannot be only spaces")
         if len(title) < 12:
             raise forms.ValidationError("Title should be longer than 12 characters")
         if Question.objects.filter(title = title).exists():
@@ -48,12 +50,12 @@ class NewQuestionForm(forms.ModelForm):
     def clean_body(self):
 
         body = str(self.cleaned_data['body'])
+        body = body.replace('&nbsp;', ' ')
+        body = body.replace('<br>', '\n')
         if body.isspace():
             raise forms.ValidationError("Body cannot be only spaces")
         if len(body) < 12:
             raise forms.ValidationError("Body should be minimum 12 characters long")
-        body = body.replace('&nbsp;', ' ')
-        body = body.replace('<br>', '\n')
 
         return body
 
@@ -94,20 +96,24 @@ class AnswerQuestionForm(forms.ModelForm):
 
     body = forms.CharField(widget = forms.Textarea(),
         required = True,
-        error_messages = {'required':'Answer field required.'},
+        error_messages = {'required':'Answer field required'},
         strip=True
     )
 
-    image = forms.ImageField(widget = forms.ClearableFileInput(), help_text = "Upload image: ", required = False)
+    image = forms.ImageField(widget = CustomClearableFileInput(), help_text = "Upload image", required = False)
 
     spam_honeypot_field = HoneypotField()
 
     def clean_body(self):
+
         body = str(self.cleaned_data['body'])
         body = body.replace('&nbsp;', ' ')
         body = body.replace('<br>', '\n')
         if body.isspace():
             raise forms.ValidationError("Body cannot be only spaces")
+        if len(body) < 12:
+            raise forms.ValidationError("Body should be minimum 12 characters long")
+
         return body
 
     class Meta(object):
@@ -118,5 +124,13 @@ class AnswerQuestionForm(forms.ModelForm):
 class AnswerCommentForm(forms.Form):
 
     body = forms.CharField(widget = forms.Textarea(), required = True,
-        error_messages = {'required':'Comment field required.'}, strip = True)
+        error_messages = {'required':'Comment field required'}, strip = True)
     spam_honeypot_field = HoneypotField()
+
+    def clean_body(self):
+        body = str(self.cleaned_data['body'])
+        body = body.replace('&nbsp;', ' ')
+        body = body.replace('<br>', '\n')
+        if body.isspace():
+            raise forms.ValidationError("Body cannot be only spaces")
+        return body

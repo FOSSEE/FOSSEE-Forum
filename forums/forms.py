@@ -2,9 +2,7 @@ from builtins import str
 from builtins import object
 from django import forms
 from django.contrib.auth import login, logout, authenticate
-from captcha.fields import ReCaptchaField
 from django.contrib.auth.models import User
-from captcha.fields import ReCaptchaField
 from django.utils.translation import ugettext_lazy as _
 from django.core.validators import RegexValidator, MaxLengthValidator, MinLengthValidator
 from website.models import Profile

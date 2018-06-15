@@ -328,10 +328,8 @@ def new_question(request):
                 if (str(question.category) == "Scilab Toolbox"):
                     context.update(csrf(request))
                     category = request.POST.get('category', None)
-                    tutorial = request.POST.get('tutorial', None)
                     context['category'] = category
-                    context['tutorial'] = tutorial
-                    context['form'] = form
+                    context['form'] = NewQuestionForm(category = category)
                     return render(request, 'website/templates/new-question.html', context)
 
                 question.sub_category = ""
