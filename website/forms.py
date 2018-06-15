@@ -1,11 +1,15 @@
 from builtins import object
 from django import forms
+from django.conf import settings
 from antispam.honeypot.forms import HoneypotField
 from website.models import *
 
 tutorials = (
     ("Select a Tutorial", "Select a Tutorial"),
 )
+
+class CustomClearableFileInput(forms.ClearableFileInput):
+    template_name = 'forums/templates/clearable_file_input.html'
 
 class NewQuestionForm(forms.ModelForm):
 
@@ -17,17 +21,19 @@ class NewQuestionForm(forms.ModelForm):
 
     title = forms.CharField(widget = forms.TextInput(),
                         required = True,
-                        error_messages = {'required':'Title field required.'})
+                        error_messages = {'required':'Title field required.'},
+                        strip=True)
 
     body = forms.CharField(widget = forms.Textarea(),
                         required = True,
-                        error_messages = {'required':'Question field required.'})
+                        error_messages = {'required':'Question field required.'},
+                        strip=True)
 
     is_spam = forms.BooleanField(required = False)
 
     spam_honeypot_field = HoneypotField()
 
-    image = forms.ImageField(widget = forms.ClearableFileInput(), help_text = "Upload image: ", required = False)
+    image = forms.ImageField(widget = CustomClearableFileInput(), help_text = "Upload image: ", required = False)
 
     def clean_title(self):
         title = str(self.cleaned_data['title'])
@@ -88,7 +94,8 @@ class AnswerQuestionForm(forms.ModelForm):
 
     body = forms.CharField(widget = forms.Textarea(),
         required = True,
-        error_messages = {'required':'Answer field required.'}
+        error_messages = {'required':'Answer field required.'},
+        strip=True
     )
 
     image = forms.ImageField(widget = forms.ClearableFileInput(), help_text = "Upload image: ", required = False)
@@ -111,5 +118,5 @@ class AnswerQuestionForm(forms.ModelForm):
 class AnswerCommentForm(forms.Form):
 
     body = forms.CharField(widget = forms.Textarea(), required = True,
-        error_messages = {'required':'Comment field required.'})
+        error_messages = {'required':'Comment field required.'}, strip = True)
     spam_honeypot_field = HoneypotField()

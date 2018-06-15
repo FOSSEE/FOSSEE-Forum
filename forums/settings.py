@@ -38,6 +38,7 @@ TEMPLATES = [
     },
 ]
 
+FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 
 
 
@@ -158,6 +159,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.forms',
     'website',
     'widget_tweaks',
     'debug_toolbar',
