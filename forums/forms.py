@@ -35,31 +35,31 @@ class ProfileForm(forms.ModelForm):
 
     first_name = forms.CharField(widget = forms.TextInput(),
                         required = True,
-                        error_messages = {'required':'First name field required.'})
+                        error_messages = {'required':'First name field required'})
     last_name = forms.CharField(widget = forms.TextInput(),
                         required = True,
-                        error_messages = {'required':'Last name field required.'})
-    phone = forms.CharField(max_length = 12, widget = forms.TextInput(), required = False, validators = [RegexValidator(regex = '^[0-9-_+.]*$')])
+                        error_messages = {'required':'Last name field required'})
+    phone = forms.CharField(min_length = 8, max_length = 16, widget = forms.TextInput(), required = False, validators = [RegexValidator(regex = '^[0-9-_+.]*$')])
 
     def clean_last_name(self):
 
-        last_name = self.cleaned_data['last_name'].encode('utf-8')
+        last_name = self.cleaned_data['last_name']
         temp = last_name.replace(" ", '')
 
         for e in str(temp):
-            if not e.isalnum():
-                raise forms.ValidationError("Only Alphanuemaric")
+            if not e.isalpha():
+                raise forms.ValidationError("Only Alphabetic")
 
         return last_name
 
     def clean_first_name(self):
 
-        first_name = self.cleaned_data['first_name'].encode('utf-8')
+        first_name = self.cleaned_data['first_name']
         temp = first_name.replace(" ", '')
 
         for e in str(temp):
-            if not e.isalnum():
-                raise forms.ValidationError("Only Alphanuemaric")
+            if not e.isalpha():
+                raise forms.ValidationError("Only Alphabetic")
 
         return first_name
 
@@ -82,12 +82,11 @@ class RegisterForm(forms.Form):
 
     username = forms.CharField(
         label = _("Username"),
-        max_length = 30,
         widget = forms.TextInput(),
         required = True,
         validators = [
             RegexValidator(
-                regex = '^[a-zA-Z0-9-_+.]*$',
+                regex = '^[a-zA-Z0-9-_+.@]*$',
                 message = 'Username required. 5-30 characters. \
                 Letters, digits and @/./+/-/_ only.',
                 code = 'invalid_username'
@@ -98,12 +97,12 @@ class RegisterForm(forms.Form):
     )
     password = forms.CharField(
         label = _("Password"),
-        widget = forms.PasswordInput(render_value = False),
+        widget = forms.PasswordInput(),
         min_length = 8,
     )
     password_confirm = forms.CharField(
         label = _("Password (again)"),
-        widget = forms.PasswordInput(render_value = False),
+        widget = forms.PasswordInput(),
         min_length = 8,
     )
     email = forms.EmailField(

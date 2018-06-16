@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
+from django.utils.translation import ugettext_lazy as _
 from website.models import FossCategory, Question
 from website.forms import NewQuestionForm, AnswerQuestionForm, AnswerCommentForm
 from forums.forms import *
@@ -162,4 +163,208 @@ class AnswerCommentFormTest(TestCase):
     def test_valid_data_entered(self):
         body = 'Test comment body'
         form = AnswerCommentForm(data = {'body': body})
+        self.assertTrue(form.is_valid())
+
+class UserLoginFormTest(TestCase):
+
+    @classmethod
+    def setUp(cls):
+        """Set up sample user"""
+        User.objects.create_user("johndoe", "johndoe@example.com", "johndoe")
+
+    def test_username_is_none(self):
+        form = UserLoginForm(data = {'username': None, 'password': 'jonhdoe'})
+        self.assertFalse(form.is_valid())
+
+    def test_password_is_none(self):
+        form = UserLoginForm(data = {'username': 'johndoe', 'password': None})
+        self.assertFalse(form.is_valid())
+
+    def test_wrong_username(self):
+        form = UserLoginForm(data = {'username': 'testuser', 'password': 'johndoe'})
+        self.assertFalse(form.is_valid())
+
+    def test_wrong_password(self):
+        form = UserLoginForm(data = {'username': 'johndoe', 'password': 'testuser'})
+        self.assertFalse(form.is_valid())
+
+    def test_blocked_user(self):
+        user = User.objects.get(username="johndoe")
+        user.is_active = False
+        user.save()
+        form = UserLoginForm(data = {'username': 'johndoe', 'password': 'johndoe'})
+        self.assertFalse(form.is_valid())
+
+    def test_valid_credentials(self):
+        form = UserLoginForm(data = {'username': 'johndoe', 'password': 'johndoe'})
+        self.assertTrue(form.is_valid())
+
+class ProfileFormTest(TestCase):
+
+    @classmethod
+    def setUp(cls):
+        """Set up test data"""
+        User.objects.create_user('johndoe', 'johndoe@example.com', 'johndoe')
+
+    def test_first_name_required(self):
+        user = User.objects.get(username = 'johndoe')
+        form = ProfileForm(user = user)
+        self.assertTrue(form.fields['first_name'].required)
+
+    def test_last_name_required(self):
+        user = User.objects.get(username = 'johndoe')
+        form = ProfileForm(user = user)
+        self.assertTrue(form.fields['last_name'].required)
+
+    def test_phone_required(self):
+        user = User.objects.get(username = 'johndoe')
+        form = ProfileForm(user = user)
+        self.assertFalse(form.fields['phone'].required)
+
+    def test_phone_min_length(self):
+        user = User.objects.get(username = 'johndoe')
+        form = ProfileForm(user = user)
+        self.assertEqual(form.fields['phone'].min_length, 8)
+
+    def test_phone_max_length(self):
+        user = User.objects.get(username = 'johndoe')
+        form = ProfileForm(user = user)
+        self.assertEqual(form.fields['phone'].max_length, 16)
+
+    def test_first_name_error_message(self):
+        user = User.objects.get(username = 'johndoe')
+        form = ProfileForm(user = user)
+        self.assertEqual(form.fields['first_name'].error_messages['required'],\
+                            'First name field required')
+
+    def test_last_name_error_message(self):
+        user = User.objects.get(username = 'johndoe')
+        form = ProfileForm(user = user)
+        self.assertEqual(form.fields['last_name'].error_messages['required'],\
+                            'Last name field required')
+
+    def test_first_name_with_number(self):
+        user = User.objects.get(username = 'johndoe')
+        form = ProfileForm(user = user, data = {'first_name': 'john2',\
+                                            'last_name': 'doe', 'address':'TestAddress'})
+        self.assertFalse(form.is_valid())
+
+    def test_last_name_with_number(self):
+        user = User.objects.get(username = 'johndoe')
+        form = ProfileForm(user = user, data = {'first_name': 'john',\
+                                            'last_name': 'doe2'})
+        self.assertFalse(form.is_valid())
+
+    def test_too_long_phone(self):
+        user = User.objects.get(username = 'johndoe')
+        form = ProfileForm(user = user, data = {'first_name': 'john',\
+                                            'last_name': 'doe', 'phone':'+352353824938292858',\
+                                            'address':'TestAddress'})
+        self.assertFalse(form.is_valid())
+    
+    def test_too_short_phone(self):
+        user = User.objects.get(username = 'johndoe')
+        form = ProfileForm(user = user, data = {'first_name': 'john',\
+                                            'last_name': 'doe', 'phone':'+352',\
+                                            'address':'TestAddress'})
+        self.assertFalse(form.is_valid())
+
+    def test_alphanumeric_phone(self):
+        user = User.objects.get(username = 'johndoe')
+        form = ProfileForm(user = user, data = {'first_name': 'john',\
+                                            'last_name': 'doe2', 'phone': '+91acafs349',\
+                                            'address':'TestAddress'})
+        self.assertFalse(form.is_valid())
+
+    def test_valid_credentials(self):
+        user = User.objects.get(username = 'johndoe')
+        form = ProfileForm(user = user, data = {'first_name': 'john',\
+                                    'last_name': 'doe', 'phone': '+9112345678',\
+                                    'address':'TestAddress'})
+        self.assertTrue(form.is_valid())
+
+class RegisterFormTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        User.objects.create_user('johndoe', 'johndoe@johndoe.com', 'johndoe')
+
+    def test_username_label(self):
+        form = RegisterForm()
+        self.assertEqual(form.fields['username'].label, _("Username"))
+
+    def test_username_required(self):
+        form = RegisterForm()
+        self.assertTrue(form.fields['username'].required)
+
+    def test_password_label(self):
+        form = RegisterForm()
+        self.assertEqual(form.fields['password'].label, _("Password"))
+
+    def test_password_confirm_label(self):
+        form = RegisterForm()
+        self.assertEqual(form.fields['password_confirm'].label, _("Password (again)"))
+
+    def test_password_min_length(self):
+        form = RegisterForm()
+        self.assertEqual(form.fields['password'].min_length, 8)
+
+    def test_password_confirm_min_length(self):
+        form = RegisterForm()
+        self.assertEqual(form.fields['password_confirm'].min_length, 8)
+
+    def test_email_label(self):
+        form = RegisterForm()
+        self.assertEqual(form.fields['email'].label, _("Email"))
+
+    def test_email_required(self):
+        form = RegisterForm()
+        self.assertTrue(form.fields['email'].required)
+
+    def test_invalid_username(self):
+        form_data = {'username': 'johndoe#', 'password': 'johndoe1234',\
+                        'password_confirm': 'johndoe1234', 'email': 'johndoe@example.com'}
+        form = RegisterForm(data = form_data)
+        self.assertFalse(form.is_valid())
+
+    def test_too_short_username(self):
+        form_data = {'username': 'john', 'password': 'johndoe1234',\
+                        'password_confirm': 'johndoe1234', 'email': 'johndoe@example.com'}
+        form = RegisterForm(data = form_data)
+        self.assertFalse(form.is_valid())
+
+    def test_too_long_username(self):
+        form_data = {'username': 'johndoejohndoejohndoejohndoejohndoe', 'password': 'johndoe1234',\
+                        'password_confirm': 'johndoe1234', 'email': 'johndoe@example.com'}
+        form = RegisterForm(data = form_data)
+        self.assertFalse(form.is_valid())
+
+    def test_too_short_password(self):
+        form_data = {'username': 'johndoejohndoe', 'password': 'johndoe',\
+                        'password_confirm': 'johndoe', 'email': 'johndoe@example.com'}
+        form = RegisterForm(data = form_data)
+        self.assertFalse(form.is_valid())
+
+    def test_existing_username(self):
+        form_data = {'username': 'johndoe', 'password': 'johndoe1234',\
+                        'password_confirm': 'johndoe1234', 'email': 'johndoe@example.com'}
+        form = RegisterForm(data = form_data)
+        self.assertFalse(form.is_valid())
+
+    def test_existing_email(self):
+        form_data = {'username': 'johndoejohndoe', 'password': 'johndoe1234',\
+                        'password_confirm': 'johndoe1234', 'email': 'johndoe@johndoe.com'}
+        form = RegisterForm(data = form_data)
+        self.assertFalse(form.is_valid())
+
+    def test_different_passwords(self):
+        form_data = {'username': 'johndoejohndoe', 'password': 'johndoe1234',\
+                        'password_confirm': 'johndoe12345', 'email': 'johndoe@example.com'}
+        form = RegisterForm(data = form_data)
+        self.assertFalse(form.is_valid())
+
+    def test_valid_credentials(self):
+        form_data = {'username': 'johndoejohndoe', 'password': 'johndoe1234',\
+                        'password_confirm': 'johndoe1234', 'email': 'johndoe@example.com'}
+        form = RegisterForm(data = form_data)
         self.assertTrue(form.is_valid())
