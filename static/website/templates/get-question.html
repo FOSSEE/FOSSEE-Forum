@@ -292,7 +292,7 @@
                 {% if user.is_authenticated %}
                  
                 {% if not MODERATOR_ACTIVATED %}
-                    <form id="form{{ answer.id }}" method="post" action="/answer-comment/" > {% csrf_token %}
+                    <form id="form{{ answer.id }}" method="post" action="{% url 'website:answer_comment' %}" > {% csrf_token %}
                         <input type="hidden" name="answer_id" value="{{ answer.id }}">
                         <textarea name="body" class="new-comment form-control" id="comment{{ answer.id }}" rows="2"></textarea>
                     </form>

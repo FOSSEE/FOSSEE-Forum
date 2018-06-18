@@ -2,6 +2,7 @@ from builtins import object
 from django import forms
 from django.conf import settings
 from antispam.honeypot.forms import HoneypotField
+from bs4 import BeautifulSoup
 from website.models import *
 
 tutorials = (
@@ -21,13 +22,11 @@ class NewQuestionForm(forms.ModelForm):
 
     title = forms.CharField(widget = forms.TextInput(),
                         required = True,
-                        error_messages = {'required':'Title field required'},
-                        strip=True)
+                        error_messages = {'required':'Title field required'})
 
     body = forms.CharField(widget = forms.Textarea(),
                         required = True,
-                        error_messages = {'required':'Question field required'},
-                        strip=True)
+                        error_messages = {'required':'Question field required'})
 
     is_spam = forms.BooleanField(required = False)
 
@@ -37,13 +36,17 @@ class NewQuestionForm(forms.ModelForm):
 
     def clean_title(self):
         title = str(self.cleaned_data['title'])
-
+        title = title.replace('&nbsp;', ' ')
+        title = title.replace('<br>', '\n')
         if title.isspace():
             raise forms.ValidationError("Title cannot be only spaces")
+        temp = BeautifulSoup(title, 'html.parser').get_text()
+        if (temp.isspace() or temp == ''):
+            raise forms.ValidationError("Title cannot be only tags")
         if len(title) < 12:
             raise forms.ValidationError("Title should be longer than 12 characters")
         if Question.objects.filter(title = title).exists():
-            raise forms.ValidationError("This title already exist.")
+            raise forms.ValidationError("This title already exists")
 
         return title
 
@@ -56,6 +59,9 @@ class NewQuestionForm(forms.ModelForm):
             raise forms.ValidationError("Body cannot be only spaces")
         if len(body) < 12:
             raise forms.ValidationError("Body should be minimum 12 characters long")
+        temp = BeautifulSoup(body, 'html.parser').get_text()
+        if (temp.isspace() or temp == ''):
+            raise forms.ValidationError("Body cannot be only tags")
 
         return body
 
@@ -71,7 +77,6 @@ class NewQuestionForm(forms.ModelForm):
         tutorial_choices = (
                 ("Select a Sub Category", "Select a Sub Category"),
         )
-        super(NewQuestionForm, self).__init__(*args, **kwargs)
 
         if category == '12':
             if FossCategory.objects.filter(id = category).exists():
@@ -96,8 +101,7 @@ class AnswerQuestionForm(forms.ModelForm):
 
     body = forms.CharField(widget = forms.Textarea(),
         required = True,
-        error_messages = {'required':'Answer field required'},
-        strip=True
+        error_messages = {'required':'Answer field required'}
     )
 
     image = forms.ImageField(widget = CustomClearableFileInput(), help_text = "Upload image", required = False)
@@ -113,6 +117,9 @@ class AnswerQuestionForm(forms.ModelForm):
             raise forms.ValidationError("Body cannot be only spaces")
         if len(body) < 12:
             raise forms.ValidationError("Body should be minimum 12 characters long")
+        temp = BeautifulSoup(body, 'html.parser').get_text()
+        if (temp.isspace() or temp == ''):
+            raise forms.ValidationError("Body cannot be only tags")
 
         return body
 
@@ -124,7 +131,7 @@ class AnswerQuestionForm(forms.ModelForm):
 class AnswerCommentForm(forms.Form):
 
     body = forms.CharField(widget = forms.Textarea(), required = True,
-        error_messages = {'required':'Comment field required'}, strip = True)
+        error_messages = {'required':'Comment field required'})
     spam_honeypot_field = HoneypotField()
 
     def clean_body(self):
@@ -133,4 +140,8 @@ class AnswerCommentForm(forms.Form):
         body = body.replace('<br>', '\n')
         if body.isspace():
             raise forms.ValidationError("Body cannot be only spaces")
+
+        temp = BeautifulSoup(body, 'html.parser').get_text()
+        if (temp.isspace() or temp == ''):
+            raise forms.ValidationError("Body cannot be only tags")
         return body

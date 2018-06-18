@@ -194,9 +194,16 @@ def send_registration_confirmation(user):
 # user login
 def user_login(request):
 
+    next_url = '/'
+    if (request.GET):
+        next_url = request.GET['next']
+
+    print(next_url)
+
     if request.user.is_anonymous:
 
         if (request.method == 'POST'):
+
             form = UserLoginForm(request.POST)
 
             # Valid credentials are entered
@@ -206,15 +213,10 @@ def user_login(request):
                 user = cleaned_data.get("user")
                 login(request, user)
 
-                if ('next' in request.POST):
-                    next_url = request.POST.get('next')
-                    return HttpResponseRedirect(next_url)
-
-                return HttpResponseRedirect('/')
+                return HttpResponseRedirect(next_url)
 
             # Invalid credentials entered
             else:
-                next_url = request.POST.get('next')
                 context = {
                     'form': form,
                     'next': next_url,
@@ -225,7 +227,6 @@ def user_login(request):
         else:
             form = UserLoginForm()
 
-        next_url = request.GET.get('nextCSRF verification failed. Request aborted.')
         context = {
             'form': form,
             'next': next_url,

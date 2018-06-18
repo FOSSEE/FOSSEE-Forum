@@ -22,7 +22,7 @@ urlpatterns = [
     path('vote_post/', views.vote_post, name = 'vote_post'),
     path('ans_vote_post/', views.ans_vote_post, name = 'ans_vote_post'),
     path('question/delete/<int:question_id>/', views.question_delete, name = 'question_delete'),
-    path('mark_answer_spam/<int:question_id>/', views.mark_answer_spam, name = 'mark_answer_spam'),
+    path('mark_answer_spam/<int:answer_id>/', views.mark_answer_spam, name = 'mark_answer_spam'),
     path('answer_delete/<int:answer_id>/', views.answer_delete, name = 'answer_delete'),
 
     # Moderator panel

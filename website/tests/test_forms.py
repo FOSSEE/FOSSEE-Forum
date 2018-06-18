@@ -74,6 +74,12 @@ class NewQuestionFormTest(TestCase):
         form = NewQuestionForm(data = {'category': category.id, 'title': title, 'body': 'Test question body', 'tutorial': 'TestTutorial'})
         self.assertFalse(form.is_valid())
 
+    def test_title_is_only_tags(self):
+        category = FossCategory.objects.get(name = "TestCategory")
+        title = '<p><p><div><div>'
+        form = NewQuestionForm(data = {'category': category.id, 'title': title, 'body': 'Test question body', 'tutorial': 'TestTutorial'})
+        self.assertFalse(form.is_valid())
+
     def test_title_exists(self):
         category = FossCategory.objects.get(name = "TestCategory")
         question = Question.objects.get(title = "TestQuestion")
@@ -90,6 +96,12 @@ class NewQuestionFormTest(TestCase):
     def test_body_is_space(self):
         category = FossCategory.objects.get(name = "TestCategory")
         body = '         '
+        form = NewQuestionForm(data = {'category': category.id, 'title': 'Test question title', 'body': body, 'tutorial': 'TestTutorial'})
+        self.assertFalse(form.is_valid())
+    
+    def test_body_is_only_tags(self):
+        category = FossCategory.objects.get(name = "TestCategory")
+        body = '<p><p><div><div>'
         form = NewQuestionForm(data = {'category': category.id, 'title': 'Test question title', 'body': body, 'tutorial': 'TestTutorial'})
         self.assertFalse(form.is_valid())
 
@@ -138,6 +150,12 @@ class AnswerQuestionFormTest(TestCase):
         form = AnswerQuestionForm(data = {'question': question.id, 'body': body})
         self.assertFalse(form.is_valid())
 
+    def test_body_is_only_tags(self):
+        question = Question.objects.get(title = "TestQuestion")
+        body = '<p><div><p><div>    '
+        form = AnswerQuestionForm(data = {'question': question.id, 'body': body})
+        self.assertFalse(form.is_valid())
+
     def test_valid_data_entered(self):
         question = Question.objects.get(title = "TestQuestion")
         body = 'Test answer body'
@@ -157,6 +175,11 @@ class AnswerCommentFormTest(TestCase):
 
     def test_body_is_space(self):
         body = '         '
+        form = AnswerCommentForm(data = {'body': body})
+        self.assertFalse(form.is_valid())
+
+    def test_body_is_only_tags(self):
+        body = '<p><div><p><div> '
         form = AnswerCommentForm(data = {'body': body})
         self.assertFalse(form.is_valid())
 
@@ -202,7 +225,7 @@ class UserLoginFormTest(TestCase):
 class ProfileFormTest(TestCase):
 
     @classmethod
-    def setUp(cls):
+    def setUpTestData(cls):
         """Set up test data"""
         User.objects.create_user('johndoe', 'johndoe@example.com', 'johndoe')
 

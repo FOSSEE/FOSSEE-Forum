@@ -1,7 +1,7 @@
 from builtins import zip
 from builtins import str
 from django import forms
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404
 from django.template.context_processors import csrf
 from django.views.decorators.csrf import csrf_exempt
@@ -65,7 +65,6 @@ def get_question(request, question_id = None, pretty_url = None):
     form = AnswerQuestionForm()
     thisuserupvote = question.userUpVotes.filter(id = request.user.id).count()
     thisuserdownvote = question.userDownVotes.filter(id = request.user.id).count()
-    net_count = question.num_votes
 
     ans_votes = []
     for vote in answers:
@@ -81,7 +80,7 @@ def get_question(request, question_id = None, pretty_url = None):
         'form': form,
         'thisUserUpvote': thisuserupvote,
         'thisUserDownvote': thisuserdownvote,
-        'net_count': net_count,
+        'net_count': question.num_votes,
     }
     context.update(csrf(request))
 
@@ -107,7 +106,6 @@ def question_answer(request, question_id):
 
     if (request.method == 'POST'):
 
-        print ("Submitting...")
         form = AnswerQuestionForm(request.POST, request.FILES)
         answer = Answer()
         answer.uid = request.user.id
@@ -150,7 +148,7 @@ def question_answer(request, question_id):
             )
             send_mail(subject, message, sender_email, to, fail_silently = True)
 
-            return HttpResponseRedirect("/question/" + str(question_id))
+            return HttpResponseRedirect('/question/{0}/'.format(question_id))
 
         else:
             context['form'] = form
@@ -173,7 +171,7 @@ def answer_comment(request):
 
     context = {}
 
-    if request.method == 'POST':
+    if (request.method == 'POST'):
 
         answer_id = request.POST['answer_id']
         answer = Answer.objects.get(pk = answer_id)
@@ -214,7 +212,7 @@ def answer_comment(request):
                 answer.question.category,
                 settings.DOMAIN_NAME + '/question/' + str(answer.question.id) + "#answer" + str(answer.id)
             )
-            send_mail(subject, message, sender_email, to)
+            # send_mail(subject, message, sender_email, to)
 
             # notifying other users in the comment thread
             uids = answer.answercomment_set.filter(answer = answer).values_list('uid', flat = True)
@@ -253,9 +251,9 @@ def answer_comment(request):
                 answer.question.category,
                 settings.DOMAIN_NAME + '/question/' + str(answer.question.id) + "#answer" + str(answer.id)
             )
-            send_mail(subject, message, sender_email, to)
+            # send_mail(subject, message, sender_email, to)
 
-            return HttpResponseRedirect("/question/" + str(answer.question.id))
+            return HttpResponseRedirect('/question/{0}/'.format(answer.question.id))
 
         else:
             context.update({
@@ -265,14 +263,8 @@ def answer_comment(request):
             })
             return render(request, 'website/templates/get-question.html', context)
 
-    context.update(csrf(request))
-    context.update({
-        'form': form,
-        'question': answer.question,
-        'answers': answers,
-    })
-
-    return render(request, 'website/templates/get-question.html', context)
+    else:
+        raise Http404('URL cannot handle GET requests.')
 
 # View used to filter question according to category
 def filter(request, category = None, tutorial = None):
@@ -305,7 +297,7 @@ def new_question(request):
 
     if (request.method == 'POST'):
 
-        print ("Submitting...")
+        print ("Submitting...\n")
         form = NewQuestionForm(request.POST, request.FILES)
 
         if form.is_valid():
@@ -371,7 +363,7 @@ def new_question(request):
 
             if (question.is_spam):
                 return HttpResponseRedirect('/')
-            return HttpResponseRedirect('/question/'+ str(question.id))
+            return HttpResponseRedirect('/question/{0}/'.format(question.id))
 
         else:
             context.update(csrf(request))
@@ -393,7 +385,7 @@ def new_question(request):
 
 # Edit a question on forums, notification is sent to mailing list team@fossee.in
 @login_required
-def edit_question(request, question_id = None):
+def edit_question(request, question_id):
 
     context = {}
     user = request.user
@@ -481,7 +473,7 @@ def edit_question(request, question_id = None):
             if (question.is_spam and not settings.MODERATOR_ACTIVATED):
                 return HttpResponseRedirect('/')
 
-            return HttpResponseRedirect('/question/'+ str(question.id))
+            return HttpResponseRedirect('/question/{0}/'.format(question.id))
 
         else:
 

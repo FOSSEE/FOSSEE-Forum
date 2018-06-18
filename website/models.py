@@ -67,7 +67,7 @@ class Answer(models.Model):
         return user
 
     def __str__(self):
-        return 'Answer - {0} - {1} - {2}'.format(self.question.category.name, self.question.title, self.body)
+        return '{0} - {1} - {2}'.format(self.question.category.name, self.question.title, self.body)
 
 class AnswerComment(models.Model):
 

@@ -147,7 +147,7 @@ class AnswerModelTest(TestCase):
 
     def test_answer_representation(self):
         answer = Answer.objects.get(body="TestAnswer")
-        expected_object_name = 'Answer - {0} - {1} - {2}'.format(answer.question.category.name,\
+        expected_object_name = '{0} - {1} - {2}'.format(answer.question.category.name,\
                                 answer.question.title, answer.body)
         self.assertEqual(expected_object_name, str(answer))
 
