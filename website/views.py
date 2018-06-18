@@ -10,7 +10,7 @@ from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.contrib import messages
 from django.utils.html import strip_tags
-from website.models import Question, Answer, Notification, AnswerComment, FossCategory, Profile, SubFossCategory, ModeratorGroup
+from website.models import *
 from website.forms import NewQuestionForm, AnswerQuestionForm, AnswerCommentForm
 from website.templatetags.helpers import prettify
 from django.core.mail import send_mail
@@ -56,10 +56,6 @@ def get_question(request, question_id = None, pretty_url = None):
 
     if question.sub_category == "" or str(question.sub_category) == 'None':
         sub_category = False
-
-    pretty_title = prettify(question.title)
-    if (pretty_url != pretty_title):
-        return HttpResponseRedirect('/question/'+ str(question_id) + '/' + pretty_title)
 
     if (settings.MODERATOR_ACTIVATED):
         answers = question.answer_set.all()

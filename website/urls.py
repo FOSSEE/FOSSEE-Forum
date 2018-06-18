@@ -10,7 +10,6 @@ urlpatterns = [
     path('', views.home, name = 'home'),
     path('questions/', views.questions, name = 'questions'),
     path('question/<int:question_id>/', views.get_question, name = 'get_question'),
-    path('question/<int:question_id>/<str:pretty_url>/', views.get_question, name = 'get_question'),
     path('question/edit/<int:question_id>/', views.edit_question, name = 'edit_question'),
     path('question-answer/<int:question_id>/', views.question_answer, name = 'question_answer'),
     path('answer-comment/', views.answer_comment, name = 'answer_comment'),
