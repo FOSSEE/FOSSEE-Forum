@@ -293,6 +293,68 @@ class AnswerCommentViewTest(TestCase):
                                     {'body': 'Test Answer comment', 'answer_id': answer.id})
         self.assertRedirects(response, reverse('website:get_question', args=(answer.question.id, )))
 
+class FilterViewTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        """Set up test data"""
+        user = User.objects.create_user("johndoe", "johndoe@example.com", "johndoe")
+        category = FossCategory.objects.create(name="TestCategory", email="category@example.com")
+        category2 = FossCategory.objects.create(name="TestCategory2", email="category2@example.com")
+        Question.objects.create(user=user, category=category, title="TestQuestion")
+        Question.objects.create(user=user, category=category, sub_category='TestSubCategory', title="TestQuestion2")
+        Question.objects.create(user=user, category=category2, title="TestQuestion3")
+        Question.objects.create(user=user, category=category2, title="TestQuestion4", is_spam=True)
+
+    def test_view_url_at_desired_location(self):
+        response = self.client.get('/filter/TestCategory/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_view_url_accessible_by_name(self):
+        response = self.client.get(reverse('website:filter', args=('TestCategory', )))
+        self.assertEqual(response.status_code, 200)
+
+    def test_view_uses_correct_template(self):
+        response = self.client.get(reverse('website:filter', args=('TestCategory', )))
+        self.assertTemplateUsed(response, 'website/templates/filter.html')
+
+    def test_view_context_category(self):
+        response = self.client.get(reverse('website:filter', args=('TestCategory', )))
+        self.assertTrue('category' in response.context)
+        self.assertEqual(response.context['category'], 'TestCategory')
+
+    def test_view_context_tutorial(self):
+        response = self.client.get(reverse('website:filter', args=('TestCategory', 'TestSubCategory', )))
+        self.assertTrue('tutorial' in response.context)
+        self.assertEqual(response.context['tutorial'], 'TestSubCategory')
+
+    def test_view_context_questions_by_category(self):
+        response = self.client.get(reverse('website:filter', args=('TestCategory', )))
+        question_id = Question.objects.get(title='TestQuestion').id
+        question2_id = Question.objects.get(title='TestQuestion2').id
+        self.assertTrue('questions' in response.context)
+        self.assertQuerysetEqual(response.context['questions'],\
+                                    ['<Question: {0} - TestCategory - TestSubCategory - TestQuestion2 - johndoe>'.format(question2_id),\
+                                    '<Question: {0} - TestCategory -  - TestQuestion - johndoe>'.format(question_id)])
+
+    def test_view_context_questions_by_category_tutorial(self):
+        response = self.client.get(reverse('website:filter', args=('TestCategory', 'TestSubCategory', )))
+        question2_id = Question.objects.get(title='TestQuestion2').id
+        self.assertTrue('questions' in response.context)
+        self.assertQuerysetEqual(response.context['questions'],\
+                                    ['<Question: {0} - TestCategory - TestSubCategory - TestQuestion2 - johndoe>'.format(question2_id)])
+
+    def test_view_context_questions_by_category_moderator_activated(self):
+        settings.MODERATOR_ACTIVATED = True
+        response = self.client.get(reverse('website:filter', args=('TestCategory2', )))
+        settings.MODERATOR_ACTIVATED = False
+        question_id = Question.objects.get(title='TestQuestion3').id
+        question2_id = Question.objects.get(title='TestQuestion4').id
+        self.assertTrue('questions' in response.context)
+        self.assertQuerysetEqual(response.context['questions'],\
+                                    ['<Question: {0} - TestCategory -  - TestQuestion4 - johndoe>'.format(question2_id),\
+                                    '<Question: {0} - TestCategory -  - TestQuestion3 - johndoe>'.format(question_id)])
+
 class NewQuestionViewTest(TestCase):
 
     @classmethod
