@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.urls import reverse
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.conf import settings
 from website.models import *
 from website.forms import *
@@ -12,7 +12,6 @@ class HomeViewTest(TestCase):
         """Set up test data"""
         user = User.objects.create_user("johndoe", "johndoe@example.com", "johndoe")
         category = FossCategory.objects.create(name="TestCategory", email="category@example.com")
-        FossCategory.objects.create(name="TestCategory2", email="category2@example.com")
         Question.objects.create(user=user, category=category, title="TestQuestion")
         Question.objects.create(user=user, category=category, title="TestQuestion 2", is_spam=True)
 
@@ -40,7 +39,7 @@ class HomeViewTest(TestCase):
         response = self.client.get(reverse('website:home'))
         self.assertTrue('categories' in response.context)
         self.assertQuerysetEqual(response.context['categories'],
-                                    ['<FossCategory: TestCategory>', '<FossCategory: TestCategory2>'])
+                                    ['<FossCategory: TestCategory>'])
 
 class QuestionsViewTest(TestCase):
 
@@ -212,7 +211,8 @@ class QuestionAnswerViewTest(TestCase):
                                     {'body': 'Test question body', 'question': question_id})
         try:
             user_id = User.objects.get(username='johndoe').id
-            Notification.objects.get(uid=user_id, qid=question_id)
+            notification = Notification.objects.get(uid=user_id, qid=question_id)
+            self.assertIsInstance(notification, Notification)
         except:
             self.fail('Notification object not created.')
 
@@ -269,7 +269,8 @@ class AnswerCommentViewTest(TestCase):
                                     {'body': 'Test Answer comment', 'answer_id': answer.id})
         try:
             user_id = User.objects.get(username='johndoe').id
-            Notification.objects.get(uid=user_id, qid=answer.question.id, aid=answer.id)
+            notification = Notification.objects.get(uid=user_id, qid=answer.question.id, aid=answer.id)
+            self.assertIsInstance(notification, Notification)
         except:
             self.fail('Notification not created for answer creator.')
 
@@ -280,7 +281,8 @@ class AnswerCommentViewTest(TestCase):
                                     {'body': 'Test Answer comment', 'answer_id': answer.id})
         try:
             user_id = User.objects.get(username='johndoe3').id
-            Notification.objects.get(uid=user_id, qid=answer.question.id, aid=answer.id)
+            notification = Notification.objects.get(uid=user_id, qid=answer.question.id, aid=answer.id)
+            self.assertIsInstance(notification, Notification)
         except:
             self.fail('Notification not created for comment creators.')
 
@@ -470,6 +472,15 @@ class EditQuestionViewTest(TestCase):
         question_id = Question.objects.get(title='TestQuestion').id
         response = self.client.get(reverse('website:edit_question', args=(question_id, )))
         self.assertContains(response, "Not authorized to edit question.")
+    
+    def test_view_redirects_when_answer_exists(self):
+        self.client.login(username='johndoe', password='johndoe')
+        user = User.objects.get(username='johndoe')
+        question = Question.objects.get(title='TestQuestion')
+        answer = Answer.objects.create(question=question, uid=user.id, body='TestAnswer')
+        response = self.client.get(reverse('website:edit_question', args=(question.id, )))
+        answer.delete()
+        self.assertContains(response, "Not authorized to edit question.")
 
     def test_view_post_no_category(self):
         self.client.login(username='johndoe', password='johndoe')
@@ -616,4 +627,369 @@ class EditQuestionViewTest(TestCase):
         self.assertEqual(question.sub_category, 'TestTutorial')
         self.assertTrue(question.is_spam)
 
+class QuestionDeleteViewTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        """Create sample data"""
+        user = User.objects.create_user("johndoe", "johndoe@example.com", "johndoe")
+        user2 = User.objects.create_user("johndoe2", "johndoe2@example.com", "johndoe2")
+        category = FossCategory.objects.create(name="TestCategory", email="category@example.com")
+        Question.objects.create(user=user, category=category, title="TestQuestion")
+
+    def test_view_redirect_if_not_logged_in(self):
+        question_id = Question.objects.get(title='TestQuestion').id
+        response = self.client.get(reverse('website:question_delete', args=(question_id, )))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith('/accounts/login/'))
+
+    def test_view_url_at_desired_location(self):
+        self.client.login(username='johndoe', password='johndoe')
+        question_id = Question.objects.get(title='TestQuestion').id
+        response = self.client.get('/question/delete/{0}/'.format(question_id))
+        self.assertEqual(response.status_code, 200)
+
+    def test_view_url_accessible_by_name(self):
+        self.client.login(username='johndoe', password='johndoe')
+        question_id = Question.objects.get(title='TestQuestion').id
+        response = self.client.get(reverse('website:question_delete', args=(question_id, )))
+        self.assertEqual(response.status_code, 200)
+
+    def test_view_uses_correct_template(self):
+        self.client.login(username='johndoe', password='johndoe')
+        question_id = Question.objects.get(title='TestQuestion').id
+        response = self.client.get(reverse('website:question_delete', args=(question_id, )))
+        self.assertTemplateUsed(response, 'website/templates/question-delete.html')
+
+    def test_view_redirects_when_not_authorized(self):
+        self.client.login(username='johndoe2', password='johndoe2')
+        question_id = Question.objects.get(title='TestQuestion').id
+        response = self.client.get(reverse('website:question_delete', args=(question_id, )))
+        self.assertContains(response, "Not authorized to delete question.")
     
+    def test_view_redirects_when_answer_exists(self):
+        self.client.login(username='johndoe', password='johndoe')
+        user = User.objects.get(username='johndoe')
+        question = Question.objects.get(title='TestQuestion')
+        answer = Answer.objects.create(question=question, uid=user.id, body='TestAnswer')
+        response = self.client.get(reverse('website:question_delete', args=(question.id, )))
+        answer.delete()
+        self.assertContains(response, "Not authorized to delete question.")
+
+    def test_view_delete_question(self):
+        self.client.login(username='johndoe', password='johndoe')
+        question = Question.objects.get(title='TestQuestion')
+        response = self.client.get(reverse('website:question_delete', args=(question.id, )))
+        try:
+            question = Question.objects.get(title='TestQuestion')
+            self.fail('Question not deleted.')
+        except:
+            self.assertEqual(response.status_code, 200)
+
+    def test_view_context_title(self):
+        self.client.login(username='johndoe', password='johndoe')
+        question = Question.objects.get(title='TestQuestion')
+        response = self.client.get(reverse('website:question_delete', args=(question.id, )))
+        self.assertTrue('title' in response.context)
+        self.assertEqual(response.context['title'], question.title)
+
+class VotePostViewTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        """Create sample data"""
+        user = User.objects.create_user("johndoe", "johndoe@example.com", "johndoe")
+        User.objects.create_user("johndoe2", "johndoe2@example.com", "johndoe2")
+        category = FossCategory.objects.create(name="TestCategory", email="category@example.com")
+        Question.objects.create(user=user, category=category, title="TestQuestion")
+
+    def test_view_redirect_if_not_logged_in(self):
+        response = self.client.get(reverse('website:vote_post'))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith('/accounts/login/'))
+
+    def test_view_vote_same_user(self):
+        self.client.login(username='johndoe', password='johndoe')
+        question_id = Question.objects.get(title='TestQuestion').id
+        self.client.post(reverse('website:vote_post'), {'id': question_id,\
+                                    'action': 'vote', 'type': 'up'})
+        question_votes = Question.objects.get(title='TestQuestion').num_votes
+        self.assertEqual(question_votes, 0)
+        self.client.post(reverse('website:vote_post'), {'id': question_id,\
+                                    'action': 'vote', 'type': 'down'})
+        question_votes = Question.objects.get(title='TestQuestion').num_votes
+        self.assertEqual(question_votes, 0)
+
+    def test_view_recall_vote_same_user(self):
+        self.client.login(username='johndoe', password='johndoe')
+        question_id = Question.objects.get(title='TestQuestion').id
+        self.client.post(reverse('website:vote_post'), {'id': question_id,\
+                                    'action': 'recall-vote', 'type': 'up'})
+        question_votes = Question.objects.get(title='TestQuestion').num_votes
+        self.assertEqual(question_votes, 0)
+        self.client.post(reverse('website:vote_post'), {'id': question_id,\
+                                    'action': 'recall-vote', 'type': 'down'})
+        question_votes = Question.objects.get(title='TestQuestion').num_votes
+        self.assertEqual(question_votes, 0)
+
+    def test_view_vote(self):
+        self.client.login(username='johndoe2', password='johndoe2')
+        user = User.objects.get(username='johndoe2')
+        question_id = Question.objects.get(title='TestQuestion').id
+        self.client.post(reverse('website:vote_post'), {'id': question_id,\
+                                    'action': 'vote', 'type': 'up'})
+        question = Question.objects.get(title='TestQuestion')
+        self.assertEqual(question.num_votes, 1)
+        question.userUpVotes.remove(user)
+        question.num_votes = 0
+        question.save()
+        self.client.post(reverse('website:vote_post'), {'id': question_id,\
+                                    'action': 'vote', 'type': 'down'})
+        question_votes = Question.objects.get(title='TestQuestion').num_votes
+        self.assertEqual(question_votes, -1)
+
+    def test_view_vote_when_already_voted(self):
+        self.client.login(username='johndoe2', password='johndoe2')
+        user = User.objects.get(username='johndoe2')
+        question = Question.objects.get(title='TestQuestion')
+        question.userDownVotes.add(user)
+        question.num_votes = -1
+        question.save()
+        self.client.post(reverse('website:vote_post'), {'id': question.id,\
+                                    'action': 'vote', 'type': 'up'})
+        question_votes = Question.objects.get(title='TestQuestion').num_votes
+        self.assertEqual(question_votes, 1)
+        question.userDownVotes.remove(user)
+        question.userUpVotes.add(user)
+        question.num_votes = 1
+        question.save()
+        self.client.post(reverse('website:vote_post'), {'id': question.id,\
+                                    'action': 'vote', 'type': 'down'})
+        question_votes = Question.objects.get(title='TestQuestion').num_votes
+        self.assertEqual(question_votes, -1)
+
+    def test_view_recall_vote(self):
+        self.client.login(username='johndoe2', password='johndoe2')
+        user = User.objects.get(username='johndoe2')
+        question = Question.objects.get(title='TestQuestion')
+        question.userUpVotes.add(user)
+        question.num_votes = 1
+        question.save()
+        self.client.post(reverse('website:vote_post'), {'id': question.id,\
+                                    'action': 'recall-vote', 'type': 'up'})
+        question_votes = Question.objects.get(title='TestQuestion').num_votes
+        self.assertEqual(question_votes, 0)
+        question.userDownVotes.add(user)
+        question.userUpVotes.remove(user)
+        question.num_votes = -1
+        question.save()
+        self.client.post(reverse('website:vote_post'), {'id': question.id,\
+                                    'action': 'recall-vote', 'type': 'down'})
+        question_votes = Question.objects.get(title='TestQuestion').num_votes
+        self.assertEqual(question_votes, 0)
+
+class AnsVotePostViewTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        """Create sample data"""
+        user = User.objects.create_user("johndoe", "johndoe@example.com", "johndoe")
+        User.objects.create_user("johndoe2", "johndoe2@example.com", "johndoe2")
+        category = FossCategory.objects.create(name="TestCategory", email="category@example.com")
+        question = Question.objects.create(user=user, category=category, title="TestQuestion")
+        Answer.objects.create(question=question, uid=user.id, body='TestAnswerBody')
+
+    def test_view_redirect_if_not_logged_in(self):
+        response = self.client.get(reverse('website:ans_vote_post'))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith('/accounts/login/'))
+
+    def test_view_vote_same_user(self):
+        self.client.login(username='johndoe', password='johndoe')
+        answer_id = Answer.objects.get(body='TestAnswerBody').id
+        self.client.post(reverse('website:ans_vote_post'), {'id': answer_id,\
+                                    'action': 'vote', 'type': 'up'})
+        answer_votes = Answer.objects.get(body='TestAnswerBody').num_votes
+        self.assertEqual(answer_votes, 0)
+        self.client.post(reverse('website:ans_vote_post'), {'id': answer_id,\
+                                    'action': 'vote', 'type': 'down'})
+        answer_votes = Answer.objects.get(body='TestAnswerBody').num_votes
+        self.assertEqual(answer_votes, 0)
+
+    def test_view_recall_vote_same_user(self):
+        self.client.login(username='johndoe', password='johndoe')
+        answer_id = Answer.objects.get(body='TestAnswerBody').id
+        self.client.post(reverse('website:ans_vote_post'), {'id': answer_id,\
+                                    'action': 'recall-vote', 'type': 'up'})
+        answer_votes = Answer.objects.get(body='TestAnswerBody').num_votes
+        self.assertEqual(answer_votes, 0)
+        self.client.post(reverse('website:ans_vote_post'), {'id': answer_id,\
+                                    'action': 'recall-vote', 'type': 'down'})
+        answer_votes = Answer.objects.get(body='TestAnswerBody').num_votes
+        self.assertEqual(answer_votes, 0)
+
+    def test_view_vote(self):
+        self.client.login(username='johndoe2', password='johndoe2')
+        user = User.objects.get(username='johndoe2')
+        answer_id = Answer.objects.get(body='TestAnswerBody').id
+        self.client.post(reverse('website:ans_vote_post'), {'id': answer_id,\
+                                    'action': 'vote', 'type': 'up'})
+        answer = Answer.objects.get(body='TestAnswerBody')
+        self.assertEqual(answer.num_votes, 1)
+        answer.userUpVotes.remove(user)
+        answer.num_votes = 0
+        answer.save()
+        self.client.post(reverse('website:ans_vote_post'), {'id': answer_id,\
+                                    'action': 'vote', 'type': 'down'})
+        answer_votes = Answer.objects.get(body='TestAnswerBody').num_votes
+        self.assertEqual(answer_votes, -1)
+
+    def test_view_vote_when_already_voted(self):
+        self.client.login(username='johndoe2', password='johndoe2')
+        user = User.objects.get(username='johndoe2')
+        answer = Answer.objects.get(body='TestAnswerBody')
+        answer.userDownVotes.add(user)
+        answer.num_votes = -1
+        answer.save()
+        self.client.post(reverse('website:ans_vote_post'), {'id': answer.id,\
+                                    'action': 'vote', 'type': 'up'})
+        answer_votes = Answer.objects.get(body='TestAnswerBody').num_votes
+        self.assertEqual(answer_votes, 1)
+        answer.userDownVotes.remove(user)
+        answer.userUpVotes.add(user)
+        answer.num_votes = 1
+        answer.save()
+        self.client.post(reverse('website:ans_vote_post'), {'id': answer.id,\
+                                    'action': 'vote', 'type': 'down'})
+        answer_votes = Answer.objects.get(body='TestAnswerBody').num_votes
+        self.assertEqual(answer_votes, -1)
+
+    def test_view_recall_vote(self):
+        self.client.login(username='johndoe2', password='johndoe2')
+        user = User.objects.get(username='johndoe2')
+        answer = Answer.objects.get(body='TestAnswerBody')
+        answer.userUpVotes.add(user)
+        answer.num_votes = 1
+        answer.save()
+        self.client.post(reverse('website:ans_vote_post'), {'id': answer.id,\
+                                    'action': 'recall-vote', 'type': 'up'})
+        answer_votes = Answer.objects.get(body='TestAnswerBody').num_votes
+        self.assertEqual(answer_votes, 0)
+        answer.userDownVotes.add(user)
+        answer.userUpVotes.remove(user)
+        answer.num_votes = -1
+        answer.save()
+        self.client.post(reverse('website:ans_vote_post'), {'id': answer.id,\
+                                    'action': 'recall-vote', 'type': 'down'})
+        answer_votes = Answer.objects.get(body='TestAnswerBody').num_votes
+        self.assertEqual(answer_votes, 0)
+
+class UserNotificationsViewTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        """Create sample data"""
+        user = User.objects.create_user("johndoe", "johndoe@example.com", "johndoe")
+        User.objects.create_user("johndoe2", "johndoe2@example.com", "johndoe2")
+        category = FossCategory.objects.create(name="TestCategory", email="category@example.com")
+        question = Question.objects.create(user=user, category=category, title="TestQuestion")
+        Notification.objects.create(uid=user.id, qid=question.id)
+
+    def test_view_redirect_if_not_logged_in(self):
+        user_id = User.objects.get(username='johndoe').id
+        response = self.client.get(reverse('website:user_notifications', args=(user_id, )))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith('/accounts/login/'))
+
+    def test_view_if_unauthorized_user(self):
+        self.client.login(username='johndoe2', password='johndoe2')
+        user_id = User.objects.get(username='johndoe').id
+        response = self.client.get(reverse('website:user_notifications', args=(user_id, )))
+        self.assertContains(response, 'Not authorized to view notifications.')
+
+    def test_view_url_at_desired_location(self):
+        self.client.login(username='johndoe', password='johndoe')
+        user_id = User.objects.get(username='johndoe').id
+        response = self.client.get('/user/{0}/notifications/'.format(user_id))
+        self.assertEqual(response.status_code, 302)
+
+    def test_view_url_accessible_by_name(self):
+        self.client.login(username='johndoe', password='johndoe')
+        user_id = User.objects.get(username='johndoe').id
+        response = self.client.get(reverse('website:user_notifications', args=(user_id, )))
+        self.assertEqual(response.status_code, 302)
+
+    def test_view_uses_correct_template(self):
+        self.client.login(username='johndoe', password='johndoe')
+        user_id = User.objects.get(username='johndoe').id
+        response = self.client.get(reverse('website:user_notifications', args=(user_id, )))
+        self.assertTemplateUsed(response, 'website/templates/notifications.html')
+
+    def test_view_context_notifications(self):
+        self.client.login(username='johndoe', password='johndoe')
+        user_id = User.objects.get(username='johndoe').id
+        response = self.client.get(reverse('website:user_notifications', args=(user_id, )))
+        self.assertTrue('notifications' in response.context)
+        notification_id = Notification.objects.get(uid=user_id)
+        self.assertQuerysetEqual(response.context['notifications'],\
+                            ['<Notification: {0}>'.format(notification_id)])
+
+class ClearNotificationsViewTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        """Create sample data"""
+        user = User.objects.create_user("johndoe", "johndoe@example.com", "johndoe")
+        category = FossCategory.objects.create(name="TestCategory", email="category@example.com")
+        question = Question.objects.create(user=user, category=category, title="TestQuestion")
+        Notification.objects.create(uid=user.id, qid=question.id)
+
+    def test_view_redirect_if_not_logged_in(self):
+        response = self.client.get(reverse('website:clear_notifications'))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith('/accounts/login/'))
+
+    def test_view_url_at_desired_location(self):
+        self.client.login(username='johndoe', password='johndoe')
+        response = self.client.get('/clear-notifications/')
+        self.assertEqual(response.status_code, 302)
+
+    def test_view_url_accessible_by_name(self):
+        self.client.login(username='johndoe', password='johndoe')
+        response = self.client.get(reverse('website:clear_notifications'))
+        self.assertEqual(response.status_code, 302)
+
+    def test_view_notifications_deleted(self):
+        self.client.login(username='johndoe', password='johndoe')
+        user_id = User.objects.get(username='johndoe').id
+        response = self.client.get(reverse('website:clear_notifications'))
+        try:
+            Notification.objects.get(uid=user_id)
+            self.fail('Notifications not deleted.')
+        except:
+            self.assertEqual(response.status_code, 302)
+
+class SearchViewTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        """Setup test data"""
+        FossCategory.objects.create(name="TestCategory", email="category@example.com")
+    
+    def test_view_url_at_desired_location(self):
+        response = self.client.get('/search/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_view_url_accessible_by_name(self):
+        response = self.client.get(reverse('website:search'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_view_uses_correct_template(self):
+        response = self.client.get(reverse('website:search'))
+        self.assertTemplateUsed(response, 'website/templates/search.html')
+    
+    def test_view_context_category(self):
+        response = self.client.get(reverse('website:search'))
+        self.assertTrue('categories' in response.context)
+        self.assertQuerysetEqual(response.context['categories'],\
+                                    ['<FossCategory: TestCategory>'])

@@ -561,7 +561,7 @@ def answer_delete(request, answer_id):
         send_mail(subject, message, sender_email, to, fail_silently = True)
 
     answer.delete()
-    return HttpResponseRedirect('/question/' + str(question_id))
+    return HttpResponseRedirect('/question/{0}/'.format(question_id))
 
 # View to mark answer as spam/non-spam
 @login_required
@@ -574,12 +574,12 @@ def mark_answer_spam(request, answer_id):
     if (request.method == "POST"):
         type = request.POST['selector']
         if (type == "spam"):
-            answer.is_spam = 1
+            answer.is_spam = True
         else:
-            answer.is_spam = 0
+            answer.is_spam = False
 
     answer.save()
-    return HttpResponseRedirect('/question/' + str(question_id) + '#answer' + str(answer.id))
+    return HttpResponseRedirect('/question/{0}/#answer{1}/'.format(question_id, answer.id))
 
 # return number of votes and initial votes
 # user who asked the question,cannot vote his/or anwser,
@@ -623,7 +623,6 @@ def vote_post(request):
             elif (vote_type == 'down') and (thisuserdownvote == 1):
                 cur_post.userDownVotes.remove(request.user)
             else:
-                # "Error - Unknown vote type or no vote to recall"
                 return HttpResponse(initial_votes)
         else:
             return HttpResponse("Error: Bad Action.")
@@ -697,7 +696,7 @@ def user_notifications(request, user_id):
 
     settings.MODERATOR_ACTIVATED = False
 
-    if (str(user_id) == str(request.user.id)):
+    if (user_id == request.user.id):
         try:
             notifications = Notification.objects.filter(uid = user_id).order_by('-date_created')
             context = {
