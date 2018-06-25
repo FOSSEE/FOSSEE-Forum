@@ -352,8 +352,8 @@ class FilterViewTest(TestCase):
         question2_id = Question.objects.get(title='TestQuestion4').id
         self.assertTrue('questions' in response.context)
         self.assertQuerysetEqual(response.context['questions'],\
-                                    ['<Question: {0} - TestCategory -  - TestQuestion4 - johndoe>'.format(question2_id),\
-                                    '<Question: {0} - TestCategory -  - TestQuestion3 - johndoe>'.format(question_id)])
+                                    ['<Question: {0} - TestCategory2 -  - TestQuestion4 - johndoe>'.format(question2_id),\
+                                    '<Question: {0} - TestCategory2 -  - TestQuestion3 - johndoe>'.format(question_id)])
 
 class NewQuestionViewTest(TestCase):
 

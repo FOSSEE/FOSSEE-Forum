@@ -297,7 +297,6 @@ def new_question(request):
 
     if (request.method == 'POST'):
 
-        print ("Submitting...\n")
         form = NewQuestionForm(request.POST, request.FILES)
 
         if form.is_valid():
@@ -398,8 +397,6 @@ def edit_question(request, question_id):
         return HttpResponse("Not authorized to edit question.")
 
     if (request.method == 'POST'):
-
-        print ("Editing...")
 
         previous_title = question.title
         form = NewQuestionForm(request.POST, request.FILES)

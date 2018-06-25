@@ -1,7 +1,8 @@
 from builtins import str
 from builtins import range
-import urllib
+import urllib.parse, urllib.request
 import json
+import ssl
 import random, string
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth import login, logout, authenticate
@@ -34,9 +35,10 @@ def account_register(request):
                 'secret': settings.GOOGLE_RECAPTCHA_SECRET_KEY,
                 'response': recaptcha_response
             }
-            data = urllib.parse.urlencode(values)
+            data = urllib.parse.urlencode(values).encode('utf-8')
             req = urllib.request.Request(url, data)
-            response = urllib.request.urlopen(req)
+            gcontext = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+            response = urllib.request.urlopen(req, context=gcontext)
             result = json.load(response)
             ''' End reCAPTCHA validation '''
 
@@ -90,7 +92,7 @@ def confirm(request, confirmation_code, username):
             login(request, user)
 
             messages.success(request, "Your account has been activated!. Please update your profile to complete your registration")
-            return HttpResponseRedirect('/accounts/profile/'+user.username)
+            return HttpResponseRedirect('/accounts/profile/')
 
         else:
             messages.success(request, "Something went wrong!. Please try again!")
@@ -104,7 +106,7 @@ def confirm(request, confirmation_code, username):
 # add details to the profile table of the user
 # update profile after registration confirmation
 @login_required
-def account_profile(request, username):
+def account_profile(request):
 
     user = request.user
     profile = Profile.objects.get(user_id = user.id)
@@ -125,7 +127,7 @@ def account_profile(request, username):
             profile.save()
 
             messages.success(request, "Your profile has been updated!")
-            return HttpResponseRedirect("/accounts/view-profile/{0}".format(user.id))
+            return HttpResponseRedirect("/accounts/view-profile/{0}/".format(user.id))
 
         # return account_view_profile(request, user.id)
         context = {'form':form}
@@ -191,45 +193,44 @@ def send_registration_confirmation(user):
     except:
         pass
 
-# user login
+# user login        
 def user_login(request):
-
-    next_url = '/'
-    if (request.GET):
-        next_url = request.GET['next']
-
-    print(next_url)
 
     if request.user.is_anonymous:
 
         if (request.method == 'POST'):
-
             form = UserLoginForm(request.POST)
 
             # Valid credentials are entered
             if form.is_valid():
-
+                
                 cleaned_data = form.cleaned_data
                 user = cleaned_data.get("user")
                 login(request, user)
 
-                return HttpResponseRedirect(next_url)
+                if ('next' in request.POST):
+                    next_url = request.POST.get('next')
+                    return HttpResponseRedirect(next_url)
 
+                return HttpResponseRedirect('/')
+            
             # Invalid credentials entered
             else:
+                next_url = request.POST.get('next')
                 context = {
-                    'form': form,
-                    'next': next_url,
+                    'form': form, 
+                    'next': next_url, 
                 }
                 context.update(csrf(request))
                 return render(request, 'forums/templates/user-login.html', context)
-
+                
         else:
             form = UserLoginForm()
-
+        
+        next_url = request.GET.get('next')
         context = {
-            'form': form,
-            'next': next_url,
+            'form': form, 
+            'next': next_url, 
         }
         context.update(csrf(request))
         return render(request, 'forums/templates/user-login.html', context)

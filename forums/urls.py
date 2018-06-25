@@ -41,7 +41,7 @@ urlpatterns = [
     path('accounts/logout/', views.user_logout, name = 'user_logout'),
     path('accounts/register/', views.account_register, name = 'user_register'),
     path('accounts/confirm/<str:confirmation_code>/<str:username>/', views.confirm, name = 'confirm'),
-    path('accounts/profile/<str:username>/', views.account_profile, name = 'profile'),
+    path('accounts/profile/', views.account_profile, name = 'profile'),
     path('accounts/view-profile/<int:user_id>/', views.account_view_profile, name = 'view_profile'),
 
 ]

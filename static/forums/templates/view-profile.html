@@ -115,7 +115,7 @@
             <div class="col-sm-12">
             
             {% if show %}
-            <form class="form-signin form-horizontal" action="/accounts/profile/{{user.username}}/" method="post" enctype="multipart/form-data">{% csrf_token %}
+            <form class="form-signin form-horizontal" action="/accounts/profile/" method="post" enctype="multipart/form-data">{% csrf_token %}
             
             <div class="form-group">
                 <label class="col-sm-3 control-label" for="id_first_name">First Name<span style="color:red">*</span></label>

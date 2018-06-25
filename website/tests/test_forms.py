@@ -244,16 +244,6 @@ class ProfileFormTest(TestCase):
         form = ProfileForm(user = user)
         self.assertFalse(form.fields['phone'].required)
 
-    def test_phone_min_length(self):
-        user = User.objects.get(username = 'johndoe')
-        form = ProfileForm(user = user)
-        self.assertEqual(form.fields['phone'].min_length, 8)
-
-    def test_phone_max_length(self):
-        user = User.objects.get(username = 'johndoe')
-        form = ProfileForm(user = user)
-        self.assertEqual(form.fields['phone'].max_length, 16)
-
     def test_first_name_error_message(self):
         user = User.objects.get(username = 'johndoe')
         form = ProfileForm(user = user)
@@ -266,16 +256,16 @@ class ProfileFormTest(TestCase):
         self.assertEqual(form.fields['last_name'].error_messages['required'],\
                             'Last name field required')
 
-    def test_first_name_with_number(self):
+    def test_invalid_first_name(self):
         user = User.objects.get(username = 'johndoe')
-        form = ProfileForm(user = user, data = {'first_name': 'john2',\
+        form = ProfileForm(user = user, data = {'first_name': 'john2@#',\
                                             'last_name': 'doe', 'address':'TestAddress'})
         self.assertFalse(form.is_valid())
 
-    def test_last_name_with_number(self):
+    def test_invalid_last_name(self):
         user = User.objects.get(username = 'johndoe')
         form = ProfileForm(user = user, data = {'first_name': 'john',\
-                                            'last_name': 'doe2'})
+                                            'last_name': 'doe2@#'})
         self.assertFalse(form.is_valid())
 
     def test_too_long_phone(self):
@@ -327,14 +317,6 @@ class RegisterFormTest(TestCase):
     def test_password_confirm_label(self):
         form = RegisterForm()
         self.assertEqual(form.fields['password_confirm'].label, _("Password (again)"))
-
-    def test_password_min_length(self):
-        form = RegisterForm()
-        self.assertEqual(form.fields['password'].min_length, 8)
-
-    def test_password_confirm_min_length(self):
-        form = RegisterForm()
-        self.assertEqual(form.fields['password_confirm'].min_length, 8)
 
     def test_email_label(self):
         form = RegisterForm()

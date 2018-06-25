@@ -9,6 +9,7 @@ from website.models import Profile
 
 
 class UserLoginForm(forms.Form):
+    
     username = forms.CharField()
     password = forms.CharField(widget = forms.PasswordInput())
 
@@ -30,16 +31,27 @@ class UserLoginForm(forms.Form):
 class ProfileForm(forms.ModelForm):
 
     class Meta(object):
+        
         model = Profile
         exclude = ['user', 'confirmation_code']
 
     first_name = forms.CharField(widget = forms.TextInput(),
                         required = True,
                         error_messages = {'required':'First name field required'})
+
     last_name = forms.CharField(widget = forms.TextInput(),
                         required = True,
                         error_messages = {'required':'Last name field required'})
-    phone = forms.CharField(min_length = 8, max_length = 16, widget = forms.TextInput(), required = False, validators = [RegexValidator(regex = '^[0-9-_+.]*$')])
+
+    phone = forms.CharField(
+        widget = forms.TextInput(),
+        required = False,
+        validators = [
+            RegexValidator(regex = '^[0-9-_+.]*$', message = 'Invalid phone number format'),
+            MinLengthValidator(8, message='Phone number cannot be shorter than 8 characters'),
+            MaxLengthValidator(16, message='Phone number cannot be longer than 16 characters')
+        ],
+    )
 
     def clean_last_name(self):
 
@@ -47,8 +59,8 @@ class ProfileForm(forms.ModelForm):
         temp = last_name.replace(" ", '')
 
         for e in str(temp):
-            if not e.isalpha():
-                raise forms.ValidationError("Only Alphabetic")
+            if not e.isalnum():
+                raise forms.ValidationError("Only alphanumeric")
 
         return last_name
 
@@ -58,8 +70,8 @@ class ProfileForm(forms.ModelForm):
         temp = first_name.replace(" ", '')
 
         for e in str(temp):
-            if not e.isalpha():
-                raise forms.ValidationError("Only Alphabetic")
+            if not e.isalnum():
+                raise forms.ValidationError("Only alphanumeric")
 
         return first_name
 
@@ -98,12 +110,16 @@ class RegisterForm(forms.Form):
     password = forms.CharField(
         label = _("Password"),
         widget = forms.PasswordInput(),
-        min_length = 8,
+        validators = [
+            MinLengthValidator(8, message = 'Password must at least be 8 characters long.')
+        ],
     )
     password_confirm = forms.CharField(
         label = _("Password (again)"),
         widget = forms.PasswordInput(),
-        min_length = 8,
+        validators = [
+            MinLengthValidator(8, message = 'Password must at least be 8 characters long.')
+        ],
     )
     email = forms.EmailField(
         label = _("Email"),
@@ -114,14 +130,14 @@ class RegisterForm(forms.Form):
     def clean_username(self):
         try:
             User.objects.get(username = self.cleaned_data['username'])
-            raise forms.ValidationError("This username has already existed.")
+            raise forms.ValidationError("This username already exists")
         except User.DoesNotExist:
             pass
 
     def clean_email(self):
         try:
             User.objects.get(email = self.cleaned_data['email'])
-            raise forms.ValidationError("This email is already taken.")
+            raise forms.ValidationError("This email is already taken")
         except User.DoesNotExist:
             pass
 

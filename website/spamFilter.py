@@ -72,7 +72,6 @@ def predict(emailBody):
     featureMatrix = vectorizer.transform([clean_string(emailBody)])
     global model
     result = model.predict(featureMatrix)
-    print("Predicting...\n")
 
     if (1 in result):
         return "Spam"
