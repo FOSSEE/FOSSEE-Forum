@@ -811,19 +811,12 @@ def moderator_unanswered(request):
 # AJAX SECTION
 # All the ajax views go below
 @csrf_exempt
-def ajax_category(request):
-    context = {
-        'categories': categories,
-    }
-    return render(request, 'website/templates/ajax_tutorials.html', context)
-
-@csrf_exempt
 def ajax_tutorials(request):
     if request.method == 'POST':
 
         category = request.POST.get('category')
 
-        if category == '12':
+        if (SubFossCategory.objects.filter(parent_id = category).exists()):
             tutorials = SubFossCategory.objects.filter(parent_id = category)
             context = {
                 'tutorials': tutorials,
@@ -831,63 +824,70 @@ def ajax_tutorials(request):
             return render(request, 'website/templates/ajax-tutorials.html', context)
 
         else:
-            return HttpResponse("changed")
-            pass
+            return HttpResponse('No sub-category in category.')
+    
+    else:
+        raise Http404('URL cannot handle GET requests.')
 
 @csrf_exempt
 def ajax_answer_update(request):
     if request.method == 'POST':
         aid = request.POST['answer_id']
         body = request.POST['answer_body']
-        answer = get_object_or_404(Answer, pk = aid)
 
-        if answer:
-            if answer.uid == request.user.id:
-                answer.body = body.encode('unicode_escape')
+        try:
+            answer = get_object_or_404(Answer, pk = aid)
+            if (is_moderator(request.user)):
+                answer.body = str(body)
                 answer.save()
+                return HttpResponse('saved')
+            else:
+                return HttpResponse('Only moderator can update.')
+        except:
+            return HttpResponse('Answer not found.')
 
-        return HttpResponse("saved")
+    else:
+        raise Http404('URL cannot handle GET requests.')
 
 @csrf_exempt
 def ajax_answer_comment_update(request):
     if request.method == "POST":
         comment_id = request.POST["comment_id"]
         comment_body = request.POST["comment_body"]
-        comment = get_object_or_404(AnswerComment, pk = comment_id)
 
-        if comment:
-            if comment.uid == request.user.id:
-                comment.body = comment_body.encode('unicode_escape')
-                comment.save()
+        try:
+            comment = get_object_or_404(AnswerComment, pk = comment_id)
+            if comment:
+                if (is_moderator(request.user)):
+                    comment.body = str(comment_body)
+                    comment.save()
+                    return HttpResponse('saved')
+                else:
+                    return HttpResponse('Only moderator can update.')
+        except:
+            return HttpResponse('Comment not found.')
 
-        return HttpResponse("saved")
-
-
-@csrf_exempt
-def ajax_similar_questions(request):
-    if request.method == 'POST':
-        category = request.POST['category']
-        tutorial = request.POST['tutorial']
-
-        # add more filtering when the forum grows
-        questions = Question.objects.filter(category = category).filter(tutorial = tutorial)
-        context = {
-            'questions': questions
-        }
-        return render(request, 'website/templates/ajax-similar-questions.html', context)
+    else:
+        raise Http404('URL cannot handle GET requests.')
 
 @csrf_exempt
 def ajax_notification_remove(request):
     if request.method == "POST":
+
         nid = request.POST["notification_id"]
-        notification = Notification.objects.get(pk = nid)
-
-        if notification:
-            if notification.uid == request.user.id:
+        
+        try:
+            notification = get_object_or_404(Notification, pk = nid)
+            if (notification.uid == request.user.id):
                 notification.delete()
-                return HttpResponse("removed")
-
-    return HttpResponse("failed")
+                return HttpResponse('removed')
+            else:
+                return HttpResponse('Unauthorized user.')
+        except:
+            return HttpResponse('Notification not found.')
+    
+    else:
+        raise Http404('URL cannot handle GET requests.')
 
 @csrf_exempt
 def ajax_keyword_search(request):
@@ -900,3 +900,6 @@ def ajax_keyword_search(request):
         }
 
         return render(request, 'website/templates/ajax-keyword-search.html', context)
+    
+    else:
+        raise Http404('URL cannot handle GET requests.')

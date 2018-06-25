@@ -80,7 +80,7 @@ class GetQuestionViewTest(TestCase):
         question = Question.objects.create(user=user, category=category, title="TestQuestion",\
                                             sub_category="TestSubCategory", num_votes=1)
         answer = Answer.objects.create(question=question, uid=user.id, body="TestAnswer")
-        Answer.objects.create(question=question, uid=user.id, body="TestAnswer 2", is_spam=True)
+        Answer.objects.create(question=question, uid=user.id, body="TestAnswer2", is_spam=True)
         AnswerComment.objects.create(answer=answer, uid=user.id, body="TestAnswerComment")
 
     def test_view_url_at_desired_location(self):
@@ -110,6 +110,14 @@ class GetQuestionViewTest(TestCase):
         self.assertTrue('ans_count' in response.context)
         self.assertEqual(response.context['ans_count'], 1)
 
+    def test_view_context_ans_count_moderator_activated(self):
+        settings.MODERATOR_ACTIVATED = True
+        question_id = Question.objects.get(title="TestQuestion").id
+        response = self.client.get(reverse('website:get_question', args=(question_id,)))
+        self.assertTrue('ans_count' in response.context)
+        self.assertEqual(response.context['ans_count'], 2)
+        settings.MODERATOR_ACTIVATED = False
+
     def test_view_context_sub_category(self):
         question_id = Question.objects.get(title="TestQuestion").id
         response = self.client.get(reverse('website:get_question', args=(question_id,)))
@@ -122,6 +130,16 @@ class GetQuestionViewTest(TestCase):
         response = self.client.get(reverse('website:get_question', args=(question_id,)))
         self.assertTrue('main_list' in response.context)
         self.assertEqual(response.context['main_list'], [(answer, [0,0,0])])
+
+    def test_view_context_main_list_moderator_activated(self):
+        settings.MODERATOR_ACTIVATED = True
+        question_id = Question.objects.get(title='TestQuestion').id
+        answer = Answer.objects.get(body = 'TestAnswer')
+        answer2 = Answer.objects.get(body = 'TestAnswer2')
+        response = self.client.get(reverse('website:get_question', args=(question_id,)))
+        self.assertTrue('main_list' in response.context)
+        self.assertEqual(response.context['main_list'], [(answer, [0,0,0]), (answer2, [0,0,0])])
+        settings.MODERATOR_ACTIVATED = False
 
     def test_view_context_form(self):
         question_id = Question.objects.get(title="TestQuestion").id
@@ -1055,3 +1073,194 @@ class SearchViewTest(TestCase):
         self.assertTrue('categories' in response.context)
         self.assertQuerysetEqual(response.context['categories'],\
                                     ['<FossCategory: TestCategory>'])
+
+class AjaxTutorialsViewTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        category = FossCategory.objects.create(name='TestCategory', email='category@example.com')
+        FossCategory.objects.create(name='TestCategory2', email='category2@example.com')
+        SubFossCategory.objects.create(parent=category, name='TestSubCategory')
+
+    def test_view_get_error_at_desired_location(self):
+        response = self.client.get('/ajax-tutorials/')
+        self.assertEqual(response.status_code, 404)
+    
+    def test_view_get_error_accessible_by_name(self):
+        response = self.client.get(reverse('website:ajax_tutorials'))
+        self.assertEqual(response.status_code, 404)
+
+    def test_view_post_category_without_subcat(self):
+        category_id = FossCategory.objects.get(name='TestCategory2').id
+        response = self.client.post(reverse('website:ajax_tutorials'),\
+            {'category': category_id})
+        self.assertContains(response, 'No sub-category in category.')
+
+    def test_view_post_context_category_with_subcat(self):
+        category_id = FossCategory.objects.get(name='TestCategory').id
+        response = self.client.post(reverse('website:ajax_tutorials'),\
+            {'category': category_id})
+        self.assertTrue('tutorials' in response.context)
+        self.assertQuerysetEqual(response.context['tutorials'],\
+            ['<SubFossCategory: TestSubCategory>'])
+
+    def test_view_post_category_with_subcat_uses_correct_template(self):
+        category_id = FossCategory.objects.get(name='TestCategory').id
+        response = self.client.post(reverse('website:ajax_tutorials'),\
+            {'category': category_id})
+        self.assertTemplateUsed(response, 'website/templates/ajax-tutorials.html')
+
+class AjaxAnswerUpdateViewTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        """Create sample answer"""
+        user = User.objects.create_user("johndoe", "johndoe@example.com", "johndoe")
+        category = FossCategory.objects.create(name="TestCategory", email="category@example.com")
+        group = Group.objects.create(name="TestCategory_moderator")
+        ModeratorGroup.objects.create(group=group, category=category)
+        user.groups.add(group)
+        question = Question.objects.create(user=user, category=category, title="TestQuestion")
+        Answer.objects.create(question=question, uid=user.id, body="TestAnswer")
+
+    def test_view_get_error_at_desired_location(self):
+        response = self.client.get('/ajax-answer-update/')
+        self.assertEqual(response.status_code, 404)
+    
+    def test_view_get_error_accessible_by_name(self):
+        response = self.client.get(reverse('website:ajax_answer_update'))
+        self.assertEqual(response.status_code, 404)
+
+    def test_view_post_answer_no_exists(self):
+        answer_id = Answer.objects.get(body='TestAnswer').id + 1
+        response = self.client.post(reverse('website:ajax_answer_update'),\
+            {'answer_id': answer_id, 'answer_body': 'TestAnswerBody'})
+        self.assertContains(response, 'Answer not found.')
+
+    def test_view_post_answer_update_no_moderator(self):
+        answer_id = Answer.objects.get(body='TestAnswer').id
+        response = self.client.post(reverse('website:ajax_answer_update'),\
+            {'answer_id': answer_id, 'answer_body': 'TestAnswerBody'})
+        self.assertContains(response, 'Only moderator can update.')
+        
+    def test_view_post_answer_update_with_moderator(self):
+        self.client.login(username='johndoe', password='johndoe')
+        answer_id = Answer.objects.get(body='TestAnswer').id
+        response = self.client.post(reverse('website:ajax_answer_update'),\
+            {'answer_id': answer_id, 'answer_body': 'TestAnswerBody'})
+        self.assertContains(response, 'saved')
+
+class AjaxAnswerCommentUpdateViewTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        """Create sample answer"""
+        user = User.objects.create_user("johndoe", "johndoe@example.com", "johndoe")
+        category = FossCategory.objects.create(name="TestCategory", email="category@example.com")
+        group = Group.objects.create(name="TestCategory_moderator")
+        ModeratorGroup.objects.create(group=group, category=category)
+        user.groups.add(group)
+        question = Question.objects.create(user=user, category=category, title="TestQuestion")
+        answer = Answer.objects.create(question=question, uid=user.id, body="TestAnswer")
+        AnswerComment.objects.create(answer=answer, uid=user.id, body="TestAnswerComment")
+
+    def test_view_get_error_at_desired_location(self):
+        response = self.client.get('/ajax-answer-comment-update/')
+        self.assertEqual(response.status_code, 404)
+    
+    def test_view_get_error_accessible_by_name(self):
+        response = self.client.get(reverse('website:ajax_answer_comment_update'))
+        self.assertEqual(response.status_code, 404)
+
+    def test_view_post_comment_no_exists(self):
+        comment_id = AnswerComment.objects.get(body='TestAnswerComment').id + 1
+        response = self.client.post(reverse('website:ajax_answer_comment_update'),\
+            {'comment_id': comment_id, 'comment_body': 'TestAnswerCommentBody'})
+        self.assertContains(response, 'Comment not found.')
+
+    def test_view_post_comment_update_no_moderator(self):
+        comment_id = AnswerComment.objects.get(body='TestAnswerComment').id
+        response = self.client.post(reverse('website:ajax_answer_comment_update'),\
+            {'comment_id': comment_id, 'comment_body': 'TestAnswerCommentBody'})
+        self.assertContains(response, 'Only moderator can update.')
+        
+    def test_view_post_comment_update_with_moderator(self):
+        self.client.login(username='johndoe', password='johndoe')
+        comment_id = AnswerComment.objects.get(body='TestAnswerComment').id
+        response = self.client.post(reverse('website:ajax_answer_comment_update'),\
+            {'comment_id': comment_id, 'comment_body': 'TestAnswerCommentBody'})
+        self.assertContains(response, 'saved')
+
+class AjaxNotificationRemoveViewTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        """Create sample answer"""
+        user = User.objects.create_user("johndoe", "johndoe@example.com", "johndoe")
+        category = FossCategory.objects.create(name="TestCategory", email="category@example.com")
+        question = Question.objects.create(user=user, category=category, title="TestQuestion")
+        Notification.objects.create(uid = user.id, qid = question.id)
+
+    def test_view_get_error_at_desired_location(self):
+        response = self.client.get('/ajax-notification-remove/')
+        self.assertEqual(response.status_code, 404)
+    
+    def test_view_get_error_accessible_by_name(self):
+        response = self.client.get(reverse('website:ajax_notification_remove'))
+        self.assertEqual(response.status_code, 404)
+
+    def test_view_post_notification_no_exists(self):
+        user_id = User.objects.get(username='johndoe').id
+        question_id = Question.objects.get(title='TestQuestion').id
+        notification_id = Notification.objects.get(uid=user_id, qid=question_id).id + 1
+        response = self.client.post(reverse('website:ajax_notification_remove'),\
+            {'notification_id': notification_id})
+        self.assertContains(response, 'Notification not found.')
+
+    def test_view_post_unauthorized_user(self):
+        user_id = User.objects.get(username='johndoe').id
+        question_id = Question.objects.get(title='TestQuestion').id
+        notification_id = Notification.objects.get(uid=user_id, qid=question_id).id
+        response = self.client.post(reverse('website:ajax_notification_remove'),\
+            {'notification_id': notification_id})
+        self.assertContains(response, 'Unauthorized user.')
+    
+    def test_view_post_success(self):
+        self.client.login(username='johndoe', password='johndoe')
+        user_id = User.objects.get(username='johndoe').id
+        question_id = Question.objects.get(title='TestQuestion').id
+        notification_id = Notification.objects.get(uid=user_id, qid=question_id).id
+        response = self.client.post(reverse('website:ajax_notification_remove'),\
+            {'notification_id': notification_id})
+        self.assertContains(response, 'removed')
+
+class AjaxKeywordSearchViewTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        """Create sample answer"""
+        user = User.objects.create_user("johndoe", "johndoe@example.com", "johndoe")
+        category = FossCategory.objects.create(name="TestCategory", email="category@example.com")
+        Question.objects.create(user=user, category=category, title="TestQuestion")
+
+    def test_view_get_error_at_desired_location(self):
+        response = self.client.get('/ajax-keyword-search/')
+        self.assertEqual(response.status_code, 404)
+    
+    def test_view_get_error_accessible_by_name(self):
+        response = self.client.get(reverse('website:ajax_keyword_search'))
+        self.assertEqual(response.status_code, 404)
+
+    def test_view_post_context_questions(self):
+        question_id = Question.objects.get(title='TestQuestion').id
+        response = self.client.post(reverse('website:ajax_keyword_search'),\
+            {'key':'Test'})
+        self.assertTrue('questions' in response.context)
+        self.assertQuerysetEqual(response.context['questions'],\
+            ['<Question: {0} - TestCategory -  - TestQuestion - johndoe>'.format(question_id)])
+
+    def test_view_post_correct_template(self):
+        question_id = Question.objects.get(title='TestQuestion').id
+        response = self.client.post(reverse('website:ajax_keyword_search'),\
+            {'key':'Test'})
+        self.assertTemplateUsed(response, 'website/templates/ajax-keyword-search.html')
