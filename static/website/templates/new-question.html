@@ -51,7 +51,7 @@
                 <label for="id_body" ><strong>Question Description:</strong></label>
                 {% render_field form.body class+="form-control body" %}
             </div>
-            
+            {{ form.image.errors }}
             <div class="form-group">
                 {% block picturetitle %}
                     <label for="id_image" ><strong>Upload a picture:</strong></label>

@@ -262,7 +262,8 @@ class AnswerCommentViewTest(TestCase):
     def test_view_does_not_load(self):
         self.client.login(username='johndoe', password='johndoe')
         response = self.client.get(reverse('website:answer_comment'), follow=True)
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'website/templates/404.html')
 
     def test_view_post_body_only_spaces(self):
         self.client.login(username='johndoe', password='johndoe')
@@ -551,7 +552,8 @@ class EditQuestionViewTest(TestCase):
         self.client.login(username='johndoe2', password='johndoe2')
         question_id = Question.objects.get(title='TestQuestion').id
         response = self.client.get(reverse('website:edit_question', args=(question_id, )))
-        self.assertContains(response, "Not authorized to edit question.")
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'website/templates/not-authorized.html')
     
     def test_view_redirects_when_answer_exists(self):
         self.client.login(username='johndoe', password='johndoe')
@@ -560,7 +562,8 @@ class EditQuestionViewTest(TestCase):
         answer = Answer.objects.create(question=question, uid=user.id, body='TestAnswer')
         response = self.client.get(reverse('website:edit_question', args=(question.id, )))
         answer.delete()
-        self.assertContains(response, "Not authorized to edit question.")
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'website/templates/not-authorized.html')
 
     def test_view_post_no_category(self):
         self.client.login(username='johndoe', password='johndoe')
@@ -745,7 +748,8 @@ class QuestionDeleteViewTest(TestCase):
         self.client.login(username='johndoe2', password='johndoe2')
         question_id = Question.objects.get(title='TestQuestion').id
         response = self.client.get(reverse('website:question_delete', args=(question_id, )))
-        self.assertContains(response, "Not authorized to delete question.")
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'website/templates/not-authorized.html')
     
     def test_view_redirects_when_answer_exists(self):
         self.client.login(username='johndoe', password='johndoe')
@@ -754,7 +758,8 @@ class QuestionDeleteViewTest(TestCase):
         answer = Answer.objects.create(question=question, uid=user.id, body='TestAnswer')
         response = self.client.get(reverse('website:question_delete', args=(question.id, )))
         answer.delete()
-        self.assertContains(response, "Not authorized to delete question.")
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'website/templates/not-authorized.html')
 
     def test_view_delete_question(self):
         self.client.login(username='johndoe', password='johndoe')
@@ -985,7 +990,8 @@ class UserNotificationsViewTest(TestCase):
         self.client.login(username='johndoe2', password='johndoe2')
         user_id = User.objects.get(username='johndoe').id
         response = self.client.get(reverse('website:user_notifications', args=(user_id, )))
-        self.assertContains(response, 'Not authorized to view notifications.')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'website/templates/not-authorized.html')
 
     def test_view_url_at_desired_location(self):
         self.client.login(username='johndoe', password='johndoe')
@@ -1084,11 +1090,13 @@ class AjaxTutorialsViewTest(TestCase):
 
     def test_view_get_error_at_desired_location(self):
         response = self.client.get('/ajax-tutorials/')
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'website/templates/404.html')
     
     def test_view_get_error_accessible_by_name(self):
         response = self.client.get(reverse('website:ajax_tutorials'))
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'website/templates/404.html')
 
     def test_view_post_category_without_subcat(self):
         category_id = FossCategory.objects.get(name='TestCategory2').id
@@ -1125,11 +1133,13 @@ class AjaxAnswerUpdateViewTest(TestCase):
 
     def test_view_get_error_at_desired_location(self):
         response = self.client.get('/ajax-answer-update/')
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'website/templates/404.html')
     
     def test_view_get_error_accessible_by_name(self):
         response = self.client.get(reverse('website:ajax_answer_update'))
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'website/templates/404.html')
 
     def test_view_post_answer_no_exists(self):
         answer_id = Answer.objects.get(body='TestAnswer').id + 1
@@ -1150,47 +1160,6 @@ class AjaxAnswerUpdateViewTest(TestCase):
             {'answer_id': answer_id, 'answer_body': 'TestAnswerBody'})
         self.assertContains(response, 'saved')
 
-class AjaxAnswerCommentUpdateViewTest(TestCase):
-
-    @classmethod
-    def setUpTestData(cls):
-        """Create sample answer"""
-        user = User.objects.create_user("johndoe", "johndoe@example.com", "johndoe")
-        category = FossCategory.objects.create(name="TestCategory", email="category@example.com")
-        group = Group.objects.create(name="TestCategory_moderator")
-        ModeratorGroup.objects.create(group=group, category=category)
-        user.groups.add(group)
-        question = Question.objects.create(user=user, category=category, title="TestQuestion")
-        answer = Answer.objects.create(question=question, uid=user.id, body="TestAnswer")
-        AnswerComment.objects.create(answer=answer, uid=user.id, body="TestAnswerComment")
-
-    def test_view_get_error_at_desired_location(self):
-        response = self.client.get('/ajax-answer-comment-update/')
-        self.assertEqual(response.status_code, 404)
-    
-    def test_view_get_error_accessible_by_name(self):
-        response = self.client.get(reverse('website:ajax_answer_comment_update'))
-        self.assertEqual(response.status_code, 404)
-
-    def test_view_post_comment_no_exists(self):
-        comment_id = AnswerComment.objects.get(body='TestAnswerComment').id + 1
-        response = self.client.post(reverse('website:ajax_answer_comment_update'),\
-            {'comment_id': comment_id, 'comment_body': 'TestAnswerCommentBody'})
-        self.assertContains(response, 'Comment not found.')
-
-    def test_view_post_comment_update_no_moderator(self):
-        comment_id = AnswerComment.objects.get(body='TestAnswerComment').id
-        response = self.client.post(reverse('website:ajax_answer_comment_update'),\
-            {'comment_id': comment_id, 'comment_body': 'TestAnswerCommentBody'})
-        self.assertContains(response, 'Only moderator can update.')
-        
-    def test_view_post_comment_update_with_moderator(self):
-        self.client.login(username='johndoe', password='johndoe')
-        comment_id = AnswerComment.objects.get(body='TestAnswerComment').id
-        response = self.client.post(reverse('website:ajax_answer_comment_update'),\
-            {'comment_id': comment_id, 'comment_body': 'TestAnswerCommentBody'})
-        self.assertContains(response, 'saved')
-
 class AjaxNotificationRemoveViewTest(TestCase):
 
     @classmethod
@@ -1203,11 +1172,13 @@ class AjaxNotificationRemoveViewTest(TestCase):
 
     def test_view_get_error_at_desired_location(self):
         response = self.client.get('/ajax-notification-remove/')
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'website/templates/404.html')
     
     def test_view_get_error_accessible_by_name(self):
         response = self.client.get(reverse('website:ajax_notification_remove'))
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'website/templates/404.html')
 
     def test_view_post_notification_no_exists(self):
         user_id = User.objects.get(username='johndoe').id
@@ -1245,11 +1216,13 @@ class AjaxKeywordSearchViewTest(TestCase):
 
     def test_view_get_error_at_desired_location(self):
         response = self.client.get('/ajax-keyword-search/')
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'website/templates/404.html')
     
     def test_view_get_error_accessible_by_name(self):
         response = self.client.get(reverse('website:ajax_keyword_search'))
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'website/templates/404.html')
 
     def test_view_post_context_questions(self):
         question_id = Question.objects.get(title='TestQuestion').id

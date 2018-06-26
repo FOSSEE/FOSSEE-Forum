@@ -65,6 +65,15 @@ class NewQuestionForm(forms.ModelForm):
 
         return body
 
+    def clean_image(self):
+        image = self.cleaned_data['image']
+
+        if (image != None):
+            if (image._size > settings.MAXIMUM_FILE_SIZE):
+                raise forms.ValidationError('File size needs to be under {0} MB.'.format(settings.MAX_FILE_SIZE_MB))
+
+        return image
+
     class Meta(object):
 
         model = Question
@@ -122,6 +131,15 @@ class AnswerQuestionForm(forms.ModelForm):
             raise forms.ValidationError("Body cannot be only tags")
 
         return body
+
+    def clean_image(self):
+        image = self.cleaned_data['image']
+
+        if (image != None):
+            if (image._size > settings.MAXIMUM_FILE_SIZE):
+                raise forms.ValidationError('File size needs to be under {0} MB.'.format(settings.MAX_FILE_SIZE_MB))
+
+        return image
 
     class Meta(object):
 

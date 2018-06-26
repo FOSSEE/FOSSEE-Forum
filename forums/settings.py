@@ -235,3 +235,7 @@ EMAIL_PORT = EMAIL_PORT_SERVER
 
 # Variable to store if moderator using forum
 MODERATOR_ACTIVATED = False
+
+# Maximum file size limit in bytes (4 MB)
+MAX_FILE_SIZE_MB = 2
+MAXIMUM_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024

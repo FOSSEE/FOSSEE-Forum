@@ -850,27 +850,6 @@ def ajax_answer_update(request):
         return render(request, 'website/templates/404.html')
 
 @csrf_exempt
-def ajax_answer_comment_update(request):
-    if request.method == "POST":
-        comment_id = request.POST["comment_id"]
-        comment_body = request.POST["comment_body"]
-
-        try:
-            comment = get_object_or_404(AnswerComment, pk = comment_id)
-            if comment:
-                if (is_moderator(request.user)):
-                    comment.body = str(comment_body)
-                    comment.save()
-                    return HttpResponse('saved')
-                else:
-                    return HttpResponse('Only moderator can update.')
-        except:
-            return HttpResponse('Comment not found.')
-
-    else:
-        return render(request, 'website/templates/404.html')
-
-@csrf_exempt
 def ajax_notification_remove(request):
     if request.method == "POST":
 
