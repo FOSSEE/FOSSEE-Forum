@@ -1,24 +1,24 @@
-from builtins import str
-from builtins import object
+import django
 import os
 import sys
-
-# os.environ.setdefault("DJANGO_SETTINGS_MODULE", "forums.settings")
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "forums.settings")
-
-base_path =  os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(base_path)
-
-import django
-django.setup()
-
+from builtins import str
+from builtins import object
 from forums.local import FORUM_NOTIFICATION
 from website.models import Question, Answer, FossCategory
 from django.db.models import Count
 from django.core.mail import send_mail
 from django.core.mail import EmailMultiAlternatives
+from .spamFilter import train
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "forums.settings")
+
+base_path =  os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(base_path)
+
+django.setup()
 
 class Cron(object):
+
     def unanswered_notification(self):
         from django.conf import settings
         import datetime as DT
@@ -56,6 +56,10 @@ class Cron(object):
             subject =  "FOSSEE Forums - " + str(item.category) +" - Unanswered Question"
             send_mail(subject, mail_body, sender_email, to)
 
+    def train_spam_filter(self):
+        train()
+
 
 a = Cron()
 a.unanswered_notification()
+a.train_spam_filter()
