@@ -7,10 +7,12 @@ from .cleanText import clean_string
 from sklearn.svm import LinearSVC
 from sklearn.metrics import confusion_matrix, f1_score, precision_score, recall_score
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+from website.models import Question, Answer
 
 # Get the original dataset
 def store():
 
+    # Add data from Excel file
     file_location = settings.PROJECT_DIR + '/DataSet.xlsx'
     workBookOld = openpyxl.load_workbook(file_location)
     dataSheetOld = workBookOld['Data set']
@@ -28,6 +30,22 @@ def store():
                 yData.append(1)
             else:
                 yData.append(0)
+
+    # Add data from forum questions
+    for question in Question.objects.all():
+        xData.append(str(clean_string(question.body)))
+        if (question.is_spam):
+            yData.append(1)
+        else:
+            yData.append(0)
+
+    # Add data from forum answers
+    for answer in Answer.objects.all():
+        xData.append(str(clean_string(answer.body)))
+        if (answer.is_spam):
+            yData.append(1)
+        else:
+            yData.append(0)
 
     return xData, yData
 
@@ -68,8 +86,12 @@ def calc_f_score(xTest, yTest, model, vectorizer):
 # Test new data for Spam
 def predict(emailBody):
 
+    string = clean_string(emailBody)
+    if ('httpaddr' in string or 'linktag' in string):
+        return "Spam"
+
     global vectorizer
-    featureMatrix = vectorizer.transform([clean_string(emailBody)])
+    featureMatrix = vectorizer.transform([string])
     global model
     result = model.predict(featureMatrix)
 

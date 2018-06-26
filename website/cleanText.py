@@ -9,6 +9,7 @@ def clean_string(myString):
 
     # convert URLs to 'httpaddr'
     myString = re.sub(r'(http|https)://[^\s]*', r' httpaddr ', myString)
+    myString = re.sub(r'<img([\w\W]+?)>', r' imgtag ', myString)
 
     # convert email addresses to 'emailaddr'
     myString = re.sub(r'[^\s]+@[^\s]+[.][^\s]+', r' emailaddr ', myString)
@@ -18,7 +19,7 @@ def clean_string(myString):
     myString = soup.get_text()
     numberLink = len(soup.find_all('a'))
     numberImg = len(soup.find_all('img'))
-    myString = myString + numberLink * " linktag " + numberImg * " imgtag "
+    myString = myString + numberLink * ' linktag ' + numberImg * ' imgtag '
 
     # convert numbers to 'number'
     myString = re.sub(r'[0-9]+', r' number ', myString)
