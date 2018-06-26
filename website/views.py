@@ -264,7 +264,7 @@ def answer_comment(request):
             return render(request, 'website/templates/get-question.html', context)
 
     else:
-        raise Http404('URL cannot handle GET requests.')
+        return render(request, 'website/templates/404.html')
 
 # View used to filter question according to category
 def filter(request, category = None, tutorial = None):
@@ -394,7 +394,7 @@ def edit_question(request, question_id):
 
     # To prevent random user from manually entering the link and editing
     if ((request.user.id != question.user.id or question.answer_set.count() > 0) and (not is_moderator(request.user))):
-        return HttpResponse("Not authorized to edit question.")
+        return render(request, 'website/templates/not-authorized.html')
 
     if (request.method == 'POST'):
 
@@ -497,8 +497,8 @@ def question_delete(request, question_id):
     title = question.title
 
     # To prevent random user from manually entering the link and deleting
-    if ((request.user.id != question.user.id or question.answer_set.count() > 0) and (not is_moderator(request.user))):
-        return HttpResponse("Not authorized to delete question.")
+    if ((request.user.id != question.user.id or question.answer_set.count() > 0) and (not settings.MODERATOR_ACTIVATED)):
+        return render(request, 'website/templates/not-authorized.html')
 
     if (request.method == "POST"):
 
@@ -704,7 +704,7 @@ def user_notifications(request, user_id):
             return HttpResponseRedirect("/user/{0}/notifications/".format(request.user.id))
 
     else:
-        return HttpResponse("Not authorized to view notifications.")
+        return render(request, 'website/templates/not-authorized.html')
 
 
 # to clear notification from header, once viewed or cancelled
@@ -827,7 +827,7 @@ def ajax_tutorials(request):
             return HttpResponse('No sub-category in category.')
     
     else:
-        raise Http404('URL cannot handle GET requests.')
+        return render(request, 'website/templates/404.html')
 
 @csrf_exempt
 def ajax_answer_update(request):
@@ -847,7 +847,7 @@ def ajax_answer_update(request):
             return HttpResponse('Answer not found.')
 
     else:
-        raise Http404('URL cannot handle GET requests.')
+        return render(request, 'website/templates/404.html')
 
 @csrf_exempt
 def ajax_answer_comment_update(request):
@@ -868,7 +868,7 @@ def ajax_answer_comment_update(request):
             return HttpResponse('Comment not found.')
 
     else:
-        raise Http404('URL cannot handle GET requests.')
+        return render(request, 'website/templates/404.html')
 
 @csrf_exempt
 def ajax_notification_remove(request):
@@ -887,7 +887,7 @@ def ajax_notification_remove(request):
             return HttpResponse('Notification not found.')
     
     else:
-        raise Http404('URL cannot handle GET requests.')
+        return render(request, 'website/templates/404.html')
 
 @csrf_exempt
 def ajax_keyword_search(request):
@@ -902,4 +902,4 @@ def ajax_keyword_search(request):
         return render(request, 'website/templates/ajax-keyword-search.html', context)
     
     else:
-        raise Http404('URL cannot handle GET requests.')
+        return render(request, 'website/templates/404.html')
