@@ -335,7 +335,7 @@
 {% if not MODERATOR_ACTIVATED %}
     {% if user.is_authenticated %}
         <form action="{% url 'website:question_answer' question.id %}" method="POST" enctype="multipart/form-data"> {% csrf_token %}
-            
+            {{ form.media }}
             {% with WIDGET_ERROR_CLASS='field_error' %}
 
                 <div class="row"> 
@@ -344,7 +344,9 @@
                         <div class="form-group">
                             {% render_field form.question value=question.id %}
                             <label for="id_body"><h4><u>Your Answer:</u></h4></label>
+                            <br>
                             {% render_field form.body class+="form-control body" %}
+                            <br>
                             <br>
                             <label for="id_image">Upload an image:</label>
                             {% render_field form.image %}

@@ -11,6 +11,7 @@
     </h4>
     <hr>
     <form role="form" action="" method="POST" enctype="multipart/form-data">{% csrf_token %}
+    {{ form.media }}
     {% with WIDGET_ERROR_CLASS='field_error' %}
     <p>
     <strong>Select the category:</strong>
@@ -28,13 +29,6 @@
                 {% render_field form.tutorial class+="form-control" %} 
             {% endif %}
         </div>
-        <div class="col-lg-2 col-md-2 col-sm-2">
-            <small><strong>
-            <a id="similar-link" data-toggle="modal" data-target="#similarModal" href="#">
-                0 similar questions
-            </a>
-            </strong></small>
-        </div>
     </div>
 
     <hr>
@@ -49,6 +43,7 @@
             {{ form.body.errors }}
             <div class="form-group">
                 <label for="id_body" ><strong>Question Description:</strong></label>
+                <br>
                 {% render_field form.body class+="form-control body" %}
             </div>
             {{ form.image.errors }}
@@ -87,40 +82,25 @@
     {% endwith %}
     </form>
 
-    <!-- Modal -->
-    <div class="modal fade" id="similarModal" tabindex="-1" role="dialog" aria-labelledby="similarModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h4 class="modal-title" id="myModalLabel">Similar Questions</h4>
-          </div>
-          <div class="modal-body" id="modal-body">
-            ...
-          </div>
-        </div><!-- /.modal-content -->
-      </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
-
-<script>
-    window.onload = function(){        
-        var c2= "{{ category }}";   
-        if (c2 != '12'){      
-            $(".tutorial" ).hide();  
+    <script>
+        window.onload = function(){        
+            var c2= "{{ category }}";   
+            if (c2 != '12'){      
+                $(".tutorial" ).hide();  
+            }
+            else {
+                $(".tutorial" ).show();    
+            }
+            if (c2 == "None"){  
+                // $("#id_category").val(c2);
+                $( "#id_category option" ).prop('disabled',false);         
+            }   
+            else  if(c2 != ""){   
+                $("#id_category").val(c2);
+                $( "#id_category option:not(:selected)" ).prop('disabled',true);     
+            }      
         }
-        else {
-            $(".tutorial" ).show();    
-        }
-        if (c2 == "None"){  
-            // $("#id_category").val(c2);
-            $( "#id_category option" ).prop('disabled',false);         
-        }   
-        else  if(c2 != ""){   
-            $("#id_category").val(c2);
-            $( "#id_category option:not(:selected)" ).prop('disabled',true);     
-        }      
-    }
-</script>
+    </script>
 {% endblock %}
 
 {% block javascript %}

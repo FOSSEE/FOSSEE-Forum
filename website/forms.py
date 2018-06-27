@@ -3,6 +3,7 @@ from django import forms
 from django.conf import settings
 from antispam.honeypot.forms import HoneypotField
 from bs4 import BeautifulSoup
+from ckeditor.widgets import CKEditorWidget
 from website.models import *
 
 tutorials = (
@@ -24,7 +25,7 @@ class NewQuestionForm(forms.ModelForm):
                         required = True,
                         error_messages = {'required':'Title field required'})
 
-    body = forms.CharField(widget = forms.Textarea(),
+    body = forms.CharField(widget = CKEditorWidget(),
                         required = True,
                         error_messages = {'required':'Question field required'})
 
@@ -108,7 +109,7 @@ class AnswerQuestionForm(forms.ModelForm):
 
     question = forms.IntegerField(widget = forms.HiddenInput())
 
-    body = forms.CharField(widget = forms.Textarea(),
+    body = forms.CharField(widget = CKEditorWidget(),
         required = True,
         error_messages = {'required':'Answer field required'}
     )

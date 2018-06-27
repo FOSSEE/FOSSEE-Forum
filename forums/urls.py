@@ -1,5 +1,7 @@
 from django.urls import include, path
 from django.conf.urls import url
+from django.conf.urls.static import static
+from django.conf import settings
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
@@ -44,4 +46,7 @@ urlpatterns = [
     path('accounts/profile/', views.account_profile, name = 'profile'),
     path('accounts/view-profile/<int:user_id>/', views.account_view_profile, name = 'view_profile'),
 
+    path('ckeditor/', include('ckeditor_uploader.urls')),
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)

@@ -4,6 +4,7 @@ from django.db import models
 from django.contrib.auth.models import User, Group
 from django.contrib.auth import get_user_model
 from django_resized import ResizedImageField
+from ckeditor.fields import RichTextField
 
 
 class FossCategory(models.Model):
@@ -31,7 +32,7 @@ class Question(models.Model):
     category = models.ForeignKey(FossCategory, on_delete = models.CASCADE)
     sub_category = models.CharField(max_length = 200)
     title = models.CharField(max_length = 200)
-    body = models.TextField()
+    body = RichTextField()
     date_created = models.DateTimeField(auto_now_add = True)
     date_modified = models.DateTimeField(auto_now = True)
     views = models.IntegerField(default = 1)
@@ -53,7 +54,7 @@ class Answer(models.Model):
 
     uid  = models.IntegerField()
     question = models.ForeignKey(Question, on_delete = models.CASCADE)
-    body = models.TextField()
+    body = RichTextField()
     date_created = models.DateTimeField(auto_now_add = True)
     date_modified = models.DateTimeField(auto_now = True)
     userUpVotes = models.ManyToManyField(User, blank = True, related_name = 'postAnswerUpVotes')
