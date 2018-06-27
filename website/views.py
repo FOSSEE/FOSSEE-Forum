@@ -850,6 +850,24 @@ def ajax_answer_update(request):
         return render(request, 'website/templates/404.html')
 
 @csrf_exempt
+def ajax_answer_comment_delete(request):
+    if request.method == 'POST':
+        comment_id = request.POST['comment_id']
+
+        try:
+            comment = get_object_or_404(AnswerComment, pk = comment_id)
+            if (is_moderator(request.user)):
+                comment.delete()
+                return HttpResponse('deleted')
+            else:
+                return HttpResponse('Only moderator can delete.')
+        except:
+            return HttpResponse('Comment not found.')
+
+    else:
+        return render(request, 'website/templates/404.html')
+
+@csrf_exempt
 def ajax_notification_remove(request):
     if request.method == "POST":
 

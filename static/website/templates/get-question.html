@@ -265,12 +265,18 @@
             <div class="comments pull-right col-lg-11 col-md-11 col-sm-11 col-xs-11" >
                 <!-- displaying comments -->
                 {% for comment in answer.answercomment_set.all %}
-                <div class="comment comment{{ comment.id }}">
+                <div class="comment comment{{ comment.id }}" style="padding: 15px 15px 15px 5px;">
                     <div class="body" id="cbody{{ comment.id }}">
                         <p>{{ comment.body| safe }}</p>
                     </div>
                     
                     <br>
+
+                    {% if user|is_moderator and MODERATOR_ACTIVATED %}
+                    <span class="meta_co" style="position: absolute; left: 0px; bottom: 0px; padding: 7px 7px;">
+                        <a class="delete-comment btn btn-xs btn-info vs" id="{{ comment.id }}" href="#">Delete</a>
+                    </span>
+                    {% endif %}
                     
                     <span class="meta_co" style="position: absolute;right: 0px; bottom: 0px;">
                         <small>
@@ -485,7 +491,7 @@
             
                 /* USER HAS ALREADY DOWN-VOTED */
                 if ($(this).hasClass('selected')) {
-                    var vote_action = 'recall-vote'
+                    var vote_action = 'recall-vote';
                     $.post('/vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
                         $('img.vote-down').removeAttr('src')
                             .attr('src', "{% static 'website/images/down1-off.png' %}")
@@ -496,7 +502,7 @@
 
                 /* USER WISHES TO VOTE */
                 else {
-                    var vote_action = 'vote'
+                    var vote_action = 'vote';
                     $.post('/vote_post/', {id:id, type:vote_type, action:vote_action}, function(response) {
                         if ($('img.vote-up').hasClass('selected')) {
                             $('img.vote-up').removeAttr('src')
@@ -625,6 +631,15 @@
                 }
             }
         });
+
+        /* DELTETING A COMMENT */
+        $('.delete-comment').click(function(event) {
+            var id = event.target.id;
+            $.post('/ajax-answer-comment-delete/', {comment_id: id}, function() {
+                location.reload();
+            });
+        });
+
     });
      
  

@@ -33,6 +33,7 @@ urlpatterns = [
     # Ajax helpers
     path('ajax-tutorials/', views.ajax_tutorials, name = 'ajax_tutorials'),
     path('ajax-answer-update/', views.ajax_answer_update, name = 'ajax_answer_update'),
+    path('ajax-answer-comment-delete/', views.ajax_answer_comment_delete, name = 'ajax_answer_comment_delete'),
     path('ajax-notification-remove/', views.ajax_notification_remove, name = 'ajax_notification_remove'),
     path('ajax-keyword-search/', views.ajax_keyword_search, name = 'ajax_keyword_search'),
 ]

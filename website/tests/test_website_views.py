@@ -1124,6 +1124,7 @@ class AjaxAnswerUpdateViewTest(TestCase):
     def setUpTestData(cls):
         """Create sample answer"""
         user = User.objects.create_user("johndoe", "johndoe@example.com", "johndoe")
+        User.objects.create_user("johndoe2", "johndoe2@example.com", "johndoe2")
         category = FossCategory.objects.create(name="TestCategory", email="category@example.com")
         group = Group.objects.create(name="TestCategory_moderator")
         ModeratorGroup.objects.create(group=group, category=category)
@@ -1147,7 +1148,14 @@ class AjaxAnswerUpdateViewTest(TestCase):
             {'answer_id': answer_id, 'answer_body': 'TestAnswerBody'})
         self.assertContains(response, 'Answer not found.')
 
+    def test_view_post_answer_update_no_logged_in(self):
+        answer_id = Answer.objects.get(body='TestAnswer').id
+        response = self.client.post(reverse('website:ajax_answer_update'),\
+            {'answer_id': answer_id, 'answer_body': 'TestAnswerBody'})
+        self.assertContains(response, 'Only moderator can update.')
+
     def test_view_post_answer_update_no_moderator(self):
+        self.client.login(username='johndoe2', password='johndoe2')
         answer_id = Answer.objects.get(body='TestAnswer').id
         response = self.client.post(reverse('website:ajax_answer_update'),\
             {'answer_id': answer_id, 'answer_body': 'TestAnswerBody'})
@@ -1159,6 +1167,57 @@ class AjaxAnswerUpdateViewTest(TestCase):
         response = self.client.post(reverse('website:ajax_answer_update'),\
             {'answer_id': answer_id, 'answer_body': 'TestAnswerBody'})
         self.assertContains(response, 'saved')
+
+class AjaxAnswerCommentDeleteViewTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        """Create sample answer comment"""
+        user = User.objects.create_user("johndoe", "johndoe@example.com", "johndoe")
+        User.objects.create_user("johndoe2", "johndoe2@example.com", "johndoe2")
+        category = FossCategory.objects.create(name="TestCategory", email="category@example.com")
+        group = Group.objects.create(name="TestCategory_moderator")
+        ModeratorGroup.objects.create(group=group, category=category)
+        user.groups.add(group)
+        question = Question.objects.create(user=user, category=category, title="TestQuestion")
+        answer = Answer.objects.create(question=question, uid=user.id, body="TestAnswer")
+        AnswerComment.objects.create(uid=user.id, answer=answer, body='TestAnswerComment')
+
+    def test_view_get_error_at_desired_location(self):
+        response = self.client.get('/ajax-answer-comment-delete/')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'website/templates/404.html')
+    
+    def test_view_get_error_accessible_by_name(self):
+        response = self.client.get(reverse('website:ajax_answer_comment_delete'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'website/templates/404.html')
+
+    def test_view_post_comment_no_exists(self):
+        comment_id = AnswerComment.objects.get(body='TestAnswerComment').id + 1
+        response = self.client.post(reverse('website:ajax_answer_comment_delete'),\
+            {'comment_id': comment_id})
+        self.assertContains(response, 'Comment not found.')
+
+    def test_view_post_comment_delete_no_logged_in(self):
+        comment_id = AnswerComment.objects.get(body='TestAnswerComment').id
+        response = self.client.post(reverse('website:ajax_answer_comment_delete'),\
+            {'comment_id': comment_id})
+        self.assertContains(response, 'Only moderator can delete.')
+
+    def test_view_post_comment_delete_no_moderator(self):
+        self.client.login(username='johndoe2', password='johndoe2')
+        comment_id = AnswerComment.objects.get(body='TestAnswerComment').id
+        response = self.client.post(reverse('website:ajax_answer_comment_delete'),\
+            {'comment_id': comment_id})
+        self.assertContains(response, 'Only moderator can delete.')
+
+    def test_view_post_comment_delete_with_moderator(self):
+        self.client.login(username='johndoe', password='johndoe')
+        comment_id = AnswerComment.objects.get(body='TestAnswerComment').id
+        response = self.client.post(reverse('website:ajax_answer_comment_delete'),\
+            {'comment_id': comment_id})
+        self.assertContains(response, 'deleted')
 
 class AjaxNotificationRemoveViewTest(TestCase):
 

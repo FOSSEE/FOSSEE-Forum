@@ -501,6 +501,17 @@ a.delete {
     border-color: #cc0000;
 }
 
-a.delete:hover, a.delete:focus, a.delete:active {
+a.delete-comment {
+    background-color: #e01d27;
+    border-color: #cc0000;
+    display: none;
+}
+
+a.delete:hover, a.delete:focus, a.delete:active, a.delete-comment:hover, a.delete-comment:focus, a.delete-comment:active {
     background-color: #b30000;
+    border-color: #cc0000;
+}
+
+.comment:hover a.delete-comment, a.delete-comment:hover {
+    display: inline-block;
 }
