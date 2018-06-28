@@ -1,6 +1,7 @@
 from builtins import str
 import os
 import datetime
+import django
 from datetime import timedelta
 
 Date = datetime.datetime.now()
@@ -23,5 +24,6 @@ def add_category(cname):
 if __name__ == '__main__':
     print("Starting population script for adding category...")
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'forums.settings')
+    django.setup()
     from website.models import *
     populate()

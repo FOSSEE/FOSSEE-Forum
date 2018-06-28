@@ -8,6 +8,7 @@ static/CACHE/*
 settings.json
 forums.sql
 local.py
+local_final.py
 website/DataSet.*
 # C extensions
 *.so
