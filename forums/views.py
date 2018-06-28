@@ -37,8 +37,7 @@ def account_register(request):
             }
             data = urllib.parse.urlencode(values).encode('utf-8')
             req = urllib.request.Request(url, data)
-            gcontext = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
-            response = urllib.request.urlopen(req, context=gcontext)
+            response = urllib.request.urlopen(req)
             result = json.load(response)
             ''' End reCAPTCHA validation '''
 
