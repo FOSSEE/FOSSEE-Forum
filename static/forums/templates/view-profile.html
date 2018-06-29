@@ -134,9 +134,9 @@
             </div>
             
             <div class="form-group">
-                <label class="col-sm-3 control-label" for= "id_street">Address<span style="color:red">*</span></label>
+                <label class="col-sm-3 control-label" for= "id_street">Address</label>
                 <div class="col-sm-5">
-                    {% render_field form.address class+="form-control street" tabindex="1" data-placeholder="Enter street" %}
+                    {% render_field form.address class+="form-control street" tabindex="1" data-placeholder="Enter address" %}
                     {{ form.address.errors }}
                 </div>
             </div>
@@ -151,6 +151,9 @@
 
             <input class="btn btn-primary" type="submit" value="Submit" />
             </form>
+
+            <small><span style="color:red">*&nbsp;</span><strong>Field required</strong></small>
+            <small></p><span style="color:red">*&nbsp;</span><strong>Fields required to access basic features of forum</strong></small>
             {%  endif %}
 
             </div>

@@ -171,7 +171,7 @@ class QuestionAnswerViewTest(TestCase):
     def setUpTestData(cls):
         """Create sample data"""
         user = User.objects.create_user("johndoe", "johndoe@example.com", "johndoe")
-        User.objects.create_user("johndoe2", "johndoe2@example.com", password="johndoe2")
+        User.objects.create_user("johndoe2", "johndoe2@example.com", "johndoe2", first_name="John", last_name="Doe")
         category = FossCategory.objects.create(name="TestCategory", email="category@example.com")
         Question.objects.create(user=user, category=category, title="TestQuestion")
 
@@ -181,8 +181,14 @@ class QuestionAnswerViewTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.startswith('/accounts/login/'))
 
-    def test_view_url_loads_with_correct_template(self):
+    def test_view_redirect_if_no_fullname(self):
         self.client.login(username='johndoe', password='johndoe')
+        question_id = Question.objects.get(title="TestQuestion").id
+        response = self.client.get(reverse('website:question_answer', args=(question_id,)))
+        self.assertRedirects(response, '/accounts/profile/?next=/question-answer/{0}/'.format(question_id))
+
+    def test_view_url_loads_with_correct_template(self):
+        self.client.login(username='johndoe2', password='johndoe2')
         question_id = Question.objects.get(title="TestQuestion").id
         response = self.client.get('/question-answer/{0}/'.format(question_id))
         self.assertEqual(response.status_code, 200)
@@ -191,7 +197,7 @@ class QuestionAnswerViewTest(TestCase):
         self.assertTemplateUsed(response, 'website/templates/get-question.html')
 
     def test_view_post_no_answer(self):
-        self.client.login(username='johndoe', password='johndoe')
+        self.client.login(username='johndoe2', password='johndoe2')
         question_id = Question.objects.get(title="TestQuestion").id
         response = self.client.post(reverse('website:question_answer', args=(question_id,)),\
                                         {'question': question_id})
@@ -199,7 +205,7 @@ class QuestionAnswerViewTest(TestCase):
         self.assertFormError(response, 'form', 'body', 'Answer field required')
 
     def test_view_post_too_short_body(self):
-        self.client.login(username='johndoe', password='johndoe')
+        self.client.login(username='johndoe2', password='johndoe2')
         question_id = Question.objects.get(title="TestQuestion").id
         response = self.client.post(reverse('website:question_answer', args=(question_id,)),\
                                     {'body': 'TooShort', 'question': question_id})
@@ -207,7 +213,7 @@ class QuestionAnswerViewTest(TestCase):
         self.assertFormError(response, 'form', 'body', 'Body should be minimum 12 characters long')
 
     def test_view_post_body_only_spaces(self):
-        self.client.login(username='johndoe', password='johndoe')
+        self.client.login(username='johndoe2', password='johndoe2')
         question_id = Question.objects.get(title="TestQuestion").id
         response = self.client.post(reverse('website:question_answer', args=(question_id,)),\
                                     {'body': '        &nbsp;          ', 'question': question_id})
@@ -215,7 +221,7 @@ class QuestionAnswerViewTest(TestCase):
         self.assertFormError(response, 'form', 'body', 'Body cannot be only spaces')
 
     def test_view_post_body_only_tags(self):
-        self.client.login(username='johndoe', password='johndoe')
+        self.client.login(username='johndoe2', password='johndoe2')
         question_id = Question.objects.get(title="TestQuestion").id
         response = self.client.post(reverse('website:question_answer', args=(question_id,)),\
                                     {'body': '<p><div></div></p>        ', 'question': question_id})
@@ -235,7 +241,7 @@ class QuestionAnswerViewTest(TestCase):
             self.fail('Notification object not created.')
 
     def test_view_post_valid_data(self):
-        self.client.login(username='johndoe', password='johndoe')
+        self.client.login(username='johndoe2', password='johndoe2')
         question_id = Question.objects.get(title="TestQuestion").id
         response = self.client.post(reverse('website:question_answer', args=(question_id,)),\
                                     {'body': 'Test question body', 'question': question_id})
@@ -247,7 +253,7 @@ class AnswerCommentViewTest(TestCase):
     def setUpTestData(cls):
         """Create sample data"""
         user = User.objects.create_user("johndoe", "johndoe@example.com", "johndoe")
-        user2 = User.objects.create_user("johndoe2", "johndoe2@example.com", "johndoe2")
+        user2 = User.objects.create_user("johndoe2", "johndoe2@example.com", "johndoe2", first_name="John", last_name="Doe")
         user3 = User.objects.create_user("johndoe3", "johndoe3@example.com", "johndoe3")
         category = FossCategory.objects.create(name="TestCategory", email="category@example.com")
         question = Question.objects.create(user=user, category=category, title="TestQuestion")
@@ -259,14 +265,19 @@ class AnswerCommentViewTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.startswith('/accounts/login/'))
 
-    def test_view_does_not_load(self):
+    def test_view_redirect_if_no_fullname(self):
         self.client.login(username='johndoe', password='johndoe')
+        response = self.client.get(reverse('website:answer_comment'))
+        self.assertRedirects(response, '/accounts/profile/?next=/answer-comment/')
+
+    def test_view_does_not_load(self):
+        self.client.login(username='johndoe2', password='johndoe2')
         response = self.client.get(reverse('website:answer_comment'), follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'website/templates/404.html')
 
     def test_view_post_body_only_spaces(self):
-        self.client.login(username='johndoe', password='johndoe')
+        self.client.login(username='johndoe2', password='johndoe2')
         answer_id = Answer.objects.get(body="TestAnswer").id
         response = self.client.post(reverse('website:answer_comment'),\
                                     {'body': '        &nbsp;          ', 'answer_id': answer_id})
@@ -274,7 +285,7 @@ class AnswerCommentViewTest(TestCase):
         self.assertFormError(response, 'form', 'body', 'Body cannot be only spaces')
 
     def test_view_post_body_only_tags(self):
-        self.client.login(username='johndoe', password='johndoe')
+        self.client.login(username='johndoe2', password='johndoe2')
         answer_id = Answer.objects.get(body="TestAnswer").id
         response = self.client.post(reverse('website:answer_comment'),\
                                     {'body': '<p><div></div></p>     ', 'answer_id': answer_id})
@@ -306,7 +317,7 @@ class AnswerCommentViewTest(TestCase):
             self.fail('Notification not created for comment creators.')
 
     def test_view_post_valid_data(self):
-        self.client.login(username='johndoe', password='johndoe')
+        self.client.login(username='johndoe2', password='johndoe2')
         answer = Answer.objects.get(body="TestAnswer")
         response = self.client.post(reverse('website:answer_comment'),\
                                     {'body': 'Test Answer comment', 'answer_id': answer.id})
@@ -380,6 +391,7 @@ class NewQuestionViewTest(TestCase):
     def setUpTestData(cls):
         """Create sample data"""
         user = User.objects.create_user("johndoe", "johndoe@example.com", "johndoe")
+        User.objects.create_user("johndoe2", "johndoe2@example.com", "johndoe2", first_name="John", last_name="Doe")
         category = FossCategory.objects.create(name="TestCategory", email="category@example.com")
         Question.objects.create(user=user, category=category, title="TestQuestion")
 
@@ -388,8 +400,13 @@ class NewQuestionViewTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.startswith('/accounts/login/'))
 
-    def test_view_url_loads_with_correct_template(self):
+    def test_view_redirect_if_no_fullname(self):
         self.client.login(username='johndoe', password='johndoe')
+        response = self.client.get(reverse('website:new_question'))
+        self.assertRedirects(response, '/accounts/profile/?next=/new-question/')
+
+    def test_view_url_loads_with_correct_template(self):
+        self.client.login(username='johndoe2', password='johndoe2')
         response = self.client.get('/new-question/')
         self.assertEqual(response.status_code, 200)
         response = self.client.get(reverse('website:new_question'))
@@ -397,7 +414,7 @@ class NewQuestionViewTest(TestCase):
         self.assertTemplateUsed(response, 'website/templates/new-question.html')
 
     def test_view_post_no_category(self):
-        self.client.login(username='johndoe', password='johndoe')
+        self.client.login(username='johndoe2', password='johndoe2')
         response = self.client.post(reverse('website:new_question'),\
                                     {'title': 'Test question title', 'body': 'Test question body',\
                                     'tutorial':  None})
@@ -405,7 +422,7 @@ class NewQuestionViewTest(TestCase):
         self.assertFormError(response, 'form', 'category', 'Select a category')
 
     def test_view_post_no_title(self):
-        self.client.login(username='johndoe', password='johndoe')
+        self.client.login(username='johndoe2', password='johndoe2')
         category = FossCategory.objects.get(name='TestCategory')
         response = self.client.post(reverse('website:new_question'),\
                                     {'category': category.id, 'body': 'Test question body',\
@@ -414,7 +431,7 @@ class NewQuestionViewTest(TestCase):
         self.assertFormError(response, 'form', 'title', 'Title field required')
 
     def test_view_post_no_body(self):
-        self.client.login(username='johndoe', password='johndoe')
+        self.client.login(username='johndoe2', password='johndoe2')
         category = FossCategory.objects.get(name='TestCategory')
         response = self.client.post(reverse('website:new_question'),\
                                     {'category': category.id, 'title': 'Test question title',\
@@ -423,7 +440,7 @@ class NewQuestionViewTest(TestCase):
         self.assertFormError(response, 'form', 'body', 'Question field required')
 
     def test_view_post_title_only_spaces(self):
-        self.client.login(username='johndoe', password='johndoe')
+        self.client.login(username='johndoe2', password='johndoe2')
         category = FossCategory.objects.get(name='TestCategory')
         response = self.client.post(reverse('website:new_question'),\
                                     {'category': category.id, 'title': '  &nbsp;             ',\
@@ -432,7 +449,7 @@ class NewQuestionViewTest(TestCase):
         self.assertFormError(response, 'form', 'title', 'Title cannot be only spaces')
 
     def test_view_post_title_only_tags(self):
-        self.client.login(username='johndoe', password='johndoe')
+        self.client.login(username='johndoe2', password='johndoe2')
         category = FossCategory.objects.get(name='TestCategory')
         response = self.client.post(reverse('website:new_question'),\
                                     {'category': category.id, 'title': '<p><div></div></p>',\
@@ -441,7 +458,7 @@ class NewQuestionViewTest(TestCase):
         self.assertFormError(response, 'form', 'title', 'Title cannot be only tags')
 
     def test_view_post_title_too_short(self):
-        self.client.login(username='johndoe', password='johndoe')
+        self.client.login(username='johndoe2', password='johndoe2')
         category = FossCategory.objects.get(name='TestCategory')
         response = self.client.post(reverse('website:new_question'),\
                                     {'category': category.id, 'title': 'TooShort',\
@@ -450,7 +467,7 @@ class NewQuestionViewTest(TestCase):
         self.assertFormError(response, 'form', 'title', 'Title should be longer than 12 characters')
 
     def test_view_post_title_already_exists(self):
-        self.client.login(username='johndoe', password='johndoe')
+        self.client.login(username='johndoe2', password='johndoe2')
         category = FossCategory.objects.get(name='TestCategory')
         response = self.client.post(reverse('website:new_question'),\
                                     {'category': category.id, 'title': 'TestQuestion',\
@@ -459,7 +476,7 @@ class NewQuestionViewTest(TestCase):
         self.assertFormError(response, 'form', 'title', 'This title already exists')
 
     def test_view_post_body_only_spaces(self):
-        self.client.login(username='johndoe', password='johndoe')
+        self.client.login(username='johndoe2', password='johndoe2')
         category = FossCategory.objects.get(name='TestCategory')
         response = self.client.post(reverse('website:new_question'),\
                                     {'category': category.id, 'title': 'Test question title',\
@@ -468,7 +485,7 @@ class NewQuestionViewTest(TestCase):
         self.assertFormError(response, 'form', 'body', 'Body cannot be only spaces')
 
     def test_view_post_body_only_tags(self):
-        self.client.login(username='johndoe', password='johndoe')
+        self.client.login(username='johndoe2', password='johndoe2')
         category = FossCategory.objects.get(name='TestCategory')
         response = self.client.post(reverse('website:new_question'),\
                                     {'category': category.id, 'body': '<p><div></div></p>',\
@@ -477,7 +494,7 @@ class NewQuestionViewTest(TestCase):
         self.assertFormError(response, 'form', 'body', 'Body cannot be only tags')
 
     def test_view_post_body_too_short(self):
-        self.client.login(username='johndoe', password='johndoe')
+        self.client.login(username='johndoe2', password='johndoe2')
         category = FossCategory.objects.get(name='TestCategory')
         response = self.client.post(reverse('website:new_question'),\
                                     {'category': category.id, 'body': 'TooShort',\
@@ -486,7 +503,7 @@ class NewQuestionViewTest(TestCase):
         self.assertFormError(response, 'form', 'body', 'Body should be minimum 12 characters long')
 
     def test_view_post_spam_question(self):
-        self.client.login(username='johndoe', password='johndoe')
+        self.client.login(username='johndoe2', password='johndoe2')
         category = FossCategory.objects.get(name='TestCategory')
         response = self.client.post(reverse('website:new_question'),\
                                     {'category': category.id, 'body': 'swiss replica watches buy',\
@@ -494,7 +511,7 @@ class NewQuestionViewTest(TestCase):
         self.assertRedirects(response, reverse('website:home'))
 
     def test_view_post_valid_data(self):
-        self.client.login(username='johndoe', password='johndoe')
+        self.client.login(username='johndoe2', password='johndoe2')
         category = FossCategory.objects.get(name='TestCategory')
         response = self.client.post(reverse('website:new_question'),\
                                     {'category': category.id, 'body': 'Test question body',\
@@ -503,14 +520,14 @@ class NewQuestionViewTest(TestCase):
         self.assertRedirects(response, reverse('website:get_question', args=(question_id, )))
 
     def test_view_get_context(self):
-        self.client.login(username='johndoe', password='johndoe')
+        self.client.login(username='johndoe2', password='johndoe2')
         response = self.client.get(reverse('website:new_question'))
         self.assertTrue('category' in response.context)
         self.assertTrue('form' in response.context)
         self.assertIsInstance(response.context['form'], NewQuestionForm)
 
     def test_view_post_context_when_form_error(self):
-        self.client.login(username='johndoe', password='johndoe')
+        self.client.login(username='johndoe2', password='johndoe2')
         category = FossCategory.objects.get(name='TestCategory')
         response = self.client.post(reverse('website:new_question'),\
                                     {'category': category.id, 'body': 'TooShort',\
@@ -527,8 +544,9 @@ class EditQuestionViewTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         """Create sample data"""
-        user = User.objects.create_user("johndoe", "johndoe@example.com", "johndoe")
-        user2 = User.objects.create_user("johndoe2", "johndoe2@example.com", "johndoe2")
+        user = User.objects.create_user("johndoe", "johndoe@example.com", "johndoe", first_name="John", last_name="Doe")
+        User.objects.create_user("johndoe2", "johndoe2@example.com", "johndoe2")
+        User.objects.create_user("johndoe3", "johndoe3@example.com", "johndoe3", first_name="John", last_name="Doe")
         category = FossCategory.objects.create(name="TestCategory", email="category@example.com")
         FossCategory.objects.create(name="TestCategory2", email="category2@example.com")
         Question.objects.create(user=user, category=category, title="TestQuestion")
@@ -538,6 +556,12 @@ class EditQuestionViewTest(TestCase):
         response = self.client.get(reverse('website:edit_question', args=(question_id, )))
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.startswith('/accounts/login/'))
+
+    def test_view_redirect_if_no_fullname(self):
+        question_id = Question.objects.get(title='TestQuestion').id
+        self.client.login(username='johndoe2', password='johndoe2')
+        response = self.client.get(reverse('website:edit_question', args=(question_id, )))
+        self.assertRedirects(response, '/accounts/profile/?next=/question/edit/{0}/'.format(question_id))
 
     def test_view_url_loads_with_correct_template(self):
         self.client.login(username='johndoe', password='johndoe')
@@ -549,7 +573,7 @@ class EditQuestionViewTest(TestCase):
         self.assertTemplateUsed(response, 'website/templates/edit-question.html')
 
     def test_view_redirects_when_not_authorized(self):
-        self.client.login(username='johndoe2', password='johndoe2')
+        self.client.login(username='johndoe3', password='johndoe3')
         question_id = Question.objects.get(title='TestQuestion').id
         response = self.client.get(reverse('website:edit_question', args=(question_id, )))
         self.assertEqual(response.status_code, 200)
@@ -974,8 +998,9 @@ class UserNotificationsViewTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         """Create sample data"""
-        user = User.objects.create_user("johndoe", "johndoe@example.com", "johndoe")
+        user = User.objects.create_user("johndoe", "johndoe@example.com", "johndoe", first_name="John", last_name="John")
         User.objects.create_user("johndoe2", "johndoe2@example.com", "johndoe2")
+        User.objects.create_user("johndoe3", "johndoe3@example.com", "johndoe3", first_name="John", last_name="Doe")
         category = FossCategory.objects.create(name="TestCategory", email="category@example.com")
         question = Question.objects.create(user=user, category=category, title="TestQuestion")
         Notification.objects.create(uid=user.id, qid=question.id)
@@ -986,8 +1011,14 @@ class UserNotificationsViewTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.startswith('/accounts/login/'))
 
-    def test_view_if_unauthorized_user(self):
+    def test_view_redirect_if_no_fullname(self):
+        user_id = User.objects.get(username='johndoe2').id
         self.client.login(username='johndoe2', password='johndoe2')
+        response = self.client.get(reverse('website:user_notifications', args=(user_id, )))
+        self.assertRedirects(response, '/accounts/profile/?next=/user/{0}/notifications/'.format(user_id))
+
+    def test_view_if_unauthorized_user(self):
+        self.client.login(username='johndoe3', password='johndoe3')
         user_id = User.objects.get(username='johndoe').id
         response = self.client.get(reverse('website:user_notifications', args=(user_id, )))
         self.assertEqual(response.status_code, 200)

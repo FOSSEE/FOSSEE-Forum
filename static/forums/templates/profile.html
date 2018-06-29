@@ -49,7 +49,7 @@
                 </div>
                 -->
                 <div class="form-group">
-                    <label class="col-sm-3 control-label" for= "id_street">Address<span style="color:red">*</span></label>
+                    <label class="col-sm-3 control-label" for= "id_street">Address</label>
                     <div class="col-sm-9">
                         {% render_field form.address class+="form-control street" tabindex="1" data-placeholder="Enter street" %}
                         {{ form.address.errors }}
@@ -66,13 +66,13 @@
                         <!-- <small>Please enter your valid phone number.</small> -->
                     </div>
                 </div>
-                {# <div class="form-group"> #}
+                <!-- {# <div class="form-group"> #}
                 {#     <label class="col-sm-3 control-label" for="id_phone">Picture</label> #}
                 {#     <div class="col-sm-9"> #}
                 {#         {% render_field form.picture class+="form-control picture" tabindex="1" %} #}
                 {#         {{ form.picture.errors }} #}
                 {#     </div> #}
-                {# </div> #}
+                {# </div> #} -->
                 <div class="form-group">
                     <div class="col-sm-offset-3 col-sm-9">
                         <input class="btn btn-primary" type="submit" value="Submit" />
@@ -81,6 +81,10 @@
             </form>
         </div>
     </div>
+
+    <br>
+    <small><span style="color:red">*&nbsp;</span><strong>Field required</strong></small>
+            <small></p><span style="color:red">*&nbsp;</span><strong>Fields required to access basic features of forum</strong></small>
     
 {% endblock %}
 

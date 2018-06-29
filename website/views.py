@@ -27,6 +27,10 @@ categories = FossCategory.objects.order_by('name')
 def is_moderator(user):
     return user.groups.count() > 0
 
+# Function to check if user is anonymous, and if not he/she has first_name and last_name
+def account_credentials_defined(user):
+    return ((user.first_name and user.last_name) or is_moderator(user))
+
 # for home page
 def home(request):
 
@@ -99,6 +103,7 @@ def get_question(request, question_id = None, pretty_url = None):
 # post answer to a question, send notification to the user, whose question is answered
 # if anwser is posted by the owner of the question, no notification is sent
 @login_required
+@user_passes_test(account_credentials_defined, login_url='/accounts/profile/')
 def question_answer(request, question_id):
 
     context = {}
@@ -167,6 +172,7 @@ def question_answer(request, question_id):
 # comments for specific answer and notification is sent to owner of the answer
 # notify other users in the comment thread
 @login_required
+@user_passes_test(account_credentials_defined, login_url='/accounts/profile/')
 def answer_comment(request):
 
     context = {}
@@ -212,7 +218,7 @@ def answer_comment(request):
                 answer.question.category,
                 settings.DOMAIN_NAME + '/question/' + str(answer.question.id) + "#answer" + str(answer.id)
             )
-            # send_mail(subject, message, sender_email, to)
+            send_mail(subject, message, sender_email, to)
 
             # notifying other users in the comment thread
             uids = answer.answercomment_set.filter(answer = answer).values_list('uid', flat = True)
@@ -251,7 +257,7 @@ def answer_comment(request):
                 answer.question.category,
                 settings.DOMAIN_NAME + '/question/' + str(answer.question.id) + "#answer" + str(answer.id)
             )
-            # send_mail(subject, message, sender_email, to)
+            send_mail(subject, message, sender_email, to)
 
             return HttpResponseRedirect('/question/{0}/'.format(answer.question.id))
 
@@ -287,6 +293,7 @@ def filter(request, category = None, tutorial = None):
 
 # post a new question on to forums, notification is sent to mailing list team@fossee.in
 @login_required
+@user_passes_test(account_credentials_defined, login_url='/accounts/profile/')
 def new_question(request):
 
     settings.MODERATOR_ACTIVATED = False
@@ -384,6 +391,7 @@ def new_question(request):
 
 # Edit a question on forums, notification is sent to mailing list team@fossee.in
 @login_required
+@user_passes_test(account_credentials_defined, login_url='/accounts/profile/')
 def edit_question(request, question_id):
 
     context = {}
@@ -689,6 +697,7 @@ def ans_vote_post(request):
 
 # notification if any on header, when user logs in to the account
 @login_required
+@user_passes_test(account_credentials_defined, login_url='/accounts/profile/')
 def user_notifications(request, user_id):
 
     settings.MODERATOR_ACTIVATED = False

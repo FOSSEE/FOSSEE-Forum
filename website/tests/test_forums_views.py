@@ -310,7 +310,7 @@ class UserLoginViewTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        User.objects.create_user('johndoe', 'johndoe@example.com', 'johndoe')
+        User.objects.create_user('johndoe', 'johndoe@example.com', 'johndoe', first_name='John', last_name='Doe')
         user = User.objects.create_user('johndoe2', 'johndoe2@example.com', 'johndoe2')
         user.is_active = False
         user.save()

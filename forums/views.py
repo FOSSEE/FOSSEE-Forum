@@ -108,7 +108,10 @@ def confirm(request, confirmation_code, username):
 def account_profile(request):
 
     user = request.user
-    profile = Profile.objects.get(user_id = user.id)
+    try:
+        profile = Profile.objects.get(user_id = user.id)
+    except:
+        profile = Profile(user = user)
 
     if (request.method == 'POST'):
 
@@ -135,7 +138,7 @@ def account_profile(request):
     else:
         context = {}
         context.update(csrf(request))
-        instance = Profile.objects.get(user_id = user.id)
+        instance = profile
         context['form'] = ProfileForm(user, instance = instance)
         return render(request, 'forums/templates/profile.html', context)
 
@@ -144,7 +147,10 @@ def account_profile(request):
 def account_view_profile(request, user_id):
 
     user = User.objects.get(pk = user_id)
-    profile = Profile.objects.get(user = user)
+    try:
+        profile = Profile.objects.get(user = user)
+    except:
+        profile = Profile(user = user)
     flag = False
 
     questions = Question.objects.filter(user_id = user_id).order_by('date_created').reverse()

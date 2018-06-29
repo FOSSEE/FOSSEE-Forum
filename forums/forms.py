@@ -43,6 +43,8 @@ class ProfileForm(forms.ModelForm):
                         required = True,
                         error_messages = {'required':'Last name field required'})
 
+    address = forms.CharField(widget = forms.Textarea(), required = False)
+
     phone = forms.CharField(
         widget = forms.TextInput(),
         required = False,

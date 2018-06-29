@@ -239,6 +239,11 @@ class ProfileFormTest(TestCase):
         form = ProfileForm(user = user)
         self.assertTrue(form.fields['last_name'].required)
 
+    def test_address_required(self):
+        user = User.objects.get(username = 'johndoe')
+        form = ProfileForm(user = user)
+        self.assertFalse(form.fields['address'].required)
+
     def test_phone_required(self):
         user = User.objects.get(username = 'johndoe')
         form = ProfileForm(user = user)
