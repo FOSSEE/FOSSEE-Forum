@@ -900,7 +900,7 @@ def ajax_keyword_search(request):
     if request.method == "POST":
         key = request.POST['key']
 
-        questions = Question.objects.filter(title__contains = key)
+        questions = Question.objects.filter(title__contains = key).filter(is_spam=False)
         context = {
             'questions': questions
         }
