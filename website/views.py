@@ -450,9 +450,9 @@ def edit_question(request, question_id):
             sender_name = "FOSSEE Forums"
             sender_email = settings.SENDER_EMAIL
             subject = "FOSSEE Forums - {0} - New Question".format(question.category)
-            to = (question.category.email, settings.FORUM_NOTIFICATION)
+            to = (question.user.email, question.category.email, settings.FORUM_NOTIFICATION)
             message = """
-                The following question has been edited by the user in the FOSSEE Forum: <br>
+                The following question has been edited in the FOSSEE Forum: <br>
                 <b> Original title: </b>{0}<br>
                 <b> New title: </b?{1}<br>
                 <b> Category: </b>{2}<br>

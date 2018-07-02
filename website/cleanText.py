@@ -40,8 +40,10 @@ def clean_string(myString):
 
     # perform word stemming
     myStringWords = myString.split(' ')
+    keepwords = [word for word in myStringWords if not word.isalnum()]
     stemmer = nltk.stem.snowball.SnowballStemmer('english')
     stemWords = [stemmer.stem(word) for word in myStringWords]
+
     myString = ' '.join(stemWords)
 
     return myString
