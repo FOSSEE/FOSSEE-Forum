@@ -29,6 +29,7 @@ urlpatterns = [
     path('moderator/', views.moderator_home, name = 'moderator_home'),
     path('moderator/questions/', views.moderator_questions, name = 'moderator_questions'),
     path('moderator/unanswered/', views.moderator_unanswered, name = 'moderator_unanswered'),
+    path('moderator/train_spam_filter/', views.train_spam_filter, name = 'train_spam_filter'),
 
     # Ajax helpers
     path('ajax-tutorials/', views.ajax_tutorials, name = 'ajax_tutorials'),

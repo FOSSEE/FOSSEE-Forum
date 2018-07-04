@@ -15,7 +15,7 @@ from website.forms import NewQuestionForm, AnswerQuestionForm, AnswerCommentForm
 from website.templatetags.helpers import prettify
 from django.core.mail import send_mail
 from django.core.mail import EmailMultiAlternatives
-from .spamFilter import predict
+from .spamFilter import predict, train
 
 User = get_user_model()
 admins = (
@@ -816,6 +816,14 @@ def moderator_unanswered(request):
     }
 
     return render(request, 'website/templates/moderator/unanswered.html', context)
+
+# Re-training spam filter
+@login_required
+@user_passes_test(is_moderator)
+def train_spam_filter(request):
+
+    train()
+    return HttpResponseRedirect('/moderator/')
 
 # AJAX SECTION
 # All the ajax views go below
