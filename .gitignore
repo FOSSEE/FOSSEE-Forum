@@ -5,9 +5,14 @@ config.py
 forums/wsgi.py
 static/CACHE/*
 *.py[cod]
-robots.txt
+settings.json
+forums.sql
+local.py
+local_final.py
+website/DataSet.*
 # C extensions
 *.so
+media/images/*
 
 # Packages
 *.egg

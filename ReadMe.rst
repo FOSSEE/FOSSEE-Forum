@@ -2,8 +2,8 @@
 FOSSEE Forum 
 ============
 
-A **WebApp** to provide online discussion, question and answer for professional 
-and programmers. 
+A **Website** to provide online discussion, question and answer for professionals
+and programmers on niche areas.
 
 Clone
 -----
@@ -11,7 +11,7 @@ Clone
 - Make sure your Internet is working.
 - Clone this repo by typing ::
 
-   git clone -b fossee-forum https://github.com/FOSSEE/spoken-tutorial-forums.git
+   git clone -b fossee-forum https://github.com/FOSSEE/FOSSEE-Forum.git
    
 
 Installation
@@ -29,33 +29,33 @@ Installation
 
     source /path/to/virtualenv-name/bin/activate
 
-- Change the directory to the `spoken-tutorial-forums/` project using the command ::
+- Change the directory to the ``spoken-tutorial-forums/`` project using the command ::
 
     cd /path/to/spoken-tutorial-forums
 
 - Install pre-requisites using the command (please don't use sudo) ::
 
-    pip install -r requirement.txt
+    pip install -r requirements.txt
 
   or you can also type ::
 
-    easy_install `cat requirement.txt`
+    easy_install `cat requirements.txt`
 
 
 Usage
 -----
 
-- Using MySQL (For development server only). Though, we recommend to use `MySQL` for deployment
-  server. See `settings.py` file for usage.
+- Using MySQL (For development server only). Though, we recommend to use ``MySQL`` for deployment
+  server as well. See `settings.py` file for usage.
 
-- Create 'forum' database in 'MySQL'.
+- Create 'forums' database in 'MySQL'.
 
-- Only for Server deployment, open `spoken-tutorial-forums/forums/settings.py` file and make the following changes ::
+- Only for Server deployment, open ``FOSSEE-Forum/forums/settings.py`` file and make the following changes ::
 
     DATABASES = {
         'default': {
         'ENGINE': 'django.db.backend.mysql',
-        'NAME'  : 'forum', 
+        'NAME'  : 'forums', 
         'USER': '', 
         'PASSWORD': '',
         'HOST': '',
@@ -64,34 +64,54 @@ Usage
     }
 
 
-- For development on your machine, create a file `config.py` in `spoken-tutorial-forums/forums/` and add ::
+- For development on your machine, create a file ``local.py`` in ``FOSSEE-Forum/forums/`` and add ::
 
-    db_user='root' #(MySql username)
+    DB_USER = 'root' # (MySql username)
+    DB_PASS = 'root' # (MySql password)
+
+    # To be obtained from FOSSEE-Forums admin
+    PUB_KEY = ''
+    PRIV_KEY = ''
+
+    # To be obtained from https://www.google.com/recaptcha/admin#list
+    FORUM_GOOGLE_RECAPTCHA_SECRET_KEY = ''
+    FORUM_GOOGLE_RECAPTCHA_SITE_KEY = ''
     
-    db_pass = 'root' #(MySql password)
-    
-- For development on your machine, open `spoken-tutorial-forums/forums/settings.py` file and make the following changes ::
+- For development on your machine, open ``FOSSEE-Forum/forums/settings.py`` file and make the following changes ::
 
     DATABASES = {
         'default': {
-        'ENGINE': 'django.db.backend.mysql',
-        'NAME'  : 'forum', 
-        'USER': db_user, 
-        'PASSWORD': db_pass ,
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME'  : 'forums',
+        'USER': DB_USER,
+        'PASSWORD': DB_PASS,
         'HOST': '',
         'PORT': '',
         }
     }
 
+- Set up the database ``forums`` by typing ``sudo mysql -u root -p`` in the terminal to log into MySQL ::
+
+    mysql> CREATE DATABASE forums;
+    mysql> GRANT ALL PRIVILEGES ON forums.* TO 'username'@'hostname' IDENTIFIED BY 'password'
+
+- Get the database file from FOSSEE-Forum admin and dump data into ``forums`` databse ::
+
+    sudo mysqldump -u [username] -p[password] forums < database.sql
+
+- Comment line 10 and lines 34-48 in ``spamFilter.py`` as these will work only when Question and Answer model is present in database
 	
 - Populate the database using the following command ::
 
-    cd /path/to/spoken-tutorial-forums
+    cd /path/to/FOSSEE-Forum
     
-    python manage.py syncdb
+    python manage.py makemigrations
+    python manage.py migrate
+    python manage.py makemigrations website
+    python manage.py migrate website
 
 
-- Run the script populate_category.py which enters lists of foss categories into the table category from the `category_names.txt` file ::
+- Run the script ``populate_category.py`` which enters lists of foss categories into the table category from the `category_names.txt` file ::
     
     python populate_category.py
 
@@ -99,43 +119,40 @@ Usage
 
     python manage.py runserver
 
+- You can add a superuser and a user for the forum using the command ::
+
+    python manage.py createsuperuser
+
+- Modify the webapp using Django admin panel and login to explore all the features of the website
+
 
 **Not for first time users and only for developers**
 Migration
 ----------
-(How to add a new model field to an existing table using South without having to drop a table)
+(How to add a new model field to an existing database)
 
 - Enter into virual environment
 
-- install south ::
-     
-    pip install south
+- Change the directory to the ``FOSSEE-Forum/`` project using the command ::
 
-- Add south to INSTALLED_APPS in settings.py
+    cd /path/to/FOSSEE-Forum
 
-- Change the directory to the `spoken-tutorial-forums/` project using the command ::
+- Run below command to create required migration commands ::
 
-    cd /path/to/spoken-tutorial-forums
+    python manage.py makemigrations
 
-- Run below command to create south_migrationhistory table ::
-
-    python manage.py syncdb
-
-- Create the initial migration with South ::
+- Execute the required migrations ::
    
-    python manage.py schemamigration --initial website
+    python manage.py migrate
 
-- Apply it as a fake migration ::
-
-    python manage.py migrate website --fake
-
-- Make the change to the website model, in this case ::
+- Make the change to the website model, for example, you can add a model ::
     
-    git pull
+    class TestModel(models.Model):
+        name = models.CharField(max_length=100)
 
 - Create a migration for your new change ::
 
-    python manage.py schemamigration --auto website
+    python manage.py makemigrations website
 
 - Apply new migration ::
 
@@ -147,9 +164,9 @@ Migration
 Contributing
 ------------
 
-- Never edit the master and fossee-forum branch.
-- Make a branch specific to the feature you wish to contribute on.
-- Send me a pull request.
+- Fork the repository to contribute changes.
+- It is preferable to make a branch specific to the feature you wish to contribute on.
+- Send a pull request.
 - Please follow `PEP8 <http://legacy.python.org/dev/peps/pep-0008/>`_
   style guide when coding in Python.
 

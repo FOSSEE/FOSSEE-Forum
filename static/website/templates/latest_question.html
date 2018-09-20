@@ -1,8 +1,7 @@
 {% if question %}
     <a class="btn btn-xs btn-block btn-primary" href="{% url 'website:filter' question.category %}">View previous questions</a>
 {% else %}
-    <a class="btn btn-xs btn-block noquestion">
-
+    <a class="btn btn-xs btn-block noquestion">   
         No questions to display
     </a>
 {% endif %}

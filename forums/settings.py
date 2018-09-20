@@ -1,13 +1,12 @@
 #Custom settings
 from os.path import *
 #from config import *
-from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS
-from local import *
+from .local import *
 from forums.settings import TO_EMAIL_ID
-from local import SET_SITE_ID
+from .local import SET_SITE_ID
 import os
 
-PROJECT_DIR = abspath(dirname(__file__) + '/../')
+PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)) + '/../')
 
 # Django settings for forums project.
 
@@ -19,8 +18,10 @@ TEMPLATES = [
         ],
         'OPTIONS': {
             'context_processors': [
-                    'django.core.context_processors.request',
+                    'django.template.context_processors.request',
+                    'django.template.context_processors.debug',
                     'website.context_processors.admin_processor',
+                    'website.context_processors.moderator_activated',
                     'django.contrib.auth.context_processors.auth',
                     'django.template.context_processors.debug',
                     'django.template.context_processors.i18n',
@@ -37,11 +38,11 @@ TEMPLATES = [
     },
 ]
 
+FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 
 
 
-DEBUG = False
-#DEBUG = True
+DEBUG = True
 
 SITE_ID = SET_SITE_ID
 SET_TO_EMAIL_ID = TO_EMAIL_ID
@@ -55,7 +56,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'new_forums',                      # Or path to database file if using sqlite3.
+        'NAME': 'forums',                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': DB_USER,
         'PASSWORD': DB_PASS,
@@ -66,7 +67,7 @@ DATABASES = {
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = ['forums.fossee.in']
+ALLOWED_HOSTS = ['forums.fossee.in', 'localhost', 'testserver']
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -91,18 +92,18 @@ USE_TZ = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
-MEDIA_ROOT = ''
+MEDIA_ROOT = os.path.join(PROJECT_DIR, 'media')
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
 # Examples: "http://example.com/media/", "http://media.example.com/"
-MEDIA_URL = ''
+MEDIA_URL = '/media/'
 
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/var/www/example.com/static/"
-STATIC_ROOT = ''
+STATIC_ROOT = '/static/'
 
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
@@ -129,17 +130,17 @@ SECRET_KEY = 'xj+a8@48-x+h1z4bmvjt_1b+=t4+sb)kujqh!efty9t=f_g!mo'
 
 # List of callables that know how to import templates from various sources.
 
-MIDDLEWARE_CLASSES = (
-    'django.middleware.common.CommonMiddleware',
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    # Uncomment the next line for simple clickjacking protection:
-    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'htmlmin.middleware.HtmlMinifyMiddleware',
     'htmlmin.middleware.MarkRequestMiddleware',
-)
+]
 
 ROOT_URLCONF = 'forums.urls'
 
@@ -149,6 +150,7 @@ WSGI_APPLICATION = 'forums.wsgi.application'
 
 
 INSTALLED_APPS = (
+    'antispam.honeypot',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -156,14 +158,11 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # Uncomment the next line to enable the admin:
+    'django.forms',
     'website',
-    # 'django.contrib.admindocs',
     'widget_tweaks',
-    # 'spoken_auth',
-    'debug_toolbar',
     'captcha',
-    #'migrate_spoken',
+    'ckeditor',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -207,14 +206,14 @@ RECAPTCHA_PUBLIC_KEY = PUB_KEY
 RECAPTCHA_PRIVATE_KEY = PRIV_KEY
 
 #Google recaptcha for forum
-GOOGLE_RECAPTCHA_SECRET_KEY = FORUM_GOOGLE_RECAPTCHA_SECRET_KEY 
+GOOGLE_RECAPTCHA_SECRET_KEY = FORUM_GOOGLE_RECAPTCHA_SECRET_KEY
 GOOGLE_RECAPTCHA_SITE_KEY = FORUM_GOOGLE_RECAPTCHA_SITE_KEY
 
 RECAPTCHA_USE_SSL = True
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
 
 EMAIL_URL = EMAIL_URL
-#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 #Sender email, forum notification email, domain name
 SENDER_EMAIL = SENDER_EMAIL
@@ -233,5 +232,40 @@ EMAIL_PORT = EMAIL_PORT_SERVER
 #EMAIL_HOST_PASSWORD = EMAIL_HOST_PASSWORD_SERVER
 #EMAIL_USE_TLS = EMAIL_USE_TLS_SERVER
 
-ADMINS = ADMINS_EMAIL_ADDRESS
-SERVER_EMAIL = SERVER_EMAIL_ADDRESS
+# Variable to store if moderator using forum
+MODERATOR_ACTIVATED = False
+
+# Maximum file size limit in bytes
+MAXIMUM_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024
+
+####################################
+    ##  CKEDITOR CONFIGURATION ##
+####################################
+
+CKEDITOR_JQUERY_URL = 'https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js'
+
+CKEDITOR_UPLOAD_PATH = 'images/'
+CKEDITOR_IMAGE_BACKEND = "pillow"
+
+CKEDITOR_CONFIGS = {
+    'default': {
+        'toolbar': 'Custom',
+        'toolbar_Custom': [
+            {'name': 'clipboard', 'items': ['Cut', 'Copy', 'Paste', 'Undo', 'Redo']},
+            {'name': 'editing', 'items': ['Scayt']},
+            {'name': 'links', 'items': ['Link', 'Unlink', 'Anchor']},
+            {'name': 'insert', 'items': ['Table', 'HorizontalRule', 'SpecialChar', 'Smiley']},
+            {'name': 'documents', 'items': ['Source']},
+            '/',
+            {'name': 'basicstyles', 'items': ['Bold', 'Italic', 'Underline', '-', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat']},
+            {'name': 'paragraph', 'items': ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock']},
+            '/',
+            {'name': 'styles', 'items': ['Styles', 'Format', 'Font', 'FontSize']},
+            {'name': 'colors', 'items': ['TextColor', 'BGColor']},
+        ],
+        'removePlugins': 'elementspath',
+        'toolbarCanCollapse': True,
+    }
+}
+
+###################################

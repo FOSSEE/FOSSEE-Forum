@@ -1,11 +1,11 @@
-DB_USER='db_user'
-DB_PASS='db_pass'
-PUB_KEY='public key'
-PRIV_KEY='private key'
+DB_USER = ''
+DB_PASS = ''
+PUB_KEY = ''
+PRIV_KEY = ''
 TO_EMAIL_ID = 'to@email.id'
 SET_SITE_ID = 2
 
-SENDER_EMAIL = "sender@email.id"
+SENDER_EMAIL = "chaituyeah2811@gmail.com"
 FORUM_NOTIFICATION = "forumnotifications@email.id"
 
 EMAIL_URL = "Site URL for email content"
@@ -28,5 +28,8 @@ ADMINS_EMAIL_ADDRESS = "[Admins mail address]" #[('name', 'id@email.id'), ('name
 SERVER_EMAIL_ADDRESS = "server email address"
 
 
-FORUM_GOOGLE_RECAPTCHA_SECRET_KEY = 'FORUM_GOOGLE_RECAPTCHA_SECRET_KEY'
-FORUM_GOOGLE_RECAPTCHA_SITE_KEY = 'FORUM_GOOGLE_RECAPTCHA_SITE_KEY'
+FORUM_GOOGLE_RECAPTCHA_SECRET_KEY = ''
+FORUM_GOOGLE_RECAPTCHA_SITE_KEY = ''
+
+# Maximum file size in MB
+MAX_FILE_SIZE_MB = 2

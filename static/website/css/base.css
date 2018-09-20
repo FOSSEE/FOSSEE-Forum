@@ -23,7 +23,7 @@ html{
 }
 
 body{
-	margin:0
+	margin:0;
 	font-size:14px;
 
 }
@@ -538,8 +538,8 @@ dt{
 }
 
 dd{
-	margin-left:0
-	font-size:15px;
+	margin-left: 0;
+	font-size: 15px;
 }
 
 @media(min-width:768px){
@@ -716,7 +716,7 @@ pre code{
 .container{
 	padding-right:15px;
 	padding-left:15px; 
-	padding-top: 15px
+	padding-top: 15px;
 	margin-right:auto;
 	margin-left:auto
 }
@@ -2107,6 +2107,7 @@ textarea.input-lg{
 }
 
 @media(min-width:768px){
+	
 	.form-inline .form-group{
 		display:inline-block;
 		margin-bottom:0;
@@ -4523,7 +4524,7 @@ textarea.input-group-sm>.form-control,textarea.input-group-sm>.input-group-addon
 	.navbar-form .form-group{
 		display:inline-block;
 		margin-bottom:0;
-		vertical-align:middle
+		vertical-align:middle;
 	}
 
 	.navbar-form .form-control{
@@ -5161,7 +5162,7 @@ a.list-group-item.active>.badge,.nav-pills>.active>a>.badge{
 	border:1px solid #ddd;
 	border-radius:0;
 	-webkit-transition:all .2s ease-in-out;
-	transition:all .2s ease-in-out
+	transition:all .2s ease-in-out;
 }
 
 .thumbnail>img,.thumbnail a>img{

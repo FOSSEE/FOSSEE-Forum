@@ -2,244 +2,209 @@
 {% load widget_tweaks %}
 {% load static %}
 {% load count_tags %}
-{% block title %}User Profile{% endblock %}
-{% block cssblock %}
-   
 
+{% block title %}User Profile{% endblock %}
+
+{% block cssblock %}
 {% endblock %}
+
 {% block heading %}
         <i class="fa fa-list-ul"></i> User Profile
 {% endblock %}
+
 {% block content %}
+
 <br><br>
 <div>
-<h3>
-{{profile.user.username}}'s Dashboard
-</h3> 
+    <h3>{{profile.user.username}}'s Dashboard</h3> 
 </div>
 <br><br>
-  <div class="col-lg-12 ">
-      
-           <ul class="nav nav-tabs">
-        <li class="active"><a data-toggle="tab" href="#profile"> <span ><i class="fa fa-user"></i></span> Profile</a></li>
-        <li><a data-toggle="tab" href="#questions"><span ><i class="fa fa-question-circle"></i>
 
-</span>  Questions</a></li>
-        <li><a data-toggle="tab"href="#answers"><span ><i class="fa fa-check-circle"></i>
-</span>  Answers</a></li>  
+<div class="col-lg-12 ">  
+
+    <ul class="nav nav-tabs">
+        <li class="active"><a data-toggle="tab" href="#profile"> <span ><i class="fa fa-user"></i></span> 
+            Profile</a></li>
+        <li><a data-toggle="tab" href="#questions"><span ><i class="fa fa-question-circle"></i></span>  
+            Questions</a></li>
+        <li><a data-toggle="tab"href="#answers"><span ><i class="fa fa-check-circle"></i></span>  
+            Answers</a></li>
+
         {% if show %}
         <li><a data-toggle="tab" href="#profile_edit"><span ><i class="fa fa-user"></i></span>
         Edit Profile</a></li>   
         {% endif %}
     </ul>
+
     <div class="tab-content">
-        <!--<div id="sectionA" class="tab-pane fade in active">
-            <p>Section A content…</p>
-        </div>
-        <div id="sectionB" class="tab-pane fade">
-            <p>Section B content…</p>
-        </div>-->
+
         <div id="profile" class="tab-pane fade in active">
             <p>
-             <div class="row well view-profile" style="margin-top: 20px;">
+            <div class="row well view-profile" style="margin-top: 20px;">
             <div class="col-sm-12">
-
             <div class="col-sm-12">
-          
+        
             <form class="form-signin form-horizontal  control-label " role="form" id="login_form" method="post" enctype="multipart/form-data">{% csrf_token %}
-                {{ form.errors }}
-                <div class="form-group">
-                    <label class="col-sm-3" for="id_first_name">User Name</label>
-                    <div class="col-sm-8 ">
-                     {% if profile.user.username %}{{ profile.user.username }}{% else %}-{% endif %}
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-sm-3 " for="id_last_name">First Name</label>
-                       <div class="col-sm-8  ">
-                        {% if profile.user.first_name %}{{ profile.user.first_name }}{% else %}-{% endif %}
-                     
-                    </div>
-                </div>
-                  <div class="form-group">
-                    <label class="col-sm-3 " for="id_last_name">Last Name</label>
-                       <div class="col-sm-8   ">
-                      {% if profile.user.last_name %}{{ profile.user.last_name }}{% else %}-{% endif %}
-                    </div>
-                </div>
+            {{ form.errors }}
 
-                {% if show %}
-                <div class="form-group">
-                    <label class="col-sm-3 " for= "id_street">Address</label>
-                     <div class="col-sm-8  ">
-                    {% if profile.address %}{{ profile.address }}{% else %}-{% endif %}
-                    </div>
+            <div class="form-group">
+                <label class="col-sm-3" for="id_first_name">User Name</label>
+                <div class="col-sm-8 ">
+                    {% if profile.user.username %}{{ profile.user.username }}{% else %}-{% endif %}
                 </div>
-                {% endif %}
+            </div>
 
-                {% if show %}
-                <div class="form-group">
-                    <label class="col-sm-3 " for="id_phone">Email</label>
-                      <div class="col-sm-8  ">
-                 {% if profile.user.email %}{{ profile.user.email }}{% else %}-{% endif %}
-                    </div>
+            <div class="form-group">
+                <label class="col-sm-3 " for="id_last_name">First Name</label>
+                <div class="col-sm-8  ">
+                {% if profile.user.first_name %}{{ profile.user.first_name }}{% else %}-{% endif %} 
                 </div>
-                {% endif %}
+            </div>
 
-                {% if show %}
-                <div class="form-group">
-                    <label class="col-sm-3 " for="id_phone">Phone</label>
-                      <div class="col-sm-8 ">
-                     {% if profile.phone %}{{ profile.phone }}{% else %}-{% endif %}
-                      </div>
+            <div class="form-group">
+                <label class="col-sm-3 " for="id_last_name">Last Name</label>
+                <div class="col-sm-8   ">
+                {% if profile.user.last_name %}{{ profile.user.last_name }}{% else %}-{% endif %}
                 </div>
-                {% endif%}
+            </div>
 
-                <div class="form-group">
-                    <label class="col-sm-3 " for="id_phone">Profile Created</label>
-                      <div class="col-sm-8  ">
-                     {{ profile.created }}
-                      
-                    </div>
+            {% if show %}
+            <div class="form-group">
+                <label class="col-sm-3 " for= "id_street">Address</label>
+                    <div class="col-sm-8  ">
+                {% if profile.address %}{{ profile.address }}{% else %}-{% endif %}
                 </div>
+            </div>
+            {% endif %}
 
-         
+            {% if show %}
+            <div class="form-group">
+                <label class="col-sm-3 " for="id_phone">Email</label>
+                <div class="col-sm-8  ">
+                {% if profile.user.email %}{{ profile.user.email }}{% else %}-{% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if show %}
+            <div class="form-group">
+                <label class="col-sm-3 " for="id_phone">Phone</label>
+                <div class="col-sm-8 ">
+                {% if profile.phone %}{{ profile.phone }}{% else %}-{% endif %}
+                </div>
+            </div>
+            {% endif%}
+
+            <div class="form-group">
+                <label class="col-sm-3 " for="id_phone">Profile Created</label>
+                <div class="col-sm-8  ">
+                {{ profile.created }}  
+                </div>
+            </div>
             </form>
-       
-    </div>
-      
-        </div>
-    </div>
+            </div>
+            </div>
+            </div>
             </p>
         </div>
 
-<div id="profile_edit" class="tab-pane fade ">
-    <div class="row well view-profile" style="margin-top: 20px;">
-        <div class="col-sm-12">
+        <div id="profile_edit" class="tab-pane fade ">
+
+            <div class="row well view-profile" style="margin-top: 20px;">
             <div class="col-sm-12">
-    {% if show %}
-    <form class="form-signin form-horizontal" action="/accounts/profile/{{user.username}}/" method="post" enctype="multipart/form-data">{% csrf_token %}
-    <div class="form-group">
-                    <label class="col-sm-3 control-label" for="id_first_name">First Name<span style="color:red">*</span></label>
-                    <div class="col-sm-5">
-                        {% render_field form.first_name class+="form-control first_name" tabindex="1" data-placeholder="Choose first_name" %}
-                        {{ form.first_name.errors }}
-                    </div>
+            <div class="col-sm-12">
+            
+            {% if show %}
+            <form class="form-signin form-horizontal" action="/accounts/profile/" method="post" enctype="multipart/form-data">{% csrf_token %}
+            
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="id_first_name">First Name<span style="color:red">*</span></label>
+                <div class="col-sm-5">
+                    {% render_field form.first_name class+="form-control first_name" tabindex="1" data-placeholder="Choose first_name" %}
+                    {{ form.first_name.errors }}
                 </div>
-                <div class="form-group">
-                    <label class="col-sm-3 control-label" for="id_last_name">Last Name<span style="color:red">*</span></label>
-                    <div class="col-sm-5">
-                        {% render_field form.last_name class+="form-control last_name" tabindex="1" data-placeholder="Choose last_name" %}
-                        {{ form.last_name.errors }}
-                    </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="id_last_name">Last Name<span style="color:red">*</span></label>
+                <div class="col-sm-5">
+                    {% render_field form.last_name class+="form-control last_name" tabindex="1" data-placeholder="Choose last_name" %}
+                    {{ form.last_name.errors }}
                 </div>
-                <div class="form-group">
-                    <label class="col-sm-3 control-label" for= "id_street">Address<span style="color:red">*</span></label>
-                    <div class="col-sm-5">
-                        {% render_field form.address class+="form-control street" tabindex="1" data-placeholder="Enter street" %}
-                        {{ form.address.errors }}
-                    </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for= "id_street">Address</label>
+                <div class="col-sm-5">
+                    {% render_field form.address class+="form-control street" tabindex="1" data-placeholder="Enter address" %}
+                    {{ form.address.errors }}
                 </div>
-                <div class="form-group">
-                    <label class="col-sm-3 control-label" for="id_phone">Phone</label>
-                    <div class="col-sm-5">
-                        {% render_field form.phone class+="form-control phone" tabindex="1" data-placeholder="Choose phone" %}
-                        {{ form.phone.errors }}
-                    </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="id_phone">Phone</label>
+                <div class="col-sm-5">
+                    {% render_field form.phone class+="form-control phone" tabindex="1" data-placeholder="Choose phone" %}
+                    {{ form.phone.errors }}
                 </div>
+            </div>
 
+            <input class="btn btn-primary" type="submit" value="Submit" />
+            </form>
 
+            <small><span style="color:red">*&nbsp;</span><strong>Field required</strong></small>
+            <small></p><span style="color:red">*&nbsp;</span><strong>Fields required to access basic features of forum</strong></small>
+            {%  endif %}
 
-        <input class="btn btn-primary" type="submit" value="Submit" />
-    </form>
-    {%  endif %}
+            </div>
+            </div>
             </div>
         </div>
-    </div>
-</div>
 
         <div id="questions" class="tab-pane fade">
+
             <p>
             <div class="row well view-profile" style="margin-top: 20px;">
       
-    {% for question in questions %}
-        <div class="my-question">
-            <span class="title">
-                <a href="{% url 'website:get_question' question.id %}">{{ question.title }}</a>
-            </span>
-            <br />
-            <span class="date">
-                <small>
-                Asked on:
-                {{ question.date_created }}
-                </small>
-            </span>
-        </div>
-    {% endfor %}
-    {% if total > 10 %}
-        <ul class="pagination pull-right">
-            {% for i in total|get_range:"0,10" %}
-                <li>
-                    <a href="{% url 'website:user_questions' user.id %}?marker={{ i }}">
-                        {% if i == marker %}
-                            <strong>{{ i|div:"10"|inc }}</strong>
-                        {% else %}
-                            {{ i|div:"10"|inc }}
-                        {% endif %}
-                    </a>
-                </li>
+            {% for question in questions %}
+            <div class="my-question">
+                <span class="title"><a href="{% url 'website:get_question' question.id %}">
+                    {{ question.title }}</a>
+                </span>
+                <br />
+                <span class="date">
+                    <small>Asked on:{{ question.date_created }}</small>
+                </span>
+            </div>
             {% endfor %}
-        </ul>
-    {% endif %}
-    </div>
+
+            </div>
             </p>
         </div>
-          <div id="answers" class="tab-pane fade">
+
+        <div id="answers" class="tab-pane fade">
+
             <p>
             <div class="row well view-profile" style="margin-top: 20px;">
                 
-    {% for answer in answers%}
-        <div class="my-answer">
-            <span class="body">
-                <a href="{% url 'website:get_question' answer.question.id %}">{{ answer.question.title }}</a> 
-            </span>
-            <br> <br>
-            <span class="date">
-                <small>
-                Replied on:
-                {{ answer.date_created }}
+            {% for answer in answers%}
+            <div class="my-answer">
+                <span class="body">
+                    <a href="{% url 'website:get_question' answer.question.id %}">{{ answer.question.title }}</a> 
+                </span>
+                <br><br>
+                <span class="date">
+                    <small>Replied on:{{ answer.date_created }}
                 </small>
-            </span>
-        </div>
-    {% endfor %}
-    
-    {% if total > 10 %}
-        <ul class="pagination pull-right">
-            {% for i in total|get_range:"0,10" %}
-                <li>
-                    <a href="{% url 'website:user_answers' user.id %}?marker={{ i }}">
-                        {% if i == marker %}
-                            <strong>{{ i|div:"10"|inc }}</strong>
-                        {% else %}
-                            {{ i|div:"10"|inc }}
-                        {% endif %}
-                    </a>
-                </li>
+                </span>
+            </div>
             {% endfor %}
-        </ul>
-    {% endif %}
-</div>
-            </p>
-        </div>
-        </div>
-     
-        </div>
-
     
-  
+            </div>
+            </p>
 
-
+        </div>
+    </div> 
+</div>
 
 {% endblock %}
-
-

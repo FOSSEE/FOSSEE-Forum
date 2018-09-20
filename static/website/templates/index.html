@@ -3,231 +3,181 @@
 {% load count_tags %}
 {% load notify %}
 {% load helpers %}
- <link rel="stylesheet" href="{% static 'website/css/main.css' %}" type="text/css" media="screen" charset="utf-8" />
+ 
+<link rel="stylesheet" href="{% static 'website/css/main.css' %}" type="text/css" media="screen" charset="utf-8" />
+
 {% block content %}
 
-<div style="margin-left: 450px;" >
+<div class="carousel-container">
+	<div class="carousel">
+		{% for category in categories %}
+			<div>
+				<div class="thumbnail">
+					{% with file=category|get_category_image %}
+						{% if file %}
+							<img src="{% static category|get_category_image %}">
+						{% else %}
+							<div class="category-title">{{category}}</div>
+						{% endif %}
+					{% endwith %}
+					<div class="caption">
+						<small class="category">
+							{{ category.description }}
+						</small>
+					{% latest_question category %}
+					<a class="btn btn-xs btn-block btn-success" href="{% url 'website:new_question' %}?category={{ category.id|urlencode }}">Ask a question</a>
+					</div>
+				</div>
+			</div>
+		{% endfor %}
+	</div> <!-- /.carousel -->
+</div> <!-- /#carousel-container -->
 
-<script>
+<div id="filter-container">
+	<div class="row" style="margin-left: 12%;">
+		<form class ="" id="filter-form" action="" role="form">
+			<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" style="width: 65%;">
+				<a class="btn btn-block btn-primary" href="{% url 'website:questions' %}" style="margin-top: 18px;">View all previous questions.</a>
+			</div> <!-- /.col -->
+		</form>
+		<div class="col-lg-6 col-md-6 col-sm-6" style="width: 25%;">
+			<div class="row" style="margin-left: 11px;">
 
-   $(document).ready(function() {
-    $('#myTable').tablesorter();
-} );
-
- </script>
-
- <script>
-  (function() {
-    var cx = '011342992297670206849:dfzecvqmvgc';
-    var gcse = document.createElement('script');
-    gcse.type = 'text/javascript';
-    gcse.async = true;
-    gcse.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') +
-        '//cse.google.com/cse.js?cx=' + cx;
-    var s = document.getElementsByTagName('script')[0];
-    s.parentNode.insertBefore(gcse, s);
-  })();
-  </script>
-  <gcse:search></gcse:search>
-  </div>
-
-<style>
-
- .gsc-search-button
-	{
-	   
-	border-radius: 5px;
-	border-color: #666;
-
-	}
-
-	input.gsc-search-button, input.gsc-search-button:hover, input.gsc-search-button:focus {
-	    
-	    background-image: url("https://www.google.com/uds/css/v2/search_box_icon.png") !important;
-	    background-position: 50% 50%;
-	    background-repeat: no-repeat;
-	    height: 28px !important;
-	    width: 60px
-	    filter: none;
-	    
-	}
-    </style>
-
-
-    <div id="carousel-container">
-
-        <div class="carousel">
-
-            {% for category in categories %}
-                <div>
-                    <div class="thumbnail">
-                        {% with file=category|get_category_image %}
-                            {% if file %}
-                                <img src="{% static category|get_category_image %}">
-                            {% else %}
-                                <div class="category-title">{{category}}</div>
-                            {% endif %}
-                        {% endwith %}
-                        <div class="caption">
-                            <small class="category">
-                                {{ category.description }}
-                            </small>
-				 {% latest_question category %}                           
-                            
-
-                    <a class="btn btn-xs btn-block btn-success" href="{% url 'website:new_question' %}?category={{ category.id|urlencode }}">Ask a question</a>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
-        </div> <!-- /.carousel -->
-    </div> <!-- /#carousel-container -->
-
-
-
-    <div id="filter-container">
-        <div class="row" style="margin-left: 12%;">
-            <form class ="" id="filter-form" action="" role="form">
-                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" style="width: 65%;">
-                    <a class="btn btn-block btn-primary" href="{% url 'website:questions' %}" style="margin-top: 18px;">View all previous questions.</a>
-                </div> <!-- /.col -->
-            </form>
-            <div class="col-lg-6 col-md-6 col-sm-6" style="width: 25%;">
-                <div class="row" style="margin-left: 11px;">
-
-                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" style="width: 100px; margin-right:40px; " >
-                        <h3 style="font-size: 18px" align="center"><strong>{% total_question_count %}</strong></h3>
-                        <h3 style="font-size: 18px; margin-top: 1px;" align="center" text-color="#7395d9" >Questions</h3>
-                    </div>
-                   
-                </div>
-            </div>
-        </div> <!-- /.row -->
-    </div> <!-- /#filter-container -->
+				<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" style="width: 100px; margin-right:40px; " >
+					<h3 style="font-size: 18px" align="center"><strong>{% total_question_count %}</strong></h3>
+					<h3 style="font-size: 18px; margin-top: 1px;" align="center" text-color="#7395d9" >Questions</h3>
+				</div>
+				
+			</div>
+		</div>
+	</div> <!-- /.row -->
+</div> <!-- /#filter-container -->
 
 <br>
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            Recent questions
-        </div>
-        <div class="panel-body">
-            <table id="myTable" class="tablesorter-blue"> 
-                 <colgroup>
-        <col width="5%" />
-        <col width="20%" />
-        <col width="50%" />
-        <col width="8%" />
-        <col width="8%" />
-        <col width="8%" />
-    </colgroup>
-	<thead> 
-	<tr> 
-		<th>No.</th>
-	        <th>FOSS</th>
-		<th>Question Title </th>
-		<th>Date</th>
-		<th>Views</th>
-		<th>Answers</th>
-	</tr> 
-	</thead> 
-	<tbody> 
-	  {% for question in questions %}
-		        <tr>
-			    <td></td>
-		            <td>
-		                <span class="category" data-toggle="tooltip" data-placement="top" >
-                {% if question.sub_category %}
-                <a class="pull-left" href="{% url 'website:filter' question.category question.sub_category %}?qid={{ question.id }}">
-                 {{ question.sub_category }}   
-                </a> 
-                {% else %}
-                 <a class="pull-left" href="{% url 'website:filter' question.category|lower %}?qid={{ question.id }}">
-                 {{ question.category|truncatechars:12 }}   
-                </a> 
-                {% endif %}
-                </span>
-		            </td>
-		           
-		            <td>
-		                <span class="question" data-toggle="tooltip" data-placement="top" >
-		                    <a href="{% url 'website:get_question' question.id %}{% prettify question.title %}">{{ question.title|truncatechars:40 }}</a>
-		                </span>           
-		            </td>
-		           
-		            <td>   
-		                <span>
-		                    <span style="display: none;">{{ question.date_created |date:"Y-m-d" }}</span>
-                                 {{ question.date_created|date:"d/m/y" }}
 
-		            </td>
-		           
-		            <td>
-		                {{ question.views}}
-		            </td>
-                
-		           
-		            <td>
-		                {{ question.answer_set.count }}
-		            </td>
-		          
-		          
-		        </tr>
-		        {% endfor %}
-		</tbody> 
-	</table> 
-        </div> <!-- /.panel-body -->
-    </div> <!-- /.panel -->
+<div class="panel panel-default">
+
+	<div class="panel-heading">
+		Recent questions
+	</div>
+
+	<div class="panel-body">
+
+		<table id="myTable" class="tablesorter-blue"> 
+
+			<colgroup>
+				<col width="5%" />
+				<col width="20%" />
+				<col width="50%" />
+				<col width="8%" />
+				<col width="8%" />
+				<col width="8%" />
+			</colgroup>
+
+			<thead> 
+				<tr> 
+					<th>No.</th>
+					<th>Category</th>
+					<th>Question Title </th>
+					<th>Date</th>
+					<th>Views</th>
+					<th>Answers</th>
+				</tr> 
+			</thead>
+				
+			<tbody> 
+				{% for question in questions|get_recent_questions %}
+				<tr>
+					<td></td>
+					<td>
+						<span class="category" data-toggle="tooltip" data-placement="top" >
+							{% if question.sub_category %}
+								<a class="pull-left" href="{% url 'website:filter' question.category question.sub_category %}?qid={{ question.id }}">
+								{{ question.sub_category }}   
+								</a> 
+								{% else %}
+								<a class="pull-left" href="{% url 'website:filter' question.category|lower %}?qid={{ question.id }}">
+								{{ question.category }}   
+								</a> 
+							{% endif %}
+						</span>
+					</td>
+						
+					<td>
+						<span class="question" data-toggle="tooltip" data-placement="top" >
+							<a href="{% url 'website:get_question' question.id %}">{{ question.title|truncatechars:40 }}</a>
+						</span>           
+					</td>
+					
+					<td>   
+						<span>{{ question.date_created|date:"d/m/y" }}</span>
+					</td>
+					
+					<td>
+						{{ question.views}}
+					</td>
+					
+					<td>
+						{{ question.answer_set.count }}
+					</td>
+				</tr>
+				{% endfor %}
+			</tbody> 
+		</table>
+	</div> <!-- /.panel-body -->
+</div> <!-- /.panel -->
 {% endblock %}
 
 {% block javascript %}
 <script>
 
-    $('table tbody tr').each(function(idx){
-                $(this).children(":eq(0)").html(idx + 1);
-    });
+	$('table tbody tr').each(function(idx){
+				$(this).children(":eq(0)").html(idx + 1);
+	});
 
 
 
-    $(document).ready(function(){
-        
-        $carousel = $('.carousel').slick({
-            lazyLoad: 'ondemand',
-            dots: false,
-            touchMove: false,
-            draggable: false,
-            slidesToShow: 4,
-            slidesToScroll: 1,
-            speed: 2000,
-            autoplay: true,
-            autoplaySpeed: 2000,
-            infinite: true,
-        });
-        $(".slick-prev").unbind();
-        $(".slick-next").unbind();
-        
-        $(".slick-prev").bind("click", function(e) {
-            var current_slide = $carousel.slickCurrentSlide();
-            $carousel.slickSetOption("slidesToScroll",3);
-            $carousel.slickGoTo(current_slide - 3);
-            $carousel.slickSetOption("slidesToScroll",1);
-            e.stopPropagation();
-        });
-        $(".slick-next").bind("click", function(e) {
-            var current_slide = $carousel.slickCurrentSlide();
-            $carousel.slickSetOption("slidesToScroll",3);
-            $carousel.slickGoTo(current_slide + 3);
-            $carousel.slickSetOption("slidesToScroll",1);
-            e.stopPropagation();
-        });
-        $("#filter-form").submit(function(e) {
-            var category = $("#filter-select").val();
-            if(category != -1) {
-                window.location = "/filter/" + category;
-            }
-            e.preventDefault();
-        });
-    });
-    $('span').tooltip();
+	$(document).ready(function(){
+		
+		$carousel = $('.carousel').slick({
+			lazyLoad: 'ondemand',
+			dots: false,
+			touchMove: false,
+			draggable: false,
+			slidesToShow: 4,
+			slidesToScroll: 1,
+			speed: 2000,
+			autoplay: true,
+			autoplaySpeed: 2000,
+			infinite: true,
+		});
+		$(".slick-prev").unbind();
+		$(".slick-next").unbind();
+		
+		$(".slick-prev").bind("click", function(e) {
+			var current_slide = $carousel.slickCurrentSlide();
+			$carousel.slickSetOption("slidesToScroll",3);
+			$carousel.slickGoTo(current_slide - 3);
+			$carousel.slickSetOption("slidesToScroll",1);
+			e.stopPropagation();
+		});
+		$(".slick-next").bind("click", function(e) {
+			var current_slide = $carousel.slickCurrentSlide();
+			$carousel.slickSetOption("slidesToScroll",3);
+			$carousel.slickGoTo(current_slide + 3);
+			$carousel.slickSetOption("slidesToScroll",1);
+			e.stopPropagation();
+		});
+		$("#filter-form").submit(function(e) {
+			var category = $("#filter-select").val();
+			if(category != -1) {
+				window.location = "/filter/" + category;
+			}
+			e.preventDefault();
+		});
+	});
+	$('span').tooltip();
 </script>
+
 <script src="{% static 'website/js/nice-bar.js' %}"></script>
 {% endblock %}

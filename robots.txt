@@ -1,0 +1,26 @@
+User-agent: *
+
+Disallow: /question/edit/*
+Disallow: /question-answer/*
+Disallow: /answer-comment/
+Disallow: /user/*/notifications/
+Disallow: /clear-notifications/
+Disallow: /vote_post/
+Disallow: /ans_vote_post/
+Disallow: /question/delete/*
+Disallow: /mark_answer_spam/*
+Disallow: /answer_delete/*
+Disallow: /moderator/*
+Disallow: /ajax-tutorials/
+Disallow: /ajax-answer-update/
+Disallow: /ajax-answer-comment-update/
+Disallow: /ajax-notification-remove/
+Disallow: /ajax-keyword-search/
+Disallow: /forgotpassword/
+Disallow: /password_reset/*
+Disallow: /changepassword/
+Disallow: /password_change/*
+Disallow: /accounts/logout/
+Disallow: /accounts/confirm/*
+Disallow: /accounts/profile/
+Disallow: /accounts/view-profile/*

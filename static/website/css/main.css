@@ -124,8 +124,7 @@ body {
 }
 #content .question .category a,
 #content .question .tutorial a,
-#content .question .minute_range a,
-#content .question .second_range a {
+.spam a, .non-spam a {
     padding: 3px 5px;
     margin: 0 5px 0 0;
     -webkit-border-radius: 3px;
@@ -143,14 +142,15 @@ body {
     width: 100px;
     overflow: hidden;
 }
-#content .question .minute_range a {
-    background: #f5f5f5;
-    color: #424242;
+.spam a {
+    background: red;
+    color: white;
 }
-#content .question .second_range a {
-    background: #f5f5f5;
-    color: #424242;
+.non-spam a {
+    background: #42B449;
+    color: white;
 }
+
 #question-details-edit {
     position: relative;
     top: 2px;
@@ -196,8 +196,7 @@ table .question a{
     top: 0;
     right:0;
 }
-.modify a.edit {
-}
+
 .modify a.save {
     display: none;
 }
@@ -249,15 +248,17 @@ table .question a{
 }
 #content .answer .body {
 	 padding-bottom: 10px;
-   ,,
 }
+
 #content .answer .user {
     padding: 2px 7px;
     background: #f5f5f5;
 }
+
 .comments {
     border-left: 1px solid #cccccc;
 }
+
 .comments .comment {
     position: relative;
     padding: 5px 5px;
@@ -441,9 +442,9 @@ table .question a{
     font-size: 107%;
     margin-bottom: 5px;
     margin-right: 5px;
-        margin-right-value: 5px;
-        margin-right-ltr-source: physical;
-        margin-right-rtl-source: physical;
+    margin-right-value: 5px;
+    margin-right-ltr-source: physical;
+    margin-right-rtl-source: physical;
     line-height: 130%;
 }
 
@@ -493,4 +494,24 @@ table .question a{
     font-weight:600;
     font-size:12px;
     text-align:center;
+}
+
+a.delete {
+    background-color: #e60000;
+    border-color: #cc0000;
+}
+
+a.delete-comment {
+    background-color: #e01d27;
+    border-color: #cc0000;
+    display: none;
+}
+
+a.delete:hover, a.delete:focus, a.delete:active, a.delete-comment:hover, a.delete-comment:focus, a.delete-comment:active {
+    background-color: #b30000;
+    border-color: #cc0000;
+}
+
+.comment:hover a.delete-comment, a.delete-comment:hover {
+    display: inline-block;
 }
