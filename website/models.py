@@ -7,9 +7,11 @@ from django_resized import ResizedImageField
 from ckeditor.fields import RichTextField
 
 
+
+
 class FossCategory(models.Model):
 
-    name = models.CharField(max_length = 100)
+    name = models.CharField(max_length = 100, default='None', blank=True)
     description = models.TextField()
     date_created = models.DateTimeField(auto_now_add = True)
     date_modified = models.DateTimeField(auto_now = True)
@@ -17,10 +19,15 @@ class FossCategory(models.Model):
     def __str__(self):
         return self.name
 
+
+class ModeratorGroup(models.Model):
+    group = models.OneToOneField(Group, on_delete = models.CASCADE)
+    category = models.ForeignKey(FossCategory, on_delete = models.CASCADE)
+
 class SubFossCategory(models.Model):
 
     parent = models.ForeignKey(FossCategory, on_delete = models.CASCADE)
-    name = models.CharField(max_length = 100)
+    name = models.CharField(max_length = 100, default='None', blank=True)
     date_created = models.DateTimeField(auto_now_add = True)
     date_modified = models.DateTimeField(auto_now = True)
     def __str__(self):
@@ -36,8 +43,8 @@ class Question(models.Model):
     date_created = models.DateTimeField(auto_now_add = True)
     date_modified = models.DateTimeField(auto_now = True)
     views = models.IntegerField(default = 1)
-    userUpVotes = models.ManyToManyField(User, blank = True, related_name = 'postUpVotes')
-    userDownVotes = models.ManyToManyField(User, blank = True, related_name = 'postDownVotes')
+    userUpVotes = models.ManyToManyField(User, blank = True, related_name = 'postUpVotes', default = 0)
+    userDownVotes = models.ManyToManyField(User, blank = True, related_name = 'postDownVotes', default = 0)
     userViews = models.ManyToManyField(User, blank = True, related_name = 'postViews')
     num_votes = models.IntegerField(default = 0)
     is_spam = models.BooleanField(default = False)
@@ -57,8 +64,8 @@ class Answer(models.Model):
     body = RichTextField()
     date_created = models.DateTimeField(auto_now_add = True)
     date_modified = models.DateTimeField(auto_now = True)
-    userUpVotes = models.ManyToManyField(User, blank = True, related_name = 'postAnswerUpVotes')
-    userDownVotes = models.ManyToManyField(User, blank = True, related_name = 'postAnswerDownVotes')
+    userUpVotes = models.ManyToManyField(User, blank = True, related_name = 'postAnswerUpVotes', default = 0)
+    userDownVotes = models.ManyToManyField(User, blank = True, related_name = 'postAnswerDownVotes', default = 0)
     num_votes = models.IntegerField(default = 0)
     is_spam = models.BooleanField(default = False)
     image = ResizedImageField(size = [800, 800], upload_to = "images/answers/", blank = True)
@@ -86,6 +93,7 @@ class Notification(models.Model):
 
     uid = models.IntegerField()
     qid = models.IntegerField()
+    pid = models.IntegerField(default = 0)
     aid = models.IntegerField(default = 0)
     cid = models.IntegerField(default = 0)
     date_created = models.DateTimeField(auto_now_add = True)
@@ -104,3 +112,4 @@ class Profile(models.Model):
 class ModeratorGroup(models.Model):
     group = models.OneToOneField(Group, on_delete = models.CASCADE)
     category = models.ForeignKey(FossCategory, on_delete = models.CASCADE)
+
