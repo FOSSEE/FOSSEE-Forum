@@ -164,3 +164,4 @@ class AnswerCommentForm(forms.Form):
         if (temp.isspace() or temp == ''):
             raise forms.ValidationError("Body cannot be only tags")
         return body
+
