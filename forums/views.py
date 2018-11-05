@@ -144,7 +144,7 @@ def account_profile(request):
 
 # view all profile details saved for the user, when clicked on my profile
 @login_required
-def account_view_profile(request, user_id):
+def account_view_profile(request, user_id=None):
 
     user = User.objects.get(pk = user_id)
     try:
@@ -246,3 +246,4 @@ def user_login(request):
 def user_logout(request):
     logout(request)
     return HttpResponseRedirect('/')
+
