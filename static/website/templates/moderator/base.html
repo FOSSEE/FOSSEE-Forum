@@ -99,14 +99,25 @@
                                 </ul>
 
                               </li>
+                              <li class="dropdown">
 
-                              <li>
-                                  <a href="{% url 'user_logout' %}">
-                                      <span class="glyphicon glyphicon-user"></span>
-                                      Logout
-                                  </a>
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                   <span class="glyphicon glyphicon-user"></span>
+                                   {{ user }}<b class="caret"></b>
+                                </a>
+
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a href="/accounts/view-profile/{{ user.id }}">My Profile</a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'password_change' %}">Change password</a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'user_logout' %}">Logout</a>
+                                    </li>
+                                </ul>
                               </li>
-
                             </ul>
                         </div> <!-- /.navbar-collapse -->
                     </div> <!-- /.container -->
@@ -127,7 +138,7 @@
         <div id="footer-wrapper" class="container">
             <div id="footer-inner" class="col-lg-12 col-md-12 col-sm-12">
                 <a class="navbar-brand" href="https://fossee.in/" target="_blank">
-                    <img id="logo" src="{% static 'website/images/logo.png' %}"> <!-- FOSSEE Forums -->               
+                    <img id="logo" src="{% static 'website/images/logo.png' %}"> <!-- FOSSEE Forums -->
                 </a>
                 <div class="cc">
                     <a class="cc-logo" rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">
@@ -162,5 +173,6 @@
     </script>
 
     </body>
-    
+
 </html>
+
