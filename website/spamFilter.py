@@ -103,3 +103,4 @@ def predict(emailBody):
 model = LinearSVC(class_weight = 'balanced')
 vectorizer = TfidfVectorizer(stop_words = 'english', max_df = 75)
 train()
+
