@@ -1,7 +1,7 @@
-{% extends 'website/templates/base.html' %}
+{% extends MODERATOR_ACTIVATED|yesno:'website/templates/moderator/base.html,website/templates/base.html' %}
 {% load helpers %}
 {% block title %}
-    {{ question.category }} - FOSSEE Forums
+    {{ category }} - FOSSEE Forums
 {% endblock %}
 {% block content %}
 
@@ -17,27 +17,21 @@
      </script>
 
 {% if questions %}
-<h5 style="padding-top: 15px;">
-   All questions under the category:
-    
-     {% for category in categories %}
-     {% if category %}
-        {{ category }}
-    {% endif %}
-    {% if tutorial %}
-       {{ name }}
-    {% endif %}
-    {% if minute_range %}
-       <b> &gt; </b>
-       {{ minute_range }} min
-    {% endif %}
-    {% if second_range %}
-       <b> &gt; </b>
-       {{ second_range }} sec
-    {% endif %}
-    <a class="btn btn-xs btn-success pull-right" href="{% url 'website:new_question' %}?category={{ category.id |urlencode }}">Ask a question</a>
-     {% endfor %}
-</h5>
+{% block pagetop %}
+    <h5 style="padding-top: 15px;">
+    All questions under the category:
+        
+        {% if category %}
+            {{ category }}
+        {% endif %}
+        {% if tutorial %}
+        {{ name }}
+        {% endif %}
+        {% if not MODERATOR_ACTIVATED %}
+            <a class="btn btn-xs btn-success pull-right" href="{% url 'website:new_question' %}?category={{ category.id |urlencode }}">Ask a question</a>
+        {% endif %}
+    </h5>
+{% endblock %}
 <br>
 <div class="clearfix"></div>
 
@@ -45,10 +39,14 @@
        <thead> 
 	<tr> 
 		<th>No.</th>
-	        <th>FOSS</th>
+	    <th>Category</th>
 		<th>Question </th>
-		<th>Date</th>
-		<th>Views</th>
+        <th>Date</th>
+        {% if MODERATOR_ACTIVATED %}
+            <th>Spam</th>
+        {% else %}
+            <th>Views</th>
+        {% endif %}
 		<th>Answers</th>
 		<th>User</th>  
 	</tr> 
@@ -56,16 +54,15 @@
 
 	<tbody> 
         {% for question in questions %}
-        <tr {% if question.id == qid %}class="parent-filter"{% endif %}>
 	    <td></td>
             <td>
                 <span class="category" data-toggle="tooltip" data-placement="top" >
                 {% if question.sub_category %}
-                <a class="pull-left" href="{% url 'website:filter' question.category question.sub_category %}?qid={{ question.id }}">
+                <a class="pull-left" href="{% url 'website:filter' question.category question.sub_category %}">
                  {{ question.sub_category|truncatechars:12 }}   
                 </a> 
                 {% else %}
-                 <a class="pull-left" href="{% url 'website:filter' question.category|lower %}?qid={{ question.id }}">
+                 <a class="pull-left" href="{% url 'website:filter' question.category|lower %}">
                  {{ question.category|truncatechars:12 }}   
                 </a> 
                 {% endif %}
@@ -74,7 +71,7 @@
 
             <td>
                 <span class="question" data-toggle="tooltip" data-placement="top" >
-                    <a href="{% url 'website:get_question' question.id %}{% prettify question.title %}">{{ question.title|truncatechars:40 }}</a>
+                    <a href="{% url 'website:get_question' question.id %}">{{ question.title|truncatechars:40 }}</a>
                 </span>            
             </td>
 
@@ -86,9 +83,16 @@
                 </span>
             </td>
                     
+            {% if MODERATOR_ACTIVATED %}
             <td>
-                {{ question.views}}
+                {{ question.is_spam|yesno:"Yes, No" }}
             </td>
+
+            {% else %}
+            <td>
+                {{ question.views }}
+            </td>
+            {% endif %}
 
             <td>
                 {{ question.answer_set.count }}

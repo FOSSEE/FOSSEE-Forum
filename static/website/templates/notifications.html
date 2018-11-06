@@ -1,26 +1,30 @@
 {% extends 'website/templates/base.html' %}
 {% load notify %}
-{% block content%}
-    <h4 class="pull-left">Notifications</h4>
-    <a class="btn btn-xs btn-warning pull-right" href="{% url "website:clear_notifications" %}" style="margin-top: 7px;">
-        Clear All
-    </a>
-    <div class="clearfix"></div> 
-    {% for notification in notifications %}
-        {% get_notification notification.id %}
-    {% endfor %}
-{% endblock %}
+
 {% block title %}
     Notificatons - FOSSEE Forums
 {% endblock %}
 
+{% block content%}
+    <h4 class="pull-left">Notifications</h4>
+    <a class="btn btn-xs btn-warning pull-right" href="{% url 'website:clear_notifications' %}" style="margin-top: 7px;">
+        Clear All
+    </a>
+    <div class="clearfix"></div> 
+
+    {% for notification in notifications %}
+        {% get_notification notification.id %}
+    {% endfor %}
+{% endblock %}
+
 {% block javascript %}
     <script type="text/javascript">
-       $(document).ready(function() {
-            $(".remove").click(function() {
+        $(document).ready(function() {
+
+            $(".remove").one("click", function() {
                 $(this).parent(".notification").slideUp();
                 var notification_id = $(this).data("nid");
-                $.ajax({
+                $.post({
                     url: "/ajax-notification-remove/",
                     type: "POST",
                     data: {
@@ -32,22 +36,21 @@
                 });
             });
             
-            $(".rmc").click(function() {
-            	 $(this).parent(".notification").slideUp();
-               
+            $(".rmc").one("click", function() {
+            	$(this).parent(".notification").slideUp();   
                 var notification_id = $(this).data("nid");
-                $.ajax({
+                $.post({
                     url: "/ajax-notification-remove/",
                     type: "POST",
                     data: {
                         notification_id: notification_id
                     },
                     success: function(data) {
-                        console.log(data);
-                       
+                        console.log(data); 
                     }
                 });
             });
+            
         });
     </script>
 {% endblock %}

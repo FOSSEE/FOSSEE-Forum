@@ -25,7 +25,7 @@
 
             <td>
                 <span class="question" data-toggle="tooltip" data-placement="top" title="{{ question.title }}">
-                    <a href="{% url 'website:get_question' question.id %}{% prettify question.title %}">{{ question.title|truncatechars:40 }}</a>
+                    <a href="{% url 'website:get_question' question.id %}">{{ question.title|truncatechars:40 }}</a>
                 </span>            
             </td>
 

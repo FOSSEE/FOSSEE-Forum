@@ -1,4 +1,4 @@
-{% extends 'website/templates/base.html' %}
+{% extends MODERATOR_ACTIVATED|yesno:'website/templates/moderator/base.html,website/templates/base.html' %}
 {% load static %}
 {% load widget_tweaks %}
 {% block title %}
@@ -7,13 +7,14 @@
 {% block content %}
     <h4 style="padding-top: 15px;">
         <span class="glyphicon glyphicon-pencil">
-        </span> Create a new question . . .
+        </span> {% block pagetitle %} Create a new question . . . {% endblock %}
     </h4>
     <hr>
-    <form role="form" action="" method="POST" >{% csrf_token %}
+    <form role="form" action="" method="POST" enctype="multipart/form-data">{% csrf_token %}
+    {{ form.media }}
     {% with WIDGET_ERROR_CLASS='field_error' %}
     <p>
-    Select the category.
+    <strong>Select the category:</strong>
         <img id="ajax-loader" src="{% static 'website/images/ajax-loader.gif' %}" style="display:none;">
     </p>
     <div class="row">
@@ -28,101 +29,78 @@
                 {% render_field form.tutorial class+="form-control" %} 
             {% endif %}
         </div>
-        <div class="col-lg-2 col-md-2 col-sm-2">
-            <small><strong>
-            <a id="similar-link" data-toggle="modal" data-target="#similarModal" href="#">
-                0 similar questions
-            </a>
-            </strong></small>
-        </div>
     </div>
+
     <hr>
+
     <div class="row">
         <div class="col-lg-12">
-         {{ form.title.errors }}
+            {{ form.title.errors }}
             <div class="form-group">
-                <label for="id_title">Question Title:</label>
+                <label for="id_title"><strong>Question Title:</strong></label>
                 {% render_field form.title class+="form-control title" %} 
             </div>
             {{ form.body.errors }}
-             <div class="form-group">
-                <label for="id_body" >Question Description:</label>
-        
+            <div class="form-group">
+                <label for="id_body" ><strong>Question Description:</strong></label>
+                <br>
                 {% render_field form.body class+="form-control body" %}
             </div>
+            {{ form.image.errors }}
+            <div class="form-group">
+                {% block picturetitle %}
+                    <label for="id_image" ><strong>Upload a picture:</strong></label>
+                {% endblock %}
+                {% render_field form.image %}
+            </div>
 
-           
+            <div class="form-group">
+                {% block spamCheckbox %}
+                {% endblock %}
+            </div>
         </div>
     </div>
+
     <script src='https://www.google.com/recaptcha/api.js'></script>
-                    <div class="g-recaptcha" data-sitekey="{{ SITE_KEY }}" data-callback="enableBtn"></div>
-                             <script>
-            function enableBtn(){
-    document.getElementById("submit_question").disabled = false;
-   }
-           </script>
-    <input id="submit_question" class="btn btn-success" type="submit" onclick = "return validate_dd();" value="Submit Question" disabled>
+    <div class="g-recaptcha" data-sitekey="{{ SITE_KEY }}" data-callback="enableBtn"></div>
+
+    <script type="text/javascript">
+        function enableBtn() {
+            document.getElementById("submit_question").disabled = false;
+        }
+        function changeText() {
+            document.getElementById("submit_question").value = "Submitting...";
+            return validate_dd();
+        }
+    </script>
+
+    {% block submitbutton %}
+        <br>
+        <input id="submit_question" class="btn btn-success" onclick="changeText()" type="submit" value="Submit Question" disabled>
+    {% endblock %}
+    
     {% endwith %}
     </form>
 
-    <!-- Modal -->
-    <div class="modal fade" id="similarModal" tabindex="-1" role="dialog" aria-labelledby="similarModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h4 class="modal-title" id="myModalLabel">Similar Questions</h4>
-          </div>
-          <div class="modal-body" id="modal-body">
-            ...
-          </div>
-        </div><!-- /.modal-content -->
-      </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
-
-<script src="{% static 'website/js/nicEdit.js' %}" type="text/javascript"></script>
-<script type="text/javascript">
-bkLib.onDomLoaded(function() {
-    new nicEditor({
-        fullPanel : true,
-        iconsPath: "{% static 'website/js/nicEditorIcons.gif' %}",
-        buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link', 'forecolor', 'bgcolor']
-    }).panelInstance('id_body');
-});
-</script>
-
-
-
-<script>
-window.onload = function(){
-    
-    var c2= "{{ category }}";
-    
-    if (c2 != '12'){
-      
-        $(".tutorial" ).hide()    
-     }
-     else {
-         $(".tutorial" ).show()    
-
-     }
-    if (c2 == "None"){
-      
-         // $("#id_category").val(c2);
-         $( "#id_category option" ).prop('disabled',false);         
-     }   
-
-     else  if(c2 != ""){
-       
-         $("#id_category").val(c2);
-         $( "#id_category option:not(:selected)" ).prop('disabled',true);     
-     }
-}
-</script>
-
-
-
-
+    <script>
+        window.onload = function(){        
+            var c2= "{{ category }}";   
+            if (c2 != '12'){      
+                $(".tutorial" ).hide();  
+            }
+            else {
+                $(".tutorial" ).show();    
+            }
+            if (c2 == "None"){  
+                // $("#id_category").val(c2);
+                $( "#id_category option" ).prop('disabled',false);         
+            }   
+            else  if(c2 != ""){   
+                $("#id_category").val(c2);
+                $( "#id_category option:not(:selected)" ).prop('disabled',true);     
+            }      
+        }
+    </script>
 {% endblock %}
 
 {% block javascript %}
