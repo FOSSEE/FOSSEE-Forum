@@ -530,7 +530,7 @@ def question_delete(request, question_id):
                 question.body,
                 delete_reason,
             )
-            send_mail(subject, message, sender_email, to, fail_silenty = True)
+            send_mail(subject, message, sender_email, to, fail_silently = True)
 
     question.delete()
     return render(request, 'website/templates/question-delete.html', {'title': title})
