@@ -109,7 +109,4 @@ class Profile(models.Model):
     class Meta(object):
         app_label = 'website'
 
-class ModeratorGroup(models.Model):
-    group = models.OneToOneField(Group, on_delete = models.CASCADE)
-    category = models.ForeignKey(FossCategory, on_delete = models.CASCADE)
 
