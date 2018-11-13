@@ -3,6 +3,7 @@ from django import forms
 from django.conf import settings
 from antispam.honeypot.forms import HoneypotField
 from bs4 import BeautifulSoup
+from django.forms import ModelForm, widgets
 from ckeditor.widgets import CKEditorWidget
 from website.models import *
 
