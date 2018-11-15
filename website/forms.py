@@ -71,7 +71,7 @@ class NewQuestionForm(forms.ModelForm):
         image = self.cleaned_data['image']
 
         if (image != None):
-            if (image._size > settings.MAXIMUM_FILE_SIZE):
+            if (image.size > settings.MAXIMUM_FILE_SIZE):
                 raise forms.ValidationError('File size needs to be under {0} MB.'.format(settings.MAX_FILE_SIZE_MB))
 
         return image
@@ -138,7 +138,7 @@ class AnswerQuestionForm(forms.ModelForm):
         image = self.cleaned_data['image']
 
         if (image != None):
-            if (image._size > settings.MAXIMUM_FILE_SIZE):
+            if (image.size > settings.MAXIMUM_FILE_SIZE):
                 raise forms.ValidationError('File size needs to be under {0} MB.'.format(settings.MAX_FILE_SIZE_MB))
 
         return image
