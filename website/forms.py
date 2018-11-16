@@ -7,10 +7,6 @@ from django.forms import ModelForm, widgets
 from ckeditor.widgets import CKEditorWidget
 from website.models import *
 
-tutorials = (
-    ("Select a Tutorial", "Select a Tutorial"),
-)
-
 class CustomClearableFileInput(forms.ClearableFileInput):
     template_name = 'forums/templates/clearable_file_input.html'
 
