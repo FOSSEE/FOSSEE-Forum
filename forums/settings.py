@@ -42,7 +42,7 @@ FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 
 
 
-DEBUG = SITE_DEBUG
+DEBUG = True
 
 SITE_ID = SET_SITE_ID
 SET_TO_EMAIL_ID = TO_EMAIL_ID
@@ -163,6 +163,7 @@ INSTALLED_APPS = (
     'widget_tweaks',
     'captcha',
     'ckeditor',
+    'ckeditor_uploader',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -214,6 +215,8 @@ DEBUG_TOOLBAR_PATCH_SETTINGS = False
 
 EMAIL_URL = EMAIL_URL
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+#EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+#EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
 
 #Sender email, forum notification email, domain name
 SENDER_EMAIL = SENDER_EMAIL
@@ -251,7 +254,7 @@ CKEDITOR_CONFIGS = {
     'default': {
         'toolbar': 'Custom',
         'toolbar_Custom': [
-            {'name': 'clipboard', 'items': ['Cut', 'Copy', 'Paste', 'Undo', 'Redo']},
+            {'name': 'clipboard', 'items': ['Cut', 'Copy', 'Paste','Undo', 'Redo', 'PasteText', 'PasteFromWord']},
             {'name': 'editing', 'items': ['Scayt']},
             {'name': 'links', 'items': ['Link', 'Unlink', 'Anchor']},
             {'name': 'insert', 'items': ['Table', 'HorizontalRule', 'SpecialChar', 'Smiley']},
@@ -265,6 +268,9 @@ CKEDITOR_CONFIGS = {
         ],
         'removePlugins': 'elementspath',
         'toolbarCanCollapse': True,
+               'extraPlugins': ','.join([
+               'uploadimage',
+        ]),
     }
 }
 
