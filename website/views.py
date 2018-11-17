@@ -141,12 +141,16 @@ def question_answer(request, question_id):
             bcc_email = settings.BCC_EMAIL_ID
             subject = "FOSSEE Forums - {0} - Your question has been answered".format(question.category)
             to = [question.user.email]
-            message = """The following new answer has been posted in the FOSSEE Forum: \n\n
-                Title: {0} \n
-                Category: {1}\n
-                Link: {2}\n\n
+            message = """The following new answer has been posted in the FOSSEE Forum: <br><br>
+                <b>Title:</b> {0} <br>
+                <b>Category:</b> {1}<br>
+                <b>Link:</b> {2}<br><br>
 
-                Regards, \nFOSSEE Team, \nIIT Bombay.
+                Regards,<br>
+                FOSSEE Team,<br>
+                FOSSEE, IIT Bombay
+                <br><br><br>
+                <center><h6>*** This is an automatically generated email, please do not reply***</h6></center>
                 """.format(
                 question.title,
                 question.category,
@@ -159,6 +163,8 @@ def question_answer(request, question_id):
                 headers = {"Content-type":"text/html;charset=iso-8859-1"}
             )
             email.attach_alternative(message, "text/html")
+            email.content_subtype = 'html'  # Main content is text/html
+            email.mixed_subtype = 'related'
             email.send(fail_silently = True)
 
 
@@ -218,11 +224,15 @@ def answer_comment(request):
             subject = "FOSSEE Forums - {0} - Comment for your answer".format(answer.question.category)
             to = [answer_creator.email]
             message = """
-                A comment has been posted on your answer. \n\n
-                Title: {0}\n
-                Category: {1}\n
-                Link: {2}\n\n
-                Regards, \nFOSSEE Team, \nIIT Bombay.
+                A comment has been posted on your answer. <br><br>
+                <b>Title:</b> {0}<br>
+                <b>Category:</b> {1}<br>
+                <b>Link:</b> {2}<br><br>
+                Regards,<br>
+                FOSSEE Team,<br>
+                FOSSEE, IIT Bombay
+                <br><br><br>
+                <center><h6>*** This is an automatically generated email, please do not reply***</h6></center>
                 """.format(
                 answer.question.title,
                 answer.question.category,
@@ -235,6 +245,8 @@ def answer_comment(request):
                 headers = {"Content-type":"text/html;charset=iso-8859-1"}
             )
             email.attach_alternative(message, "text/html")
+            email.content_subtype = 'html'  # Main content is text/html
+            email.mixed_subtype = 'related'
             email.send(fail_silently = True)
 
             # notifying other users in the comment thread
@@ -244,9 +256,6 @@ def answer_comment(request):
             comment_creator_emails = []
             for c in answer_comments:
                 comment_creator = c.user()
-                email = comment_creator.email
-                comment_creator_emails.append(email)
-            comment_creator_emails.append(settings.FORUM_NOTIFICATION)
 
             # getting distinct uids
             uids = set(uids)
@@ -263,13 +272,17 @@ def answer_comment(request):
             sender_email = settings.SENDER_EMAIL
             bcc_email = settings.BCC_EMAIL_ID
             subject = "FOSSEE Forums - {0} - Comment has a reply".format(answer.question.category)
-            to = comment_creator_emails
+            to = [comment_creator.email]
             message = """
-                A reply has been posted on your comment.\n\n
-                Title: {0}\n
-                Category: {1}\n
-                Link: {2}\n\n
-                Regards, \nFOSSEE Team, \nIIT Bombay.
+                A reply has been posted on your comment.<br><br>
+                <b>Title:</b> {0}<br>
+                <b>Category:</b> {1}<br>
+                <b>Link:</b> {2}<br><br>
+                Regards,<br>
+                FOSSEE Team,<br>
+                FOSSEE, IIT Bombay
+                <br><br><br>
+                <center><h6>*** This is an automatically generated email, please do not reply***</h6></center>
                 """.format(
                 answer.question.title,
                 answer.question.category,
@@ -283,6 +296,8 @@ def answer_comment(request):
                 headers = {"Content-type":"text/html;charset=iso-8859-1"}
             )
             email.attach_alternative(message, "text/html")
+            email.content_subtype = 'html'  # Main content is text/html
+            email.mixed_subtype = 'related'
             email.send(fail_silently = True)
 
             return HttpResponseRedirect('/question/{0}/'.format(answer.question.id))
@@ -378,7 +393,12 @@ def new_question(request):
                 <b> Category: </b>{1}<br>
                 <b> Link: </b><a href="{3}">{3}</a><br>
                 <b> Question : </b>{2}<br>
-                <b> Classified as spam: </b>{4}<br>
+                <b> Classified as spam: </b>{4}<br><br>
+                Regards,<br>
+                FOSSEE Team,<br>
+                FOSSEE, IIT Bombay
+                <br><br><br>
+                <center><h6>*** This is an automatically generated email, please do not reply***</h6></center>
                 """.format(
                 question.title,
                 question.category,
@@ -388,11 +408,13 @@ def new_question(request):
             )
             email = EmailMultiAlternatives(
                 subject, '',
-                sender_email, to,
+                sender_email, [to],
                 bcc=[bcc_email],
                 headers = {"Content-type":"text/html;charset=iso-8859-1"}
             )
             email.attach_alternative(message, "text/html")
+            email.content_subtype = 'html'  # Main content is text/html
+            email.mixed_subtype = 'related'
             email.send(fail_silently = True)
 
             if (question.is_spam):
@@ -479,7 +501,7 @@ def edit_question(request, question_id):
             sender_email = settings.SENDER_EMAIL
             subject = "FOSSEE Forums - {0} - New Question".format(question.category)
             #to = (question.user.email, question.category.email, settings.FORUM_NOTIFICATION)
-            to = question.user.email
+            to = (question.user.email)
             bcc_email = (uestion.category.email, settings.FORUM_NOTIFICATION)
             message = """
                 The following question has been edited in the FOSSEE Forum: <br>
@@ -488,7 +510,12 @@ def edit_question(request, question_id):
                 <b> Category: </b>{2}<br>
                 <b> Link: </b><a href="{4}">{4}</a><br>
                 <b> Question : </b>{3}<br>
-                <b> Classified as spam: </b>{5}<br>
+                <b> Classified as spam: </b>{5}<br><br>
+                Regards,<br>
+                FOSSEE Team,<br>
+                FOSSEE, IIT Bombay
+                <br><br><br>
+                <center><h6>*** This is an automatically generated email, please do not reply***</h6></center>
                 """.format(
                 question.title,
                 previous_title,
@@ -503,6 +530,8 @@ def edit_question(request, question_id):
                 headers = {"Content-type":"text/html;charset=iso-8859-1"}
             )
             email.attach_alternative(message, "text/html")
+            email.content_subtype = 'html'  # Main content is text/html
+            email.mixed_subtype = 'related'
             email.send(fail_silently = True)
 
             if (question.is_spam and not settings.MODERATOR_ACTIVATED):
@@ -546,15 +575,20 @@ def question_delete(request, question_id):
             sender_name = "FOSSEE Forums"
             sender_email = settings.SENDER_EMAIL
             subject = "FOSSEE Forums - {0} - New Question".format(question.category)
-            to = (question.user.email)
+            to = [question.user.email]
             bcc_email = settings.BCC_EMAIL_ID
-            delete_reason = request.POST['deleteQuestion']
+            delete_reason = request.POST.get('deleteQuestion')
             message = """
                 The following question has been deleted by a moderator of the FOSSEE Forum: <br>
                 <b> Title: </b>{0}<br>
                 <b> Category: </b>{1}<br>
                 <b> Question: </b>{2}<br>
-                <b> Moderator comments: </b>{3}<br>
+                <b> Moderator comments: </b>{3}<br><br>
+                Regards,<br>
+                FOSSEE Team,<br>
+                FOSSEE, IIT Bombay
+                <br><br><br>
+                <center><h6>*** This is an automatically generated email, please do not reply***</h6></center>
                 """.format(
                 title,
                 question.category,
@@ -568,6 +602,8 @@ def question_delete(request, question_id):
                 headers = {"Content-type":"text/html;charset=iso-8859-1"}
             )
             email.attach_alternative(message, "text/html")
+            email.content_subtype = 'html'  # Main content is text/html
+            email.mixed_subtype = 'related'
             email.send(fail_silently = True)
             #send_mail(subject, message, sender_email, to, fail_silently = True)
 
@@ -590,13 +626,18 @@ def answer_delete(request, answer_id):
         subject = "FOSSEE Forums - {0} - Answer Deleted".format(answer.question.category)
         to = [answer.user().email]
         bcc_email = settings.BCC_EMAIL_ID
-        delete_reason = request.POST['deleteAnswer']
+        delete_reason = request.POST.get('deleteAnswer')
         message = """
             The following answer has been deleted by a moderator in the FOSSEE Forum: <br>
             <b> Answer: </b>{0}<br>
             <b> Category: </b>{1}<br>
             <b> Question: </b>{2}<br>
-            <b> Moderator comments: </b>{3}<br>
+            <b> Moderator comments: </b>{3}<br><br>
+            Regards,<br>
+            FOSSEE Team,<br>
+            FOSSEE, IIT Bombay
+            <br><br><br>
+            <center><h6>*** This is an automatically generated email, please do not reply***</h6></center>
             """.format(
             answer.body,
             answer.question.category,
@@ -610,6 +651,8 @@ def answer_delete(request, answer_id):
             headers = {"Content-type":"text/html;charset=iso-8859-1"}
         )
         email.attach_alternative(message, "text/html")
+        email.content_subtype = 'html'  # Main content is text/html
+        email.mixed_subtype = 'related'
         email.send(fail_silently = True)
 
     answer.delete()
