@@ -244,7 +244,7 @@
                     </div>
                     <div class="modal-body">
                         <h5>Why is this answer being deleted?</h5>
-                        <form method="POST" action="{% url 'website:question_delete' question.id %}">
+                        <form method="POST" action="{% url 'website:answer_delete' answer.id %}">
                         {% csrf_token %}
                             <textarea name="deleteAnswer" required></textarea>
                             <hr>
