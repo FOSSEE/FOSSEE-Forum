@@ -9,6 +9,7 @@ SET_SITE_ID = 2
 SITE_DEBUG = ['False'] #set debug option
 
 SENDER_EMAIL = 'sender@mail.com'
+BCC_EMAIL_ID = 'bcc@mail.com'
 FORUM_NOTIFICATION = 'forumnotifications@email.id'
 
 EMAIL_URL = 'Site URL for email content'

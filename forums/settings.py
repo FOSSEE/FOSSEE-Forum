@@ -2,7 +2,6 @@
 from os.path import *
 #from config import *
 from .local import *
-from forums.settings import TO_EMAIL_ID
 from .local import SET_SITE_ID
 import os
 
@@ -45,7 +44,6 @@ FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 DEBUG = True
 
 SITE_ID = SET_SITE_ID
-SET_TO_EMAIL_ID = TO_EMAIL_ID
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -220,6 +218,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 #Sender email, forum notification email, domain name
 SENDER_EMAIL = SENDER_EMAIL
+BCC_EMAIL_ID = BCC_EMAIL_ID
 FORUM_NOTIFICATION = FORUM_NOTIFICATION
 DOMAIN_NAME = DOMAIN_NAME
 
