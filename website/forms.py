@@ -146,7 +146,7 @@ class AnswerQuestionForm(forms.ModelForm):
 
 class AnswerCommentForm(forms.Form):
 
-    body = forms.CharField(widget = forms.Textarea(), required = True,
+    body = forms.CharField(widget = CKEditorWidget(), required = True,
         error_messages = {'required':'Comment field required'})
     spam_honeypot_field = HoneypotField()
 
