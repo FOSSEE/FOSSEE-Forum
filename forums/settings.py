@@ -2,7 +2,6 @@
 from os.path import *
 #from config import *
 from .local import *
-from forums.settings import TO_EMAIL_ID
 from .local import SET_SITE_ID
 import os
 
@@ -42,10 +41,9 @@ FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 
 
 
-DEBUG = SITE_DEBUG
+DEBUG = True
 
 SITE_ID = SET_SITE_ID
-SET_TO_EMAIL_ID = TO_EMAIL_ID
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -163,6 +161,7 @@ INSTALLED_APPS = (
     'widget_tweaks',
     'captcha',
     'ckeditor',
+    'ckeditor_uploader',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -214,9 +213,12 @@ DEBUG_TOOLBAR_PATCH_SETTINGS = False
 
 EMAIL_URL = EMAIL_URL
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+#EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+#EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
 
 #Sender email, forum notification email, domain name
 SENDER_EMAIL = SENDER_EMAIL
+BCC_EMAIL_ID = BCC_EMAIL_ID
 FORUM_NOTIFICATION = FORUM_NOTIFICATION
 DOMAIN_NAME = DOMAIN_NAME
 
@@ -251,7 +253,7 @@ CKEDITOR_CONFIGS = {
     'default': {
         'toolbar': 'Custom',
         'toolbar_Custom': [
-            {'name': 'clipboard', 'items': ['Cut', 'Copy', 'Paste', 'Undo', 'Redo']},
+            {'name': 'clipboard', 'items': ['Cut', 'Copy', 'Paste','Undo', 'Redo', 'PasteText', 'PasteFromWord']},
             {'name': 'editing', 'items': ['Scayt']},
             {'name': 'links', 'items': ['Link', 'Unlink', 'Anchor']},
             {'name': 'insert', 'items': ['Table', 'HorizontalRule', 'SpecialChar', 'Smiley']},
@@ -265,6 +267,9 @@ CKEDITOR_CONFIGS = {
         ],
         'removePlugins': 'elementspath',
         'toolbarCanCollapse': True,
+               'extraPlugins': ','.join([
+               'uploadimage',
+        ]),
     }
 }
 

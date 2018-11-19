@@ -7,10 +7,6 @@ from django.forms import ModelForm, widgets
 from ckeditor.widgets import CKEditorWidget
 from website.models import *
 
-tutorials = (
-    ("Select a Tutorial", "Select a Tutorial"),
-)
-
 class CustomClearableFileInput(forms.ClearableFileInput):
     template_name = 'forums/templates/clearable_file_input.html'
 
@@ -150,7 +146,7 @@ class AnswerQuestionForm(forms.ModelForm):
 
 class AnswerCommentForm(forms.Form):
 
-    body = forms.CharField(widget = forms.Textarea(), required = True,
+    body = forms.CharField(widget = CKEditorWidget(), required = True,
         error_messages = {'required':'Comment field required'})
     spam_honeypot_field = HoneypotField()
 
