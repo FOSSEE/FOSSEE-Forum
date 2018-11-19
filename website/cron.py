@@ -6,7 +6,6 @@ from builtins import object
 from forums.local import FORUM_NOTIFICATION
 from website.models import Question, Answer, FossCategory
 from django.db.models import Count
-from django.core.mail import send_mail
 from django.core.mail import EmailMultiAlternatives
 from .spamFilter import train
 
@@ -46,15 +45,28 @@ class Cron(object):
                     body_cat[category_id] = [question]
         for key, value in list(body_cat.items()):
             category_name = FossCategory.objects.get(id = key)
-            mail_body = "*** This is an automatically generated email, please do not reply ***" + " \n\nThe following questions are left unanswered : \n\n"
+            mail_body = "<b>The following questions are left unanswered :</b><br><br>"
             for item in value:
                 string = "Question : " + str(item.title) + "\n" + str(item.category) + "\n" + settings.DOMAIN_NAME + "/question/" + str(item.id) +"\n\n"
                 mail_body += string
             sender_email = settings.SENDER_EMAIL
-            mail_body += "Please do the needful.\n\n"
-            to = (item.category.email, FORUM_NOTIFICATION)
+            mail_body += "Please do the needful.<br><br>"
+            mail_body += "<center><h6>*** This is an automatically generated email, please do not reply***</h6></center>"
+            to = (item.category.email)
+            bcc_email = settings.BCC_EMAIL_ID
             subject =  "FOSSEE Forums - " + str(item.category) +" - Unanswered Question"
             send_mail(subject, mail_body, sender_email, to)
+
+            email = EmailMultiAlternatives(
+                subject, '',
+                sender_email, to,
+                bcc=[bcc_email],
+                headers = {"Content-type":"text/html;charset=iso-8859-1"}
+            )
+            email.attach_alternative(mail_body, "text/html")
+            email.content_subtype = 'html'  # Main content is text/html
+            email.mixed_subtype = 'related'
+            email.send(fail_silently = True)
 
     def train_spam_filter(self):
         train()
