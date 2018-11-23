@@ -153,8 +153,12 @@ def account_view_profile(request, user_id=None):
         profile = Profile(user = user)
     flag = False
 
-    questions = Question.objects.filter(user_id = user_id).order_by('date_created').reverse()
-    answers = Answer.objects.filter(uid = user_id).order_by('date_created').reverse()
+    if settings.MODERATOR_ACTIVATED:
+        questions = Question.objects.filter(user_id = user_id).order_by('date_created').reverse()
+        answers = Answer.objects.filter(uid = user_id).order_by('date_created').reverse()
+    else:
+        questions = Question.objects.filter(user_id = user_id).filter(is_spam = False).order_by('date_created').reverse()
+        answers = Answer.objects.filter(uid = user_id).filter(is_spam = False).order_by('date_created').reverse()
     form = ProfileForm(user, instance = profile)
 
     if str(user_id) == str(request.user.id):
