@@ -142,7 +142,6 @@ def question_answer(request, question_id):
             sender_email = settings.SENDER_EMAIL
             bcc_email = settings.BCC_EMAIL_ID
             subject = "FOSSEE Forums - {0} - Your question has been answered".format(question.category)
-            print(question.user.email,"**************")
             to = [question.user.email]
             message = """The following new answer has been posted in the FOSSEE Forum: <br><br>
                 <b>Title:</b> {0} <br>
