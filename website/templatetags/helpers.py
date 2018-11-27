@@ -27,7 +27,7 @@ def get_category_image(category):
     return False
 register.filter('get_category_image', get_category_image)
 
-# Getting only the 10 most recent questions
+# Getting only the 100 most recent questions
 def get_recent_questions(questions):
-    return questions[:10]
+    return questions[:100]
 register.filter('get_recent_questions', get_recent_questions)
