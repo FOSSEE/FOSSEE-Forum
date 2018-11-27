@@ -24,6 +24,9 @@ class ModeratorGroup(models.Model):
     group = models.OneToOneField(Group, on_delete = models.CASCADE)
     category = models.ForeignKey(FossCategory, on_delete = models.CASCADE)
 
+class AdvertiseBanner(models.Model):
+    body = models.TextField(default='Null')
+
 class SubFossCategory(models.Model):
 
     parent = models.ForeignKey(FossCategory, on_delete = models.CASCADE)
@@ -108,5 +111,4 @@ class Profile(models.Model):
 
     class Meta(object):
         app_label = 'website'
-
 

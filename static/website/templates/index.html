@@ -7,7 +7,16 @@
 <link rel="stylesheet" href="{% static 'website/css/main.css' %}" type="text/css" media="screen" charset="utf-8" />
 
 {% block content %}
+  <script>
 
+    $(document).ready(function()
+    {
+          $("#myTable").DataTable({
+          // 'sPaginationType': "scrolling"
+          });
+    });
+
+   </script>
 <div class="carousel-container">
 	<div class="carousel">
 		{% for category in categories %}
