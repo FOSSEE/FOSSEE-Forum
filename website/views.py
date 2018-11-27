@@ -108,6 +108,8 @@ def question_answer(request, question_id):
 
     context = {}
     question = get_object_or_404(Question, id = question_id)
+    answer_mail = answer_mail = Answer.objects.order_by('uid').values('uid')\
+                  .filter(question_id = question_id).distinct()
 
     if (request.method == 'POST'):
 
@@ -140,6 +142,7 @@ def question_answer(request, question_id):
             sender_email = settings.SENDER_EMAIL
             bcc_email = settings.BCC_EMAIL_ID
             subject = "FOSSEE Forums - {0} - Your question has been answered".format(question.category)
+            print(question.user.email,"**************")
             to = [question.user.email]
             message = """The following new answer has been posted in the FOSSEE Forum: <br><br>
                 <b>Title:</b> {0} <br>
@@ -167,6 +170,39 @@ def question_answer(request, question_id):
             email.mixed_subtype = 'related'
             email.send(fail_silently = True)
 
+            for x in answer_mail:
+                #Sending email to thread when a new answer is posted
+                sender_name = "FOSSEE Forums"
+                sender_email = settings.SENDER_EMAIL
+                bcc_email = settings.BCC_EMAIL_ID
+                subject = "FOSSEE Forums - {0} - Question has been answered".format(question.category)
+                print(question.user.email,"**************")
+                to = [get_user_email(x['uid'])]
+                message = """The following new answer has been posted in the FOSSEE Forum: <br><br>
+                    <b>Title:</b> {0} <br>
+                    <b>Category:</b> {1}<br>
+                    <b>Link:</b> {2}<br><br>
+
+                    Regards,<br>
+                    FOSSEE Team,<br>
+                    FOSSEE, IIT Bombay
+                    <br><br><br>
+                    <center><h6>*** This is an automatically generated email, please do not reply***</h6></center>
+                    """.format(
+                    question.title,
+                    question.category,
+                    settings.DOMAIN_NAME + '/question/' + str(question_id) + "#answer" + str(answer.id)
+                )
+                email = EmailMultiAlternatives(
+                    subject, '',
+                    sender_email, to,
+                    bcc=[bcc_email],
+                    headers = {"Content-type":"text/html;charset=iso-8859-1"}
+                )
+                email.attach_alternative(message, "text/html")
+                email.content_subtype = 'html'  # Main content is text/html
+                email.mixed_subtype = 'related'
+                email.send(fail_silently = True)
 
             return HttpResponseRedirect('/question/{0}/'.format(question_id))
 
@@ -1008,3 +1044,7 @@ def ajax_keyword_search(request):
     else:
         return render(request, 'website/templates/404.html')
 
+def get_user_email(uid):
+    user = User.objects.get(id=uid)
+    user_email = user.email
+    return user_email
