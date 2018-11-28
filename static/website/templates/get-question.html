@@ -196,7 +196,7 @@
 
             {% if user|is_moderator and MODERATOR_ACTIVATED  %}
             <span class="modify" style="display:block">
-                <a class="delete btn btn-xs btn-info vs" data-toggle="modal" data-target="#answerDeleteModal" href="#">Delete</a>
+                <a class="delete btn btn-xs btn-info vs ansdel" data-toggle="modal" data-target="#answerDeleteModal" data-id= "{{ answer.id }}" href="#{{ answer.id }}">Delete</a>
                 <a class="edit btn btn-xs btn-info vs" href="#{{ answer.id }}" data-target="body{{ answer.id }}">Edit</a>
                 <a class="save btn btn-xs btn-success vs"  data-target="body{{ answer.id }}" data-aid="{{ answer.id }}" href="#">Save</a>
             </span>
@@ -244,7 +244,7 @@
                     </div>
                     <div class="modal-body">
                         <h5>Why is this answer being deleted?</h5>
-                        <form method="POST" action="{% url 'website:answer_delete' answer.id %}">
+                        <form id = "answerDeleteForm" method="POST" action="">
                         {% csrf_token %}
                             <textarea name="deleteAnswer" required></textarea>
                             <hr>
@@ -252,7 +252,7 @@
                                 <input type="submit" class="btn btn-sm btn-success" value="Okay">
                                 <a class="btn btn-sm btn-default" data-dismiss="modal" href="#">Close</a>
                             </div>
-                        </form>   
+                        </form>
                     <div class="clearfix"></div>
                     </div> <!-- /.modal-body -->
                     </div> <!-- /.modal-content -->
@@ -646,7 +646,13 @@
      
  
 </script>
-   
+<script type="text/javascript">
+    $('.ansdel').on('click', function (event) {
+    var button = $(event.relatedTarget) // Button that triggered the modal
+    var id= $(this).data('id') // Extract info from data-* attributes
+    $("#answerDeleteForm").attr("action", "/answer_delete/" + id+"/");
+})
+</script>
 <script src="{% static 'website/js/thread-user.js' %}"></script>
 <script src="{% static 'website/js/custom.js' %}"></script>
 
