@@ -7,7 +7,16 @@
 <link rel="stylesheet" href="{% static 'website/css/main.css' %}" type="text/css" media="screen" charset="utf-8" />
 
 {% block content %}
+  <script>
 
+    $(document).ready(function()
+    {
+          $("#myTable").DataTable({
+          // 'sPaginationType': "scrolling"
+          });
+    });
+
+   </script>
 <div id="carousel-container">
     <div class="carousel">
         {% for category in categories %}
@@ -104,7 +113,7 @@
                         
                     <td>
                         <span class="question" data-toggle="tooltip" data-placement="top" >
-                            <a href="{% url 'website:get_question' question.id %}">{{ question.title|truncatechars:40 }}</a>
+                            <a href="{% url 'website:get_question' question.id %}">{{ question.title|truncatechars:80 }}</a>
                         </span>           
                     </td>
                     
