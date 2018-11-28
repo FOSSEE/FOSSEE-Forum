@@ -537,7 +537,7 @@ def edit_question(request, question_id):
             subject = "FOSSEE Forums - {0} - New Question".format(question.category)
             #to = (question.user.email, question.category.email, settings.FORUM_NOTIFICATION)
             to = (question.user.email)
-            bcc_email = (uestion.category.email, settings.FORUM_NOTIFICATION)
+            bcc_email = (question.category.email, settings.FORUM_NOTIFICATION)
             message = """
                 The following question has been edited in the FOSSEE Forum: <br>
                 <b> Original title: </b>{0}<br>
