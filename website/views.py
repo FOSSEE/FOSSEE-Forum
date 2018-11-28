@@ -561,7 +561,8 @@ def edit_question(request, question_id):
             )
             email = EmailMultiAlternatives(
                 subject, '',
-                sender_email, to,
+                sender_email, [to],
+                bcc=[bcc_email],
                 headers = {"Content-type":"text/html;charset=iso-8859-1"}
             )
             email.attach_alternative(message, "text/html")
