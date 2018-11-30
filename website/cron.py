@@ -3,18 +3,18 @@ import os
 import sys
 from builtins import str
 from builtins import object
-from forums.local import FORUM_NOTIFICATION
-from website.models import Question, Answer, FossCategory
 from django.db.models import Count
 from django.core.mail import EmailMultiAlternatives
-from .spamFilter import train
-
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "forums.settings")
 
 base_path =  os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(base_path)
 
 django.setup()
+
+from forums.local import FORUM_NOTIFICATION
+from website.models import Question, Answer, FossCategory
+from website.spamFilter import train
 
 class Cron(object):
 
@@ -55,11 +55,10 @@ class Cron(object):
             to = (item.category.email)
             bcc_email = settings.BCC_EMAIL_ID
             subject =  "FOSSEE Forums - " + str(item.category) +" - Unanswered Question"
-            send_mail(subject, mail_body, sender_email, to)
 
             email = EmailMultiAlternatives(
                 subject, '',
-                sender_email, to,
+                sender_email, [to],
                 bcc=[bcc_email],
                 headers = {"Content-type":"text/html;charset=iso-8859-1"}
             )
