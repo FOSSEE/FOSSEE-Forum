@@ -16,6 +16,7 @@ from website.templatetags.helpers import prettify
 from django.core.mail import send_mail
 from django.core.mail import EmailMultiAlternatives
 from .spamFilter import predict, train
+from .decorators import check_recaptcha
 
 User = get_user_model()
 admins = (
@@ -103,6 +104,7 @@ def get_question(request, question_id = None, pretty_url = None):
 # post answer to a question, send notification to the user, whose question is answered
 # if anwser is posted by the owner of the question, no notification is sent
 @login_required
+@check_recaptcha
 @user_passes_test(account_credentials_defined, login_url='/accounts/profile/')
 def question_answer(request, question_id):
 
@@ -117,7 +119,7 @@ def question_answer(request, question_id):
         answer = Answer()
         answer.uid = request.user.id
 
-        if form.is_valid():
+        if form.is_valid() and request.recaptcha_is_valid:
             cleaned_data = form.cleaned_data
             body = cleaned_data['body']
             answer.body = body.splitlines()
@@ -206,8 +208,45 @@ def question_answer(request, question_id):
             return HttpResponseRedirect('/question/{0}/'.format(question_id))
 
         else:
-            context['form'] = form
+            question = get_object_or_404(Question, id = question_id)
+            sub_category = True
+
+            if question.sub_category == "" or str(question.sub_category) == 'None':
+                sub_category = False
+
+            if (settings.MODERATOR_ACTIVATED):
+                answers = question.answer_set.all()
+            else:
+                answers = question.answer_set.filter(is_spam = False).all()
+            ans_count = len(answers)
+            form = AnswerQuestionForm()
+            thisuserupvote = question.userUpVotes.filter(id = request.user.id).count()
+            thisuserdownvote = question.userDownVotes.filter(id = request.user.id).count()
+
+            ans_votes = []
+            for vote in answers:
+                net_ans_count  = vote.num_votes
+                ans_votes.append([vote.userUpVotes\
+                .filter(id = request.user.id).count(), vote.userDownVotes\
+                .filter(id = request.user.id).count(), net_ans_count])
+
+            main_list = list(zip(answers, ans_votes))
+            context = {
+                'ans_count': ans_count,
+                'question': question,
+                'sub_category':sub_category,
+                'main_list': main_list,
+                'form': form,
+                'thisUserUpvote': thisuserupvote,
+                'thisUserDownvote': thisuserdownvote,
+                'net_count': question.num_votes,
+            }
+            form = AnswerQuestionForm()
+            context['SITE_KEY'] = settings.GOOGLE_RECAPTCHA_SITE_KEY
             context['question'] = question
+            context['error'] = "Invalid reCAPTCHA please try again"
+            context.update(csrf(request))
+            return render(request, 'website/templates/get-question.html', context)
 
     else:
         form = AnswerQuestionForm()
