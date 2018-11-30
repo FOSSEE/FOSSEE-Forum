@@ -47,7 +47,7 @@ class Cron(object):
             category_name = FossCategory.objects.get(id = key)
             mail_body = "<b>The following questions are left unanswered :</b><br><br>"
             for item in value:
-                string = "Question : " + str(item.title) + "\n" + str(item.category) + "\n" + settings.DOMAIN_NAME + "/question/" + str(item.id) +"\n\n"
+                string = "Question : " + str(item.title) + "<br>" + str(item.category) + "<br>" + settings.DOMAIN_NAME + "/question/" + str(item.id) +"<br><br>"
                 mail_body += string
             sender_email = settings.SENDER_EMAIL
             mail_body += "Please do the needful.<br><br>"
