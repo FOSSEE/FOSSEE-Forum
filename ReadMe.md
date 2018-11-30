@@ -11,27 +11,29 @@ Clone
 - Make sure your Internet is working.
 - Clone this repo by typing ::
 
-   git clone -b fossee-forum https://github.com/FOSSEE/FOSSEE-Forum.git
+   git clone -b django2.x https://github.com/FOSSEE/FOSSEE-Forum.git
    
 
 Installation
 ------------
+### Follow below given Steps to get started
+> _NOTE_ : Use Python3.6 
 
 - Install Virtual Environment using the following command ::
 
-    sudo apt-get install python-virtualenv
+    sudo apt-get install python3-virtualenv
 
 - Create a Virtual Environment ::
 
-    virtualenv /path/to/virtualenv
+    virtualenv -p python3 /path/to/virtualenv
 
 - Activate the virtualenv using the command ::
 
     source /path/to/virtualenv-name/bin/activate
 
-- Change the directory to the ``spoken-tutorial-forums/`` project using the command ::
+- Change the directory to the ``FOSSEE-Forum/`` project using the command ::
 
-    cd /path/to/spoken-tutorial-forums
+    cd /path/to/FOSSEE-Forum
 
 - Install pre-requisites using the command (please don't use sudo) ::
 
@@ -55,7 +57,7 @@ Usage
     DATABASES = {
         'default': {
         'ENGINE': 'django.db.backend.mysql',
-        'NAME'  : 'forums', 
+        'NAME'  : DB_NAME, 
         'USER': '', 
         'PASSWORD': '',
         'HOST': '',
@@ -66,6 +68,7 @@ Usage
 
 - For development on your machine, create a file ``local.py`` in ``FOSSEE-Forum/forums/`` and add ::
 
+    DB_NAME = 'forums'
     DB_USER = 'root' # (MySql username)
     DB_PASS = 'root' # (MySql password)
 
@@ -82,7 +85,7 @@ Usage
     DATABASES = {
         'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME'  : 'forums',
+        'NAME'  : DB_NAME,
         'USER': DB_USER,
         'PASSWORD': DB_PASS,
         'HOST': '',
