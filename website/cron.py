@@ -24,7 +24,8 @@ class Cron(object):
 
         try:
             weekago = DT.date.today() - DT.timedelta(days = 6)
-            questions = Question.objects.filter(date_created__lte = weekago)
+            questions = Question.objects\
+                        .filter(date_created__lte = weekago, is_spam = 0)
         except Exception as e:
             print("No questions found")
         category_count = FossCategory.objects.count()
@@ -45,16 +46,23 @@ class Cron(object):
                     body_cat[category_id] = [question]
         for key, value in list(body_cat.items()):
             category_name = FossCategory.objects.get(id = key)
-            mail_body = "<b>The following questions are left unanswered :</b><br><br>"
+            mail_body = """<b>The following questions are left unanswered"""\
+                         """:</b><br><br>"""
             for item in value:
-                string = "Question : " + str(item.title) + "<br>" + str(item.category) + "<br>" + settings.DOMAIN_NAME + "/question/" + str(item.id) +"<br><br>"
+                string = "<b>Question :</b> " + str(item.title) + "<br><br>" \
+                + "<b>Category :</b> " + str(item.category) + "<br>" \
+                + settings.DOMAIN_NAME \
+                + "/question/" + str(item.id) +"<br><br>"
                 mail_body += string
             sender_email = settings.SENDER_EMAIL
             mail_body += "Please do the needful.<br><br>"
-            mail_body += "<center><h6>*** This is an automatically generated email, please do not reply***</h6></center>"
+            mail_body += """<center><h6>*** This is an automatically """ \
+                         """generated email, please do not reply***</h6>"""\
+                         """</center>"""
             to = (item.category.email)
             bcc_email = settings.BCC_EMAIL_ID
-            subject =  "FOSSEE Forums - " + str(item.category) +" - Unanswered Question"
+            subject =  "FOSSEE Forums - " + str(item.category) \
+                       +" - Unanswered Question"
 
             email = EmailMultiAlternatives(
                 subject, '',
