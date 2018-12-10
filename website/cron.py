@@ -1,7 +1,6 @@
 import django
 import os
 import sys
-import pytz
 from builtins import str
 from builtins import object
 from django.db.models import Count
