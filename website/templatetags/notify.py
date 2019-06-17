@@ -25,7 +25,7 @@ register.simple_tag(notification_count)
 def latest_question(category):
     question = None
     try:
-        question = Question.objects.filter(category = category).order_by('-date_created')[0]
+        question = Question.objects.filter(category = category, is_active = True).order_by('-date_created')[0]
     except:
         pass
     context = {

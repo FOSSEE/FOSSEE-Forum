@@ -28,6 +28,8 @@ sys.path.append('/Sites/newforums_fossee_in/FOSSEE-Forum')
 # os.environ["DJANGO_SETTINGS_MODULE"] = "forums.settings"
 os.environ["DJANGO_SETTINGS_MODULE"] = "forums.settings"
 
+# os.environ['HTTPS'] = "on"
+
 activate_this = '/Sites/newforums_fossee_in/django/bin/activate_this.py'
 #execfile(activate_this, dict(__file__=activate_this))
 

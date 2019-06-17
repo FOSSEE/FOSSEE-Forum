@@ -7,8 +7,6 @@ from django_resized import ResizedImageField
 from ckeditor.fields import RichTextField
 
 
-
-
 class FossCategory(models.Model):
 
     name = models.CharField(max_length = 100, default='None', blank=True)
@@ -40,7 +38,7 @@ class Question(models.Model):
 
     user  = models.ForeignKey(User, on_delete = models.CASCADE)
     category = models.ForeignKey(FossCategory, on_delete = models.CASCADE)
-    sub_category = models.CharField(max_length = 200)
+    sub_category = models.CharField(max_length = 200,blank = True)
     title = models.CharField(max_length = 200)
     body = RichTextField()
     date_created = models.DateTimeField(auto_now_add = True)
@@ -51,6 +49,7 @@ class Question(models.Model):
     userViews = models.ManyToManyField(User, blank = True, related_name = 'postViews')
     num_votes = models.IntegerField(default = 0)
     is_spam = models.BooleanField(default = False)
+    is_active = models.BooleanField(default = True)
     image = ResizedImageField(size = [800, 800], upload_to = "images/questions/", blank = True)
 
     def __str__(self):
@@ -71,6 +70,7 @@ class Answer(models.Model):
     userDownVotes = models.ManyToManyField(User, blank = True, related_name = 'postAnswerDownVotes', default = 0)
     num_votes = models.IntegerField(default = 0)
     is_spam = models.BooleanField(default = False)
+    is_active = models.BooleanField(default = True)
     image = ResizedImageField(size = [800, 800], upload_to = "images/answers/", blank = True)
 
     def user(self):
@@ -87,6 +87,7 @@ class AnswerComment(models.Model):
     body = models.TextField(blank = False)
     date_created = models.DateTimeField(auto_now_add = True)
     date_modified = models.DateTimeField(auto_now = True)
+    is_active = models.BooleanField(default = True)
 
     def user(self):
         user = User.objects.get(id = self.uid)
@@ -111,4 +112,3 @@ class Profile(models.Model):
 
     class Meta(object):
         app_label = 'website'
-

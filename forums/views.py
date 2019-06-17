@@ -199,6 +199,7 @@ def send_registration_confirmation(user):
     email.attach_alternative(message, "text/html")
     try:
         result = email.send(fail_silently = False)
+        print(result)
     except:
         pass
 

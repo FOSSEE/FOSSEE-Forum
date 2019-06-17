@@ -3,11 +3,11 @@
 {% load count_tags %}
 {% load notify %}
 {% load helpers %}
- 
+
 <link rel="stylesheet" href="{% static 'website/css/main.css' %}" type="text/css" media="screen" charset="utf-8" />
 
 {% block content %}
-  <script>
+<script>
 
     $(document).ready(function()
     {
@@ -15,90 +15,89 @@
           // 'sPaginationType': "scrolling"
           });
     });
-
    </script>
 <div class="carousel-container">
-	<div class="carousel">
-		{% for category in categories %}
-			<div>
-				<div class="thumbnail">
-					{% with file=category|get_category_image %}
-						{% if file %}
-							<img src="{% static category|get_category_image %}">
-						{% else %}
-							<div class="category-title">{{category}}</div>
-						{% endif %}
-					{% endwith %}
-					<div class="caption">
-						<small class="category">
-							{{ category.description }}
-						</small>
-					{% latest_question category %}
-					<a class="btn btn-xs btn-block btn-success" href="{% url 'website:new_question' %}?category={{ category.id|urlencode }}">Ask a question</a>
-					</div>
-				</div>
-			</div>
-		{% endfor %}
-	</div> <!-- /.carousel -->
+    <div class="carousel">
+        {% for category in categories %}
+        <div>
+            <div class="thumbnail">
+                {% with file=category|get_category_image %}
+                {% if file %}
+                <img src="{% static category|get_category_image %}">
+                {% else %}
+                <div class="category-title">{{category}}</div>
+                {% endif %}
+                {% endwith %}
+                <div class="caption">
+                    <small class="category">
+                        {{ category.description }}
+                    </small>
+                    {% latest_question category %}
+                    <a class="btn btn-xs btn-block btn-success" href="{% url 'website:new_question' %}?category={{ category.id|urlencode }}">Ask a question</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div> <!-- /.carousel -->
 </div> <!-- /#carousel-container -->
 
 <div id="filter-container">
-	<div class="row" style="margin-left: 12%;">
-		<form class ="" id="filter-form" action="" role="form">
-			<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" style="width: 65%;">
-				<a class="btn btn-block btn-primary" href="{% url 'website:questions' %}" style="margin-top: 18px;">View all previous questions.</a>
-			</div> <!-- /.col -->
-		</form>
-		<div class="col-lg-6 col-md-6 col-sm-6" style="width: 25%;">
-			<div class="row" style="margin-left: 11px;">
+    <div class="row" style="margin-left: 12%;">
+        <form class ="" id="filter-form" action="" role="form">
+            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" style="width: 65%;">
+                <a class="btn btn-block btn-primary" href="{% url 'website:questions' %}" style="margin-top: 18px;">View all previous questions.</a>
+            </div> <!-- /.col -->
+        </form>
+        <div class="col-lg-6 col-md-6 col-sm-6" style="width: 25%;">
+            <div class="row" style="margin-left: 11px;">
 
-				<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" style="width: 100px; margin-right:40px; " >
-					<h3 style="font-size: 18px" align="center"><strong>{% total_question_count %}</strong></h3>
-					<h3 style="font-size: 18px; margin-top: 1px;" align="center" text-color="#7395d9" >Questions</h3>
-				</div>
-				
-			</div>
-		</div>
-	</div> <!-- /.row -->
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" style="width: 100px; margin-right:40px; " >
+                    <h3 style="font-size: 18px" align="center"><strong>{% total_question_count %}</strong></h3>
+                    <h3 style="font-size: 18px; margin-top: 1px;" align="center" text-color="#7395d9" >Questions</h3>
+                </div>
+
+            </div>
+        </div>
+    </div> <!-- /.row -->
 </div> <!-- /#filter-container -->
 
 <br>
 
 <div class="panel panel-default">
 
-	<div class="panel-heading">
-		Recent questions
-	</div>
+    <div class="panel-heading">
+        Recent questions
+    </div>
 
-	<div class="panel-body">
+    <div class="panel-body">
 
-		<table id="myTable" class="tablesorter-blue"> 
+        <table id="myTable" class="tablesorter-blue">
 
-			<colgroup>
-				<col width="5%" />
-				<col width="20%" />
-				<col width="50%" />
-				<col width="8%" />
-				<col width="8%" />
-				<col width="8%" />
-			</colgroup>
+            <colgroup>
+                <col width="5%" />
+                <col width="20%" />
+                <col width="50%" />
+                <col width="8%" />
+                <col width="8%" />
+                <col width="8%" />
+            </colgroup>
 
-			<thead> 
-				<tr> 
-					<th>No.</th>
-					<th>Category</th>
-					<th>Question Title </th>
-					<th>Date</th>
-					<th>Views</th>
-					<th>Answers</th>
-				</tr> 
-			</thead>
-				
-			<tbody> 
-				{% for question in questions|get_recent_questions %}
-				<tr>
-					<td></td>
-					<td>
+            <thead>
+            <tr>
+                <th>No.</th>
+                <th>Category</th>
+                <th>Question Title </th>
+                <th>Date</th>
+                <th>Views</th>
+                <th>Answers</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            {% for question in questions|get_recent_questions %}
+            <tr>
+                <td></td>
+                <td>
 						<span class="category" data-toggle="tooltip" data-placement="top" >
 							{% if question.sub_category %}
 								<a class="pull-left" href="{% url 'website:filter' question.category question.sub_category %}?qid={{ question.id }}">
@@ -110,30 +109,30 @@
 								</a> 
 							{% endif %}
 						</span>
-					</td>
-						
-					<td>
+                </td>
+
+                <td>
 						<span class="question" data-toggle="tooltip" data-placement="top" >
 							<a href="{% url 'website:get_question' question.id %}">{{ question.title|truncatechars:80 }}</a>
-						</span>           
-					</td>
-					
-					<td>   
-						<span>{{ question.date_created|date:"d/m/y" }}</span>
-					</td>
-					
-					<td>
-						{{ question.views}}
-					</td>
-					
-					<td>
-						{{ question.answer_set.count }}
-					</td>
-				</tr>
-				{% endfor %}
-			</tbody> 
-		</table>
-	</div> <!-- /.panel-body -->
+						</span>
+                </td>
+
+                <td>
+                    <span>{{ question.date_created|date:"d/m/y" }}</span>
+                </td>
+
+                <td>
+                    {{ question.views}}
+                </td>
+
+                <td>
+                    {{ question.answer_set.count }}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div> <!-- /.panel-body -->
 </div> <!-- /.panel -->
 {% endblock %}
 

@@ -24,6 +24,9 @@ urlpatterns = [
     path('question/delete/<int:question_id>/', views.question_delete, name = 'question_delete'),
     path('mark_answer_spam/<int:answer_id>/', views.mark_answer_spam, name = 'mark_answer_spam'),
     path('answer_delete/<int:answer_id>/', views.answer_delete, name = 'answer_delete'),
+    path('question_restore/<int:question_id>/',views.question_restore, name = 'question_restore'),
+    path('answer_restore/<int:answer_id>/',views.answer_restore, name = 'answer_restore'),
+    path('comment_restore/<int:comment_id>/',views.comment_restore, name = 'comment_restore'),
 
     # Moderator panel
     path('moderator/', views.moderator_home, name = 'moderator_home'),
