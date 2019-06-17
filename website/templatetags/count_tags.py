@@ -7,7 +7,7 @@ register = template.Library()
 
 # Counts the number of questions in <category>
 def category_question_count(category):
-    category_question_count = Question.objects.filter(category = category).count()
+    category_question_count = Question.objects.filter(category = category, is_active = True).count()
     return category_question_count
 register.simple_tag(category_question_count)
 
@@ -62,13 +62,13 @@ register.filter('div', div)
 
 # retriving total number of questions
 def total_question_count():
-    count = Question.objects.all().count()
+    count = Question.objects.filter(is_active = True).count()
     return count
 register.simple_tag(total_question_count)
 
 # retriving total number of answers
 def total_answer_count():
-    count = Answer.objects.all().count()
+    count = Answer.objects.all(is_active = True).count()
     return count
 register.simple_tag(total_answer_count)
 

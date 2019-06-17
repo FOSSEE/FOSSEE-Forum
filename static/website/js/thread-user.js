@@ -12,7 +12,7 @@ $(document).ready(function() {
     /*
      * question edit section
      * set the jquery variables 
-    */
+    */3
     $saving = $(".saving");
     $saved= $(".saved");
     $question = $(".question");
@@ -28,7 +28,6 @@ $(document).ready(function() {
     $question_details_edit = $("#question-details-edit");
 
     /* make the question editable and show modify */
-    //$question.addClass("editable");
     $question_modify.show();
 
     /* edit and save click events */
@@ -154,53 +153,20 @@ $(document).ready(function() {
     */
     $answer_edit = $('.answer .edit');
     $answer_save = $(".answer .save");
-    $answerPanelWrapper = $("#answerPanelWrapper");
-
-    var answerNicEditor = new nicEditor({
-        fullPanel : true,
-        buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link', 'forecolor', 'bgcolor'],
-        iconsPath: "/static/website/js/nicEditorIcons.gif",
-    });
-    answerNicEditor.panelInstance('answerNicPanel');
 
     $answer_edit.click(function(e) {
         var target = $(this).data("target");
-        answerNicEditor.addInstance(target);
-        $(this).parents("div.answer").prepend($answerPanelWrapper);
-        $answerPanelWrapper.show();
-        $('#answerPanelWrapper .nicEdit-panelContain').parent().width('100%');
-        $('#answerPanelWrapper .nicEdit-panelContain').parent().next().width('100%');
+        var id = $(this).attr("id");
+        $("#"+id+"1").show();
+        $("#"+id+"2").hide();
         $(this).hide();
         $(this).next().show();
-        $("#"+target).focus();
-        e.preventDefault();
     });
 
     $answer_save.click(function() {
-        $saving.show();
-        var target = $(this).data("target");
-        answerNicEditor.removeInstance(target);
-        $answerPanelWrapper.hide();
-        $('#answerPanelWrapper .nicEdit-panelContain').parent().width('100%');
-        $(this).hide();
-        $(this).prev().show();
-        
-        var answer_id = parseInt($(this).data("aid"));
-        var answer_body = $("#"+target).html();
-        
-        $.ajax({
-            url: "/ajax-answer-update/",
-            type: "POST",
-            data: {
-                answer_id: answer_id,
-                answer_body: answer_body
-            },
-            success: function(data) {
-                $saving.hide();
-                $saved.show();
-                $saved.fadeOut("slow");
-            }
-        });
+        var id = $(this).attr('data-form');
+        $("#"+id).submit();
+
     });
 
     /*
@@ -269,59 +235,27 @@ $(document).ready(function() {
      * add a new comment
      * set the dom variables
     */
-    var nics = {};
     $add_comment = $(".add-comment");
     $cancel_commment = $(".cancel-comment");
     $post_comment = $(".post-comment");
     $add_comment.click(function(e) {
         $(this).hide();
+        var id = $(this).attr('id');
+        $("#"+id+"1").show();
         $(this).siblings(".cancel-comment").show();
         $(this).siblings(".post-comment").show();
-        
-        var target = $(this).data("target");
-        $("#"+target).show();
-        
-        nics[target] = new nicEditor({
-            fullPanel : true,
-            buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html','image', 'link'],
-            iconsPath: "/static/website/js/nicEditorIcons.gif",
-        }).panelInstance(target, {hasPanel : true});
-        e.preventDefault();
     });
 
     $cancel_commment.click(function(e) {
         $(this).hide();
+        var id = $(this).siblings(".add-comment").attr('id');
         $(this).siblings(".post-comment").hide();
+        $("#"+id+"1").hide();
         $(this).siblings(".add-comment").show();
-        
-        var target = $(this).data("target");
-        
-        nics[target].removeInstance(target);
-        nics[target] = null;
-        $("#"+target).hide();
-        e.preventDefault();
     });
 
     $post_comment.click(function(e) {
-        var target = $(this).data("target");
-       // alert(target);
-        var answer_id = $(this).data("aid");
-        var form = $(this).data("form");
-        $form = $("#"+form);
-        nics[target].instanceById(target).saveContent();
-        var text = (nics[target].instanceById(target).getContent());
-        // alert(text)
-        text = text.replace(/<br ?\/?>/g, "\n")
-        text = text.replace(/&nbsp;/g, ' ');
-        // alert(text+"after");
-        // alert(text.trim().length);
-        if(text.trim().length > 0 ){
-            $form.submit();
-            e.preventDefault;
-        }
-         else{
-            alert("Kindly write a comment")
-            return false;
-        }
+        var id = $(this).attr('data-form');
+        $("#"+id).submit();
     });
 });

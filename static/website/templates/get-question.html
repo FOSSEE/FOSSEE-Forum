@@ -7,7 +7,7 @@
     {{ question.category }} - {{ question.title }} - FOSSEE Forums
 {% endblock %}
 
-{% block extra_head %} <link rel="stylesheet" href="{{ STATIC_URL }}css/code.css"> {% endblock %}
+<!-- {% block extra_head %} <link rel="stylesheet" href="{{ STATIC_URL }}css/code.css"> {% endblock %} -->
 
 
 {% block content %}
@@ -92,7 +92,11 @@
         <span class="modify">
             {% if user|can_edit:question and not ans_count or user|is_moderator and MODERATOR_ACTIVATED %}
                 <a class="edit btn btn-xs btn-info" href="{% url 'website:edit_question' question.id %}">Edit</a>
-                <a class="delete btn btn-xs btn-info" data-toggle="modal" data-target="#questionDeleteModal" href="#">Delete</a>
+                {% if question.is_active %}
+                <a class="delete btn btn-xs btn-info" data-toggle="modal" data-target="#questionDeleteModal" >Delete</a>
+                {% else %}
+                <a class="restore btn btn-xs btn-info" href="{% url 'website:question_restore' question.id %}" >Restore</a>
+                {% endif %}
             {% endif %}
         </span>
         
@@ -114,11 +118,11 @@
 </div> <!-- /.row -->
 
 
-<h4><u>Answers:</u></h4>
+<!-- <h4><u>Answers:</u></h4>
 <div id="answerPanelWrapper" style="display:none;">
     <div id="answerNicPanel" style="display:none;"></div>
 </div>
-
+ -->
 <div id="commentPanelWrapper" style="display:none;">
     <div id="commentNicPanel" style="display:none;"></div>
 </div>
@@ -138,7 +142,7 @@
                     <img src="{% static 'website/images/up1-on.png' %}" class="ans-vote-up selected {{ answer.uid }}" id="up{{ answer.id }}" title="This question shows research effort; it is useful and clear"/>
                 {% endifequal %}
     
-                <span class="vote-count-post" id="span{{ answer.id }}" >
+                <span class="vote-count-post" id="span{{ answer.id }}">
                     {{ ans_vote.2 }}
                 </span>
                 {% ifequal ans_vote.1 0 %}
@@ -149,10 +153,27 @@
             </div>
         </div>
 
-        <div class="answer {% if user|is_moderator %}editable{% endif %}" id="answer{{answer.id}}" style="margin-left: 63px;">                               
-            
+        <div class="answer {% if user|is_moderator and MODERATOR_ACTIVATED or user|can_edit:answer %}editable{% endif %}" id="answer{{answer.id}}" style="margin-left: 63px;">                               
             <div class="body" id="body{{ answer.id }}" style="padding-bottom: 12px; padding-top: 15px">
-                <p>{{ answer.body| safe }}</p>
+                {% if user|is_moderator and MODERATOR_ACTIVATED or user|can_edit:answer and answer|havenot_comments %}
+                <form id="form{{ answer.id }}" method="POST"  action="{% url 'website:ajax_answer_update' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="answer_id" value="{{ answer.id }}">
+                    {{ form.media }}
+                <div class="edit-answer" id="ans{{ answer.id }}1">
+                    {% render_field form.body class+="form-control body" id=answer.id %}
+                </div>
+                </form>
+                {% endif %}
+                <div id="ans{{ answer.id }}2">{{ answer.body| safe }}</div>
+                {% if user|is_moderator and MODERATOR_ACTIVATED or user|can_edit:answer and answer|havenot_comments %}
+                    <script type="text/javascript">
+                        CKEDITOR.on("instanceReady", function(event)
+                        {
+                            CKEDITOR.instances['{{ answer.id }}'].setData(document.getElementById("ans{{ answer.id }}2").innerHTML);
+                        });
+                    </script>
+                {% endif %}
                 {% if answer.image %}
                     <img src = {{ answer.image.url }} />
                 {% endif %}
@@ -194,15 +215,18 @@
                 </span>
             </span>
 
-            {% if user|is_moderator and MODERATOR_ACTIVATED  %}
+            {% if user|is_moderator and MODERATOR_ACTIVATED or user|can_edit:answer and answer|havenot_comments %}
             <span class="modify" style="display:block">
+                {% if answer.is_active %}
                 <a class="delete btn btn-xs btn-info vs ansdel" data-toggle="modal" data-target="#answerDeleteModal" data-id= "{{ answer.id }}" href="#{{ answer.id }}">Delete</a>
-                <a class="edit btn btn-xs btn-info vs" href="#{{ answer.id }}" data-target="body{{ answer.id }}">Edit</a>
-                <a class="save btn btn-xs btn-success vs"  data-target="body{{ answer.id }}" data-aid="{{ answer.id }}" href="#">Save</a>
+                {% else %}
+                <a class="restore btn btn-xs btn-info vs ansres" data-id= "{{ answer.id }}" href="{% url 'website:answer_restore' answer.id %}">Restore</a>
+                {% endif %}
+                <a class="edit btn btn-xs btn-info vs" data-target="body{{ answer.id }}" id="ans{{ answer.id }}">Edit</a>
+                <a class="save btn btn-xs btn-success vs"  data-target="body{{ answer.id }}" data-aid="{{ answer.id }}" data-form="form{{ answer.id }}">Save</a>
             </span>
             {% endif %}
 
-                            
             <!-- Modal to mark answer as spam/non-spam -->
             <div class="modal fade" id="detailsModal{{ answer.id }}" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
@@ -226,7 +250,7 @@
                                 <hr>
                                 <div class="pull-right">
                                     <input type="submit" class="btn btn-sm btn-success" value="Submit">
-                                    <a class="btn btn-sm btn-default" data-dismiss="modal" href="#">Close</a>
+                                    <a class="btn btn-sm btn-default" data-dismiss="modal">Close</a>
                             </form>
                         </div>
                         <div class="clearfix"></div>
@@ -250,7 +274,7 @@
                             <hr>
                             <div class="pull-right">
                                 <input type="submit" class="btn btn-sm btn-success" value="Okay">
-                                <a class="btn btn-sm btn-default" data-dismiss="modal" href="#">Close</a>
+                                <a class="btn btn-sm btn-default" data-dismiss="modal">Close</a>
                             </div>
                         </form>
                     <div class="clearfix"></div>
@@ -265,17 +289,23 @@
             <div class="comments pull-right col-lg-11 col-md-11 col-sm-11 col-xs-11" >
                 <!-- displaying comments -->
                 {% for comment in answer.answercomment_set.all %}
+                {% if comment.is_active or MODERATOR_ACTIVATED %}
                 <div class="comment comment{{ comment.id }}" style="padding: 15px 15px 15px 5px;">
                     <div class="body" id="cbody{{ comment.id }}">
                         <p>{{ comment.body| safe }}</p>
                     </div>
                     
                     <br>
-
-                    {% if user|is_moderator and MODERATOR_ACTIVATED %}
+                    {% if user|is_moderator and MODERATOR_ACTIVATED or user|can_edit:comment and answer|can_delete:comment.id %}
+                    {% if comment.is_active %}
                     <span class="meta_co" style="position: absolute; left: 0px; bottom: 0px; padding: 7px 7px;">
-                        <a class="delete-comment btn btn-xs btn-info vs" id="{{ comment.id }}" href="#">Delete</a>
+                        <a class="delete-comment btn btn-xs btn-info vs" id="{{ comment.id }}">Delete</a>
                     </span>
+                    {% else %}
+                    <span class="meta_co" style="position: absolute; left: 0px; bottom: 0px; padding: 7px 7px;">
+                        <a class="restore-comment btn btn-xs btn-info vs" href="{% url 'website:comment_restore' comment.id %}">Restore</a>
+                    </span>
+                    {% endif %}
                     {% endif %}
                     
                     <span class="meta_co" style="position: absolute;right: 0px; bottom: 0px;">
@@ -284,13 +314,13 @@
                                 {{ comment.date_created|date:"d-m-y" }}, {{ comment.date_created|time }}
                             </i>
                         </small>
-                        
                         <span style="padding: 2px 7px">
                             <a href="/accounts/view-profile/{{ comment.user.id }}"> {{comment.user}} </a>
                         </span>
                     </span>
 
                 </div>
+                {% endif %}
                 {% endfor %}
                 
                 
@@ -298,26 +328,27 @@
                 {% if user.is_authenticated %}
                  
                 {% if not MODERATOR_ACTIVATED %}
-                    <form id="form{{ answer.id }}" method="post" action="{% url 'website:answer_comment' %}" > {% csrf_token %}
+                    <form id="comment_form{{ answer.id }}" method="post" action="{% url 'website:answer_comment' %}" > {% csrf_token %}
                         <input type="hidden" name="answer_id" value="{{ answer.id }}">
-                        <textarea name="body" class="new-comment form-control" id="comment{{ answer.id }}" rows="2"></textarea>
+                        <div class="new-comment" id="comment{{ answer.id }}1">
+                        {% render_field form.body class+="form-control body" id=answer|comment_id %}
+                    </div>
                     </form>
-                
-                    <a class="add-comment" style="background: #46B8DA none repeat scroll 0% 0%;color: #FFF;border-radius: 3px;padding: 5px 12px;" href="#" data-target="comment{{ answer.id }}">
+                    <a class="add-comment" style="background: #46B8DA none repeat scroll 0% 0%;color: #FFF;border-radius: 3px;padding: 5px 12px;" data-target="comment{{ answer.id }}" id="comment{{ answer.id }}">
                         <small>add comment</small>
                     </a>
+
                 {% endif %}
               
-                 
-                <a class="post-comment" href="#" data-target="comment{{ answer.id }}" data-aid="{{ answer.id }}" data-form="form{{ answer.id }}">
+               
+                <a class="post-comment" data-target="comment{{ answer.id }}" data-aid="comment{{ answer.id }}" data-form="comment_form{{ answer.id }}" onclick="submit_btn()">
 
                     <small>post comment</small>
                 </a>
                 
-                <a class="cancel-comment" href="#" data-target="comment{{ answer.id }}">
+                <a class="cancel-comment" data-target="comment{{ answer.id }}">
                     <small>cancel comment</small>
                 </a>
-               
                 {% else %}
                 <br>
                 <a class="btn btn-xs btn-success vs" href="/accounts/login">
@@ -345,7 +376,7 @@
                             {% render_field form.question value=question.id %}
                             <label for="id_body"><h4><u>Your Answer:</u></h4></label>
                             <br>
-                            {% render_field form.body class+="form-control body" %}
+                            {% render_field form.body class+="form-control body" id="editor1" %}
                             <br>
                             <br>
                             <label for="id_image">Upload an image:</label>
@@ -642,7 +673,12 @@
                 location.reload();
             });
         });
-
+        $('.restore-comment').click(function(event) {
+            // var id = event.target.id;
+            // $.post('/ajax-answer-comment-delete/', {comment_id: id}, function() {
+                // location.reload();
+            // });
+        });
     });
      
  
@@ -653,6 +689,15 @@
     var id= $(this).data('id') // Extract info from data-* attributes
     $("#answerDeleteForm").attr("action", "/answer_delete/" + id+"/");
 })
+    // $('.ansres').on('click', function (event) {
+    //     var id = $(this).attr("data-id");
+    //     $.post('/answer-restore/'+id, function() {
+    //         location.reload();
+    //     });
+    // var button = $(event.relatedTarget) // Button that triggered the modal
+    // var id= $(this).data('id') // Extract info from data-* attributes
+    // $("#answerDeleteForm").attr("action", "/answer_delete/" + id+"/");
+// })
 </script>
 <script src="{% static 'website/js/thread-user.js' %}"></script>
 <script src="{% static 'website/js/custom.js' %}"></script>
