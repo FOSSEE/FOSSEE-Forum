@@ -1103,7 +1103,9 @@ def search(request):
 def moderator_home(request):
 
     settings.MODERATOR_ACTIVATED = True
-
+    next = request.GET.get('next','')
+    if next:
+        return HttpResponseRedirect(next)
     # If user is a master moderator
     if (request.user.groups.filter(name = "forum_moderator").exists()):
         questions = Question.objects.filter().order_by('-date_created')
