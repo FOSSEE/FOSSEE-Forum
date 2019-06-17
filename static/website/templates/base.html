@@ -104,7 +104,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                                     </li>
                                     {% if user|is_moderator %}
                                         <li>
-                                            <a href="{% url 'website:moderator_home' %}">Moderator Panel</a>
+                                            <a href="{% url 'website:moderator_home' %}?next={{request.path}}">Moderator Panel</a>
                                         </li>
                                     {% endif %}
                                     <li>
