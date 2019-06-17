@@ -32,7 +32,7 @@ def store():
                 yData.append(0)
 
     # Add data from forum questions
-    for question in Question.objects.all():
+    for question in Question.objects.all().exclude(is_active = False):
         xData.append(str(clean_string(question.body)))
         if (question.is_spam):
             yData.append(1)
@@ -40,7 +40,7 @@ def store():
             yData.append(0)
 
     # Add data from forum answers
-    for answer in Answer.objects.all():
+    for answer in Answer.objects.all().exclude(is_active = False):
         xData.append(str(clean_string(answer.body)))
         if (answer.is_spam):
             yData.append(1)

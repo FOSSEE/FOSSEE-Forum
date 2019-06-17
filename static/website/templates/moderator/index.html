@@ -73,12 +73,13 @@
             <table id="myTable" class="tablesorter-blue"> 
 
             <colgroup>
-                <col width="5%" />
-                <col width="20%" />
+                <col width="4%" />
+                <col width="18%" />
                 <col width="50%" />
-                <col width="8%" />
-                <col width="8%" />
-                <col width="8%" />
+                <col width="7%" />
+                <col width="7%" />
+                <col width="6%" />
+                <col width="7%" />
             </colgroup>
 
             <thead> 
@@ -90,6 +91,7 @@
                     <th>Views</th>
                     <th>Answers</th>
                     <th>Spam</th>
+                    <th>Deleted</th>
                 </tr> 
             </thead>
             
@@ -131,6 +133,9 @@
 
                     <td>
                     {{ question.is_spam|yesno:"Yes, No" }}
+                    </td>
+                    <td>
+                        {{ question.is_active|yesno:"No, Yes" }}
                     </td>
                 </tr>
                 {% endfor %}

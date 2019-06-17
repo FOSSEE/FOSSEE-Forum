@@ -21,3 +21,23 @@ def is_moderator(user):
     except:
         return False
 register.filter(is_moderator)
+
+def comment_id(answer):
+    return "comment"+str(answer.id)
+register.filter(comment_id)
+
+def havenot_comments(answer):
+    comment = answer.answercomment_set.filter(is_active = True)
+    if not comment:
+        return True
+    else:
+        return False
+register.filter(havenot_comments)
+
+def can_delete(answer,comment_id):
+    comments = answer.answercomment_set.filter(is_active = True)
+    for x in comments:
+        if x.id>comment_id:
+            return False
+    return True
+register.filter(can_delete)
