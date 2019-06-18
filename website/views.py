@@ -35,8 +35,18 @@ def account_credentials_defined(user):
 
 # for home page
 def home(request):
-
     settings.MODERATOR_ACTIVATED = False
+    next = request.GET.get('next','')
+    next = next.split('/')
+    if 'moderator' in next:
+        next.remove('moderator')
+    next = '/'.join(next)
+    print(next)
+    print("\n\n\n")
+    # if next == '/moderator/':
+    #     return HttpResponseRedirect('/')
+    if next:
+        return HttpResponseRedirect(next)
     categories = FossCategory.objects.order_by('name')
     questions = Question.objects.filter(is_spam = False,is_active = True).order_by('-date_created')
     context = {
@@ -46,8 +56,13 @@ def home(request):
 
     return render(request, "website/templates/index.html", context)
 
+def redirect_to_home(request):
+    return HttpResponseRedirect('/')
+
 # to get all questions posted till now and pagination, 20 questions at a time
 def questions(request):
+    if is_moderator(request.user) and settings.MODERATOR_ACTIVATED:
+        return HttpResponseRedirect('/moderator/questions/')
     questions = Question.objects.all().filter(is_spam = False, is_active = True).order_by('-date_created')
     context = {
         'questions': questions,
@@ -455,12 +470,12 @@ def answer_comment(request):
 def filter(request, category = None, tutorial = None):
 
     if category and tutorial:
-        questions = Question.objects.filter(category__name = category, is_active = True).filter(sub_category = tutorial).order_by('-date_created')
+        questions = Question.objects.filter(category__name = category).filter(sub_category = tutorial).order_by('-date_created')
     elif tutorial is None:
-        questions = Question.objects.filter(category__name = category, is_active = True).order_by('-date_created')
+        questions = Question.objects.filter(category__name = category).order_by('-date_created')
 
     if (not settings.MODERATOR_ACTIVATED):
-        questions = questions.filter(is_spam = False)
+        questions = questions.filter(is_spam = False, is_active = True)
 
     context = {
         'questions': questions,
@@ -1085,7 +1100,7 @@ def clear_notifications(request):
     return HttpResponseRedirect("/user/{0}/notifications/".format(request.user.id))
 
 def search(request):
-    settings.MODERATOR_ACTIVATED = False
+    # settings.MODERATOR_ACTIVATED = False
     categories = FossCategory.objects.order_by('name')
     context = {
         'categories': categories
@@ -1104,6 +1119,8 @@ def moderator_home(request):
 
     settings.MODERATOR_ACTIVATED = True
     next = request.GET.get('next','')
+    if next == '/':
+        return HttpResponseRedirect('/moderator/')
     if next:
         return HttpResponseRedirect(next)
     # If user is a master moderator
@@ -1112,15 +1129,14 @@ def moderator_home(request):
         categories = FossCategory.objects.order_by('name')
 
     else:
-        # Finding the moderator's categories
+        # Finding the moderator's categories and Getting the questions related to moderator's categories
         categories = []
-        for group in request.user.groups.all():
-            categories.append(ModeratorGroup.objects.get(group = group).category)
-        # Getting the questions related to moderator's categories
         questions = []
-        for category in categories:
+        for group in request.user.groups.all():
+            category = ModeratorGroup.objects.get(group = group).category
+            categories.append(category)
             questions.extend(Question.objects.filter(category__name = category.name).order_by('-date_created'))
-
+        questions.sort(key=lambda question: question.date_created, reverse = True)
     context = {
         'questions': questions,
         'categories': categories,
@@ -1135,7 +1151,8 @@ def moderator_questions(request):
 
     # If user is a master moderator
     if (request.user.groups.filter(name = "forum_moderator").exists()):
-        questions = Question.objects.filter(is_active = True).order_by('-date_created')
+        categories = FossCategory.objects.order_by('name')
+        questions = Question.objects.filter().order_by('-date_created')
         if ('spam' in request.GET):
             questions = questions.filter(is_spam = True)
         elif ('non-spam' in request.GET):
@@ -1144,16 +1161,19 @@ def moderator_questions(request):
     else:
         # Finding the moderator's category questions
         questions = []
+        categories = []
         for group in request.user.groups.all():
             category = ModeratorGroup.objects.get(group = group).category
-            questions_to_add = Question.objects.filter(category__name = category.name, is_active = True).order_by('-date_created')
+            categories.append(category)
+            questions_to_add = Question.objects.filter(category__name = category.name).order_by('-date_created')
             if ('spam' in request.GET):
                 questions_to_add = questions_to_add.filter(is_spam = True)
             elif ('non-spam' in request.GET):
                 questions_to_add = questions_to_add.filter(is_spam = False)
             questions.extend(questions_to_add)
-
+        questions.sort(key=lambda question: question.date_created, reverse = True)
     context = {
+        'categories': categories,
         'questions': questions,
     }
 
@@ -1166,16 +1186,20 @@ def moderator_unanswered(request):
 
     # If user is a master moderator
     if (request.user.groups.filter(name = "forum_moderator").exists()):
+        categories = FossCategory.objects.order_by('name')
         questions = Question.objects.all().filter(is_active = True).order_by('date_created').reverse()
 
     else:
         # Finding the moderator's category questions
         questions = []
+        categories = []
         for group in request.user.groups.all():
             category = ModeratorGroup.objects.get(group = group).category
+            categories.append(category)
             questions.extend(Question.objects.filter(category__name = category.name, is_active = True).order_by('-date_created'))
-
+        questions.sort(key=lambda question: question.date_created, reverse = True)
     context = {
+        'categories':categories,
         'questions': questions,
     }
 
@@ -1370,14 +1394,15 @@ def ajax_notification_remove(request):
 def ajax_keyword_search(request):
     if request.method == "POST":
         key = request.POST['key']
-
-        questions = Question.objects.filter(title__contains = key).filter(is_spam=False, is_active = True)
+        if is_moderator(request.user) and settings.MODERATOR_ACTIVATED:
+            questions = (Question.objects.filter(title__contains = key)|Question.objects.filter(category__name = key)).distinct().order_by('-date_created')
+        else:
+            questions = (Question.objects.filter(title__contains = key).filter(is_spam=False, is_active = True)|Question.objects.filter(category__name = key).filter(is_spam=False, is_active = True)).distinct().order_by('-date_created')
         context = {
             'questions': questions
         }
 
         return render(request, 'website/templates/ajax-keyword-search.html', context)
-    
     else:
         return render(request, 'website/templates/404.html')
 

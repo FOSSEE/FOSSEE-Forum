@@ -19,6 +19,11 @@ $(document).ready(function() {
             },
             dataType: "html",
             success: function(data) {
+                alert(data);
+                var data = $("#myTable").DataTable({
+          // 'sPaginationType': "scrolling"
+          });
+                alert(data);
                 $keyword_search_results.html(data);
                 console.log(data);
             }

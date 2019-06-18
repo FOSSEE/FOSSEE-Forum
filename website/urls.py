@@ -1,6 +1,7 @@
 from django.conf.urls.static import static
 from django.conf import settings
 from django.urls import path
+from django.conf.urls import url
 from website import views
 
 app_name = 'website'
@@ -40,6 +41,8 @@ urlpatterns = [
     path('ajax-answer-comment-delete/', views.ajax_answer_comment_delete, name = 'ajax_answer_comment_delete'),
     path('ajax-notification-remove/', views.ajax_notification_remove, name = 'ajax_notification_remove'),
     path('ajax-keyword-search/', views.ajax_keyword_search, name = 'ajax_keyword_search'),
+
+    url(r'^.*/$', views.redirect_to_home)
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
