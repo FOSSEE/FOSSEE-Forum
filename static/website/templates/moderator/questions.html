@@ -12,11 +12,17 @@
 
 	    $(document).ready(function()
 		{
-		$("#myTable").DataTable({
+		var table = $("#myTable").DataTable({
           // 'sPaginationType': "scrolling"
           });
+        $('#category').change(function(e){
+            var selectedCategory = $(this).children("option:selected").val();
+            if( selectedCategory != "All Categories")
+                table.column(1).search('^' + selectedCategory + '$', true, false, true).draw();
+            else
+                table.column(1).search('').draw();
+        });
       });
-
 	 </script>
 
     <h4> 
@@ -24,14 +30,22 @@
         </h5>
     </h4>
        <table id="myTable" class="tablesorter-blue">
+        Category : 
+            <select name="categories" id="category" style="margin: 10px 0px 15px 5px;">
+                <option>All Categories</option>
+                {% for category in categories %}
+                    <option>{{ category }}</option>
+                {% endfor %}
+            </select>
         <colgroup>
+        <col width="3%" />
+        <col width="14%" />
+        <col width="45%" />
+        <col width="7%" />
+        <col width="6%" />
         <col width="5%" />
-        <col width="20%" />
-        <col width="50%" />
-        <col width="8%" />
-        <col width="8%" />
-        <col width="8%" />
-        <col width="8%" />
+        <col width="6%" />
+        <col width="6%" />
         <col width="8%" />
     </colgroup>
         <thead> 
@@ -43,6 +57,7 @@
 		<th>Spam</th>
 		<th>Votes</th>
 		<th>Answers</th>
+        <th>Deleted</th>
 		<th>User</th>  
 	</tr> 
 	</thead> 
@@ -58,9 +73,9 @@
                 </a> 
                 {% else %}
                  <a class="pull-left" href="{% url 'website:filter' question.category|lower %}?qid={{ question.id }}">
-                 {{ question.category|truncatechars:30 }}
+                 {{ question.category }}
                 </a> 
-                
+                <!-- |truncatechars:30 -->
                 {% endif %}
                 </span>
             </td>
@@ -89,6 +104,9 @@
             
             <td>
                 {{ question.answer_set.count }}
+            </td>
+            <td>
+                {{ question.is_active|yesno:"No, Yes" }}
             </td>
             <td>
            
