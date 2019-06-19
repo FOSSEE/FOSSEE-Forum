@@ -104,8 +104,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                                     </li>
                                     {% if user|is_moderator %}
                                         <li>
-                                            <a href="{% url 'website:moderator_home' %}?next={{ request.path }}">Moderator Panel</a>
+                                            <a onclick="moderator()" style="cursor: pointer;">Moderator Panel</a>
                                         </li>
+                                        <script type="text/javascript">
+                                            function moderator(){
+                                                window.location.replace("{% url 'website:moderator_home' %}?next={{ request.path }}");
+                                            }
+                                        </script>
                                     {% endif %}
                                     <li>
                                         <a href="{% url 'user_logout' %}">Logout</a>
