@@ -75,14 +75,9 @@
                               </li>
 
                               <li>
-                                <a onclick="user_panel()" style="cursor: pointer;">
+                                <a href="{% url 'website:home' %}?next={{ request.path }}">
                                     User Panel
                                 </a>
-                                <script type="text/javascript">
-                                    function user_panel(){
-                                        window.location.replace("{% url 'website:home' %}?next={{ request.path }}");
-                                    }
-                                </script>
                               </li>
 
                               <li class="dropdown">

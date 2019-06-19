@@ -2,15 +2,19 @@ from django import template
 
 register = template.Library()
 
+
 def can_edit(user, obj):
     try:
         if user == obj.user or user.id == obj.uid:
-           return True
+            return True
         else:
-           return False
-    except:
+            return False
+    except BaseException:
         return False
+
+
 register.filter(can_edit)
+
 
 def is_moderator(user):
     try:
@@ -18,26 +22,37 @@ def is_moderator(user):
             return True
         else:
             return False
-    except:
+    except BaseException:
         return False
+
+
 register.filter(is_moderator)
 
+
 def comment_id(answer):
-    return "comment"+str(answer.id)
+    return "comment" + str(answer.id)
+
+
 register.filter(comment_id)
 
+
 def havenot_comments(answer):
-    comment = answer.answercomment_set.filter(is_active = True)
+    comment = answer.answercomment_set.filter(is_active=True)
     if not comment:
         return True
     else:
         return False
+
+
 register.filter(havenot_comments)
 
-def can_delete(answer,comment_id):
-    comments = answer.answercomment_set.filter(is_active = True)
+
+def can_delete(answer, comment_id):
+    comments = answer.answercomment_set.filter(is_active=True)
     for x in comments:
-        if x.id>comment_id:
+        if x.id > comment_id:
             return False
     return True
+
+
 register.filter(can_delete)

@@ -170,6 +170,7 @@
                     <script type="text/javascript">
                         CKEDITOR.on("instanceReady", function(event)
                         {
+                            alert(CKEDITOR.version);
                             CKEDITOR.instances['{{ answer.id }}'].setData(document.getElementById("ans{{ answer.id }}2").innerHTML);
                         });
                     </script>

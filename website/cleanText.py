@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 import re
 import nltk
 
+
 def clean_string(myString):
 
     # convert text to lowercase
@@ -32,7 +33,8 @@ def clean_string(myString):
     # convert other punctuation to whitespace
     myString = re.sub(r'([^\w\s]+)|([_-]+)', r' ', myString)
 
-    # convert newlines and blanklines to special strings and extra whitespace to single
+    # convert newlines and blanklines to special strings and extra whitespace
+    # to single
     myString = re.sub(r'\n', r' newline ', myString)
     myString = re.sub(r'\n\n', r' blankline ', myString)
     myString = re.sub(r'\s+', r' ', myString)
