@@ -97,4 +97,4 @@ urlpatterns = [
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-urlpatterns = urlpatterns + [url(r'^.*/$', views.redirect_to_home)]
+# urlpatterns = urlpatterns + [url(r'^.*/$', views.redirect_to_home)]

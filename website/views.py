@@ -17,7 +17,7 @@ from django.core.mail import send_mail
 from django.core.mail import EmailMultiAlternatives
 from .spamFilter import predict, train
 from .decorators import check_recaptcha
-
+from django.urls import resolve, Resolver404
 import openpyxl
 
 User = get_user_model()
@@ -48,12 +48,13 @@ def home(request):
     if 'moderator' in next:
         next.remove('moderator')
     next = '/'.join(next)
-    print(next)
-    print("\n\n\n")
-    # if next == '/moderator/':
-    #     return HttpResponseRedirect('/')
-    if next:
+    try:
+        resolve(next)
         return HttpResponseRedirect(next)
+    except Resolver404:
+        if next:
+            return HttpResponseRedirect('/')
+        pass
     categories = FossCategory.objects.order_by('name')
     questions = Question.objects.filter(
         is_spam=False, is_active=True).order_by('-date_created')
@@ -63,10 +64,6 @@ def home(request):
     }
 
     return render(request, "website/templates/index.html", context)
-
-
-def redirect_to_home(request):
-    return HttpResponseRedirect('/')
 
 # to get all questions posted till now and pagination, 20 questions at a time
 
@@ -95,7 +92,7 @@ def get_question(request, question_id=None, pretty_url=None):
         sub_category = False
 
     if (is_moderator(request.user) and settings.MODERATOR_ACTIVATED):
-        answers = question.answer_set.all()  # .exclude(is_active = False)
+        answers = question.answer_set.all()
     else:
         answers = question.answer_set.filter(
             is_spam=False, is_active=True).all()
@@ -1218,8 +1215,13 @@ def moderator_home(request):
     next = request.GET.get('next', '')
     if next == '/':
         return HttpResponseRedirect('/moderator/')
-    if next:
+    try:
+        resolve(next)
         return HttpResponseRedirect(next)
+    except Resolver404:
+        if next:
+            return HttpResponseRedirect('/moderator/')
+        pass
     # If user is a master moderator
     if (request.user.groups.filter(name="forum_moderator").exists()):
         questions = Question.objects.filter().order_by('-date_created')
