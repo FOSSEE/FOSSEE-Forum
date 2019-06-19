@@ -54,7 +54,6 @@ def home(request):
     except Resolver404:
         if next:
             return HttpResponseRedirect('/')
-        pass
     categories = FossCategory.objects.order_by('name')
     questions = Question.objects.filter(
         is_spam=False, is_active=True).order_by('-date_created')
@@ -1221,7 +1220,6 @@ def moderator_home(request):
     except Resolver404:
         if next:
             return HttpResponseRedirect('/moderator/')
-        pass
     # If user is a master moderator
     if (request.user.groups.filter(name="forum_moderator").exists()):
         questions = Question.objects.filter().order_by('-date_created')
