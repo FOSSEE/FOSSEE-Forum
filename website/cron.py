@@ -1,3 +1,6 @@
+from website.spamFilter import train
+from website.models import Question, Answer, FossCategory
+from forums.local import FORUM_NOTIFICATION
 import django
 import os
 import sys
@@ -7,14 +10,11 @@ from django.db.models import Count
 from django.core.mail import EmailMultiAlternatives
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "forums.settings")
 
-base_path =  os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(base_path)
 
 django.setup()
 
-from forums.local import FORUM_NOTIFICATION
-from website.models import Question, Answer, FossCategory
-from website.spamFilter import train
 
 class Cron(object):
 
@@ -23,9 +23,9 @@ class Cron(object):
         import datetime as DT
 
         try:
-            weekago = DT.date.today() - DT.timedelta(days = 6)
+            weekago = DT.date.today() - DT.timedelta(days=6)
             questions = Question.objects\
-                        .filter(date_created__lte = weekago, is_spam = 0)
+                .filter(date_created__lte=weekago, is_spam=0)
         except Exception as e:
             print("No questions found")
         category_count = FossCategory.objects.count()
@@ -33,26 +33,26 @@ class Cron(object):
         body_cat = {}
         for question in questions:
             try:
-                uque = Answer.objects.filter(question__id = question.id)
+                uque = Answer.objects.filter(question__id=question.id)
             except Exception as e:
                 print("error occured >  > ")
                 print(e)
             if not uque.exists():
-                i = i+1
+                i = i + 1
                 category_id = question.category.id
                 if category_id in list(body_cat.keys()):
                     body_cat[category_id].append(question)
                 else:
                     body_cat[category_id] = [question]
         for key, value in list(body_cat.items()):
-            category_name = FossCategory.objects.get(id = key)
+            category_name = FossCategory.objects.get(id=key)
             mail_body = """<b>The following questions are left unanswered"""\
-                         """:</b><br><br>"""
+                """:</b><br><br>"""
             for item in value:
                 string = "<b>Question :</b> " + str(item.title) + "<br><br>" \
-                + "<b>Category :</b> " + str(item.category) + "<br>" \
-                + settings.DOMAIN_NAME \
-                + "/question/" + str(item.id) +"<br><br>"
+                    + "<b>Category :</b> " + str(item.category) + "<br>" \
+                    + settings.DOMAIN_NAME \
+                    + "/question/" + str(item.id) + "<br><br>"
                 mail_body += string
             sender_email = settings.SENDER_EMAIL
             mail_body += "Please do the needful.<br><br>"
@@ -61,19 +61,19 @@ class Cron(object):
                          """</center>"""
             to = (item.category.email)
             bcc_email = settings.BCC_EMAIL_ID
-            subject =  "FOSSEE Forums - " + str(item.category) \
-                       +" - Unanswered Question"
+            subject = "FOSSEE Forums - " + str(item.category) \
+                + " - Unanswered Question"
 
             email = EmailMultiAlternatives(
                 subject, '',
                 sender_email, [to],
                 bcc=[bcc_email],
-                headers = {"Content-type":"text/html;charset=iso-8859-1"}
+                headers={"Content-type": "text/html;charset=iso-8859-1"}
             )
             email.attach_alternative(mail_body, "text/html")
             email.content_subtype = 'html'  # Main content is text/html
             email.mixed_subtype = 'related'
-            email.send(fail_silently = True)
+            email.send(fail_silently=True)
 
     def train_spam_filter(self):
         train()

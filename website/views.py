@@ -22,21 +22,28 @@ import openpyxl
 
 User = get_user_model()
 admins = (
-   9, 4376, 4915, 14595, 12329, 22467, 5518, 30705
+    9, 4376, 4915, 14595, 12329, 22467, 5518, 30705
 )
 
 # Function to check if user is in any moderator group
+
+
 def is_moderator(user):
     return user.groups.count() > 0
 
-# Function to check if user is anonymous, and if not he/she has first_name and last_name
+# Function to check if user is anonymous, and if not he/she has first_name
+# and last_name
+
+
 def account_credentials_defined(user):
     return ((user.first_name and user.last_name) or is_moderator(user))
 
 # for home page
+
+
 def home(request):
     settings.MODERATOR_ACTIVATED = False
-    next = request.GET.get('next','')
+    next = request.GET.get('next', '')
     next = next.split('/')
     if 'moderator' in next:
         next.remove('moderator')
@@ -48,7 +55,8 @@ def home(request):
     if next:
         return HttpResponseRedirect(next)
     categories = FossCategory.objects.order_by('name')
-    questions = Question.objects.filter(is_spam = False,is_active = True).order_by('-date_created')
+    questions = Question.objects.filter(
+        is_spam=False, is_active=True).order_by('-date_created')
     context = {
         'categories': categories,
         'questions': questions,
@@ -56,49 +64,58 @@ def home(request):
 
     return render(request, "website/templates/index.html", context)
 
+
 def redirect_to_home(request):
     return HttpResponseRedirect('/')
 
 # to get all questions posted till now and pagination, 20 questions at a time
+
+
 def questions(request):
     if is_moderator(request.user) and settings.MODERATOR_ACTIVATED:
         return HttpResponseRedirect('/moderator/questions/')
-    questions = Question.objects.all().filter(is_spam = False, is_active = True).order_by('-date_created')
+    questions = Question.objects.all().filter(
+        is_spam=False, is_active=True).order_by('-date_created')
     context = {
         'questions': questions,
     }
     return render(request, 'website/templates/questions.html', context)
 
 # get particular question, with votes,anwsers
-def get_question(request, question_id = None, pretty_url = None):
+
+
+def get_question(request, question_id=None, pretty_url=None):
     if settings.MODERATOR_ACTIVATED:
-        question = get_object_or_404(Question, id = question_id)
+        question = get_object_or_404(Question, id=question_id)
     else:
-        question = get_object_or_404(Question, id = question_id, is_active = True)
+        question = get_object_or_404(Question, id=question_id, is_active=True)
     sub_category = True
 
     if question.sub_category == "" or str(question.sub_category) == 'None':
         sub_category = False
 
-    if ( is_moderator(request.user) and settings.MODERATOR_ACTIVATED):
-        answers = question.answer_set.all()#.exclude(is_active = False)
+    if (is_moderator(request.user) and settings.MODERATOR_ACTIVATED):
+        answers = question.answer_set.all()  # .exclude(is_active = False)
     else:
-        answers = question.answer_set.filter(is_spam = False, is_active = True).all()
+        answers = question.answer_set.filter(
+            is_spam=False, is_active=True).all()
     ans_count = len(answers)
     form = AnswerQuestionForm()
-    thisuserupvote = question.userUpVotes.filter(id = request.user.id).count()
-    thisuserdownvote = question.userDownVotes.filter(id = request.user.id).count()
+    thisuserupvote = question.userUpVotes.filter(id=request.user.id).count()
+    thisuserdownvote = question.userDownVotes.filter(
+        id=request.user.id).count()
 
     ans_votes = []
     for vote in answers:
-        net_ans_count  = vote.num_votes
-        ans_votes.append([vote.userUpVotes.filter(id = request.user.id).count(), vote.userDownVotes.filter(id = request.user.id).count(), net_ans_count])
+        net_ans_count = vote.num_votes
+        ans_votes.append([vote.userUpVotes.filter(id=request.user.id).count(
+        ), vote.userDownVotes.filter(id=request.user.id).count(), net_ans_count])
 
     main_list = list(zip(answers, ans_votes))
     context = {
         'ans_count': ans_count,
         'question': question,
-        'sub_category':sub_category,
+        'sub_category': sub_category,
         'main_list': main_list,
         'form': form,
         'thisUserUpvote': thisuserupvote,
@@ -110,7 +127,7 @@ def get_question(request, question_id = None, pretty_url = None):
     # updating views count
     if (request.user.is_anonymous):  # if no one logged in
         question.views += 1
-    elif (question.userViews.filter(id = request.user.id).count() == 0):
+    elif (question.userViews.filter(id=request.user.id).count() == 0):
         question.views += 1
         question.userViews.add(request.user)
 
@@ -127,7 +144,7 @@ def get_question(request, question_id = None, pretty_url = None):
 def question_answer(request, question_id):
 
     context = {}
-    question = get_object_or_404(Question, id = question_id, is_active = True)
+    question = get_object_or_404(Question, id=question_id, is_active=True)
     if (request.method == 'POST'):
 
         form = AnswerQuestionForm(request.POST, request.FILES)
@@ -146,19 +163,22 @@ def question_answer(request, question_id):
                 answer.is_spam = True
             answer.save()
 
-            # if user_id of question does not match to user_id of answer, send notification
-            if ((question.user.id != request.user.id) and (answer.is_spam == False)):
+            # if user_id of question does not match to user_id of answer, send
+            # notification
+            if ((question.user.id != request.user.id)
+                    and (answer.is_spam == False)):
                 notification = Notification()
                 notification.uid = question.user.id
                 notification.qid = question.id
                 notification.aid = answer.id
                 notification.save()
 
-            #Sending email when a new answer is posted
+            # Sending email when a new answer is posted
             sender_name = "FOSSEE Forums"
             sender_email = settings.SENDER_EMAIL
             bcc_email = settings.BCC_EMAIL_ID
-            subject = "FOSSEE Forums - {0} - Your question has been answered".format(question.category)
+            subject = "FOSSEE Forums - {0} - Your question has been answered".format(
+                question.category)
             to = [question.user.email]
             message = """The following new answer has been posted in the FOSSEE Forum: <br><br>
                 <b>Title:</b> {0} <br>
@@ -179,18 +199,21 @@ def question_answer(request, question_id):
                 subject, '',
                 sender_email, to,
                 bcc=[bcc_email],
-                headers = {"Content-type":"text/html;charset=iso-8859-1"}
+                headers={"Content-type": "text/html;charset=iso-8859-1"}
             )
             email.attach_alternative(message, "text/html")
             email.content_subtype = 'html'  # Main content is text/html
             email.mixed_subtype = 'related'
-            email.send(fail_silently = True)
-            
-            answer_sets = Answer.objects.filter(question_id = question_id, is_active = True).distinct()
+            email.send(fail_silently=True)
+
+            answer_sets = Answer.objects.filter(
+                question_id=question_id, is_active=True).distinct()
             comment_set = []
             mail_ids = []
             for answer_id in answer_sets:
-                comment_set.append(AnswerComment.objects.values('uid').filter(answer = answer_id, is_active = True).distinct())
+                comment_set.append(
+                    AnswerComment.objects.values('uid').filter(
+                        answer=answer_id, is_active=True).distinct())
                 mail_ids.append(answer_id.uid)
             for x in comment_set:
                 for y in x:
@@ -207,11 +230,12 @@ def question_answer(request, question_id):
                 notification.aid = answer.id
                 notification.save()
 
-                #Sending email to thread when a new answer is posted
+                # Sending email to thread when a new answer is posted
                 sender_name = "FOSSEE Forums"
                 sender_email = settings.SENDER_EMAIL
                 bcc_email = settings.BCC_EMAIL_ID
-                subject = "FOSSEE Forums - {0} - Question has been answered".format(question.category)
+                subject = "FOSSEE Forums - {0} - Question has been answered".format(
+                    question.category)
                 to = [get_user_email(x)]
                 message = """The following new answer has been posted in the FOSSEE Forum: <br><br>
                     <b>Title:</b> {0} <br>
@@ -232,43 +256,48 @@ def question_answer(request, question_id):
                     subject, '',
                     sender_email, to,
                     bcc=[bcc_email],
-                    headers = {"Content-type":"text/html;charset=iso-8859-1"}
+                    headers={"Content-type": "text/html;charset=iso-8859-1"}
                 )
                 email.attach_alternative(message, "text/html")
                 email.content_subtype = 'html'  # Main content is text/html
                 email.mixed_subtype = 'related'
-                email.send(fail_silently = True)
+                email.send(fail_silently=True)
 
             return HttpResponseRedirect('/question/{0}/'.format(question_id))
 
         else:
-            question = get_object_or_404(Question, id = question_id, is_active = True)
+            question = get_object_or_404(
+                Question, id=question_id, is_active=True)
             sub_category = True
 
-            if question.sub_category == "" or str(question.sub_category) == 'None':
+            if question.sub_category == "" or str(
+                    question.sub_category) == 'None':
                 sub_category = False
 
             if (settings.MODERATOR_ACTIVATED):
-                answers = question.answer_set.filter(is_active = True)
+                answers = question.answer_set.filter(is_active=True)
             else:
-                answers = question.answer_set.filter(is_spam = False,is_active = True).all()
+                answers = question.answer_set.filter(
+                    is_spam=False, is_active=True).all()
             ans_count = len(answers)
             form = AnswerQuestionForm()
-            thisuserupvote = question.userUpVotes.filter(id = request.user.id).count()
-            thisuserdownvote = question.userDownVotes.filter(id = request.user.id).count()
+            thisuserupvote = question.userUpVotes.filter(
+                id=request.user.id).count()
+            thisuserdownvote = question.userDownVotes.filter(
+                id=request.user.id).count()
 
             ans_votes = []
             for vote in answers:
-                net_ans_count  = vote.num_votes
-                ans_votes.append([vote.userUpVotes\
-                .filter(id = request.user.id).count(), vote.userDownVotes\
-                .filter(id = request.user.id).count(), net_ans_count])
+                net_ans_count = vote.num_votes
+                ans_votes.append([vote.userUpVotes
+                                  .filter(id=request.user.id).count(), vote.userDownVotes
+                                  .filter(id=request.user.id).count(), net_ans_count])
 
             main_list = list(zip(answers, ans_votes))
             context = {
                 'ans_count': ans_count,
                 'question': question,
-                'sub_category':sub_category,
+                'sub_category': sub_category,
                 'main_list': main_list,
                 'form': form,
                 'thisUserUpvote': thisuserupvote,
@@ -280,7 +309,10 @@ def question_answer(request, question_id):
             context['question'] = question
             context['error'] = "Invalid reCAPTCHA please try again"
             context.update(csrf(request))
-            return render(request, 'website/templates/get-question.html', context)
+            return render(
+                request,
+                'website/templates/get-question.html',
+                context)
 
     else:
         form = AnswerQuestionForm()
@@ -303,15 +335,17 @@ def answer_comment(request):
     if (request.method == 'POST'):
 
         answer_id = request.POST['answer_id']
-        answer = Answer.objects.get(pk = answer_id, is_active = True)
-        answers = answer.question.answer_set.filter(is_spam = False, is_active = True).all()
+        answer = Answer.objects.get(pk=answer_id, is_active=True)
+        answers = answer.question.answer_set.filter(
+            is_spam=False, is_active=True).all()
         answer_creator = answer.user()
-        if request.POST['body'].strip()=="":
-            return HttpResponseRedirect('/question/{0}/'.format(answer.question.id))
+        if request.POST['body'].strip() == "":
+            return HttpResponseRedirect(
+                '/question/{0}/'.format(answer.question.id))
         form = AnswerCommentForm(request.POST)
 
         if form.is_valid():
-            
+
             body = request.POST['body']
             comment = AnswerComment()
             comment.uid = request.user.id
@@ -331,7 +365,8 @@ def answer_comment(request):
                 sender_name = "FOSSEE Forums"
                 sender_email = settings.SENDER_EMAIL
                 bcc_email = settings.BCC_EMAIL_ID
-                subject = "FOSSEE Forums - {0} - Comment for your answer".format(answer.question.category)
+                subject = "FOSSEE Forums - {0} - Comment for your answer".format(
+                    answer.question.category)
                 to = [answer_creator.email]
                 message = """
                     A comment has been posted on your answer. <br><br>
@@ -352,14 +387,15 @@ def answer_comment(request):
                     subject, '',
                     sender_email, to,
                     bcc=[bcc_email],
-                    headers = {"Content-type":"text/html;charset=iso-8859-1"}
+                    headers={"Content-type": "text/html;charset=iso-8859-1"}
                 )
                 email.attach_alternative(message, "text/html")
                 email.content_subtype = 'html'  # Main content is text/html
                 email.mixed_subtype = 'related'
-                email.send(fail_silently = True)
+                email.send(fail_silently=True)
 
-            comment_creator = AnswerComment.objects.order_by('-date_created').values('uid').filter(answer = answer, is_active = True).exclude(uid = request.user.id).distinct()
+            comment_creator = AnswerComment.objects.order_by('-date_created').values(
+                'uid').filter(answer=answer, is_active=True).exclude(uid=request.user.id).distinct()
             if comment_creator:
 
                 notification = Notification()
@@ -372,7 +408,8 @@ def answer_comment(request):
                 sender_name = "FOSSEE Forums"
                 sender_email = settings.SENDER_EMAIL
                 bcc_email = settings.BCC_EMAIL_ID
-                subject = "FOSSEE Forums - {0} - Comment has a reply".format(answer.question.category)
+                subject = "FOSSEE Forums - {0} - Comment has a reply".format(
+                    answer.question.category)
                 to = [get_user_email(comment_creator[0]['uid'])]
                 message = """
                     A reply has been posted on your comment.<br><br>
@@ -385,7 +422,7 @@ def answer_comment(request):
                     <br><br><br>
                     <center><h6>*** This is an automatically generated email, please do not reply***</h6></center>
                     """.format(
-                        answer.question.title,
+                    answer.question.title,
                     answer.question.category,
                     settings.DOMAIN_NAME + '/question/' + str(answer.question.id) + "#answer" + str(answer.id)
                 )
@@ -393,24 +430,27 @@ def answer_comment(request):
                 email = EmailMultiAlternatives(
                     subject, '',
                     sender_email, to,
-                        bcc=[bcc_email],
-                    headers = {"Content-type":"text/html;charset=iso-8859-1"}
+                    bcc=[bcc_email],
+                    headers={"Content-type": "text/html;charset=iso-8859-1"}
                 )
                 email.attach_alternative(message, "text/html")
                 email.content_subtype = 'html'  # Main content is text/html
                 email.mixed_subtype = 'related'
-                email.send(fail_silently = True)
+                email.send(fail_silently=True)
 
             comment_set = []
             mail_ids = [answer.question.user.id]
             for answer_id in answers:
-                comment_set.append(AnswerComment.objects.values('uid').filter(answer = answer_id, is_active = True).distinct())
+                comment_set.append(
+                    AnswerComment.objects.values('uid').filter(
+                        answer=answer_id, is_active=True).distinct())
                 mail_ids.append(answer_id.uid)
             for x in comment_set:
                 for y in x:
                     mail_ids.append(y['uid'])
             mail_ids = set(mail_ids)
-            mail_ids.difference_update({answer.uid,comment_creator,request.user.id})
+            mail_ids.difference_update(
+                {answer.uid, comment_creator, request.user.id})
 
             for x in mail_ids:
 
@@ -424,7 +464,8 @@ def answer_comment(request):
                 sender_name = "FOSSEE Forums"
                 sender_email = settings.SENDER_EMAIL
                 bcc_email = settings.BCC_EMAIL_ID
-                subject = "FOSSEE Forums - A Comment has been posted under Question No. {0}".format(answer.question.id)
+                subject = "FOSSEE Forums - A Comment has been posted under Question No. {0}".format(
+                    answer.question.id)
                 to = [get_user_email(x)]
                 message = """
                     A comment has been posted under the Question.<br><br>
@@ -446,14 +487,15 @@ def answer_comment(request):
                     subject, '',
                     sender_email, to,
                     bcc=[bcc_email],
-                    headers = {"Content-type":"text/html;charset=iso-8859-1"}
+                    headers={"Content-type": "text/html;charset=iso-8859-1"}
                 )
                 email.attach_alternative(message, "text/html")
                 email.content_subtype = 'html'  # Main content is text/html
                 email.mixed_subtype = 'related'
-                email.send(fail_silently = True)
+                email.send(fail_silently=True)
 
-            return HttpResponseRedirect('/question/{0}/'.format(answer.question.id))
+            return HttpResponseRedirect(
+                '/question/{0}/'.format(answer.question.id))
 
         else:
             context.update({
@@ -461,21 +503,29 @@ def answer_comment(request):
                 'question': answer.question,
                 'answers': answers,
             })
-            return render(request, 'website/templates/get-question.html', context)
+            return render(
+                request,
+                'website/templates/get-question.html',
+                context)
 
     else:
         return render(request, 'website/templates/404.html')
 
 # View used to filter question according to category
-def filter(request, category = None, tutorial = None):
+
+
+def filter(request, category=None, tutorial=None):
 
     if category and tutorial:
-        questions = Question.objects.filter(category__name = category).filter(sub_category = tutorial).order_by('-date_created')
+        questions = Question.objects.filter(
+            category__name=category).filter(
+            sub_category=tutorial).order_by('-date_created')
     elif tutorial is None:
-        questions = Question.objects.filter(category__name = category).order_by('-date_created')
+        questions = Question.objects.filter(
+            category__name=category).order_by('-date_created')
 
     if (not settings.MODERATOR_ACTIVATED):
-        questions = questions.filter(is_spam = False, is_active = True)
+        questions = questions.filter(is_spam=False, is_active=True)
 
     context = {
         'questions': questions,
@@ -483,9 +533,10 @@ def filter(request, category = None, tutorial = None):
         'tutorial': tutorial,
     }
 
-    return render(request, 'website/templates/filter.html',  context)
+    return render(request, 'website/templates/filter.html', context)
 
-# post a new question on to forums, notification is sent to mailing list team@fossee.in
+# post a new question on to forums, notification is sent to mailing list
+# team@fossee.in
 @login_required
 @user_passes_test(account_credentials_defined, login_url='/accounts/profile/')
 def new_question(request):
@@ -517,8 +568,9 @@ def new_question(request):
                     context.update(csrf(request))
                     category = request.POST.get('category', None)
                     context['category'] = category
-                    context['form'] = NewQuestionForm(category = category)
-                    return render(request, 'website/templates/new-question.html', context)
+                    context['form'] = NewQuestionForm(category=category)
+                    return render(
+                        request, 'website/templates/new-question.html', context)
 
                 question.sub_category = ""
 
@@ -534,10 +586,11 @@ def new_question(request):
 
             question.save()
 
-            #Sending email when a new question is asked
+            # Sending email when a new question is asked
             sender_name = "FOSSEE Forums"
             sender_email = settings.SENDER_EMAIL
-            subject = "FOSSEE Forums - {0} - New Question".format(question.category)
+            subject = "FOSSEE Forums - {0} - New Question".format(
+                question.category)
             to = (question.category.email)
             message = """
                 The following new question has been posted in the FOSSEE Forum: <br>
@@ -554,17 +607,17 @@ def new_question(request):
                 question.title,
                 question.category,
                 question.body,
-                settings.DOMAIN_NAME + '/question/'+ str(question.id),
+                settings.DOMAIN_NAME + '/question/' + str(question.id),
             )
             email = EmailMultiAlternatives(
                 subject, '',
                 sender_email, [to],
-                headers = {"Content-type":"text/html;charset=iso-8859-1"}
+                headers={"Content-type": "text/html;charset=iso-8859-1"}
             )
             email.attach_alternative(message, "text/html")
             email.content_subtype = 'html'  # Main content is text/html
             email.mixed_subtype = 'related'
-            email.send(fail_silently = True)
+            email.send(fail_silently=True)
             to = settings.BCC_EMAIL_ID
             message = """
                 The following new question has been posted in the FOSSEE Forum: <br>
@@ -582,18 +635,18 @@ def new_question(request):
                 question.title,
                 question.category,
                 question.body,
-                settings.DOMAIN_NAME + '/question/'+ str(question.id),
+                settings.DOMAIN_NAME + '/question/' + str(question.id),
                 question.is_spam,
             )
             email = EmailMultiAlternatives(
                 subject, '',
                 sender_email, [to],
-                headers = {"Content-type":"text/html;charset=iso-8859-1"}
+                headers={"Content-type": "text/html;charset=iso-8859-1"}
             )
             email.attach_alternative(message, "text/html")
             email.content_subtype = 'html'  # Main content is text/html
             email.mixed_subtype = 'related'
-            email.send(fail_silently = True)
+            email.send(fail_silently=True)
 
             if (question.is_spam):
                 return HttpResponseRedirect('/')
@@ -606,18 +659,22 @@ def new_question(request):
             context['category'] = category
             context['tutorial'] = tutorial
             context['form'] = form
-            return render(request, 'website/templates/new-question.html', context)
+            return render(
+                request,
+                'website/templates/new-question.html',
+                context)
 
     else:
         category = request.GET.get('category')
-        form = NewQuestionForm(category = category)
+        form = NewQuestionForm(category=category)
         context['category'] = category
 
     context['form'] = form
     context.update(csrf(request))
     return render(request, 'website/templates/new-question.html', context)
 
-# Edit a question on forums, notification is sent to mailing list team@fossee.in
+# Edit a question on forums, notification is sent to mailing list
+# team@fossee.in
 @login_required
 @user_passes_test(account_credentials_defined, login_url='/accounts/profile/')
 def edit_question(request, question_id):
@@ -626,17 +683,18 @@ def edit_question(request, question_id):
     user = request.user
     context['SITE_KEY'] = settings.GOOGLE_RECAPTCHA_SITE_KEY
     all_category = FossCategory.objects.all()
-    question = get_object_or_404(Question, id = question_id, is_active = True)
+    question = get_object_or_404(Question, id=question_id, is_active=True)
 
     # To prevent random user from manually entering the link and editing
-    if ((request.user.id != question.user.id or question.answer_set.filter(is_active = True).count() > 0) and (not is_moderator(request.user))):
+    if ((request.user.id != question.user.id or question.answer_set.filter(
+            is_active=True).count() > 0) and (not is_moderator(request.user))):
         return render(request, 'website/templates/not-authorized.html')
 
     if (request.method == 'POST'):
 
         previous_title = question.title
         form = NewQuestionForm(request.POST, request.FILES)
-        question.title = '' # To prevent same title error in form
+        question.title = ''  # To prevent same title error in form
         question.save()
 
         if form.is_valid():
@@ -656,7 +714,8 @@ def edit_question(request, question_id):
                     context['category'] = category
                     context['tutorial'] = tutorial
                     context['form'] = form
-                    return render(request, 'website/templates/edit-question.html', context)
+                    return render(
+                        request, 'website/templates/edit-question.html', context)
 
                 question.sub_category = ""
 
@@ -667,7 +726,7 @@ def edit_question(request, question_id):
             question.is_spam = cleaned_data['is_spam']
 
             if question.is_spam != change_spam:
-                add_Spam(question.body,question.is_spam)
+                add_Spam(question.body, question.is_spam)
 
             question.views = 1
             question.save()
@@ -680,11 +739,14 @@ def edit_question(request, question_id):
 
             question.save()
 
-            answer_sets = Answer.objects.filter(question_id = question_id, is_active = True).distinct()
+            answer_sets = Answer.objects.filter(
+                question_id=question_id, is_active=True).distinct()
             comment_set = []
             mail_ids = [question.user.id]
             for answer in answer_sets:
-                comment_set.append(AnswerComment.objects.values('uid').filter(answer = answer, is_active = True).distinct())
+                comment_set.append(
+                    AnswerComment.objects.values('uid').filter(
+                        answer=answer, is_active=True).distinct())
                 mail_ids.append(answer.uid)
             for x in comment_set:
                 for y in x:
@@ -694,10 +756,13 @@ def edit_question(request, question_id):
             for uid in mail_ids:
                 sender_name = "FOSSEE Forums"
                 sender_email = settings.SENDER_EMAIL
-                subject = "FOSSEE Forums - {0} - New Question".format(question.category)
+                subject = "FOSSEE Forums - {0} - New Question".format(
+                    question.category)
                 #to = (question.user.email, question.category.email, settings.FORUM_NOTIFICATION)
                 to = [get_user_email(uid)]
-                bcc_email = (question.category.email, settings.FORUM_NOTIFICATION)
+                bcc_email = (
+                    question.category.email,
+                    settings.FORUM_NOTIFICATION)
                 message = """
                     The following question has been edited in the FOSSEE Forum: <br>
                     <b> Original title: </b>{0}<br>
@@ -716,19 +781,19 @@ def edit_question(request, question_id):
                     previous_title,
                     question.category,
                     question.body,
-                    settings.DOMAIN_NAME + '/question/'+ str(question.id),
+                    settings.DOMAIN_NAME + '/question/' + str(question.id),
                     question.is_spam,
                 )
                 email = EmailMultiAlternatives(
                     subject, '',
                     sender_email, [to],
                     bcc=[bcc_email],
-                    headers = {"Content-type":"text/html;charset=iso-8859-1"}
+                    headers={"Content-type": "text/html;charset=iso-8859-1"}
                 )
                 email.attach_alternative(message, "text/html")
                 email.content_subtype = 'html'  # Main content is text/html
                 email.mixed_subtype = 'related'
-                email.send(fail_silently = True)
+                email.send(fail_silently=True)
 
             if (question.is_spam and not settings.MODERATOR_ACTIVATED):
                 return HttpResponseRedirect('/')
@@ -743,48 +808,57 @@ def edit_question(request, question_id):
             context['category'] = category
             context['tutorial'] = tutorial
             context['form'] = form
-            return render(request, 'website/templates/edit-question.html', context)
+            return render(
+                request,
+                'website/templates/edit-question.html',
+                context)
 
     else:
-        form = NewQuestionForm(instance = question)
+        form = NewQuestionForm(instance=question)
 
     context['form'] = form
     context.update(csrf(request))
     return render(request, 'website/templates/edit-question.html', context)
 
-def add_Spam(question_body,is_spam):
+
+def add_Spam(question_body, is_spam):
     xfile = openpyxl.load_workbook('DataSet.xlsx')
     sheet = xfile['Data set']
-    n = len(sheet['A'])+1
-    for i in range(2,n):
-        if(question_body==str(sheet.cell(row=i,column=1).value)):
-            sheet.cell(row=i,column=2).value=is_spam
+    n = len(sheet['A']) + 1
+    for i in range(2, n):
+        if(question_body == str(sheet.cell(row=i, column=1).value)):
+            sheet.cell(row=i, column=2).value = is_spam
             xfile.save('DataSet.xlsx')
             return
-    sheet['A%s'%n]=question_body
-    sheet['B%s'%n]=is_spam
+    sheet['A%s' % n] = question_body
+    sheet['B%s' % n] = is_spam
     xfile.save('DataSet.xlsx')
 
-# View for deleting question, notification is sent to mailing list team@fossee.in
+# View for deleting question, notification is sent to mailing list
+# team@fossee.in
 @login_required
 def question_delete(request, question_id):
 
-    question = get_object_or_404(Question, id = question_id, is_active = True)
+    question = get_object_or_404(Question, id=question_id, is_active=True)
     title = question.title
 
     # To prevent random user from manually entering the link and deleting
-    if ((request.user.id != question.user.id or question.answer_set.filter(is_active = True).count() > 0) and (not settings.MODERATOR_ACTIVATED)):
+    if ((request.user.id != question.user.id or question.answer_set.filter(
+            is_active=True).count() > 0) and (not settings.MODERATOR_ACTIVATED)):
         return render(request, 'website/templates/not-authorized.html')
 
     if (request.method == "POST"):
 
         # Send a delete email only when moderator does so
         if (settings.MODERATOR_ACTIVATED):
-            answer_sets = Answer.objects.filter(question_id = question_id, is_active = True).distinct()
+            answer_sets = Answer.objects.filter(
+                question_id=question_id, is_active=True).distinct()
             comment_set = []
             mail_ids = [question.user.id]
             for answer in answer_sets:
-                comment_set.append(AnswerComment.objects.values('uid').filter(answer = answer, is_active = True).distinct())
+                comment_set.append(
+                    AnswerComment.objects.values('uid').filter(
+                        answer=answer, is_active=True).distinct())
                 mail_ids.append(answer.uid)
             for x in comment_set:
                 for y in x:
@@ -794,7 +868,8 @@ def question_delete(request, question_id):
             for uid in mail_ids:
                 sender_name = "FOSSEE Forums"
                 sender_email = settings.SENDER_EMAIL
-                subject = "FOSSEE Forums - {0} - New Question".format(question.category)
+                subject = "FOSSEE Forums - {0} - New Question".format(
+                    question.category)
                 to = [get_user_email(uid)]
                 bcc_email = settings.BCC_EMAIL_ID
                 delete_reason = request.POST.get('deleteQuestion')
@@ -819,12 +894,12 @@ def question_delete(request, question_id):
                     subject, '',
                     sender_email, to,
                     bcc=[bcc_email],
-                    headers = {"Content-type":"text/html;charset=iso-8859-1"}
+                    headers={"Content-type": "text/html;charset=iso-8859-1"}
                 )
                 email.attach_alternative(message, "text/html")
                 email.content_subtype = 'html'  # Main content is text/html
                 email.mixed_subtype = 'related'
-                email.send(fail_silently = True)
+                email.send(fail_silently=True)
 
     question.is_active = False
     question.save()
@@ -835,11 +910,14 @@ def question_delete(request, question_id):
         for comment in answer.answercomment_set.all():
             comment.is_active = False
             comment.save()
-    return render(request, 'website/templates/question-delete.html', {'title': title})
+    return render(request,
+                  'website/templates/question-delete.html',
+                  {'title': title})
+
 
 @login_required
-def question_restore(request,question_id):
-    question = get_object_or_404(Question, id = question_id, is_active = False)
+def question_restore(request, question_id):
+    question = get_object_or_404(Question, id=question_id, is_active=False)
     if not is_moderator(request.user) or not settings.MODERATOR_ACTIVATED:
         return render(request, 'website/templates/not-authorized.html')
     question.is_active = True
@@ -857,21 +935,25 @@ def question_restore(request,question_id):
 @login_required
 def answer_delete(request, answer_id):
 
-    answer = get_object_or_404(Answer, id = answer_id)
+    answer = get_object_or_404(Answer, id=answer_id)
     question_id = answer.question.id
 
-    if ((request.user.id != answer.uid or AnswerComment.objects.filter(answer = answer, is_active = True).exclude(uid = answer.uid).exists()) and (not settings.MODERATOR_ACTIVATED)):
+    if ((request.user.id != answer.uid or AnswerComment.objects.filter(answer=answer,
+                                                                       is_active=True).exclude(uid=answer.uid).exists()) and (not settings.MODERATOR_ACTIVATED)):
         return render(request, 'website/templates/not-authorized.html')
 
     if (request.method == "POST") and (settings.MODERATOR_ACTIVATED):
 
         # Sending email to user when answer is deleted
 
-        answer_sets = Answer.objects.filter(question_id = question_id, is_active = True).distinct()
+        answer_sets = Answer.objects.filter(
+            question_id=question_id, is_active=True).distinct()
         comment_set = []
         mail_ids = [answer.question.user.id]
         for answer in answer_sets:
-            comment_set.append(AnswerComment.objects.values('uid').filter(answer = answer, is_active = True).distinct())
+            comment_set.append(
+                AnswerComment.objects.values('uid').filter(
+                    answer=answer, is_active=True).distinct())
             mail_ids.append(answer.uid)
         for x in comment_set:
             for y in x:
@@ -881,7 +963,8 @@ def answer_delete(request, answer_id):
         for uid in mail_ids:
             sender_name = "FOSSEE Forums"
             sender_email = settings.SENDER_EMAIL
-            subject = "FOSSEE Forums - {0} - Answer Deleted".format(answer.question.category)
+            subject = "FOSSEE Forums - {0} - Answer Deleted".format(
+                answer.question.category)
             to = [get_user_email(uid)]
             bcc_email = settings.BCC_EMAIL_ID
             delete_reason = request.POST.get('deleteAnswer')
@@ -901,17 +984,17 @@ def answer_delete(request, answer_id):
                 answer.question.category,
                 answer.question.body,
                 delete_reason,
-            )   
+            )
             email = EmailMultiAlternatives(
                 subject, '',
                 sender_email, to,
                 bcc=[bcc_email],
-                headers = {"Content-type":"text/html;charset=iso-8859-1"}
+                headers={"Content-type": "text/html;charset=iso-8859-1"}
             )
             email.attach_alternative(message, "text/html")
             email.content_subtype = 'html'  # Main content is text/html
             email.mixed_subtype = 'related'
-            email.send(fail_silently = True)
+            email.send(fail_silently=True)
 
     answer.is_active = False
     answer.save()
@@ -923,7 +1006,7 @@ def answer_delete(request, answer_id):
 
 @login_required
 def answer_restore(request, answer_id):
-    answer = get_object_or_404(Answer, id = answer_id, is_active = False)
+    answer = get_object_or_404(Answer, id=answer_id, is_active=False)
     if not is_moderator(request.user) or not settings.MODERATOR_ACTIVATED:
         return render(request, 'website/templates/not-authorized.html')
     if not answer.question.is_active:
@@ -935,22 +1018,24 @@ def answer_restore(request, answer_id):
         comment.save()
     return HttpResponseRedirect('/question/{0}/'.format(answer.question.id))
 
+
 def comment_restore(request, comment_id):
-    comment = get_object_or_404(AnswerComment, id = comment_id, is_active = False)
+    comment = get_object_or_404(AnswerComment, id=comment_id, is_active=False)
     if not is_moderator(request.user) or not settings.MODERATOR_ACTIVATED:
         return render(request, 'website/templates/not-authorized.html')
     if not comment.answer.is_active:
         return HttpResponse("Comment Can't be restored")
     comment.is_active = True
     comment.save()
-    return HttpResponseRedirect('/question/{0}/'.format(comment.answer.question.id))
+    return HttpResponseRedirect(
+        '/question/{0}/'.format(comment.answer.question.id))
 
 # View to mark answer as spam/non-spam
 @login_required
 @user_passes_test(is_moderator)
 def mark_answer_spam(request, answer_id):
 
-    answer = get_object_or_404(Answer, id = answer_id, is_active = True)
+    answer = get_object_or_404(Answer, id=answer_id, is_active=True)
     question_id = answer.question.id
 
     if (request.method == "POST"):
@@ -960,7 +1045,8 @@ def mark_answer_spam(request, answer_id):
         else:
             answer.is_spam = False
     answer.save()
-    return HttpResponseRedirect('/question/{0}/#answer{1}/'.format(question_id, answer.id))
+    return HttpResponseRedirect(
+        '/question/{0}/#answer{1}/'.format(question_id, answer.id))
 
 # return number of votes and initial votes
 # user who asked the question,cannot vote his/or anwser,
@@ -971,9 +1057,11 @@ def vote_post(request):
     post_id = int(request.POST.get('id'))
     vote_type = request.POST.get('type')
     vote_action = request.POST.get('action')
-    cur_post = get_object_or_404(Question, id = post_id, is_active = True)
-    thisuserupvote = cur_post.userUpVotes.filter(id = request.user.id, is_active = True).count()
-    thisuserdownvote = cur_post.userDownVotes.filter(id = request.user.id, is_active = True).count()
+    cur_post = get_object_or_404(Question, id=post_id, is_active=True)
+    thisuserupvote = cur_post.userUpVotes.filter(
+        id=request.user.id, is_active=True).count()
+    thisuserdownvote = cur_post.userDownVotes.filter(
+        id=request.user.id, is_active=True).count()
     initial_votes = cur_post.num_votes
 
     if (request.user.id != cur_post.user.id):
@@ -1025,9 +1113,11 @@ def ans_vote_post(request):
     post_id = int(request.POST.get('id'))
     vote_type = request.POST.get('type')
     vote_action = request.POST.get('action')
-    cur_post = get_object_or_404(Answer, id = post_id, is_active = True)
-    thisuserupvote = cur_post.userUpVotes.filter(id = request.user.id, is_active = True).count()
-    thisuserdownvote = cur_post.userDownVotes.filter(id = request.user.id, is_active = True).count()
+    cur_post = get_object_or_404(Answer, id=post_id, is_active=True)
+    thisuserupvote = cur_post.userUpVotes.filter(
+        id=request.user.id, is_active=True).count()
+    thisuserdownvote = cur_post.userDownVotes.filter(
+        id=request.user.id, is_active=True).count()
     initial_votes = cur_post.num_votes
 
     if (request.user.id != cur_post.uid):
@@ -1080,13 +1170,18 @@ def user_notifications(request, user_id):
 
     if (user_id == request.user.id):
         try:
-            notifications = Notification.objects.filter(uid = user_id).order_by('-date_created')
+            notifications = Notification.objects.filter(
+                uid=user_id).order_by('-date_created')
             context = {
                 'notifications': notifications,
             }
-            return render(request, 'website/templates/notifications.html', context)
-        except:
-            return HttpResponseRedirect("/user/{0}/notifications/".format(request.user.id))
+            return render(
+                request,
+                'website/templates/notifications.html',
+                context)
+        except BaseException:
+            return HttpResponseRedirect(
+                "/user/{0}/notifications/".format(request.user.id))
 
     else:
         return render(request, 'website/templates/not-authorized.html')
@@ -1096,8 +1191,10 @@ def user_notifications(request, user_id):
 @login_required
 def clear_notifications(request):
     settings.MODERATOR_ACTIVATED = False
-    Notification.objects.filter(uid = request.user.id).delete()
-    return HttpResponseRedirect("/user/{0}/notifications/".format(request.user.id))
+    Notification.objects.filter(uid=request.user.id).delete()
+    return HttpResponseRedirect(
+        "/user/{0}/notifications/".format(request.user.id))
+
 
 def search(request):
     # settings.MODERATOR_ACTIVATED = False
@@ -1118,25 +1215,30 @@ def search(request):
 def moderator_home(request):
 
     settings.MODERATOR_ACTIVATED = True
-    next = request.GET.get('next','')
+    next = request.GET.get('next', '')
     if next == '/':
         return HttpResponseRedirect('/moderator/')
     if next:
         return HttpResponseRedirect(next)
     # If user is a master moderator
-    if (request.user.groups.filter(name = "forum_moderator").exists()):
+    if (request.user.groups.filter(name="forum_moderator").exists()):
         questions = Question.objects.filter().order_by('-date_created')
         categories = FossCategory.objects.order_by('name')
 
     else:
-        # Finding the moderator's categories and Getting the questions related to moderator's categories
+        # Finding the moderator's categories and Getting the questions related
+        # to moderator's categories
         categories = []
         questions = []
         for group in request.user.groups.all():
-            category = ModeratorGroup.objects.get(group = group).category
+            category = ModeratorGroup.objects.get(group=group).category
             categories.append(category)
-            questions.extend(Question.objects.filter(category__name = category.name).order_by('-date_created'))
-        questions.sort(key=lambda question: question.date_created, reverse = True)
+            questions.extend(
+                Question.objects.filter(
+                    category__name=category.name).order_by('-date_created'))
+        questions.sort(
+            key=lambda question: question.date_created,
+            reverse=True)
     context = {
         'questions': questions,
         'categories': categories,
@@ -1150,60 +1252,76 @@ def moderator_home(request):
 def moderator_questions(request):
 
     # If user is a master moderator
-    if (request.user.groups.filter(name = "forum_moderator").exists()):
+    if (request.user.groups.filter(name="forum_moderator").exists()):
         categories = FossCategory.objects.order_by('name')
         questions = Question.objects.filter().order_by('-date_created')
         if ('spam' in request.GET):
-            questions = questions.filter(is_spam = True)
+            questions = questions.filter(is_spam=True)
         elif ('non-spam' in request.GET):
-            questions = questions.filter(is_spam = False)
+            questions = questions.filter(is_spam=False)
 
     else:
         # Finding the moderator's category questions
         questions = []
         categories = []
         for group in request.user.groups.all():
-            category = ModeratorGroup.objects.get(group = group).category
+            category = ModeratorGroup.objects.get(group=group).category
             categories.append(category)
-            questions_to_add = Question.objects.filter(category__name = category.name).order_by('-date_created')
+            questions_to_add = Question.objects.filter(
+                category__name=category.name).order_by('-date_created')
             if ('spam' in request.GET):
-                questions_to_add = questions_to_add.filter(is_spam = True)
+                questions_to_add = questions_to_add.filter(is_spam=True)
             elif ('non-spam' in request.GET):
-                questions_to_add = questions_to_add.filter(is_spam = False)
+                questions_to_add = questions_to_add.filter(is_spam=False)
             questions.extend(questions_to_add)
-        questions.sort(key=lambda question: question.date_created, reverse = True)
+        questions.sort(
+            key=lambda question: question.date_created,
+            reverse=True)
     context = {
         'categories': categories,
         'questions': questions,
     }
 
-    return render(request, 'website/templates/moderator/questions.html', context)
+    return render(
+        request,
+        'website/templates/moderator/questions.html',
+        context)
 
 # Unanswered questions page for moderator
 @login_required
 @user_passes_test(is_moderator)
 def moderator_unanswered(request):
 
+    settings.MODERATOR_ACTIVATED = True
     # If user is a master moderator
-    if (request.user.groups.filter(name = "forum_moderator").exists()):
+    if (request.user.groups.filter(name="forum_moderator").exists()):
         categories = FossCategory.objects.order_by('name')
-        questions = Question.objects.all().filter(is_active = True).order_by('date_created').reverse()
+        questions = Question.objects.all().filter(
+            is_active=True).order_by('date_created').reverse()
 
     else:
         # Finding the moderator's category questions
         questions = []
         categories = []
         for group in request.user.groups.all():
-            category = ModeratorGroup.objects.get(group = group).category
+            category = ModeratorGroup.objects.get(group=group).category
             categories.append(category)
-            questions.extend(Question.objects.filter(category__name = category.name, is_active = True).order_by('-date_created'))
-        questions.sort(key=lambda question: question.date_created, reverse = True)
+            questions.extend(
+                Question.objects.filter(
+                    category__name=category.name,
+                    is_active=True).order_by('-date_created'))
+        questions.sort(
+            key=lambda question: question.date_created,
+            reverse=True)
     context = {
-        'categories':categories,
+        'categories': categories,
         'questions': questions,
     }
 
-    return render(request, 'website/templates/moderator/unanswered.html', context)
+    return render(
+        request,
+        'website/templates/moderator/unanswered.html',
+        context)
 
 # Re-training spam filter
 @login_required
@@ -1221,18 +1339,22 @@ def ajax_tutorials(request):
 
         category = request.POST.get('category')
 
-        if (SubFossCategory.objects.filter(parent_id = category).exists()):
-            tutorials = SubFossCategory.objects.filter(parent_id = category)
+        if (SubFossCategory.objects.filter(parent_id=category).exists()):
+            tutorials = SubFossCategory.objects.filter(parent_id=category)
             context = {
                 'tutorials': tutorials,
             }
-            return render(request, 'website/templates/ajax-tutorials.html', context)
+            return render(
+                request,
+                'website/templates/ajax-tutorials.html',
+                context)
 
         else:
             return HttpResponse('No sub-category in category.')
-    
+
     else:
         return render(request, 'website/templates/404.html')
+
 
 @csrf_exempt
 def ajax_answer_update(request):
@@ -1241,17 +1363,21 @@ def ajax_answer_update(request):
         aid = request.POST['answer_id']
         body = request.POST['body']
         try:
-            answer = get_object_or_404(Answer, pk = aid)
-            if ((is_moderator(request.user) and settings.MODERATOR_ACTIVATED) or (request.user.id == answer.uid and not AnswerComment.objects.filter(answer = answer).exclude(uid = answer.uid).exists())):
+            answer = get_object_or_404(Answer, pk=aid)
+            if ((is_moderator(request.user) and settings.MODERATOR_ACTIVATED) or (request.user.id ==
+                                                                                  answer.uid and not AnswerComment.objects.filter(answer=answer).exclude(uid=answer.uid).exists())):
                 answer.body = str(body)
                 answer.save()
                 if settings.MODERATOR_ACTIVATED:
                     question_id = answer.question.id
-                    answer_sets = Answer.objects.filter(question_id = question_id, is_active = True).distinct()
+                    answer_sets = Answer.objects.filter(
+                        question_id=question_id, is_active=True).distinct()
                     comment_set = []
                     mail_ids = [answer.question.user.id]
                     for ans in answer_sets:
-                        comment_set.append(AnswerComment.objects.values('uid').filter(answer = ans, is_active = True).distinct())
+                        comment_set.append(
+                            AnswerComment.objects.values('uid').filter(
+                                answer=ans, is_active=True).distinct())
                         mail_ids.append(ans.uid)
                     for x in comment_set:
                         for y in x:
@@ -1261,7 +1387,8 @@ def ajax_answer_update(request):
                     for uid in mail_ids:
                         sender_name = "FOSSEE Forums"
                         sender_email = settings.SENDER_EMAIL
-                        subject = "FOSSEE Forums - {0} - Answer Deleted".format(answer.question.category)
+                        subject = "FOSSEE Forums - {0} - Answer Deleted".format(
+                            answer.question.category)
                         to = [get_user_email(uid)]
                         bcc_email = settings.BCC_EMAIL_ID
                         delete_reason = request.POST.get('deleteAnswer')
@@ -1281,42 +1408,46 @@ def ajax_answer_update(request):
                             answer.question.category,
                             answer.question.body,
                             delete_reason,
-                        )   
-                        email = EmailMultiAlternatives(
-                            subject, '',
-                            sender_email, to,
-                            bcc=[bcc_email],
-                            headers = {"Content-type":"text/html;charset=iso-8859-1"}
                         )
+                        email = EmailMultiAlternatives(
+                            subject, '', sender_email, to, bcc=[bcc_email], headers={
+                                "Content-type": "text/html;charset=iso-8859-1"})
                         email.attach_alternative(message, "text/html")
                         email.content_subtype = 'html'  # Main content is text/html
                         email.mixed_subtype = 'related'
-                        email.send(fail_silently = True)
-                return HttpResponseRedirect('/question/{0}/'.format(answer.question.id))
+                        email.send(fail_silently=True)
+                return HttpResponseRedirect(
+                    '/question/{0}/'.format(answer.question.id))
             else:
                 return HttpResponse('Only moderator can update.')
-        except:
-            return HttpResponse('Answer not found or An error occured during update')
+        except BaseException:
+            return HttpResponse(
+                'Answer not found or An error occured during update')
 
     else:
         return render(request, 'website/templates/404.html')
+
 
 @csrf_exempt
 def ajax_answer_comment_delete(request):
     if request.method == 'POST':
         comment_id = request.POST['comment_id']
         try:
-            comment = get_object_or_404(AnswerComment, pk = comment_id)
-            if (is_moderator(request.user) and settings.MODERATOR_ACTIVATED) or (request.user.id == comment.uid and can_delete(comment.answer,comment_id)):
+            comment = get_object_or_404(AnswerComment, pk=comment_id)
+            if (is_moderator(request.user) and settings.MODERATOR_ACTIVATED) or (
+                    request.user.id == comment.uid and can_delete(comment.answer, comment_id)):
                 comment.is_active = False
                 comment.save()
                 if settings.MODERATOR_ACTIVATED:
                     question_id = comment.answer.question.id
-                    answer_sets = Answer.objects.filter(question_id = question_id, is_active = True).distinct()
+                    answer_sets = Answer.objects.filter(
+                        question_id=question_id, is_active=True).distinct()
                     comment_set = []
                     mail_ids = [answer.question.user.id]
                     for ans in answer_sets:
-                        comment_set.append(AnswerComment.objects.values('uid').filter(answer = ans, is_active = True).distinct())
+                        comment_set.append(
+                            AnswerComment.objects.values('uid').filter(
+                                answer=ans, is_active=True).distinct())
                         mail_ids.append(ans.uid)
                     for x in comment_set:
                         for y in x:
@@ -1326,7 +1457,8 @@ def ajax_answer_comment_delete(request):
                     for uid in mail_ids:
                         sender_name = "FOSSEE Forums"
                         sender_email = settings.SENDER_EMAIL
-                        subject = "FOSSEE Forums - {0} - Comment Deleted".format(answer.question.category)
+                        subject = "FOSSEE Forums - {0} - Comment Deleted".format(
+                            answer.question.category)
                         to = [get_user_email(uid)]
                         bcc_email = settings.BCC_EMAIL_ID
                         # delete_reason = request.POST.get('deleteAnswer')
@@ -1344,67 +1476,81 @@ def ajax_answer_comment_delete(request):
                             comment.body,
                             comment.answer.question.category,
                             comment.answer.body,
-                        )   
-                        email = EmailMultiAlternatives(
-                            subject, '',
-                            sender_email, to,
-                            bcc=[bcc_email],
-                            headers = {"Content-type":"text/html;charset=iso-8859-1"}
                         )
+                        email = EmailMultiAlternatives(
+                            subject, '', sender_email, to, bcc=[bcc_email], headers={
+                                "Content-type": "text/html;charset=iso-8859-1"})
                         email.attach_alternative(message, "text/html")
                         email.content_subtype = 'html'  # Main content is text/html
                         email.mixed_subtype = 'related'
-                        email.send(fail_silently = True)
+                        email.send(fail_silently=True)
                 return HttpResponse('deleted')
             else:
                 return HttpResponse('Only moderator can delete.')
-        except:
+        except BaseException:
             return HttpResponse('Comment not found.')
 
     else:
         return render(request, 'website/templates/404.html')
 
-def can_delete(answer,comment_id):
-    comments = answer.answercomment_set.filter(is_active = True).all()
+
+def can_delete(answer, comment_id):
+    comments = answer.answercomment_set.filter(is_active=True).all()
     for c in comments:
-        if c.id > int(comment_id) :
+        if c.id > int(comment_id):
             return False
     return True
+
 
 @csrf_exempt
 def ajax_notification_remove(request):
     if request.method == "POST":
 
         nid = request.POST["notification_id"]
-        
+
         try:
-            notification = get_object_or_404(Notification, pk = nid)
+            notification = get_object_or_404(Notification, pk=nid)
             if (notification.uid == request.user.id):
                 notification.delete()
                 return HttpResponse('removed')
             else:
                 return HttpResponse('Unauthorized user.')
-        except:
+        except BaseException:
             return HttpResponse('Notification not found.')
-    
+
     else:
         return render(request, 'website/templates/404.html')
+
 
 @csrf_exempt
 def ajax_keyword_search(request):
     if request.method == "POST":
         key = request.POST['key']
         if is_moderator(request.user) and settings.MODERATOR_ACTIVATED:
-            questions = (Question.objects.filter(title__contains = key)|Question.objects.filter(category__name = key)).distinct().order_by('-date_created')
+            questions = (
+                Question.objects.filter(
+                    title__contains=key) | Question.objects.filter(
+                    category__name=key)).distinct().order_by('-date_created')
         else:
-            questions = (Question.objects.filter(title__contains = key).filter(is_spam=False, is_active = True)|Question.objects.filter(category__name = key).filter(is_spam=False, is_active = True)).distinct().order_by('-date_created')
+            questions = (
+                Question.objects.filter(
+                    title__contains=key).filter(
+                    is_spam=False,
+                    is_active=True) | Question.objects.filter(
+                    category__name=key).filter(
+                    is_spam=False,
+                    is_active=True)).distinct().order_by('-date_created')
         context = {
             'questions': questions
         }
 
-        return render(request, 'website/templates/ajax-keyword-search.html', context)
+        return render(
+            request,
+            'website/templates/ajax-keyword-search.html',
+            context)
     else:
         return render(request, 'website/templates/404.html')
+
 
 def get_user_email(uid):
     user = User.objects.get(id=uid)
