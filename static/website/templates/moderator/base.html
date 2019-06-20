@@ -69,7 +69,7 @@
                             <ul class="nav navbar-nav navbar-right">
 
                               <li>
-                                <a href="{% url 'website:train_spam_filter' %}">
+                                <a onclick="retrain_spam_filter()" style="cursor: pointer;">
                                     Re-train Spam Filter
                                 </a>
                               </li>
@@ -81,6 +81,9 @@
                                 <script type="text/javascript">
                                     function user_panel(){
                                         window.location.replace("{% url 'website:home' %}?next={{ request.path }}");
+                                    }
+                                    function retrain_spam_filter(){
+                                        window.location.replace("{% url 'website:train_spam_filter' %}?next={{ request.path }}")
                                     }
                                 </script>
                               </li>

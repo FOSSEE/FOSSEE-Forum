@@ -44,6 +44,7 @@
         <th>Date</th>
         {% if MODERATOR_ACTIVATED %}
             <th>Spam</th>
+            <th>Deleted</th>
         {% else %}
             <th>Views</th>
         {% endif %}
@@ -86,6 +87,9 @@
             {% if MODERATOR_ACTIVATED %}
             <td>
                 {{ question.is_spam|yesno:"Yes, No" }}
+            </td>
+            <td>
+                {{ question.is_active|yesno:"No, Yes" }}
             </td>
 
             {% else %}
