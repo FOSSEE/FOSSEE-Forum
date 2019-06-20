@@ -537,7 +537,10 @@ def filter(request, category=None, tutorial=None):
 @user_passes_test(account_credentials_defined, login_url='/accounts/profile/')
 def new_question(request):
 
-    settings.MODERATOR_ACTIVATED = False
+    if settings.MODERATOR_ACTIVATED:
+        return HttpResponseRedirect('/moderator/')
+
+    # settings.MODERATOR_ACTIVATED = False
 
     context = {}
     context['SITE_KEY'] = settings.GOOGLE_RECAPTCHA_SITE_KEY
@@ -683,7 +686,7 @@ def edit_question(request, question_id):
 
     # To prevent random user from manually entering the link and editing
     if ((request.user.id != question.user.id or question.answer_set.filter(
-            is_active=True).count() > 0) and (not is_moderator(request.user))):
+            is_active=True).count() > 0) and (not is_moderator(request.user) or not settings.MODERATOR_ACTIVATED)):
         return render(request, 'website/templates/not-authorized.html')
 
     if (request.method == 'POST'):
@@ -1006,7 +1009,8 @@ def answer_restore(request, answer_id):
     if not is_moderator(request.user) or not settings.MODERATOR_ACTIVATED:
         return render(request, 'website/templates/not-authorized.html')
     if not answer.question.is_active:
-        return HttpResponse("Answer Can't be restored")
+        messages.error(request,"Answer can only be restored when its question is not deleted.")
+        return HttpResponseRedirect('/question/{0}/'.format(answer.question.id))
     answer.is_active = True
     answer.save()
     for comment in answer.answercomment_set.all():
@@ -1020,7 +1024,8 @@ def comment_restore(request, comment_id):
     if not is_moderator(request.user) or not settings.MODERATOR_ACTIVATED:
         return render(request, 'website/templates/not-authorized.html')
     if not comment.answer.is_active:
-        return HttpResponse("Comment Can't be restored")
+        messages.error(request,"Comment can only be restored when its answer is not deleted")
+        return HttpResponseRedirect('/question/{0}/'.format(comment.answer.question.id))
     comment.is_active = True
     comment.save()
     return HttpResponseRedirect(
@@ -1162,7 +1167,10 @@ def ans_vote_post(request):
 @user_passes_test(account_credentials_defined, login_url='/accounts/profile/')
 def user_notifications(request, user_id):
 
-    settings.MODERATOR_ACTIVATED = False
+    if settings.MODERATOR_ACTIVATED:
+        return HttpResponseRedirect('/moderator/')
+
+    # settings.MODERATOR_ACTIVATED = False
 
     if (user_id == request.user.id):
         try:
@@ -1328,8 +1336,13 @@ def moderator_unanswered(request):
 @user_passes_test(is_moderator)
 def train_spam_filter(request):
 
+    next = request.GET.get('next','')
     train()
-    return HttpResponseRedirect('/moderator/')
+    try:
+        resolve(next)
+        return HttpResponseRedirect(next)
+    except Resolver404:
+        return HttpResponseRedirect('/moderator/')
 
 # AJAX SECTION
 # All the ajax views go below
@@ -1363,67 +1376,66 @@ def ajax_answer_update(request):
         aid = request.POST['answer_id']
         body = request.POST['body']
         try:
-            answer = get_object_or_404(Answer, pk=aid)
-            if ((is_moderator(request.user) and settings.MODERATOR_ACTIVATED) or (request.user.id ==
-                                                                                  answer.uid and not AnswerComment.objects.filter(answer=answer).exclude(uid=answer.uid).exists())):
-                answer.body = str(body)
-                answer.save()
-                if settings.MODERATOR_ACTIVATED:
-                    question_id = answer.question.id
-                    answer_sets = Answer.objects.filter(
-                        question_id=question_id, is_active=True).distinct()
-                    comment_set = []
-                    mail_ids = [answer.question.user.id]
-                    for ans in answer_sets:
-                        comment_set.append(
-                            AnswerComment.objects.values('uid').filter(
-                                answer=ans, is_active=True).distinct())
-                        mail_ids.append(ans.uid)
-                    for x in comment_set:
-                        for y in x:
-                            mail_ids.append(y['uid'])
-                    mail_ids = set(mail_ids)
-
-                    for uid in mail_ids:
-                        sender_name = "FOSSEE Forums"
-                        sender_email = settings.SENDER_EMAIL
-                        subject = "FOSSEE Forums - {0} - Answer Deleted".format(
-                            answer.question.category)
-                        to = [get_user_email(uid)]
-                        bcc_email = settings.BCC_EMAIL_ID
-                        delete_reason = request.POST.get('deleteAnswer')
-                        message = """
-                            The following answer has been edited by a moderator in the FOSSEE Forum: <br>
-                            <b> Answer: </b>{0}<br>
-                            <b> Category: </b>{1}<br>
-                            <b> Question: </b>{2}<br>
-                            <b> Moderator comments: </b>{3}<br><br>
-                            Regards,<br>
-                            FOSSEE Team,<br>
-                            FOSSEE, IIT Bombay
-                            <br><br><br>
-                            <center><h6>*** This is an automatically generated email, please do not reply***</h6></center>
-                            """.format(
-                            answer.body,
-                            answer.question.category,
-                            answer.question.body,
-                            delete_reason,
-                        )
-                        email = EmailMultiAlternatives(
-                            subject, '', sender_email, to, bcc=[bcc_email], headers={
-                                "Content-type": "text/html;charset=iso-8859-1"})
-                        email.attach_alternative(message, "text/html")
-                        email.content_subtype = 'html'  # Main content is text/html
-                        email.mixed_subtype = 'related'
-                        email.send(fail_silently=True)
-                return HttpResponseRedirect(
-                    '/question/{0}/'.format(answer.question.id))
-            else:
-                return HttpResponse('Only moderator can update.')
+            answer = get_object_or_404(Answer, pk=aid, is_active = True)
         except BaseException:
-            return HttpResponse(
-                'Answer not found or An error occured during update')
-
+            return render(request, 'website/templates/404.html')
+        if ((is_moderator(request.user) and settings.MODERATOR_ACTIVATED) or (request.user.id ==
+                                                                              answer.uid and not AnswerComment.objects.filter(answer=answer).exclude(uid=answer.uid).exists())):
+            answer.body = str(body)
+            answer.save()
+            if settings.MODERATOR_ACTIVATED:
+                question_id = answer.question.id
+                answer_sets = Answer.objects.filter(
+                    question_id=question_id, is_active=True).distinct()
+                comment_set = []
+                mail_ids = [answer.question.user.id]
+                for ans in answer_sets:
+                    comment_set.append(
+                        AnswerComment.objects.values('uid').filter(
+                            answer=ans, is_active=True).distinct())
+                    mail_ids.append(ans.uid)
+                for x in comment_set:
+                    for y in x:
+                      mail_ids.append(y['uid'])
+                mail_ids = set(mail_ids)
+                for uid in mail_ids:
+                    sender_name = "FOSSEE Forums"
+                    sender_email = settings.SENDER_EMAIL
+                    subject = "FOSSEE Forums - {0} - Answer Deleted".format(
+                        answer.question.category)
+                    to = [get_user_email(uid)]
+                    bcc_email = settings.BCC_EMAIL_ID
+                    delete_reason = request.POST.get('deleteAnswer')
+                    message = """
+                        The following answer has been edited by a moderator in the FOSSEE Forum: <br>
+                        <b> Answer: </b>{0}<br>
+                        <b> Category: </b>{1}<br>
+                        <b> Question: </b>{2}<br>
+                        <b> Moderator comments: </b>{3}<br><br>
+                        Regards,<br>
+                        FOSSEE Team,<br>
+                        FOSSEE, IIT Bombay
+                        <br><br><br>
+                        <center><h6>*** This is an automatically generated email, please do not reply***</h6></center>
+                        """.format(
+                        answer.body,
+                        answer.question.category,
+                        answer.question.body,
+                        delete_reason,
+                    )
+                    email = EmailMultiAlternatives(
+                        subject, '', sender_email, to, bcc=[bcc_email], headers={
+                            "Content-type": "text/html;charset=iso-8859-1"})
+                    email.attach_alternative(message, "text/html")
+                    email.content_subtype = 'html'  # Main content is text/html
+                    email.mixed_subtype = 'related'
+                    email.send(fail_silently=True)
+            return HttpResponseRedirect(
+                '/question/{0}/'.format(answer.question.id))
+        else:
+            messages.error(request,"Only moderator can update.")
+            return HttpResponseRedirect('/question/{0}/'.format(answer.question.id))
+                # return HttpResponse('Only moderator can update.')
     else:
         return render(request, 'website/templates/404.html')
 
@@ -1434,62 +1446,63 @@ def ajax_answer_comment_delete(request):
         comment_id = request.POST['comment_id']
         try:
             comment = get_object_or_404(AnswerComment, pk=comment_id)
-            if (is_moderator(request.user) and settings.MODERATOR_ACTIVATED) or (
-                    request.user.id == comment.uid and can_delete(comment.answer, comment_id)):
-                comment.is_active = False
-                comment.save()
-                if settings.MODERATOR_ACTIVATED:
-                    question_id = comment.answer.question.id
-                    answer_sets = Answer.objects.filter(
-                        question_id=question_id, is_active=True).distinct()
-                    comment_set = []
-                    mail_ids = [answer.question.user.id]
-                    for ans in answer_sets:
-                        comment_set.append(
-                            AnswerComment.objects.values('uid').filter(
-                                answer=ans, is_active=True).distinct())
-                        mail_ids.append(ans.uid)
-                    for x in comment_set:
-                        for y in x:
-                            mail_ids.append(y['uid'])
-                    mail_ids = set(mail_ids)
-
-                    for uid in mail_ids:
-                        sender_name = "FOSSEE Forums"
-                        sender_email = settings.SENDER_EMAIL
-                        subject = "FOSSEE Forums - {0} - Comment Deleted".format(
-                            answer.question.category)
-                        to = [get_user_email(uid)]
-                        bcc_email = settings.BCC_EMAIL_ID
-                        # delete_reason = request.POST.get('deleteAnswer')
-                        message = """
-                            The following comment has been deleted by a moderator in the FOSSEE Forum: <br>
-                            <b> Comment: </b>{0}<br>
-                            <b> Category: </b>{1}<br>
-                            <b> Answer: </b>{2}<br><br>
-                            Regards,<br>
-                            FOSSEE Team,<br>
-                            FOSSEE, IIT Bombay
-                            <br><br><br>
-                            <center><h6>*** This is an automatically generated email, please do not reply***</h6></center>
-                            """.format(
-                            comment.body,
-                            comment.answer.question.category,
-                            comment.answer.body,
-                        )
-                        email = EmailMultiAlternatives(
-                            subject, '', sender_email, to, bcc=[bcc_email], headers={
-                                "Content-type": "text/html;charset=iso-8859-1"})
-                        email.attach_alternative(message, "text/html")
-                        email.content_subtype = 'html'  # Main content is text/html
-                        email.mixed_subtype = 'related'
-                        email.send(fail_silently=True)
-                return HttpResponse('deleted')
-            else:
-                return HttpResponse('Only moderator can delete.')
         except BaseException:
-            return HttpResponse('Comment not found.')
+            return render(request, 'website/templates/404.html')
+        if (is_moderator(request.user) and settings.MODERATOR_ACTIVATED) or (
+                request.user.id == comment.uid and can_delete(comment.answer, comment_id)):
+            comment.is_active = False
+            comment.save()
+            if settings.MODERATOR_ACTIVATED:
+                question_id = comment.answer.question.id
+                answer_sets = Answer.objects.filter(
+                    question_id=question_id, is_active=True).distinct()
+                comment_set = []
+                mail_ids = [comment.answer.question.user.id]
+                for ans in answer_sets:
+                    comment_set.append(
+                        AnswerComment.objects.values('uid').filter(
+                            answer=ans, is_active=True).distinct())
+                    mail_ids.append(ans.uid)
+                for x in comment_set:
+                    for y in x:
+                        mail_ids.append(y['uid'])
+                mail_ids = set(mail_ids)
 
+                for uid in mail_ids:
+                    sender_name = "FOSSEE Forums"
+                    sender_email = settings.SENDER_EMAIL
+                    subject = "FOSSEE Forums - {0} - Comment Deleted".format(
+                        comment.answer.question.category)
+                    to = [get_user_email(uid)]
+                    bcc_email = settings.BCC_EMAIL_ID
+                    # delete_reason = request.POST.get('deleteAnswer')
+                    message = """
+                        The following comment has been deleted by a moderator in the FOSSEE Forum: <br>
+                        <b> Comment: </b>{0}<br>
+                        <b> Category: </b>{1}<br>
+                        <b> Answer: </b>{2}<br><br>
+                        Regards,<br>
+                        FOSSEE Team,<br>
+                        FOSSEE, IIT Bombay
+                        <br><br><br>
+                        <center><h6>*** This is an automatically generated email, please do not reply***</h6></center>
+                        """.format(
+                        comment.body,
+                        comment.answer.question.category,
+                        comment.answer.body,
+                    )
+                    email = EmailMultiAlternatives(
+                        subject, '', sender_email, to, bcc=[bcc_email], headers={
+                            "Content-type": "text/html;charset=iso-8859-1"})
+                    email.attach_alternative(message, "text/html")
+                    email.content_subtype = 'html'  # Main content is text/html
+                    email.mixed_subtype = 'related'
+                    email.send(fail_silently=True)
+            return HttpResponse('deleted')
+        else:
+            messages.error(request,"Only Moderator can delete.")
+            return HttpResponseRedirect('/question/{0}/'.format(comment.answer.question.id))
+            # return HttpResponse('Only moderator can delete.')
     else:
         return render(request, 'website/templates/404.html')
 
