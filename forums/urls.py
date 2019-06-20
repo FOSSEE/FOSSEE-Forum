@@ -12,6 +12,7 @@ admin.autodiscover()
 urlpatterns = [
 
     re_path(r'^admin/', admin.site.urls),
+    re_path(r'^', include('website.urls', namespace='website')),
 
     # URLs for password reset and password change
     re_path('^forgotpassword/', auth_views.PasswordResetView.as_view(\
@@ -50,7 +51,6 @@ urlpatterns = [
     path('accounts/view-profile/<int:user_id>/', views.account_view_profile, name = 'view_profile'),
 
     path('ckeditor/', include('ckeditor_uploader.urls')),
-    re_path(r'^', include('website.urls', namespace='website')),
 
 ]
 

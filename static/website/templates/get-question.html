@@ -13,7 +13,14 @@
 {% block content %}
 
 <div class="row">
-                        
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-danger h5">
+                <a class="close" data-dismiss="alert" aria-label="close" style="color: black;">&times;</a>
+                <b>{{ message }}</b>
+            </div>
+        {% endfor %}
+    {% endif %}
     <div class="question-wrapper col-lg-12 col-md-12 col-sm-12 col-xs-12">
     <div class="question">
      <!-- VOTE CELL -->
@@ -91,11 +98,13 @@
 
         <span class="modify">
             {% if user|can_edit:question and not ans_count or user|is_moderator and MODERATOR_ACTIVATED %}
-                <a class="edit btn btn-xs btn-info" href="{% url 'website:edit_question' question.id %}">Edit</a>
                 {% if question.is_active %}
+                <a class="edit btn btn-xs btn-info" href="{% url 'website:edit_question' question.id %}">Edit</a>
                 <a class="delete btn btn-xs btn-info" data-toggle="modal" data-target="#questionDeleteModal" >Delete</a>
                 {% else %}
+                {% if MODERATOR_ACTIVATED %}
                 <a class="restore btn btn-xs btn-info" href="{% url 'website:question_restore' question.id %}" >Restore</a>
+                {% endif %}
                 {% endif %}
             {% endif %}
         </span>
@@ -219,11 +228,13 @@
             <span class="modify" style="display:block">
                 {% if answer.is_active %}
                 <a class="delete btn btn-xs btn-info vs ansdel" data-toggle="modal" data-target="#answerDeleteModal" data-id= "{{ answer.id }}" href="#{{ answer.id }}">Delete</a>
-                {% else %}
-                <a class="restore btn btn-xs btn-info vs ansres" data-id= "{{ answer.id }}" href="{% url 'website:answer_restore' answer.id %}">Restore</a>
-                {% endif %}
                 <a class="edit btn btn-xs btn-info vs" data-target="body{{ answer.id }}" id="ans{{ answer.id }}">Edit</a>
                 <a class="save btn btn-xs btn-success vs"  data-target="body{{ answer.id }}" data-aid="{{ answer.id }}" data-form="form{{ answer.id }}">Save</a>
+                {% else %}
+                {% if MODERATOR_ACTIVATED %}
+                <a class="restore btn btn-xs btn-info vs ansres" data-id= "{{ answer.id }}" href="{% url 'website:answer_restore' answer.id %}">Restore</a>
+                {% endif %}
+                {% endif %}
             </span>
             {% endif %}
 
@@ -302,9 +313,11 @@
                         <a class="delete-comment btn btn-xs btn-info vs" id="{{ comment.id }}">Delete</a>
                     </span>
                     {% else %}
+                    {% if MODERATOR_ACTIVATED %}
                     <span class="meta_co" style="position: absolute; left: 0px; bottom: 0px; padding: 7px 7px;">
                         <a class="restore-comment btn btn-xs btn-info vs" href="{% url 'website:comment_restore' comment.id %}">Restore</a>
                     </span>
+                    {% endif %}
                     {% endif %}
                     {% endif %}
                     
