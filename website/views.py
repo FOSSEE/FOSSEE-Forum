@@ -685,8 +685,8 @@ def edit_question(request, question_id):
     question = get_object_or_404(Question, id=question_id, is_active=True)
 
     # To prevent random user from manually entering the link and editing
-    if ((request.user.id != question.user.id or question.answer_set.filter(
-            is_active=True).count() > 0) and (not is_moderator(request.user) or not settings.MODERATOR_ACTIVATED)):
+    if ((request.user.id != question.user.id or question.answer_set.filter(is_active=True).count(
+    ) > 0) and (not is_moderator(request.user) or not settings.MODERATOR_ACTIVATED)):
         return render(request, 'website/templates/not-authorized.html')
 
     if (request.method == 'POST'):
@@ -1009,8 +1009,11 @@ def answer_restore(request, answer_id):
     if not is_moderator(request.user) or not settings.MODERATOR_ACTIVATED:
         return render(request, 'website/templates/not-authorized.html')
     if not answer.question.is_active:
-        messages.error(request,"Answer can only be restored when its question is not deleted.")
-        return HttpResponseRedirect('/question/{0}/'.format(answer.question.id))
+        messages.error(
+            request,
+            "Answer can only be restored when its question is not deleted.")
+        return HttpResponseRedirect(
+            '/question/{0}/'.format(answer.question.id))
     answer.is_active = True
     answer.save()
     for comment in answer.answercomment_set.all():
@@ -1024,8 +1027,11 @@ def comment_restore(request, comment_id):
     if not is_moderator(request.user) or not settings.MODERATOR_ACTIVATED:
         return render(request, 'website/templates/not-authorized.html')
     if not comment.answer.is_active:
-        messages.error(request,"Comment can only be restored when its answer is not deleted")
-        return HttpResponseRedirect('/question/{0}/'.format(comment.answer.question.id))
+        messages.error(
+            request,
+            "Comment can only be restored when its answer is not deleted")
+        return HttpResponseRedirect(
+            '/question/{0}/'.format(comment.answer.question.id))
     comment.is_active = True
     comment.save()
     return HttpResponseRedirect(
@@ -1336,7 +1342,7 @@ def moderator_unanswered(request):
 @user_passes_test(is_moderator)
 def train_spam_filter(request):
 
-    next = request.GET.get('next','')
+    next = request.GET.get('next', '')
     train()
     try:
         resolve(next)
@@ -1376,7 +1382,7 @@ def ajax_answer_update(request):
         aid = request.POST['answer_id']
         body = request.POST['body']
         try:
-            answer = get_object_or_404(Answer, pk=aid, is_active = True)
+            answer = get_object_or_404(Answer, pk=aid, is_active=True)
         except BaseException:
             return render(request, 'website/templates/404.html')
         if ((is_moderator(request.user) and settings.MODERATOR_ACTIVATED) or (request.user.id ==
@@ -1396,7 +1402,7 @@ def ajax_answer_update(request):
                     mail_ids.append(ans.uid)
                 for x in comment_set:
                     for y in x:
-                      mail_ids.append(y['uid'])
+                        mail_ids.append(y['uid'])
                 mail_ids = set(mail_ids)
                 for uid in mail_ids:
                     sender_name = "FOSSEE Forums"
@@ -1433,9 +1439,10 @@ def ajax_answer_update(request):
             return HttpResponseRedirect(
                 '/question/{0}/'.format(answer.question.id))
         else:
-            messages.error(request,"Only moderator can update.")
-            return HttpResponseRedirect('/question/{0}/'.format(answer.question.id))
-                # return HttpResponse('Only moderator can update.')
+            messages.error(request, "Only moderator can update.")
+            return HttpResponseRedirect(
+                '/question/{0}/'.format(answer.question.id))
+            # return HttpResponse('Only moderator can update.')
     else:
         return render(request, 'website/templates/404.html')
 
@@ -1500,8 +1507,9 @@ def ajax_answer_comment_delete(request):
                     email.send(fail_silently=True)
             return HttpResponse('deleted')
         else:
-            messages.error(request,"Only Moderator can delete.")
-            return HttpResponseRedirect('/question/{0}/'.format(comment.answer.question.id))
+            messages.error(request, "Only Moderator can delete.")
+            return HttpResponseRedirect(
+                '/question/{0}/'.format(comment.answer.question.id))
             # return HttpResponse('Only moderator can delete.')
     else:
         return render(request, 'website/templates/404.html')
