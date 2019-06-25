@@ -995,18 +995,19 @@ def answer_delete(request, answer_id):
             email.mixed_subtype = 'related'
             email.send(fail_silently=True)
 
-    answer.is_active = False
-    answer.save()
-    for comment in answer.answercomment_set.all():
-        comment.is_active = False
-        comment.save()
+        answer.is_active = False
+        answer.save()
+        for comment in answer.answercomment_set.all():
+            comment.is_active = False
+            comment.save()
     return HttpResponseRedirect('/question/{0}/'.format(question_id))
 
 
 @login_required
+@user_passes_test(is_moderator)
 def answer_restore(request, answer_id):
     answer = get_object_or_404(Answer, id=answer_id, is_active=False)
-    if not is_moderator(request.user) or not settings.MODERATOR_ACTIVATED:
+    if not settings.MODERATOR_ACTIVATED:
         return render(request, 'website/templates/not-authorized.html')
     if not answer.question.is_active:
         messages.error(
@@ -1021,10 +1022,11 @@ def answer_restore(request, answer_id):
         comment.save()
     return HttpResponseRedirect('/question/{0}/'.format(answer.question.id))
 
-
+@login_required
+@user_passes_test(is_moderator)
 def comment_restore(request, comment_id):
     comment = get_object_or_404(AnswerComment, id=comment_id, is_active=False)
-    if not is_moderator(request.user) or not settings.MODERATOR_ACTIVATED:
+    if not settings.MODERATOR_ACTIVATED:
         return render(request, 'website/templates/not-authorized.html')
     if not comment.answer.is_active:
         messages.error(
@@ -1380,7 +1382,7 @@ def ajax_answer_update(request):
 
     if request.method == 'POST':
         aid = request.POST['answer_id']
-        body = request.POST['body']
+        body = request.POST['answer_body']
         try:
             answer = get_object_or_404(Answer, pk=aid, is_active=True)
         except BaseException:

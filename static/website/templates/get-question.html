@@ -170,7 +170,7 @@
                     <input type="hidden" name="answer_id" value="{{ answer.id }}">
                     {{ form.media }}
                 <div class="edit-answer" id="ans{{ answer.id }}1">
-                    {% render_field form.body class+="form-control body" id=answer.id %}
+                    {% render_field form.body class+="form-control body" name="answer_body" id=answer.id %}
                 </div>
                 </form>
                 {% endif %}
