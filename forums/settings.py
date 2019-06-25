@@ -54,10 +54,10 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'forums_djago2_1',                      # Or path to database file if using sqlite3.
+        'NAME': forums,                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
-        'USER': 'root',
-        'PASSWORD': '1',
+        'USER': root,
+        'PASSWORD': 1,
         'HOST': '127.0.0.1',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
         'PORT': '',                      # Set to empty string for default.
     }
@@ -65,8 +65,7 @@ DATABASES = {
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
-#ALLOWED_HOSTS = SYSTEM_ALLOWED_HOSTS
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = SYSTEM_ALLOWED_HOSTS
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -165,11 +164,6 @@ INSTALLED_APPS = (
     'ckeditor_uploader',
 )
 
-# SESSION_COOKIE_SECURE = True
-# CSRF_COOKIE_SECURE = True
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-
-# os.environ['wsgi.url_scheme'] = 'https'
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
 # the site admins on every HTTP 500 error when DEBUG=False.
@@ -210,6 +204,8 @@ HTML_MINIFY = HTML_MINIFY
 RECAPTCHA_PUBLIC_KEY = PUB_KEY
 RECAPTCHA_PRIVATE_KEY = PRIV_KEY
 
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
 #Google recaptcha for forum
 GOOGLE_RECAPTCHA_SECRET_KEY = FORUM_GOOGLE_RECAPTCHA_SECRET_KEY
 GOOGLE_RECAPTCHA_SITE_KEY = FORUM_GOOGLE_RECAPTCHA_SITE_KEY
@@ -219,7 +215,6 @@ DEBUG_TOOLBAR_PATCH_SETTINGS = False
 
 EMAIL_URL = EMAIL_URL
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-#EMAIL_bACKEND = 'django.core.mail.backends.console.EmailBackend'
 #EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 #EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
 

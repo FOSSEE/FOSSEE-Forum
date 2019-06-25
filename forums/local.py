@@ -1,8 +1,8 @@
 #DB_USER = 'db user name'
-#DB_PASS = 'db user password'
-#DB_NAME = 'db name'
 DB_USER = 'root'
+#DB_PASS = 'db user password'
 DB_PASS = '1'
+#DB_NAME = 'db name'
 DB_NAME = 'forums'
 PUB_KEY = 'Public Key'
 PRIV_KEY = 'Private Key'
@@ -35,8 +35,8 @@ ADMINS_EMAIL_ADDRESS = '[Admins mail address]' #[('name', 'id@email.id'), ('name
 SERVER_EMAIL_ADDRESS = 'server email address'
 
 
-FORUM_GOOGLE_RECAPTCHA_SECRET_KEY = '6Ld4e6YUAAAAAFtO7OhCFWmU6b9vKMUy83ds5Rvi'#secret key
-FORUM_GOOGLE_RECAPTCHA_SITE_KEY = '6Ld4e6YUAAAAAACX4CcsPFq_SLfp81ZPMfTUrCBs'#site key
+FORUM_GOOGLE_RECAPTCHA_SECRET_KEY = 'google recaptcha secret key'
+FORUM_GOOGLE_RECAPTCHA_SITE_KEY = 'google recaptcha site key'
 
 #ALLOWED_HOSTS
 
