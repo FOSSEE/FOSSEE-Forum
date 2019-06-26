@@ -12,7 +12,7 @@ $(document).ready(function() {
     /*
      * question edit section
      * set the jquery variables 
-    */3
+    */
     $saving = $(".saving");
     $saved= $(".saved");
     $question = $(".question");
