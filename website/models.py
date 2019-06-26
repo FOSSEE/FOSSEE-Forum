@@ -14,7 +14,12 @@ class FossCategory(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
     email = models.CharField(max_length=50)
-
+    image = ResizedImageField(
+        size=[
+            800,
+            800],
+        upload_to="images/fossCategory/",
+        blank=True)
     def __str__(self):
         return self.name
 
