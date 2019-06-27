@@ -691,6 +691,9 @@
         $('.delete-comment').click(function(event) {
             var id = event.target.id;
             alert(id[3:])
+            $.post('/ajax-answer-comment-delete/', {comment_id: id}, function() {
+                location.reload();
+            });
         });
     });
      
