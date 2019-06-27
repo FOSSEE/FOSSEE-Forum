@@ -32,8 +32,8 @@ ADMINS_EMAIL_ADDRESS = '[Admins mail address]' #[('name', 'id@email.id'), ('name
 SERVER_EMAIL_ADDRESS = 'server email address'
 
 
-FORUM_GOOGLE_RECAPTCHA_SECRET_KEY = 'google recaptcha secret key'
-FORUM_GOOGLE_RECAPTCHA_SITE_KEY = 'google recaptcha site key'
+FORUM_GOOGLE_RECAPTCHA_SECRET_KEY = '6Ld4e6YUAAAAAFtO7OhCFWmU6b9vKMUy83ds5Rvi'
+FORUM_GOOGLE_RECAPTCHA_SITE_KEY = '6Ld4e6YUAAAAAACX4CcsPFq_SLfp81ZPMfTUrCBs'
 
 #Train spamfilter(default set as True)
 TRAIN_SPAMFILTER = True
