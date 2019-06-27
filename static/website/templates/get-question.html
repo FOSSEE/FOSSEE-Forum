@@ -685,6 +685,12 @@
                 location.reload();
             });
         });
+        $('.restore-comment').click(function(event) {
+            // var id = event.target.id;
+            // $.post('/ajax-answer-comment-delete/', {comment_id: id}, function() {
+                // location.reload();
+            // });
+        });
     });
      
  
@@ -695,6 +701,15 @@
     var id= $(this).data('id') // Extract info from data-* attributes
     $("#answerDeleteForm").attr("action", "/answer_delete/" + id+"/");
 })
+    // $('.ansres').on('click', function (event) {
+    //     var id = $(this).attr("data-id");
+    //     $.post('/answer-restore/'+id, function() {
+    //         location.reload();
+    //     });
+    // var button = $(event.relatedTarget) // Button that triggered the modal
+    // var id= $(this).data('id') // Extract info from data-* attributes
+    // $("#answerDeleteForm").attr("action", "/answer_delete/" + id+"/");
+// })
 </script>
 <script src="{% static 'website/js/thread-user.js' %}"></script>
 <script src="{% static 'website/js/custom.js' %}"></script>

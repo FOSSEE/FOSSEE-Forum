@@ -90,7 +90,7 @@ USE_TZ = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
-MEDIA_ROOT = os.path.join(PROJECT_DIR, 'media')
+MEDIA_ROOT = os.path.join(PROJECT_DIR, 'static/website')
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -164,6 +164,11 @@ INSTALLED_APPS = (
     'ckeditor_uploader',
 )
 
+# SESSION_COOKIE_SECURE = True
+# CSRF_COOKIE_SECURE = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# os.environ['wsgi.url_scheme'] = 'https'
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
 # the site admins on every HTTP 500 error when DEBUG=False.
@@ -204,8 +209,6 @@ HTML_MINIFY = HTML_MINIFY
 RECAPTCHA_PUBLIC_KEY = PUB_KEY
 RECAPTCHA_PRIVATE_KEY = PRIV_KEY
 
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-
 #Google recaptcha for forum
 GOOGLE_RECAPTCHA_SECRET_KEY = FORUM_GOOGLE_RECAPTCHA_SECRET_KEY
 GOOGLE_RECAPTCHA_SITE_KEY = FORUM_GOOGLE_RECAPTCHA_SITE_KEY
@@ -215,6 +218,7 @@ DEBUG_TOOLBAR_PATCH_SETTINGS = False
 
 EMAIL_URL = EMAIL_URL
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+#EMAIL_bACKEND = 'django.core.mail.backends.console.EmailBackend'
 #EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 #EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
 
