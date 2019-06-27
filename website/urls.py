@@ -93,7 +93,10 @@ urlpatterns = [
         'ajax-keyword-search/',
         views.ajax_keyword_search,
         name='ajax_keyword_search'),
-
+    path(
+        'ajax-answer-comment-update/',
+        views.ajax_answer_comment_update,
+        name='ajax_answer_comment_update'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

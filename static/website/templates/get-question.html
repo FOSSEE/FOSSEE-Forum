@@ -126,17 +126,6 @@
 </div> <!-- /.row -->
 
 
-<!-- <h4><u>Answers:</u></h4>
-<div id="answerPanelWrapper" style="display:none;">
-    <div id="answerNicPanel" style="display:none;"></div>
-</div>
- -->
-<div id="commentPanelWrapper" style="display:none;">
-    <div id="commentNicPanel" style="display:none;"></div>
-</div>
-
-
-
 {% for answer, ans_vote in main_list %}
 
 <div class="row">
@@ -302,14 +291,34 @@
                 {% if comment.is_active or MODERATOR_ACTIVATED %}
                 <div class="comment comment{{ comment.id }}" style="padding: 15px 15px 15px 5px;">
                     <div class="body" id="cbody{{ comment.id }}">
-                        <p>{{ comment.body| safe }}</p>
+                        {{ comment.body| safe }}
                     </div>
                     
                     <br>
                     {% if user|is_moderator and MODERATOR_ACTIVATED or user|can_edit:comment and answer|can_delete:comment.id %}
                     {% if comment.is_active %}
+                    <form id="save_comment{{ comment.id }}" method="POST"  action="{% url 'website:ajax_answer_comment_update' %}">
+                        <div id="editor{{ comment.id }}" style="padding-bottom: 20px; display: none;">
+                            {% csrf_token %}
+                            <input type="hidden" name="comment_id" value="{{ comment.id }}">
+                            {{ form.media }}
+                            {% render_field form.body class+="form-control body" name="comment_body" id=comment.id %}
+                        </div>
+                    </form>
                     <span class="meta_co" style="position: absolute; left: 0px; bottom: 0px; padding: 7px 7px;">
-                        <a class="delete-comment btn btn-xs btn-info vs" id="{{ comment.id }}">Delete</a>
+                        <a class="edit-comment btn btn-xs btn-info vs" data-id="{{ comment.id }}">Edit</a>
+                    </span>
+                    <span class="meta_co" style="position: absolute; left: 0px; bottom: 0px; padding: 7px 7px;">
+                        <a class="save-comment btn btn-xs btn-info vs" id="com{{ comment.id }}" data-form = "{{ comment.id }}" style="display: none;">Save</a>
+                    </span>
+                    <script type="text/javascript">
+                        CKEDITOR.on("instanceReady", function(event)
+                        {
+                            CKEDITOR.instances['{{ comment.id }}'].setData(document.getElementById("cbody{{ comment.id }}").innerHTML);
+                        });
+                    </script>
+                    <span class="meta_co" style="position: absolute; left: 40px; bottom: 0px; padding: 7px 7px;">
+                        <a class="delete-comment btn btn-xs btn-info vs" id="del{{ comment.id }}">Delete</a>
                     </span>
                     {% else %}
                     {% if MODERATOR_ACTIVATED %}
@@ -681,15 +690,7 @@
         /* DELTETING A COMMENT */
         $('.delete-comment').click(function(event) {
             var id = event.target.id;
-            $.post('/ajax-answer-comment-delete/', {comment_id: id}, function() {
-                location.reload();
-            });
-        });
-        $('.restore-comment').click(function(event) {
-            // var id = event.target.id;
-            // $.post('/ajax-answer-comment-delete/', {comment_id: id}, function() {
-                // location.reload();
-            // });
+            alert(id[3:])
         });
     });
      
@@ -701,15 +702,6 @@
     var id= $(this).data('id') // Extract info from data-* attributes
     $("#answerDeleteForm").attr("action", "/answer_delete/" + id+"/");
 })
-    // $('.ansres').on('click', function (event) {
-    //     var id = $(this).attr("data-id");
-    //     $.post('/answer-restore/'+id, function() {
-    //         location.reload();
-    //     });
-    // var button = $(event.relatedTarget) // Button that triggered the modal
-    // var id= $(this).data('id') // Extract info from data-* attributes
-    // $("#answerDeleteForm").attr("action", "/answer_delete/" + id+"/");
-// })
 </script>
 <script src="{% static 'website/js/thread-user.js' %}"></script>
 <script src="{% static 'website/js/custom.js' %}"></script>
