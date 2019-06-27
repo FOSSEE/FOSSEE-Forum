@@ -21,19 +21,6 @@ def prettify(string):
 
 register.simple_tag(prettify)
 
-# Getting the category image
-
-
-def get_category_image(category):
-    base_path = settings.PROJECT_DIR + '/static/website/images/'
-    file_name = category.name.replace(' ', '') + '.jpg'
-    file_path = base_path + file_name
-    if os.path.isfile(file_path):
-        return 'website/images/' + file_name
-    return False
-
-
-register.filter('get_category_image', get_category_image)
 
 # Getting only the 100 most recent questions
 
