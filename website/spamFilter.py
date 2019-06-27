@@ -15,7 +15,7 @@ from website.models import Question, Answer
 def store():
 
     # Add data from Excel file
-    file_location = settings.PROJECT_DIR + '/DataSet.xlsx'
+    file_location = settings.PROJECT_DIR + '/static/website/DataSet.xlsx'
     workBookOld = openpyxl.load_workbook(file_location)
     dataSheetOld = workBookOld['Data set']
 
