@@ -1,6 +1,6 @@
-DB_USER = 'db user name'
-DB_PASS = 'db user password'
-DB_NAME = 'db name'
+DB_USER = 'root'
+DB_PASS = 'root'
+DB_NAME = 'forums_djago2_1'
 PUB_KEY = 'Public Key'
 PRIV_KEY = 'Private Key'
 TO_EMAIL_ID = 'to@email.id'
@@ -35,9 +35,14 @@ SERVER_EMAIL_ADDRESS = 'server email address'
 FORUM_GOOGLE_RECAPTCHA_SECRET_KEY = 'google recaptcha secret key'
 FORUM_GOOGLE_RECAPTCHA_SITE_KEY = 'google recaptcha site key'
 
-#ALLOWED_HOSTS
+#Train spamfilter(default set as True)
+TRAIN_SPAMFILTER = True
 
+#ALLOWED_HOSTS
 SYSTEM_ALLOWED_HOSTS = ['Enter the host name' ]
+
+#Secre key for application (any random 32 alphanumeric characters)
+SECRET_KEY_CODE = 'any random 32 alphanumeric characters'
 
 # Maximum file size in MB
 MAX_FILE_SIZE_MB = 2
