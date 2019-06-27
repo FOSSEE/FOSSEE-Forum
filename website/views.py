@@ -146,6 +146,10 @@ def question_answer(request, question_id):
         form = AnswerQuestionForm(request.POST, request.FILES)
         answer = Answer()
         answer.uid = request.user.id
+        if request.POST['body'].strip() == "":
+            messages.error(request,"Answer cann't be empty or only blank spaces.")
+            return HttpResponseRedirect(
+                '/question/{0}/'.format(question_id))
 
         if form.is_valid() and request.recaptcha_is_valid:
             cleaned_data = form.cleaned_data
@@ -336,6 +340,7 @@ def answer_comment(request):
             is_spam=False, is_active=True).all()
         answer_creator = answer.user()
         if request.POST['body'].strip() == "":
+            messages.error(request,"Comment cann't be empty or only blank spaces.")
             return HttpResponseRedirect(
                 '/question/{0}/'.format(answer.question.id))
         form = AnswerCommentForm(request.POST)
