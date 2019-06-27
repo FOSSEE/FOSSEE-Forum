@@ -13,7 +13,6 @@
 	    $(document).ready(function()
 		{
 		var table = $("#myTable").DataTable({
-          // 'sPaginationType': "scrolling"
           });
         $('#category').change(function(e){
             var selectedCategory = $(this).children("option:selected").val();
@@ -75,7 +74,6 @@
                  <a class="pull-left" href="{% url 'website:filter' question.category|lower %}?qid={{ question.id }}">
                  {{ question.category }}
                 </a> 
-                <!-- |truncatechars:30 -->
                 {% endif %}
                 </span>
             </td>
