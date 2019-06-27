@@ -5,7 +5,8 @@ from django.contrib.auth.models import User, Group
 from django.contrib.auth import get_user_model
 from django_resized import ResizedImageField
 from ckeditor.fields import RichTextField
-
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 
 class FossCategory(models.Model):
 
@@ -107,6 +108,13 @@ class Answer(models.Model):
     def __str__(self):
         return '{0} - {1} - {2}'.format(self.question.category.name,
                                         self.question.title, self.body)
+
+
+@receiver(post_delete, sender=Question)
+@receiver(post_delete, sender=Answer)
+@receiver(post_delete, sender=FossCategory)
+def submission_delete(sender, instance, **kwargs):
+    instance.image.delete(False)
 
 
 class AnswerComment(models.Model):
