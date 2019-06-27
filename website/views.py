@@ -1377,7 +1377,6 @@ def ajax_tutorials(request):
         return render(request, 'website/templates/404.html')
 
 
-@csrf_exempt
 def ajax_answer_update(request):
 
     if request.method == 'POST':
@@ -1418,8 +1417,7 @@ def ajax_answer_update(request):
                         The following answer has been edited by a moderator in the FOSSEE Forum: <br>
                         <b> Answer: </b>{0}<br>
                         <b> Category: </b>{1}<br>
-                        <b> Question: </b>{2}<br>
-                        <b> Moderator comments: </b>{3}<br><br>
+                        <b> Question: </b>{2}<br><br>
                         Regards,<br>
                         FOSSEE Team,<br>
                         FOSSEE, IIT Bombay
@@ -1429,7 +1427,6 @@ def ajax_answer_update(request):
                         answer.body,
                         answer.question.category,
                         answer.question.body,
-                        delete_reason,
                     )
                     email = EmailMultiAlternatives(
                         subject, '', sender_email, to, bcc=[bcc_email], headers={
@@ -1438,13 +1435,13 @@ def ajax_answer_update(request):
                     email.content_subtype = 'html'  # Main content is text/html
                     email.mixed_subtype = 'related'
                     email.send(fail_silently=True)
+            messages.success(request, "Answer is Successfully Saved")
             return HttpResponseRedirect(
                 '/question/{0}/'.format(answer.question.id))
         else:
             messages.error(request, "Only moderator can update.")
             return HttpResponseRedirect(
                 '/question/{0}/'.format(answer.question.id))
-            # return HttpResponse('Only moderator can update.')
     else:
         return render(request, 'website/templates/404.html')
 
@@ -1512,7 +1509,75 @@ def ajax_answer_comment_delete(request):
             messages.error(request, "Only Moderator can delete.")
             return HttpResponseRedirect(
                 '/question/{0}/'.format(comment.answer.question.id))
-            # return HttpResponse('Only moderator can delete.')
+    else:
+        return render(request, 'website/templates/404.html')
+
+
+@csrf_exempt
+def ajax_answer_comment_update(request):
+    if request.method == 'POST':
+        cid = request.POST['comment_id']
+        body = request.POST['comment_body']
+        try:
+            comment = get_object_or_404(AnswerComment, pk=cid, is_active=True)
+        except BaseException:
+            return render(request, 'website/templates/404.html')
+        if (is_moderator(request.user) and settings.MODERATOR_ACTIVATED) or (
+                request.user.id == comment.uid and can_delete(comment.answer, cid)):
+            comment.body = str(body)
+            comment.save()
+            if settings.MODERATOR_ACTIVATED:
+                question_id = comment.answer.question.id
+                answer_sets = Answer.objects.filter(
+                    question_id=question_id, is_active=True).distinct()
+                comment_set = []
+                mail_ids = [comment.answer.question.user.id]
+                for ans in answer_sets:
+                    comment_set.append(
+                        AnswerComment.objects.values('uid').filter(
+                            answer=ans, is_active=True).distinct())
+                    mail_ids.append(ans.uid)
+                for x in comment_set:
+                    for y in x:
+                        mail_ids.append(y['uid'])
+                mail_ids = set(mail_ids)
+                mail_ids.discard(request.user.id)
+                for uid in mail_ids:
+                    sender_name = "FOSSEE Forums"
+                    sender_email = settings.SENDER_EMAIL
+                    subject = "FOSSEE Forums - {0} - Answer Deleted".format(
+                        comment.answer.question.category)
+                    to = [get_user_email(uid)]
+                    bcc_email = settings.BCC_EMAIL_ID
+                    message = """
+                        The following comment has been edited by a moderator in the FOSSEE Forum: <br>
+                        <b> Comment: </b>{0}<br>
+                        <b> Category: </b>{1}<br>
+                        <b> Question: </b>{2}<br><br>
+                        Regards,<br>
+                        FOSSEE Team,<br>
+                        FOSSEE, IIT Bombay
+                        <br><br><br>
+                        <center><h6>*** This is an automatically generated email, please do not reply***</h6></center>
+                        """.format(
+                        comment.body,
+                        comment.answer.question.category,
+                        comment.answer.question.body,
+                    )
+                    email = EmailMultiAlternatives(
+                        subject, '', sender_email, to, bcc=[bcc_email], headers={
+                            "Content-type": "text/html;charset=iso-8859-1"})
+                    email.attach_alternative(message, "text/html")
+                    email.content_subtype = 'html'  # Main content is text/html
+                    email.mixed_subtype = 'related'
+                    email.send(fail_silently=True)
+            messages.success(request, "Comment is Successfully Saved")
+            return HttpResponseRedirect(
+                '/question/{0}/'.format(comment.answer.question.id))
+        else:
+            messages.error(request, "Only moderator can update.")
+            return HttpResponseRedirect(
+                '/question/{0}/'.format(comment.answer.question.id))
     else:
         return render(request, 'website/templates/404.html')
 
