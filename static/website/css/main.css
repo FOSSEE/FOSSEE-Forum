@@ -191,15 +191,11 @@ table .question a{
     display: none;
 }
 .modify {
-    display: none;
     position: absolute;
     top: 0;
     right:0;
 }
 
-.modify a.save {
-    display: none;
-}
 .vs {
     padding: 0px 5px !important;
     font-size: x-small;
