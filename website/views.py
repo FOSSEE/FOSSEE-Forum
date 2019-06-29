@@ -81,10 +81,9 @@ def questions(request):
 
 
 def get_question(request, question_id=None, pretty_url=None):
-    if settings.MODERATOR_ACTIVATED:
-        question = get_object_or_404(Question, id=question_id)
-    else:
-        question = get_object_or_404(Question, id=question_id, is_active=True)
+    question = get_object_or_404(Question, id=question_id)
+    if not settings.MODERATOR_ACTIVATED and not question.is_active:
+        return HttpResponseRedirect("/")
     sub_category = True
 
     if question.sub_category == "" or str(question.sub_category) == 'None':
