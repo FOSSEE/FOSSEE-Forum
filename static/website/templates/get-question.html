@@ -492,7 +492,7 @@
 
         /* VOTE FOR QUESTION */
         $('div.vote img.vote-up').click(function() {
-            
+            alert("Kasim");
             var question_user_id = {{ question.user_id }};
             var current_user_id = {{ request.user.id }};
             var id = {{ question.pk }};
@@ -690,7 +690,6 @@
         /* DELTETING A COMMENT */
         $('.delete-comment').click(function(event) {
             var id = event.target.id;
-            alert(id[3:])
             $.post('/ajax-answer-comment-delete/', {comment_id: id}, function() {
                 location.reload();
             });
