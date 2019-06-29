@@ -217,7 +217,7 @@
                 {% if answer.is_active %}
                 <a class="delete btn btn-xs btn-info vs ansdel" data-toggle="modal" data-target="#answerDeleteModal" data-id= "{{ answer.id }}" href="#{{ answer.id }}">Delete</a>
                 <a class="edit btn btn-xs btn-info vs" data-target="body{{ answer.id }}" id="ans{{ answer.id }}">Edit</a>
-                <a class="save btn btn-xs btn-success vs"  data-target="body{{ answer.id }}" data-aid="{{ answer.id }}" data-form="form{{ answer.id }}">Save</a>
+                <a class="save btn btn-xs btn-success vs"  data-target="body{{ answer.id }}" data-aid="{{ answer.id }}" data-form="form{{ answer.id }}" style="display: none;">Save</a>
                 {% else %}
                 {% if MODERATOR_ACTIVATED %}
                 <a class="restore btn btn-xs btn-info vs ansres" data-id= "{{ answer.id }}" href="{% url 'website:answer_restore' answer.id %}">Restore</a>
