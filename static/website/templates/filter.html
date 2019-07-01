@@ -60,11 +60,11 @@
                 <span class="category" data-toggle="tooltip" data-placement="top" >
                 {% if question.sub_category %}
                 <a class="pull-left" href="{% url 'website:filter' question.category question.sub_category %}">
-                 {{ question.sub_category|truncatechars:12 }}   
+                 {{ question.sub_category }}   
                 </a> 
                 {% else %}
                  <a class="pull-left" href="{% url 'website:filter' question.category|lower %}">
-                 {{ question.category|truncatechars:12 }}   
+                 {{ question.category }}   
                 </a> 
                 {% endif %}
                 </span>
