@@ -19,7 +19,7 @@ urlpatterns = [
     template_name= 'forums/templates/registration/password_reset_form.html'),\
     name = "password_reset"),
 
-    re_path(r'^password_reset/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',\
+    re_path(r'^password_reset/(?P<uidb64>[0-9A-Za-z]+)/(?P<token>.+)/$',\
     auth_views.PasswordResetConfirmView.as_view(\
     template_name= 'forums/templates/registration/password_reset_confirm.html'\
     ), name = 'password_reset_confirm'),
