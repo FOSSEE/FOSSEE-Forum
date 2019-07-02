@@ -1220,7 +1220,8 @@ def clear_notifications(request):
 
 
 def search(request):
-    # settings.MODERATOR_ACTIVATED = False
+    if settings.MODERATOR_ACTIVATED:
+        return HttpResponseRedirect('/moderator/')
     categories = FossCategory.objects.order_by('name')
     context = {
         'categories': categories
@@ -1625,24 +1626,17 @@ def ajax_notification_remove(request):
 def ajax_keyword_search(request):
     if request.method == "POST":
         key = request.POST['key']
-        if is_moderator(request.user) and settings.MODERATOR_ACTIVATED:
-            questions = (
-                Question.objects.filter(
-                    title__contains=key) | Question.objects.filter(
-                    category__name=key)).distinct().order_by('-date_created')
-        else:
-            questions = (
-                Question.objects.filter(
-                    title__contains=key).filter(
-                    is_spam=False,
-                    is_active=True) | Question.objects.filter(
-                    category__name=key).filter(
-                    is_spam=False,
-                    is_active=True)).distinct().order_by('-date_created')
+        questions = (
+            Question.objects.filter(
+                title__contains=key).filter(
+                is_spam=False,
+                is_active=True) | Question.objects.filter(
+                category__name=key).filter(
+                is_spam=False,
+                is_active=True)).distinct().order_by('-date_created')
         context = {
             'questions': questions
         }
-
         return render(
             request,
             'website/templates/ajax-keyword-search.html',
