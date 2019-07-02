@@ -492,7 +492,6 @@
 
         /* VOTE FOR QUESTION */
         $('div.vote img.vote-up').click(function() {
-            alert("Kasim");
             var question_user_id = {{ question.user_id }};
             var current_user_id = {{ request.user.id }};
             var id = {{ question.pk }};
