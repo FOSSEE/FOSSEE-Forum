@@ -781,8 +781,7 @@ def edit_question(request, question_id):
                     <b> New title: </b>{1}<br>
                     <b> Category: </b>{2}<br>
                     <b> Link: </b><a href="{4}">{4}</a><br>
-                    <b> Question : </b>{3}<br>
-                    <b> Classified as spam: </b>{5}<br><br>
+                    <b> Question : </b>{3}<br><br>
                     Regards,<br>
                     FOSSEE Team,<br>
                     FOSSEE, IIT Bombay
@@ -794,7 +793,6 @@ def edit_question(request, question_id):
                     question.category,
                     question.body,
                     settings.DOMAIN_NAME + '/question/' + str(question.id),
-                    question.is_spam,
                 )
                 email = EmailMultiAlternatives(
                     subject, '',
