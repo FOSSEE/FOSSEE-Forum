@@ -28,8 +28,14 @@ admins = (
 # Function to check if user is in any moderator group
 
 
-def is_moderator(user):
-    return user.groups.count() > 0
+
+def is_moderator(user,question=None):
+    if question:
+        if user.groups.filter(moderatorgroup=ModeratorGroup.objects.get(category=question.category)).exists():
+            return True
+    elif user.groups.count() > 0:
+        return True
+    return False
 
 # Function to check if user is anonymous, and if not he/she has first_name
 # and last_name
@@ -81,15 +87,18 @@ def questions(request):
 
 
 def get_question(request, question_id=None, pretty_url=None):
-    question = get_object_or_404(Question, id=question_id)
-    if not settings.MODERATOR_ACTIVATED and not question.is_active:
-        return HttpResponseRedirect("/")
+    if is_moderator(request.user,get_object_or_404(Question, id=question_id)) and settings.MODERATOR_ACTIVATED:
+        question = get_object_or_404(Question, id=question_id)
+    elif is_moderator(request.user) and settings.MODERATOR_ACTIVATED:
+        return HttpResponseRedirect("/moderator/")
+    else:
+        question = get_object_or_404(Question, id=question_id, is_active=True)
     sub_category = True
 
     if question.sub_category == "" or str(question.sub_category) == 'None':
         sub_category = False
 
-    if (is_moderator(request.user) and settings.MODERATOR_ACTIVATED):
+    if (is_moderator(request.user,question) and settings.MODERATOR_ACTIVATED):
         answers = question.answer_set.all()
     else:
         answers = question.answer_set.filter(
@@ -690,7 +699,7 @@ def edit_question(request, question_id):
 
     # To prevent random user from manually entering the link and editing
     if ((request.user.id != question.user.id or question.answer_set.filter(is_active=True).count(
-    ) > 0) and (not is_moderator(request.user) or not settings.MODERATOR_ACTIVATED)):
+    ) > 0) and (not is_moderator(request.user, question) or not settings.MODERATOR_ACTIVATED)):
         return render(request, 'website/templates/not-authorized.html')
 
     if (request.method == 'POST'):
@@ -847,7 +856,7 @@ def question_delete(request, question_id):
 
     # To prevent random user from manually entering the link and deleting
     if ((request.user.id != question.user.id or question.answer_set.filter(
-            is_active=True).count() > 0) and (not settings.MODERATOR_ACTIVATED)):
+            is_active=True).count() > 0) and (not is_moderator(request.user, question) or not settings.MODERATOR_ACTIVATED)):
         return render(request, 'website/templates/not-authorized.html')
 
     if (request.method == "POST"):
@@ -921,7 +930,7 @@ def question_delete(request, question_id):
 @login_required
 def question_restore(request, question_id):
     question = get_object_or_404(Question, id=question_id, is_active=False)
-    if not is_moderator(request.user) or not settings.MODERATOR_ACTIVATED:
+    if not is_moderator(request.user, question) or not settings.MODERATOR_ACTIVATED:
         return render(request, 'website/templates/not-authorized.html')
     question.is_active = True
     question.save()
@@ -942,7 +951,7 @@ def answer_delete(request, answer_id):
     question_id = answer.question.id
 
     if ((request.user.id != answer.uid or AnswerComment.objects.filter(answer=answer,
-                                                                       is_active=True).exclude(uid=answer.uid).exists()) and (not settings.MODERATOR_ACTIVATED)):
+                                                                       is_active=True).exclude(uid=answer.uid).exists()) and (not is_moderator(request.user, question) or not settings.MODERATOR_ACTIVATED)):
         return render(request, 'website/templates/not-authorized.html')
 
     if (request.method == "POST") and (settings.MODERATOR_ACTIVATED):
@@ -1011,7 +1020,7 @@ def answer_delete(request, answer_id):
 @user_passes_test(is_moderator)
 def answer_restore(request, answer_id):
     answer = get_object_or_404(Answer, id=answer_id, is_active=False)
-    if not settings.MODERATOR_ACTIVATED:
+    if not is_moderator(request.user, answer.question) or not settings.MODERATOR_ACTIVATED:
         return render(request, 'website/templates/not-authorized.html')
     if not answer.question.is_active:
         messages.error(
@@ -1390,7 +1399,7 @@ def ajax_answer_update(request):
             answer = get_object_or_404(Answer, pk=aid, is_active=True)
         except BaseException:
             return render(request, 'website/templates/404.html')
-        if ((is_moderator(request.user) and settings.MODERATOR_ACTIVATED) or (request.user.id ==
+        if ((is_moderator(request.user, answer.question) and settings.MODERATOR_ACTIVATED) or (request.user.id ==
                                                                               answer.uid and not AnswerComment.objects.filter(answer=answer).exclude(uid=answer.uid).exists())):
             answer.body = str(body)
             answer.save()
@@ -1458,7 +1467,7 @@ def ajax_answer_comment_delete(request):
             comment = get_object_or_404(AnswerComment, pk=comment_id)
         except BaseException:
             return render(request, 'website/templates/404.html')
-        if (is_moderator(request.user) and settings.MODERATOR_ACTIVATED) or (
+        if (is_moderator(request.user, comment.answer.question) and settings.MODERATOR_ACTIVATED) or (
                 request.user.id == comment.uid and can_delete(comment.answer, comment_id)):
             comment.is_active = False
             comment.save()
@@ -1526,7 +1535,7 @@ def ajax_answer_comment_update(request):
             comment = get_object_or_404(AnswerComment, pk=cid, is_active=True)
         except BaseException:
             return render(request, 'website/templates/404.html')
-        if (is_moderator(request.user) and settings.MODERATOR_ACTIVATED) or (
+        if (is_moderator(request.user, comment.answer.question) and settings.MODERATOR_ACTIVATED) or (
                 request.user.id == comment.uid and can_delete(comment.answer, cid)):
             comment.body = str(body)
             comment.save()
