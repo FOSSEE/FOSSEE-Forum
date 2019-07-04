@@ -949,7 +949,7 @@ def answer_delete(request, answer_id):
     question_id = answer.question.id
 
     if ((request.user.id != answer.uid or AnswerComment.objects.filter(answer=answer,
-                                                                       is_active=True).exclude(uid=answer.uid).exists()) and (not is_moderator(request.user, question) or not settings.MODERATOR_ACTIVATED)):
+                                                                       is_active=True).exclude(uid=answer.uid).exists()) and (not is_moderator(request.user, answer.question) or not settings.MODERATOR_ACTIVATED)):
         return render(request, 'website/templates/not-authorized.html')
 
     if (request.method == "POST") and (settings.MODERATOR_ACTIVATED):
