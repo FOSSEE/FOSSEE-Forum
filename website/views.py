@@ -76,9 +76,11 @@ def home(request):
 def questions(request):
     if is_moderator(request.user) and settings.MODERATOR_ACTIVATED:
         return HttpResponseRedirect('/moderator/questions/')
+    categories = FossCategory.objects.order_by('name')
     questions = Question.objects.all().filter(
         is_spam=False, is_active=True).order_by('-date_created')
     context = {
+        'categories': categories,
         'questions': questions,
     }
     return render(request, 'website/templates/questions.html', context)
