@@ -88,20 +88,18 @@ def questions(request):
 def get_question(request, question_id=None, pretty_url=None):
     if is_moderator(request.user,get_object_or_404(Question, id=question_id)) and settings.MODERATOR_ACTIVATED:
         question = get_object_or_404(Question, id=question_id)
+        answers = question.answer_set.all()
     elif is_moderator(request.user) and settings.MODERATOR_ACTIVATED:
         return HttpResponseRedirect("/moderator/")
     else:
         question = get_object_or_404(Question, id=question_id, is_active=True)
+        answers = question.answer_set.filter(
+                is_spam=False, is_active=True).all()
     sub_category = True
 
     if question.sub_category == "" or str(question.sub_category) == 'None':
         sub_category = False
 
-    if (is_moderator(request.user,question) and settings.MODERATOR_ACTIVATED):
-        answers = question.answer_set.all()
-    else:
-        answers = question.answer_set.filter(
-            is_spam=False, is_active=True).all()
     ans_count = len(answers)
     form = AnswerQuestionForm()
     thisuserupvote = question.userUpVotes.filter(id=request.user.id).count()
@@ -138,6 +136,17 @@ def get_question(request, question_id=None, pretty_url=None):
 
     context['SITE_KEY'] = settings.GOOGLE_RECAPTCHA_SITE_KEY
     return render(request, 'website/templates/get-question.html', context)
+
+def to_uids(question):
+    answer_sets = Answer.objects.filter(
+        question_id=question.id, is_active=True).distinct()
+    mail_uids = [question.user.id]
+    for answer in answer_sets:
+        for comment in AnswerComment.objects.values('uid').filter(answer=answer, is_active=True).distinct():
+            mail_uids.append(comment['uid'])
+        mail_uids.append(answer.uid)
+    mail_uids = set(mail_uids)
+    return mail_uids
 
 def send_email(sender_email, to, subject, message, bcc_email=None):
     email = EmailMultiAlternatives(
@@ -192,50 +201,38 @@ def question_answer(request, question_id):
                 notification.aid = answer.id
                 notification.save()
 
-            # Sending email when a new answer is posted
-            sender_name = "FOSSEE Forums"
-            sender_email = settings.SENDER_EMAIL
-            bcc_email = settings.BCC_EMAIL_ID
-            subject = "FOSSEE Forums - {0} - Your question has been answered".format(
-                question.category)
-            to = [question.user.email]
-            message = """The following new answer has been posted in the FOSSEE Forum: <br><br>
-                <b>Title:</b> {0} <br>
-                <b>Category:</b> {1}<br>
-                <b>Link:</b> {2}<br><br>
+                # Sending email when a new answer is posted
+                sender_name = "FOSSEE Forums"
+                sender_email = settings.SENDER_EMAIL
+                bcc_email = settings.BCC_EMAIL_ID
+                subject = "FOSSEE Forums - {0} - Your question has been answered".format(
+                    question.category)
+                to = [question.user.email]
+                message = """The following new answer has been posted in the FOSSEE Forum: <br><br>
+                    <b>Title:</b> {0} <br>
+                    <b>Category:</b> {1}<br>
+                    <b>Link:</b> {2}<br><br>
 
-                Regards,<br>
-                FOSSEE Team,<br>
-                FOSSEE, IIT Bombay
-                <br><br><br>
-                <center><h6>*** This is an automatically generated email, please do not reply***</h6></center>
-                """.format(
-                question.title,
-                question.category,
-                settings.DOMAIN_NAME + '/question/' + str(question_id) + "#answer" + str(answer.id)
-            )
-            send_email(sender_email, to, subject, message, bcc_email)
+                    Regards,<br>
+                    FOSSEE Team,<br>
+                    FOSSEE, IIT Bombay
+                    <br><br><br>
+                    <center><h6>*** This is an automatically generated email, please do not reply***</h6></center>
+                    """.format(
+                    question.title,
+                    question.category,
+                    settings.DOMAIN_NAME + '/question/' + str(question_id) + "#answer" + str(answer.id)
+                )
+                send_email(sender_email, to, subject, message, bcc_email)
 
-            answer_sets = Answer.objects.filter(
-                question_id=question_id, is_active=True).distinct()
-            comment_set = []
-            mail_ids = []
-            for answer_id in answer_sets:
-                comment_set.append(
-                    AnswerComment.objects.values('uid').filter(
-                        answer=answer_id, is_active=True).distinct())
-                mail_ids.append(answer_id.uid)
-            for x in comment_set:
-                for y in x:
-                    mail_ids.append(y['uid'])
-            mail_ids = set(mail_ids)
-            mail_ids.difference_update({question.user.id, request.user.id})
+            mail_uids = to_uids(question)
+            mail_uids.difference_update({question.user.id, request.user.id})
 
             # Notification for all user in this thread
-            for x in mail_ids:
+            for mail_uid in mail_uids:
 
                 notification = Notification()
-                notification.uid = x
+                notification.uid = mail_uid
                 notification.qid = question.id
                 notification.aid = answer.id
                 notification.save()
@@ -246,7 +243,7 @@ def question_answer(request, question_id):
                 bcc_email = settings.BCC_EMAIL_ID
                 subject = "FOSSEE Forums - {0} - Question has been answered".format(
                     question.category)
-                to = [get_user_email(x)]
+                to = [get_user_email(mail_uid)]
                 message = """The following new answer has been posted in the FOSSEE Forum: <br><br>
                     <b>Title:</b> {0} <br>
                     <b>Category:</b> {1}<br>
@@ -422,24 +419,13 @@ def answer_comment(request):
 
                 send_email(sender_email, to, subject, message, bcc_email)
 
-            comment_set = []
-            mail_ids = [answer.question.user.id]
-            for answer_id in answers:
-                comment_set.append(
-                    AnswerComment.objects.values('uid').filter(
-                        answer=answer_id, is_active=True).distinct())
-                mail_ids.append(answer_id.uid)
-            for x in comment_set:
-                for y in x:
-                    mail_ids.append(y['uid'])
-            mail_ids = set(mail_ids)
-            mail_ids.difference_update(
-                {answer.uid, comment_creator, request.user.id})
+            mail_uids = to_uids(answer.question)
+            mail_uids.difference_update({answer.uid, comment_creator, request.user.id})
 
-            for x in mail_ids:
+            for mail_uid in mail_uids:
 
                 notification = Notification()
-                notification.uid = x
+                notification.uid = mail_uid
                 notification.qid = answer.question.id
                 notification.aid = answer.id
                 notification.cid = comment.id
@@ -450,7 +436,7 @@ def answer_comment(request):
                 bcc_email = settings.BCC_EMAIL_ID
                 subject = "FOSSEE Forums - A Comment has been posted under Question No. {0}".format(
                     answer.question.id)
-                to = [get_user_email(x)]
+                to = [get_user_email(mail_uid)]
                 message = """
                     A comment has been posted under the Question.<br><br>
                     <b>Title:</b> {0}<br>
@@ -700,50 +686,36 @@ def edit_question(request, question_id):
                     question.is_spam = True
 
             question.save()
-
-            answer_sets = Answer.objects.filter(
-                question_id=question_id, is_active=True).distinct()
-            comment_set = []
-            mail_ids = [question.user.id]
-            for answer in answer_sets:
-                comment_set.append(
-                    AnswerComment.objects.values('uid').filter(
-                        answer=answer, is_active=True).distinct())
-                mail_ids.append(answer.uid)
-            for x in comment_set:
-                for y in x:
-                    mail_ids.append(y['uid'])
-            mail_ids = set(mail_ids)
-
-            for uid in mail_ids:
-                sender_name = "FOSSEE Forums"
-                sender_email = settings.SENDER_EMAIL
-                subject = "FOSSEE Forums - {0} - New Question".format(
-                    question.category)
-                #to = (question.user.email, question.category.email, settings.FORUM_NOTIFICATION)
+            
+            sender_name = "FOSSEE Forums"
+            sender_email = settings.SENDER_EMAIL
+            subject = "FOSSEE Forums - {0} - New Question".format(
+                question.category)
+            bcc_email = (
+                question.category.email,
+                settings.FORUM_NOTIFICATION)
+            message = """
+                The following question has been edited in the FOSSEE Forum: <br>
+                <b> Original title: </b>{0}<br>
+                <b> New title: </b>{1}<br>
+                <b> Category: </b>{2}<br>
+                <b> Link: </b><a href="{4}">{4}</a><br>
+                <b> Question : </b>{3}<br><br>
+                Regards,<br>
+                FOSSEE Team,<br>
+                FOSSEE, IIT Bombay
+                <br><br><br>
+                <center><h6>*** This is an automatically generated email, please do not reply***</h6></center>
+                """.format(
+                question.title,
+                previous_title,
+                question.category,
+                question.body,
+                settings.DOMAIN_NAME + '/question/' + str(question.id),
+            )
+            mail_uids = to_uids(question_id)
+            for uid in mail_uids:
                 to = [get_user_email(uid)]
-                bcc_email = (
-                    question.category.email,
-                    settings.FORUM_NOTIFICATION)
-                message = """
-                    The following question has been edited in the FOSSEE Forum: <br>
-                    <b> Original title: </b>{0}<br>
-                    <b> New title: </b>{1}<br>
-                    <b> Category: </b>{2}<br>
-                    <b> Link: </b><a href="{4}">{4}</a><br>
-                    <b> Question : </b>{3}<br><br>
-                    Regards,<br>
-                    FOSSEE Team,<br>
-                    FOSSEE, IIT Bombay
-                    <br><br><br>
-                    <center><h6>*** This is an automatically generated email, please do not reply***</h6></center>
-                    """.format(
-                    question.title,
-                    previous_title,
-                    question.category,
-                    question.body,
-                    settings.DOMAIN_NAME + '/question/' + str(question.id),
-                )
                 send_email(sender_email, to, subject, message, bcc_email)
 
             if (question.is_spam and not settings.MODERATOR_ACTIVATED):
@@ -802,45 +774,32 @@ def question_delete(request, question_id):
 
         # Send a delete email only when moderator does so
         if (settings.MODERATOR_ACTIVATED):
-            answer_sets = Answer.objects.filter(
-                question_id=question_id, is_active=True).distinct()
-            comment_set = []
-            mail_ids = [question.user.id]
-            for answer in answer_sets:
-                comment_set.append(
-                    AnswerComment.objects.values('uid').filter(
-                        answer=answer, is_active=True).distinct())
-                mail_ids.append(answer.uid)
-            for x in comment_set:
-                for y in x:
-                    mail_ids.append(y['uid'])
-            mail_ids = set(mail_ids)
-
-            for uid in mail_ids:
-                sender_name = "FOSSEE Forums"
-                sender_email = settings.SENDER_EMAIL
-                subject = "FOSSEE Forums - {0} - New Question".format(
-                    question.category)
+            sender_name = "FOSSEE Forums"
+            sender_email = settings.SENDER_EMAIL
+            subject = "FOSSEE Forums - {0} - New Question".format(
+                question.category)
+            bcc_email = settings.BCC_EMAIL_ID
+            delete_reason = request.POST.get('deleteQuestion')
+            message = """
+                The following question has been deleted by a moderator of the FOSSEE Forum: <br>
+                <b> Title: </b>{0}<br>
+                <b> Category: </b>{1}<br>
+                <b> Question: </b>{2}<br>
+                <b> Moderator comments: </b>{3}<br><br>
+                Regards,<br>
+                FOSSEE Team,<br>
+                FOSSEE, IIT Bombay
+                <br><br><br>
+                <center><h6>*** This is an automatically generated email, please do not reply***</h6></center>
+                """.format(
+                title,
+                question.category,
+                question.body,
+                delete_reason,
+            )
+            mail_uids = to_uids(question)
+            for uid in mail_uids:
                 to = [get_user_email(uid)]
-                bcc_email = settings.BCC_EMAIL_ID
-                delete_reason = request.POST.get('deleteQuestion')
-                message = """
-                    The following question has been deleted by a moderator of the FOSSEE Forum: <br>
-                    <b> Title: </b>{0}<br>
-                    <b> Category: </b>{1}<br>
-                    <b> Question: </b>{2}<br>
-                    <b> Moderator comments: </b>{3}<br><br>
-                    Regards,<br>
-                    FOSSEE Team,<br>
-                    FOSSEE, IIT Bombay
-                    <br><br><br>
-                    <center><h6>*** This is an automatically generated email, please do not reply***</h6></center>
-                    """.format(
-                    title,
-                    question.category,
-                    question.body,
-                    delete_reason,
-                )
                 send_email(sender_email, to, subject, message, bcc_email)
 
     question.is_active = False
@@ -887,46 +846,32 @@ def answer_delete(request, answer_id):
     if (request.method == "POST") and (settings.MODERATOR_ACTIVATED):
 
         # Sending email to user when answer is deleted
-
-        answer_sets = Answer.objects.filter(
-            question_id=question_id, is_active=True).distinct()
-        comment_set = []
-        mail_ids = [answer.question.user.id]
-        for answer in answer_sets:
-            comment_set.append(
-                AnswerComment.objects.values('uid').filter(
-                    answer=answer, is_active=True).distinct())
-            mail_ids.append(answer.uid)
-        for x in comment_set:
-            for y in x:
-                mail_ids.append(y['uid'])
-        mail_ids = set(mail_ids)
-
-        for uid in mail_ids:
-            sender_name = "FOSSEE Forums"
-            sender_email = settings.SENDER_EMAIL
-            subject = "FOSSEE Forums - {0} - Answer Deleted".format(
-                answer.question.category)
+        sender_name = "FOSSEE Forums"
+        sender_email = settings.SENDER_EMAIL
+        subject = "FOSSEE Forums - {0} - Answer Deleted".format(
+            answer.question.category)
+        bcc_email = settings.BCC_EMAIL_ID
+        delete_reason = request.POST.get('deleteAnswer')
+        message = """
+            The following answer has been deleted by a moderator in the FOSSEE Forum: <br>
+            <b> Answer: </b>{0}<br>
+            <b> Category: </b>{1}<br>
+            <b> Question: </b>{2}<br>
+            <b> Moderator comments: </b>{3}<br><br>
+            Regards,<br>
+            FOSSEE Team,<br>
+            FOSSEE, IIT Bombay
+            <br><br><br>
+            <center><h6>*** This is an automatically generated email, please do not reply***</h6></center>
+            """.format(
+            answer.body,
+            answer.question.category,
+            answer.question.body,
+            delete_reason,
+        )
+        mail_uids = to_uids(answer.question)
+        for uid in mail_uids:
             to = [get_user_email(uid)]
-            bcc_email = settings.BCC_EMAIL_ID
-            delete_reason = request.POST.get('deleteAnswer')
-            message = """
-                The following answer has been deleted by a moderator in the FOSSEE Forum: <br>
-                <b> Answer: </b>{0}<br>
-                <b> Category: </b>{1}<br>
-                <b> Question: </b>{2}<br>
-                <b> Moderator comments: </b>{3}<br><br>
-                Regards,<br>
-                FOSSEE Team,<br>
-                FOSSEE, IIT Bombay
-                <br><br><br>
-                <center><h6>*** This is an automatically generated email, please do not reply***</h6></center>
-                """.format(
-                answer.body,
-                answer.question.category,
-                answer.question.body,
-                delete_reason,
-            )
             send_email(sender_email, to, subject, message, bcc_email)
 
         answer.is_active = False
@@ -1326,43 +1271,30 @@ def ajax_answer_update(request):
             answer.body = str(body)
             answer.save()
             if settings.MODERATOR_ACTIVATED:
-                question_id = answer.question.id
-                answer_sets = Answer.objects.filter(
-                    question_id=question_id, is_active=True).distinct()
-                comment_set = []
-                mail_ids = [answer.question.user.id]
-                for ans in answer_sets:
-                    comment_set.append(
-                        AnswerComment.objects.values('uid').filter(
-                            answer=ans, is_active=True).distinct())
-                    mail_ids.append(ans.uid)
-                for x in comment_set:
-                    for y in x:
-                        mail_ids.append(y['uid'])
-                mail_ids = set(mail_ids)
-                for uid in mail_ids:
-                    sender_name = "FOSSEE Forums"
-                    sender_email = settings.SENDER_EMAIL
-                    subject = "FOSSEE Forums - {0} - Answer Deleted".format(
-                        answer.question.category)
+                sender_name = "FOSSEE Forums"
+                sender_email = settings.SENDER_EMAIL
+                subject = "FOSSEE Forums - {0} - Answer Deleted".format(
+                    answer.question.category)
+                bcc_email = settings.BCC_EMAIL_ID
+                delete_reason = request.POST.get('deleteAnswer')
+                message = """
+                    The following answer has been edited by a moderator in the FOSSEE Forum: <br>
+                    <b> Answer: </b>{0}<br>
+                    <b> Category: </b>{1}<br>
+                    <b> Question: </b>{2}<br><br>
+                    Regards,<br>
+                    FOSSEE Team,<br>
+                    FOSSEE, IIT Bombay
+                    <br><br><br>
+                    <center><h6>*** This is an automatically generated email, please do not reply***</h6></center>
+                    """.format(
+                    answer.body,
+                    answer.question.category,
+                    answer.question.body,
+                )
+                mail_uids = to_uids(answer.question)
+                for uid in mail_uids:
                     to = [get_user_email(uid)]
-                    bcc_email = settings.BCC_EMAIL_ID
-                    delete_reason = request.POST.get('deleteAnswer')
-                    message = """
-                        The following answer has been edited by a moderator in the FOSSEE Forum: <br>
-                        <b> Answer: </b>{0}<br>
-                        <b> Category: </b>{1}<br>
-                        <b> Question: </b>{2}<br><br>
-                        Regards,<br>
-                        FOSSEE Team,<br>
-                        FOSSEE, IIT Bombay
-                        <br><br><br>
-                        <center><h6>*** This is an automatically generated email, please do not reply***</h6></center>
-                        """.format(
-                        answer.body,
-                        answer.question.category,
-                        answer.question.body,
-                    )
                     send_email(sender_email, to, subject, message, bcc_email)
             messages.success(request, "Answer is Successfully Saved")
             return HttpResponseRedirect(
@@ -1388,44 +1320,31 @@ def ajax_answer_comment_delete(request):
             comment.is_active = False
             comment.save()
             if settings.MODERATOR_ACTIVATED:
-                question_id = comment.answer.question.id
-                answer_sets = Answer.objects.filter(
-                    question_id=question_id, is_active=True).distinct()
-                comment_set = []
-                mail_ids = [comment.answer.question.user.id]
-                for ans in answer_sets:
-                    comment_set.append(
-                        AnswerComment.objects.values('uid').filter(
-                            answer=ans, is_active=True).distinct())
-                    mail_ids.append(ans.uid)
-                for x in comment_set:
-                    for y in x:
-                        mail_ids.append(y['uid'])
-                mail_ids = set(mail_ids)
 
-                for uid in mail_ids:
-                    sender_name = "FOSSEE Forums"
-                    sender_email = settings.SENDER_EMAIL
-                    subject = "FOSSEE Forums - {0} - Comment Deleted".format(
-                        comment.answer.question.category)
+                sender_name = "FOSSEE Forums"
+                sender_email = settings.SENDER_EMAIL
+                subject = "FOSSEE Forums - {0} - Comment Deleted".format(
+                    comment.answer.question.category)
+                bcc_email = settings.BCC_EMAIL_ID
+                # delete_reason = request.POST.get('deleteAnswer')
+                message = """
+                    The following comment has been deleted by a moderator in the FOSSEE Forum: <br>
+                    <b> Comment: </b>{0}<br>
+                    <b> Category: </b>{1}<br>
+                    <b> Answer: </b>{2}<br><br>
+                    Regards,<br>
+                    FOSSEE Team,<br>
+                    FOSSEE, IIT Bombay
+                    <br><br><br>
+                    <center><h6>*** This is an automatically generated email, please do not reply***</h6></center>
+                    """.format(
+                    comment.body,
+                    comment.answer.question.category,
+                    comment.answer.body,
+                )
+                mail_uids = to_uids(comment.answer.question)
+                for uid in mail_uids:
                     to = [get_user_email(uid)]
-                    bcc_email = settings.BCC_EMAIL_ID
-                    # delete_reason = request.POST.get('deleteAnswer')
-                    message = """
-                        The following comment has been deleted by a moderator in the FOSSEE Forum: <br>
-                        <b> Comment: </b>{0}<br>
-                        <b> Category: </b>{1}<br>
-                        <b> Answer: </b>{2}<br><br>
-                        Regards,<br>
-                        FOSSEE Team,<br>
-                        FOSSEE, IIT Bombay
-                        <br><br><br>
-                        <center><h6>*** This is an automatically generated email, please do not reply***</h6></center>
-                        """.format(
-                        comment.body,
-                        comment.answer.question.category,
-                        comment.answer.body,
-                    )
                     send_email(sender_email, to, subject, message, bcc_email)
             return HttpResponse('deleted')
         else:
@@ -1450,43 +1369,30 @@ def ajax_answer_comment_update(request):
             comment.body = str(body)
             comment.save()
             if settings.MODERATOR_ACTIVATED:
-                question_id = comment.answer.question.id
-                answer_sets = Answer.objects.filter(
-                    question_id=question_id, is_active=True).distinct()
-                comment_set = []
-                mail_ids = [comment.answer.question.user.id]
-                for ans in answer_sets:
-                    comment_set.append(
-                        AnswerComment.objects.values('uid').filter(
-                            answer=ans, is_active=True).distinct())
-                    mail_ids.append(ans.uid)
-                for x in comment_set:
-                    for y in x:
-                        mail_ids.append(y['uid'])
-                mail_ids = set(mail_ids)
-                mail_ids.discard(request.user.id)
-                for uid in mail_ids:
-                    sender_name = "FOSSEE Forums"
-                    sender_email = settings.SENDER_EMAIL
-                    subject = "FOSSEE Forums - {0} - Answer Deleted".format(
-                        comment.answer.question.category)
+                sender_name = "FOSSEE Forums"
+                sender_email = settings.SENDER_EMAIL
+                subject = "FOSSEE Forums - {0} - Answer Deleted".format(
+                    comment.answer.question.category)
+                bcc_email = settings.BCC_EMAIL_ID
+                message = """
+                    The following comment has been edited by a moderator in the FOSSEE Forum: <br>
+                    <b> Comment: </b>{0}<br>
+                    <b> Category: </b>{1}<br>
+                    <b> Question: </b>{2}<br><br>
+                    Regards,<br>
+                    FOSSEE Team,<br>
+                    FOSSEE, IIT Bombay
+                    <br><br><br>
+                    <center><h6>*** This is an automatically generated email, please do not reply***</h6></center>
+                    """.format(
+                    comment.body,
+                    comment.answer.question.category,
+                    comment.answer.question.body,
+                )
+                mail_uids = to_uids(comment.answer.question)
+                mail_uids.discard(request.user.id)
+                for uid in mail_uids:
                     to = [get_user_email(uid)]
-                    bcc_email = settings.BCC_EMAIL_ID
-                    message = """
-                        The following comment has been edited by a moderator in the FOSSEE Forum: <br>
-                        <b> Comment: </b>{0}<br>
-                        <b> Category: </b>{1}<br>
-                        <b> Question: </b>{2}<br><br>
-                        Regards,<br>
-                        FOSSEE Team,<br>
-                        FOSSEE, IIT Bombay
-                        <br><br><br>
-                        <center><h6>*** This is an automatically generated email, please do not reply***</h6></center>
-                        """.format(
-                        comment.body,
-                        comment.answer.question.category,
-                        comment.answer.question.body,
-                    )
                     send_email(sender_email, to, subject, message, bcc_email)
             messages.success(request, "Comment is Successfully Saved")
             return HttpResponseRedirect(
