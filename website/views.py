@@ -1262,10 +1262,7 @@ def ajax_answer_update(request):
     if request.method == 'POST':
         aid = request.POST['answer_id']
         body = request.POST['answer_body']
-        try:
-            answer = get_object_or_404(Answer, pk=aid, is_active=True)
-        except BaseException:
-            return render(request, 'website/templates/404.html')
+        answer = get_object_or_404(Answer, pk=aid, is_active=True)
         if ((is_moderator(request.user, answer.question) and settings.MODERATOR_ACTIVATED) or (request.user.id ==
                                                                               answer.uid and not AnswerComment.objects.filter(answer=answer).exclude(uid=answer.uid).exists())):
             answer.body = str(body)
@@ -1311,10 +1308,7 @@ def ajax_answer_update(request):
 def ajax_answer_comment_delete(request):
     if request.method == 'POST':
         comment_id = request.POST['comment_id']
-        try:
-            comment = get_object_or_404(AnswerComment, pk=comment_id)
-        except BaseException:
-            return render(request, 'website/templates/404.html')
+        comment = get_object_or_404(AnswerComment, pk=comment_id)
         if (is_moderator(request.user, comment.answer.question) and settings.MODERATOR_ACTIVATED) or (
                 request.user.id == comment.uid and can_delete(comment.answer, comment_id)):
             comment.is_active = False
@@ -1360,10 +1354,7 @@ def ajax_answer_comment_update(request):
     if request.method == 'POST':
         cid = request.POST['comment_id']
         body = request.POST['comment_body']
-        try:
-            comment = get_object_or_404(AnswerComment, pk=cid, is_active=True)
-        except BaseException:
-            return render(request, 'website/templates/404.html')
+        comment = get_object_or_404(AnswerComment, pk=cid, is_active=True)
         if (is_moderator(request.user, comment.answer.question) and settings.MODERATOR_ACTIVATED) or (
                 request.user.id == comment.uid and can_delete(comment.answer, cid)):
             comment.body = str(body)
