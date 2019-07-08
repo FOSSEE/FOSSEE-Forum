@@ -37,11 +37,7 @@ register.filter(comment_id)
 
 
 def havenot_comments(answer):
-    comment = answer.answercomment_set.filter(is_active=True)
-    if not comment:
-        return True
-    else:
-        return False
+    return(not answer.answercomment_set.filter(is_active=True).exists())
 
 
 register.filter(havenot_comments)

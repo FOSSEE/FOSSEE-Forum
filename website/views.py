@@ -29,13 +29,10 @@ admins = (
 
 
 
-def is_moderator(user,question=None):
+def is_moderator(user, question=None):
     if question:
-        if user.groups.filter(moderatorgroup=ModeratorGroup.objects.get(category=question.category)).exists():
-            return True
-    elif user.groups.count() > 0:
-        return True
-    return False
+        return user.groups.filter(moderatorgroup=ModeratorGroup.objects.get(category=question.category)).exists()
+    return user.groups.count() > 0
 
 # Function to check if user is anonymous, and if not he/she has first_name
 # and last_name
