@@ -167,17 +167,12 @@ def send_email(sender_email, to, subject, message, bcc_email=None):
 @user_passes_test(account_credentials_defined, login_url='/accounts/profile/')
 def question_answer(request, question_id):
 
-    context = {}
     question = get_object_or_404(Question, id=question_id, is_active=True)
     if (request.method == 'POST'):
 
         form = AnswerQuestionForm(request.POST, request.FILES)
         answer = Answer()
         answer.uid = request.user.id
-        if request.POST['body'].strip() == "":
-            messages.error(request,"Answer cann't be empty or only blank spaces.")
-            return HttpResponseRedirect(
-                '/question/{0}/'.format(question_id))
 
         if form.is_valid() and request.recaptcha_is_valid:
             cleaned_data = form.cleaned_data
@@ -264,62 +259,8 @@ def question_answer(request, question_id):
             return HttpResponseRedirect('/question/{0}/'.format(question_id))
 
         else:
-            question = get_object_or_404(
-                Question, id=question_id, is_active=True)
-            sub_category = True
-
-            if question.sub_category == "" or str(
-                    question.sub_category) == 'None':
-                sub_category = False
-
-            if (settings.MODERATOR_ACTIVATED):
-                answers = question.answer_set.filter(is_active=True)
-            else:
-                answers = question.answer_set.filter(
-                    is_spam=False, is_active=True).all()
-            ans_count = len(answers)
-            form = AnswerQuestionForm()
-            thisuserupvote = question.userUpVotes.filter(
-                id=request.user.id).count()
-            thisuserdownvote = question.userDownVotes.filter(
-                id=request.user.id).count()
-
-            ans_votes = []
-            for vote in answers:
-                net_ans_count = vote.num_votes
-                ans_votes.append([vote.userUpVotes
-                                  .filter(id=request.user.id).count(), vote.userDownVotes
-                                  .filter(id=request.user.id).count(), net_ans_count])
-
-            main_list = list(zip(answers, ans_votes))
-            context = {
-                'ans_count': ans_count,
-                'question': question,
-                'sub_category': sub_category,
-                'main_list': main_list,
-                'form': form,
-                'thisUserUpvote': thisuserupvote,
-                'thisUserDownvote': thisuserdownvote,
-                'net_count': question.num_votes,
-            }
-            form = AnswerQuestionForm()
-            context['SITE_KEY'] = settings.GOOGLE_RECAPTCHA_SITE_KEY
-            context['question'] = question
-            context['error'] = "Invalid reCAPTCHA please try again"
-            context.update(csrf(request))
-            return render(
-                request,
-                'website/templates/get-question.html',
-                context)
-
-    else:
-        form = AnswerQuestionForm()
-        context['question'] = question
-
-    context['form'] = form
-    context['SITE_KEY'] = settings.GOOGLE_RECAPTCHA_SITE_KEY
-    context.update(csrf(request))
-    return render(request, 'website/templates/get-question.html', context)
+            messages.error(request,"Answer cann't be empty or only blank spaces.")
+    return HttpResponseRedirect('/question/{0}/'.format(question_id))
 
 
 # comments for specific answer and notification is sent to owner of the answer
@@ -337,10 +278,6 @@ def answer_comment(request):
         answers = answer.question.answer_set.filter(
             is_spam=False, is_active=True).all()
         answer_creator = answer.user()
-        if request.POST['body'].strip() == "":
-            messages.error(request,"Comment cann't be empty or only blank spaces.")
-            return HttpResponseRedirect(
-                '/question/{0}/'.format(answer.question.id))
         form = AnswerCommentForm(request.POST)
 
         if form.is_valid():
@@ -459,16 +396,9 @@ def answer_comment(request):
                 '/question/{0}/'.format(answer.question.id))
 
         else:
-            context.update({
-                'form': form,
-                'question': answer.question,
-                'answers': answers,
-            })
-            return render(
-                request,
-                'website/templates/get-question.html',
-                context)
-
+            messages.error(request,"Comment cann't be empty or only blank spaces.")
+            return HttpResponseRedirect(
+                '/question/{0}/'.format(answer.question.id))
     else:
         return render(request, 'website/templates/404.html')
 
