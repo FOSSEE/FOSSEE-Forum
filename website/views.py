@@ -29,13 +29,10 @@ admins = (
 
 
 
-def is_moderator(user,question=None):
+def is_moderator(user, question=None):
     if question:
-        if user.groups.filter(moderatorgroup=ModeratorGroup.objects.get(category=question.category)).exists():
-            return True
-    elif user.groups.count() > 0:
-        return True
-    return False
+        return user.groups.filter(moderatorgroup=ModeratorGroup.objects.get(category=question.category)).exists()
+    return user.groups.count() > 0
 
 # Function to check if user is anonymous, and if not he/she has first_name
 # and last_name
@@ -142,6 +139,18 @@ def get_question(request, question_id=None, pretty_url=None):
     context['SITE_KEY'] = settings.GOOGLE_RECAPTCHA_SITE_KEY
     return render(request, 'website/templates/get-question.html', context)
 
+def send_email(sender_email, to, subject, message, bcc_email=None):
+    email = EmailMultiAlternatives(
+        subject, '',
+        sender_email, to,
+        bcc=[bcc_email],
+        headers={"Content-type": "text/html;charset=iso-8859-1"}
+    )
+    email.attach_alternative(message, "text/html")
+    email.content_subtype = 'html'  # Main content is text/html
+    email.mixed_subtype = 'related'
+    email.send(fail_silently=True)
+
 # post answer to a question, send notification to the user, whose question is answered
 # if anwser is posted by the owner of the question, no notification is sent
 @login_required
@@ -205,16 +214,7 @@ def question_answer(request, question_id):
                 question.category,
                 settings.DOMAIN_NAME + '/question/' + str(question_id) + "#answer" + str(answer.id)
             )
-            email = EmailMultiAlternatives(
-                subject, '',
-                sender_email, to,
-                bcc=[bcc_email],
-                headers={"Content-type": "text/html;charset=iso-8859-1"}
-            )
-            email.attach_alternative(message, "text/html")
-            email.content_subtype = 'html'  # Main content is text/html
-            email.mixed_subtype = 'related'
-            email.send(fail_silently=True)
+            send_email(sender_email, to, subject, message, bcc_email)
 
             answer_sets = Answer.objects.filter(
                 question_id=question_id, is_active=True).distinct()
@@ -262,16 +262,7 @@ def question_answer(request, question_id):
                     question.category,
                     settings.DOMAIN_NAME + '/question/' + str(question_id) + "#answer" + str(answer.id)
                 )
-                email = EmailMultiAlternatives(
-                    subject, '',
-                    sender_email, to,
-                    bcc=[bcc_email],
-                    headers={"Content-type": "text/html;charset=iso-8859-1"}
-                )
-                email.attach_alternative(message, "text/html")
-                email.content_subtype = 'html'  # Main content is text/html
-                email.mixed_subtype = 'related'
-                email.send(fail_silently=True)
+                send_email(sender_email, to, subject, message, bcc_email)
 
             return HttpResponseRedirect('/question/{0}/'.format(question_id))
 
@@ -394,16 +385,7 @@ def answer_comment(request):
                     answer.question.category,
                     settings.DOMAIN_NAME + '/question/' + str(answer.question.id) + "#answer" + str(answer.id)
                 )
-                email = EmailMultiAlternatives(
-                    subject, '',
-                    sender_email, to,
-                    bcc=[bcc_email],
-                    headers={"Content-type": "text/html;charset=iso-8859-1"}
-                )
-                email.attach_alternative(message, "text/html")
-                email.content_subtype = 'html'  # Main content is text/html
-                email.mixed_subtype = 'related'
-                email.send(fail_silently=True)
+                send_email(sender_email, to, subject, message, bcc_email)
 
             comment_creator = AnswerComment.objects.order_by('-date_created').values(
                 'uid').filter(answer=answer, is_active=True).exclude(uid=request.user.id).distinct()
@@ -438,16 +420,7 @@ def answer_comment(request):
                     settings.DOMAIN_NAME + '/question/' + str(answer.question.id) + "#answer" + str(answer.id)
                 )
 
-                email = EmailMultiAlternatives(
-                    subject, '',
-                    sender_email, to,
-                    bcc=[bcc_email],
-                    headers={"Content-type": "text/html;charset=iso-8859-1"}
-                )
-                email.attach_alternative(message, "text/html")
-                email.content_subtype = 'html'  # Main content is text/html
-                email.mixed_subtype = 'related'
-                email.send(fail_silently=True)
+                send_email(sender_email, to, subject, message, bcc_email)
 
             comment_set = []
             mail_ids = [answer.question.user.id]
@@ -494,16 +467,7 @@ def answer_comment(request):
                     settings.DOMAIN_NAME + '/question/' + str(answer.question.id) + "#answer" + str(answer.id)
                 )
 
-                email = EmailMultiAlternatives(
-                    subject, '',
-                    sender_email, to,
-                    bcc=[bcc_email],
-                    headers={"Content-type": "text/html;charset=iso-8859-1"}
-                )
-                email.attach_alternative(message, "text/html")
-                email.content_subtype = 'html'  # Main content is text/html
-                email.mixed_subtype = 'related'
-                email.send(fail_silently=True)
+                send_email(sender_email, to, subject, message, bcc_email)
 
             return HttpResponseRedirect(
                 '/question/{0}/'.format(answer.question.id))
@@ -605,7 +569,7 @@ def new_question(request):
             sender_email = settings.SENDER_EMAIL
             subject = "FOSSEE Forums - {0} - New Question".format(
                 question.category)
-            to = (question.category.email)
+            to = [question.category.email]
             message = """
                 The following new question has been posted in the FOSSEE Forum: <br>
                 <b> Title: </b>{0}<br>
@@ -623,16 +587,8 @@ def new_question(request):
                 question.body,
                 settings.DOMAIN_NAME + '/question/' + str(question.id),
             )
-            email = EmailMultiAlternatives(
-                subject, '',
-                sender_email, [to],
-                headers={"Content-type": "text/html;charset=iso-8859-1"}
-            )
-            email.attach_alternative(message, "text/html")
-            email.content_subtype = 'html'  # Main content is text/html
-            email.mixed_subtype = 'related'
-            email.send(fail_silently=True)
-            to = settings.BCC_EMAIL_ID
+            send_email(sender_email, to, subject, message)
+            to = [settings.BCC_EMAIL_ID]
             message = """
                 The following new question has been posted in the FOSSEE Forum: <br>
                 <b> Title: </b>{0}<br>
@@ -652,15 +608,7 @@ def new_question(request):
                 settings.DOMAIN_NAME + '/question/' + str(question.id),
                 question.is_spam,
             )
-            email = EmailMultiAlternatives(
-                subject, '',
-                sender_email, [to],
-                headers={"Content-type": "text/html;charset=iso-8859-1"}
-            )
-            email.attach_alternative(message, "text/html")
-            email.content_subtype = 'html'  # Main content is text/html
-            email.mixed_subtype = 'related'
-            email.send(fail_silently=True)
+            send_email(sender_email, to, subject, message)
 
             if (question.is_spam):
                 return HttpResponseRedirect('/')
@@ -796,16 +744,7 @@ def edit_question(request, question_id):
                     question.body,
                     settings.DOMAIN_NAME + '/question/' + str(question.id),
                 )
-                email = EmailMultiAlternatives(
-                    subject, '',
-                    sender_email, [to],
-                    bcc=[bcc_email],
-                    headers={"Content-type": "text/html;charset=iso-8859-1"}
-                )
-                email.attach_alternative(message, "text/html")
-                email.content_subtype = 'html'  # Main content is text/html
-                email.mixed_subtype = 'related'
-                email.send(fail_silently=True)
+                send_email(sender_email, to, subject, message, bcc_email)
 
             if (question.is_spam and not settings.MODERATOR_ACTIVATED):
                 return HttpResponseRedirect('/')
@@ -902,16 +841,7 @@ def question_delete(request, question_id):
                     question.body,
                     delete_reason,
                 )
-                email = EmailMultiAlternatives(
-                    subject, '',
-                    sender_email, to,
-                    bcc=[bcc_email],
-                    headers={"Content-type": "text/html;charset=iso-8859-1"}
-                )
-                email.attach_alternative(message, "text/html")
-                email.content_subtype = 'html'  # Main content is text/html
-                email.mixed_subtype = 'related'
-                email.send(fail_silently=True)
+                send_email(sender_email, to, subject, message, bcc_email)
 
     question.is_active = False
     question.save()
@@ -997,16 +927,7 @@ def answer_delete(request, answer_id):
                 answer.question.body,
                 delete_reason,
             )
-            email = EmailMultiAlternatives(
-                subject, '',
-                sender_email, to,
-                bcc=[bcc_email],
-                headers={"Content-type": "text/html;charset=iso-8859-1"}
-            )
-            email.attach_alternative(message, "text/html")
-            email.content_subtype = 'html'  # Main content is text/html
-            email.mixed_subtype = 'related'
-            email.send(fail_silently=True)
+            send_email(sender_email, to, subject, message, bcc_email)
 
         answer.is_active = False
         answer.save()
@@ -1442,13 +1363,7 @@ def ajax_answer_update(request):
                         answer.question.category,
                         answer.question.body,
                     )
-                    email = EmailMultiAlternatives(
-                        subject, '', sender_email, to, bcc=[bcc_email], headers={
-                            "Content-type": "text/html;charset=iso-8859-1"})
-                    email.attach_alternative(message, "text/html")
-                    email.content_subtype = 'html'  # Main content is text/html
-                    email.mixed_subtype = 'related'
-                    email.send(fail_silently=True)
+                    send_email(sender_email, to, subject, message, bcc_email)
             messages.success(request, "Answer is Successfully Saved")
             return HttpResponseRedirect(
                 '/question/{0}/'.format(answer.question.id))
@@ -1511,13 +1426,7 @@ def ajax_answer_comment_delete(request):
                         comment.answer.question.category,
                         comment.answer.body,
                     )
-                    email = EmailMultiAlternatives(
-                        subject, '', sender_email, to, bcc=[bcc_email], headers={
-                            "Content-type": "text/html;charset=iso-8859-1"})
-                    email.attach_alternative(message, "text/html")
-                    email.content_subtype = 'html'  # Main content is text/html
-                    email.mixed_subtype = 'related'
-                    email.send(fail_silently=True)
+                    send_email(sender_email, to, subject, message, bcc_email)
             return HttpResponse('deleted')
         else:
             messages.error(request, "Only Moderator can delete.")
@@ -1578,13 +1487,7 @@ def ajax_answer_comment_update(request):
                         comment.answer.question.category,
                         comment.answer.question.body,
                     )
-                    email = EmailMultiAlternatives(
-                        subject, '', sender_email, to, bcc=[bcc_email], headers={
-                            "Content-type": "text/html;charset=iso-8859-1"})
-                    email.attach_alternative(message, "text/html")
-                    email.content_subtype = 'html'  # Main content is text/html
-                    email.mixed_subtype = 'related'
-                    email.send(fail_silently=True)
+                    send_email(sender_email, to, subject, message, bcc_email)
             messages.success(request, "Comment is Successfully Saved")
             return HttpResponseRedirect(
                 '/question/{0}/'.format(comment.answer.question.id))
