@@ -269,8 +269,6 @@ def question_answer(request, question_id):
 @user_passes_test(account_credentials_defined, login_url='/accounts/profile/')
 def answer_comment(request):
 
-    context = {}
-
     if (request.method == 'POST'):
 
         answer_id = request.POST['answer_id']
