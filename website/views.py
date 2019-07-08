@@ -138,10 +138,10 @@ def get_question(request, question_id=None, pretty_url=None):
     return render(request, 'website/templates/get-question.html', context)
 
 def to_uids(question):
-    answer_sets = Answer.objects.filter(
+    answers = Answer.objects.filter(
         question_id=question.id, is_active=True).distinct()
     mail_uids = [question.user.id]
-    for answer in answer_sets:
+    for answer in answers:
         for comment in AnswerComment.objects.values('uid').filter(answer=answer, is_active=True).distinct():
             mail_uids.append(comment['uid'])
         mail_uids.append(answer.uid)
