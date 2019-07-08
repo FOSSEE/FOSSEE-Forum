@@ -318,7 +318,7 @@
                         });
                     </script>
                     <span class="meta_co" style="position: absolute; left: 40px; bottom: 0px; padding: 7px 7px;">
-                        <a class="delete-comment btn btn-xs btn-info vs" id="del{{ comment.id }}">Delete</a>
+                        <a class="delete-comment btn btn-xs btn-info vs" data-id="{{ comment.id }}">Delete</a>
                     </span>
                     {% else %}
                     {% if MODERATOR_ACTIVATED %}
@@ -688,7 +688,7 @@
 
         /* DELTETING A COMMENT */
         $('.delete-comment').click(function(event) {
-            var id = event.target.id;
+            var id = $(this).attr('data-id');
             $.post('/ajax-answer-comment-delete/', {comment_id: id}, function() {
                 location.reload();
             });
