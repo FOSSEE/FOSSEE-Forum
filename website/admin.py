@@ -46,6 +46,4 @@ admin.site.register(Question, QuestionAdmin)
 admin.site.register(Answer, AnswerAdmin)
 admin.site.register(AnswerComment)
 admin.site.register(FossCategory)
-
-
 admin.site.register(ModeratorGroup)
