@@ -713,7 +713,7 @@ def edit_question(request, question_id):
                 question.body,
                 settings.DOMAIN_NAME + '/question/' + str(question.id),
             )
-            mail_uids = to_uids(question_id)
+            mail_uids = to_uids(question)
             for uid in mail_uids:
                 to = [get_user_email(uid)]
                 send_email(sender_email, to, subject, message, bcc_email)
