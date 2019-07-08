@@ -10,7 +10,7 @@
 
 
 {% block content %}
-
+{{ form.media }}
 <div class="row">
     {% if messages %}
         {% for message in messages %}
@@ -156,7 +156,6 @@
                 <form id="form{{ answer.id }}" method="POST"  action="{% url 'website:ajax_answer_update' %}">
                     {% csrf_token %}
                     <input type="hidden" name="answer_id" value="{{ answer.id }}">
-                    {{ form.media }}
                 <div class="edit-answer" id="ans{{ answer.id }}1">
                     {% render_field form.body class+="form-control body" name="answer_body" id=answer.id %}
                 </div>
@@ -301,7 +300,6 @@
                         <div id="editor{{ comment.id }}" style="padding-bottom: 20px; display: none;">
                             {% csrf_token %}
                             <input type="hidden" name="comment_id" value="{{ comment.id }}">
-                            {{ form.media }}
                             {% render_field form.body class+="form-control body" name="comment_body" id=comment.id %}
                         </div>
                     </form>
@@ -387,7 +385,6 @@
 {% if not MODERATOR_ACTIVATED %}
     {% if user.is_authenticated %}
         <form action="{% url 'website:question_answer' question.id %}" method="POST" enctype="multipart/form-data"> {% csrf_token %}
-            {{ form.media }}
             {% with WIDGET_ERROR_CLASS='field_error' %}
 
                 <div class="row"> 
@@ -468,7 +465,6 @@
 {% endblock %}
 
 {% block javascript %}
-<script src="{% static 'website/js/nicEdit.js' %}" type="text/javascript"></script>
    
 <script type="text/javascript">
     $(".user_co").each(function() {
