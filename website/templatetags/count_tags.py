@@ -102,7 +102,7 @@ register.simple_tag(total_question_count)
 
 
 def total_answer_count():
-    count = Answer.objects.all(is_active=True).count()
+    count = Answer.objects.filter(is_active=True).count()
     return count
 
 
