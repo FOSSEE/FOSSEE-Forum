@@ -21,6 +21,7 @@ class FossCategory(models.Model):
             800],
         upload_to="images/fossCategory/",
         blank=True)
+    
     def __str__(self):
         return self.name
 
