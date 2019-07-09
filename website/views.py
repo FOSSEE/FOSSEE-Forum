@@ -25,7 +25,7 @@ admins = (
     9, 4376, 4915, 14595, 12329, 22467, 5518, 30705
 )
 
-# Function to check if user is in any moderator group
+# Function to check if user is in any moderator group or to check whether user belongs to the moderator group of question's category
 
 
 
