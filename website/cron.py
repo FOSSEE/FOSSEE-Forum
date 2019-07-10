@@ -1,6 +1,3 @@
-from website.spamFilter import train
-from website.models import Question, Answer, FossCategory
-from forums.local import FORUM_NOTIFICATION
 import django
 import os
 import sys
@@ -15,6 +12,9 @@ sys.path.append(base_path)
 
 django.setup()
 
+from website.spamFilter import train
+from website.models import Question, Answer, FossCategory
+from forums.local import FORUM_NOTIFICATION
 
 class Cron(object):
 
@@ -22,23 +22,14 @@ class Cron(object):
         from django.conf import settings
         import datetime as DT
 
-        try:
-            weekago = DT.date.today() - DT.timedelta(days=6)
-            questions = Question.objects\
-                .filter(date_created__lte=weekago, is_spam=0)
-        except Exception as e:
-            print("No questions found")
+        weekago = DT.date.today() - DT.timedelta(days=6)
+        questions = Question.objects\
+            .filter(date_created__lte=weekago, is_spam=0)
         category_count = FossCategory.objects.count()
-        i = 0
         body_cat = {}
         for question in questions:
-            try:
-                uque = Answer.objects.filter(question__id=question.id)
-            except Exception as e:
-                print("error occured >  > ")
-                print(e)
+            uque = Answer.objects.filter(question__id=question.id)
             if not uque.exists():
-                i = i + 1
                 category_id = question.category.id
                 if category_id in list(body_cat.keys()):
                     body_cat[category_id].append(question)
