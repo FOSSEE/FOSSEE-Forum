@@ -96,14 +96,12 @@
         {% endif %}
 
         <span class="modify">
-            {% if user|can_edit:question and not ans_count or user|is_moderator and MODERATOR_ACTIVATED %}
+            {% if user|can_edit:question and not ans_count or MODERATOR_ACTIVATED %}
                 {% if question.is_active %}
                 <a class="edit btn btn-xs btn-info" href="{% url 'website:edit_question' question.id %}">Edit</a>
                 <a class="delete btn btn-xs btn-info" data-toggle="modal" data-target="#questionDeleteModal" >Delete</a>
                 {% else %}
-                {% if MODERATOR_ACTIVATED %}
                 <a class="restore btn btn-xs btn-info" href="{% url 'website:question_restore' question.id %}" >Restore</a>
-                {% endif %}
                 {% endif %}
             {% endif %}
         </span>
@@ -150,9 +148,9 @@
             </div>
         </div>
 
-        <div class="answer {% if user|is_moderator and MODERATOR_ACTIVATED or user|can_edit:answer %}editable{% endif %}" id="answer{{answer.id}}" style="margin-left: 63px;">                               
+        <div class="answer {% if MODERATOR_ACTIVATED or user|can_edit:answer %}editable{% endif %}" id="answer{{answer.id}}" style="margin-left: 63px;">                               
             <div class="body" id="body{{ answer.id }}" style="padding-bottom: 12px; padding-top: 15px">
-                {% if user|is_moderator and MODERATOR_ACTIVATED or user|can_edit:answer and answer|havenot_comments %}
+                {% if MODERATOR_ACTIVATED or user|can_edit:answer and answer|havenot_comments %}
                 <form id="form{{ answer.id }}" method="POST"  action="{% url 'website:ajax_answer_update' %}">
                     {% csrf_token %}
                     <input type="hidden" name="answer_id" value="{{ answer.id }}">
@@ -162,7 +160,7 @@
                 </form>
                 {% endif %}
                 <div id="ans{{ answer.id }}2">{{ answer.body| safe }}</div>
-                {% if user|is_moderator and MODERATOR_ACTIVATED or user|can_edit:answer and answer|havenot_comments %}
+                {% if MODERATOR_ACTIVATED or user|can_edit:answer and answer|havenot_comments %}
                     <script type="text/javascript">
                         CKEDITOR.on("instanceReady", function(event)
                         {
@@ -211,7 +209,7 @@
                 </span>
             </span>
 
-            {% if user|is_moderator and MODERATOR_ACTIVATED or user|can_edit:answer and answer|havenot_comments %}
+            {% if MODERATOR_ACTIVATED or user|can_edit:answer and answer|havenot_comments %}
             <span class="modify" style="display:block">
                 {% if answer.is_active %}
                 <a class="delete btn btn-xs btn-info vs ansdel" data-toggle="modal" data-target="#answerDeleteModal" data-id= "{{ answer.id }}" href="#{{ answer.id }}">Delete</a>
@@ -294,7 +292,7 @@
                     </div>
                     
                     <br>
-                    {% if user|is_moderator and MODERATOR_ACTIVATED or user|can_edit:comment and answer|can_delete:comment.id %}
+                    {% if MODERATOR_ACTIVATED or user|can_edit:comment and answer|can_delete:comment.id %}
                     {% if comment.is_active %}
                     <form id="save_comment{{ comment.id }}" method="POST"  action="{% url 'website:ajax_answer_comment_update' %}">
                         <div id="editor{{ comment.id }}" style="padding-bottom: 20px; display: none;">
