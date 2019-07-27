@@ -65,16 +65,10 @@
 	    <td> </td>
             <td>
                 <span class="category" data-toggle="tooltip" data-placement="top" >
-                {% if question.sub_category %}
-                <a class="pull-left" href="{% url 'website:filter' question.category question.sub_category %}?qid={{ question.id }}">
-                 {{ question.sub_category }}   
-                </a> 
-                {% else %}
                  <a class="pull-left" href="{% url 'website:filter' question.category|lower %}?qid={{ question.id }}">
-                 {{ question.category|truncatechars:20 }}
+                 {{ question.category }}
                 </a> 
                 
-                {% endif %}
                 </span>
             </td>
           
