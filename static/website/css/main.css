@@ -98,7 +98,6 @@ body {
 /* } */
 #content .question {
     position: relative;
-    padding: 30px 0 15px 0;
 }
 #content .editable {
     padding: 15px 5px 15px 5px;
@@ -191,15 +190,11 @@ table .question a{
     display: none;
 }
 .modify {
-    display: none;
     position: absolute;
     top: 0;
     right:0;
 }
 
-.modify a.save {
-    display: none;
-}
 .vs {
     padding: 0px 5px !important;
     font-size: x-small;
@@ -264,7 +259,7 @@ table .question a{
     padding: 5px 5px;
     border-bottom: 1px dotted #cccccc;
 }
-.comments .new-comment {
+.comments .new-comment,.edit-answer {
     display: none;
 }
 .comments .add-comment {
@@ -496,22 +491,26 @@ table .question a{
     text-align:center;
 }
 
-a.delete {
+a.delete, a.restore {
     background-color: #e60000;
     border-color: #cc0000;
 }
 
-a.delete-comment {
+a.delete-comment, a.restore-comment, a.edit-comment, a.save-comment {
     background-color: #e01d27;
     border-color: #cc0000;
     display: none;
 }
 
-a.delete:hover, a.delete:focus, a.delete:active, a.delete-comment:hover, a.delete-comment:focus, a.delete-comment:active {
+a.delete:hover, a.delete:focus, a.delete:active, a.delete-comment:hover, a.delete-comment:focus, a.delete-comment:active, a.restore-comment:hover, a.restore-comment:focus, a.restore-comment:active, a.edit-comment:hover, a.edit-comment:focus, a.edit-comment:active, a.save-comment:hover, a.save-comment:focus, a.save-comment:active {
     background-color: #b30000;
     border-color: #cc0000;
 }
 
-.comment:hover a.delete-comment, a.delete-comment:hover {
+.comment:hover a.delete-comment, a.delete-comment:hover, .comment:hover a.restore-comment, a.restore-comment:hover, .comment:hover a.edit-comment, a.edit-comment:hover, .comment:hover a.save-comment, a.save-comment:hover {
     display: inline-block;
+}
+
+.saved {
+    color: black;
 }

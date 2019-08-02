@@ -10,10 +10,12 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from website.models import Question, Answer
 
 # Get the original dataset
+
+
 def store():
 
     # Add data from Excel file
-    file_location = settings.PROJECT_DIR + '/DataSet.xlsx'
+    file_location = settings.PROJECT_DIR + '/static/website/DataSet.xlsx'
     workBookOld = openpyxl.load_workbook(file_location)
     dataSheetOld = workBookOld['Data set']
 
@@ -22,17 +24,18 @@ def store():
 
     rows = dataSheetOld.max_row
 
-    for i in range(2, rows+1):
+    for i in range(2, rows + 1):
 
-        if (str(dataSheetOld.cell(row = i, column = 2).value) != 'None'):
-            xData.append(str(clean_string(dataSheetOld.cell(row = i, column = 1).value)))
-            if (str(dataSheetOld.cell(row = i, column = 2).value) == "1"):
+        if (str(dataSheetOld.cell(row=i, column=2).value) != 'None'):
+            xData.append(
+                str(clean_string(dataSheetOld.cell(row=i, column=1).value)))
+            if (str(dataSheetOld.cell(row=i, column=2).value) == "1"):
                 yData.append(1)
             else:
                 yData.append(0)
 
     # Add data from forum questions
-    for question in Question.objects.all():
+    for question in Question.objects.all().exclude(is_active=False):
         xData.append(str(clean_string(question.body)))
         if (question.is_spam):
             yData.append(1)
@@ -40,7 +43,7 @@ def store():
             yData.append(0)
 
     # Add data from forum answers
-    for answer in Answer.objects.all():
+    for answer in Answer.objects.all().exclude(is_active=False):
         xData.append(str(clean_string(answer.body)))
         if (answer.is_spam):
             yData.append(1)
@@ -55,6 +58,8 @@ def store():
     # return xTrain, xTest, yTrain, yTest
 
 # Train the data when server checks happening
+
+
 def train():
 
     print("Training spam filter...")
@@ -78,12 +83,14 @@ def calc_f_score(xTest, yTest, model, vectorizer):
     result = model.predict(xTestMatrix)
     matrix = confusion_matrix(yTestMatrix, result)
 
-    fScore = f1_score(yTestMatrix, result, pos_label = 0)
-    precision = precision_score(yTestMatrix, result, pos_label = 0)
-    recall = recall_score(yTestMatrix, result, pos_label = 0)
+    fScore = f1_score(yTestMatrix, result, pos_label=0)
+    precision = precision_score(yTestMatrix, result, pos_label=0)
+    recall = recall_score(yTestMatrix, result, pos_label=0)
     return fScore, precision, recall, matrix
 
 # Test new data for Spam
+
+
 def predict(emailBody):
 
     string = clean_string(emailBody)
@@ -100,7 +107,7 @@ def predict(emailBody):
     else:
         return "Not Spam"
 
-model = LinearSVC(class_weight = 'balanced')
-vectorizer = TfidfVectorizer(stop_words = 'english', max_df = 75)
-train()
 
+model = LinearSVC(class_weight='balanced')
+vectorizer = TfidfVectorizer(stop_words='english', max_df=75)
+train()

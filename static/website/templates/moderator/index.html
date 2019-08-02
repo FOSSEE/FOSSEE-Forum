@@ -11,9 +11,16 @@
 
     $(document).ready(function()
     {
-          $("#myTable").DataTable({
+          var table = $("#myTable").DataTable({
           // 'sPaginationType': "scrolling"
           });
+          $('#category').change(function(e){
+            var selectedCategory = $(this).children("option:selected").val();
+            if( selectedCategory != "All Categories")
+                table.column(1).search('^' + selectedCategory + '$', true, false, true).draw();
+            else
+                table.column(1).search('').draw();
+        });
     });
 
    </script>
@@ -22,13 +29,11 @@
         {% for category in categories %}
         <div>
             <div class="thumbnail">
-                {% with file=category|get_category_image %}
-                    {% if file %}
-                        <img src="{% static category|get_category_image %}">
+                    {% if category.image %}
+                        <img src={{ category.image.url }} />
                     {% else %}
                         <div class="category-title">{{ category }}</div>
                     {% endif %}
-                {% endwith %}
                 <div class="caption">
                     <small class="category">
                         {{ category.description }}
@@ -69,16 +74,22 @@
             Recent questions
         </div>
         <div class="panel-body">
-
             <table id="myTable" class="tablesorter-blue"> 
-
+                Category : 
+            <select name="categories" id="category" style="margin: 10px 0px 15px 5px;">
+                <option>All Categories</option>
+                {% for category in categories %}
+                    <option>{{ category }}</option>
+                {% endfor %}
+            </select>
             <colgroup>
-                <col width="5%" />
-                <col width="20%" />
+                <col width="4%" />
+                <col width="18%" />
                 <col width="50%" />
-                <col width="8%" />
-                <col width="8%" />
-                <col width="8%" />
+                <col width="7%" />
+                <col width="7%" />
+                <col width="6%" />
+                <col width="7%" />
             </colgroup>
 
             <thead> 
@@ -90,24 +101,19 @@
                     <th>Views</th>
                     <th>Answers</th>
                     <th>Spam</th>
+                    <th>Deleted</th>
                 </tr> 
             </thead>
             
-            <tbody> 
+            <tbody id="question-content"> 
                 {% for question in questions|get_recent_questions %}
                 <tr>
                     <td></td>
                     <td>
                         <span class="category" data-toggle="tooltip" data-placement="top" >
-                            {% if question.sub_category %}
-                                <a class="pull-left" href="{% url 'website:filter' question.category question.sub_category %}?qid={{ question.id }}">
-                                {{ question.sub_category }}   
-                                </a> 
-                                {% else %}
-                                <a class="pull-left" href="{% url 'website:filter' question.category|lower %}?qid={{ question.id }}">
+                                <a class="pull-left" href="{% url 'website:filter' question.category|lower %}?qid={{ question.id }}" style="line-spacing:50px;">
                                 {{ question.category }}   
                                 </a> 
-                            {% endif %}
                         </span>
                     </td>
                         
@@ -132,6 +138,9 @@
                     <td>
                     {{ question.is_spam|yesno:"Yes, No" }}
                     </td>
+                    <td>
+                        {{ question.is_active|yesno:"No, Yes" }}
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody> 
@@ -145,8 +154,9 @@
 {% block javascript %}
 <script>
 
+
     $('table tbody tr').each(function(idx){
-                $(this).children(":eq(0)").html(idx + 1);
+        $(this).children(":eq(0)").html(idx + 1);
     });
 
 
@@ -197,5 +207,4 @@
     });
     $('span').tooltip();
 </script>
-<script src="{% static 'website/js/nice-bar.js' %}"></script>
 {% endblock %}

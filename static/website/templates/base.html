@@ -1,6 +1,6 @@
-
 {% load static %}
 {% load permission_tags %}
+<!DOCTYPE html>
 <html>
     <head>
         <title>
@@ -14,7 +14,6 @@
         <link rel="stylesheet" href="{% static 'website/css/base.css' %}" type="text/css" media="screen" charset="utf-8" />
         <link rel="stylesheet" href="{% static 'website/slick/slick.css' %}" type="text/css" media="screen" charset="utf-8" />
         <link rel="stylesheet" href="{% static 'website/css/main.css' %}" type="text/css" media="screen" charset="utf-8" />
-        <link rel="stylesheet" href="{% static 'website/css/nice-bar.css' %}" type="text/css" media="screen" charset="utf-8" />
         <link rel="stylesheet" href="{% static 'website/css/login.css' %}" type="text/css" media="screen" charset="utf-8" />
         <link rel="stylesheet" href="{% static 'website/css/theme.blue.css' %}" type="text/css" media="screen" charset="utf-8" />
         <link rel="stylesheet" type="text/css" href="{% static 'website/css/dataTables.bootstrap.min.css' %}">
@@ -88,14 +87,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                                         </span>
                                     </a>
                                 </li>
-                                
+                                {% if user.is_authenticated %}
                               <li class="dropdown">
 
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                    <span class="glyphicon glyphicon-user"></span> 
                                    {{ user }}<b class="caret"></b>
                                 </a>
-
                                 <ul class="dropdown-menu">
                                     <li>
                                         <a href="/accounts/view-profile/{{ user.id }}">My Profile</a>
@@ -105,15 +103,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                                     </li>
                                     {% if user|is_moderator %}
                                         <li>
-                                            <a href="{% url 'website:moderator_home' %}">Moderator Panel</a>
+                                            <a onclick="moderator()" style="cursor: pointer;">Moderator Panel</a>
                                         </li>
+                                        <script type="text/javascript">
+                                            function moderator(){
+                                                window.location.replace("{% url 'website:moderator_home' %}?next={{ request.path }}");
+                                            }
+                                        </script>
                                     {% endif %}
                                     <li>
                                         <a href="{% url 'user_logout' %}">Logout</a>
                                     </li>
                                 </ul>
                               </li> 
-
+                              {% endif %}
                               {% else %}
                               <li>
                                 <a href="{% url 'user_login' %}">
@@ -156,7 +159,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- <script src="{% static 'codemirror/lib/codemirror.js' %}"></script> -->
     <script src="{% static 'website/js/bootstrap.min.js' %}"></script>
     <script src="{% static 'website/slick/slick.min.js' %}"></script>
-    <script src="{% static 'website/js/nice-bar.js' %}"></script>
     {% block javascript %}
         <!-- overide with custom javascript -->
     {% endblock %}

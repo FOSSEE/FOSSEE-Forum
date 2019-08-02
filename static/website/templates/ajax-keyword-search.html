@@ -1,25 +1,36 @@
 {% load helpers %}
 
-
-{{ quesions }}
-
-
 {% if questions %}
 <br>
-<table class="table table-striped table-bordered table-hover">
+<table class="tablesorter-blue" id="myTable">
+    <colgroup>
+                <col width="4%" />
+                <col width="18%" />
+                <col width="50%" />
+                <col width="7%" />
+                <col width="7%" />
+                <col width="6%" />
+                <col width="7%" />
+            </colgroup>
+    <thead> 
+    <tr> 
+    <th>No.</th>
     <th> FOSS </th>
     <th> Question<span class="glyphicon glyphicon-link"></span></th>
     <th> Date</th>
     <th> Views</th>
     <th> Answers</th>
     <th> User</th>
-    
+    </tr>
+</thead>
+<tbody id="question-content"> 
     {% for question in questions %}
     <tr>
+        <td></td>
         <td>
                 <span class="category" data-toggle="tooltip" data-placement="top" title="{{ question.category }}">
                <a class="pull-left" href="{% url 'website:filter' question.category %}?qid={{ question.id }}">
-                 {{ question.category|truncatechars:12 }} </a>
+                 {{ question.category }} </a>
                  </span>
             </td>
 
@@ -54,6 +65,7 @@
 
     </tr>
     {% endfor %}
+</tbody>
 </table>
 {% else %}
     <h4>No results found . . .</h4>
@@ -62,5 +74,8 @@
 {% block javascript %}
 <script>
     $('span').tooltip();
+    $('table tbody tr').each(function(idx){
+        $(this).children(":eq(0)").html(idx + 1);
+    });
 </script>
 {% endblock %}
