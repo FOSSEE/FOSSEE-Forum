@@ -14,6 +14,14 @@ def category_question_count(category):
 
 
 register.simple_tag(category_question_count)
+
+# Count the number of an active answers of a question
+
+def answer_count(question):
+    return question.answer_set.filter(is_active=True).count()
+
+register.simple_tag(answer_count)
+
 # Implementing range(x) function in templates
 
 
