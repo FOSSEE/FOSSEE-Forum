@@ -1,5 +1,6 @@
 {% extends MODERATOR_ACTIVATED|yesno:'website/templates/moderator/base.html,website/templates/base.html' %}
 {% load helpers %}
+{% load count_tags %}
 {% block title %}
     {{ category }} - FOSSEE Forums
 {% endblock %}
@@ -99,7 +100,11 @@
             {% endif %}
 
             <td>
+            {% if MODERATOR_ACTIVATED %}
                 {{ question.answer_set.count }}
+            {% else %}
+                {% answer_count question %}
+            {% endif %}
             </td>
 
             <td>
