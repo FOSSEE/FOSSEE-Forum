@@ -132,7 +132,7 @@
                 </td>
 
                 <td>
-                    {{ question.answer_set.count }}
+                    {% answer_count question %}
                 </td>
             </tr>
             {% endfor %}
