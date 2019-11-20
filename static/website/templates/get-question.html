@@ -280,7 +280,7 @@
             </div> <!-- /.modal -->
 
         </div> <!-- /.answer -->
-        
+          
         <div class="row" style="padding-left: 40px">
             <div class="comments pull-right col-lg-11 col-md-11 col-sm-11 col-xs-11" >
                 <!-- displaying comments -->
@@ -324,23 +324,7 @@
                     {% endif %}
                     {% endif %}
                     {% endif %}
-                    
-                    <span class="meta_co" style="position: absolute;right: 0px; bottom: 0px;">
-                        <small>
-                            <i>
-                                {{ comment.date_created|date:"d-m-y" }}, {{ comment.date_created|time }}
-                            </i>
-                        </small>
-                        <span style="padding: 2px 7px">
-                            <a href="/accounts/view-profile/{{ comment.user.id }}"> {{comment.user}} </a>
-                        </span>
-                    </span>
-
-                </div>
-                {% endif %}
-                {% endfor %}
-                
-                
+                                  
                 <!-- form to add comment -->
                 {% if user.is_authenticated %}
                  
@@ -486,7 +470,6 @@
 
         /* VOTE FOR QUESTION */
         $('div.vote img.vote-up').click(function() {
-
             var question_user_id = {{ question.user_id }};
             var current_user_id = {{ request.user.id }};
             var id = {{ question.pk }};
