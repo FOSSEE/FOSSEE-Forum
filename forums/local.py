@@ -42,7 +42,8 @@ TRAIN_SPAMFILTER = True
 SYSTEM_ALLOWED_HOSTS = ['Enter the host name' ]
 
 #Secre key for application (any random 32 alphanumeric characters)
-SECRET_KEY_CODE = 'any random 32 alphanumeric characters'
+SECRET_KEY_CODE = 'Any random 32 alphanumeric charaters'
+
 
 # Maximum file size in MB
 MAX_FILE_SIZE_MB = 2
