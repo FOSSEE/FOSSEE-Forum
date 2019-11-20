@@ -2,7 +2,7 @@
 *.swp
 *.pyc
 config.py
-forums/local.py
+*.bkp
 forums/wsgi.py
 static/CACHE/*
 *.py[cod]
