@@ -8,7 +8,7 @@ from sklearn.svm import LinearSVC
 from sklearn.metrics import confusion_matrix, f1_score, precision_score, recall_score
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from website.models import Question, Answer
-
+from forums.local import TRAIN_SPAMFILTER
 # Get the original dataset
 
 
@@ -110,4 +110,8 @@ def predict(emailBody):
 
 model = LinearSVC(class_weight='balanced')
 vectorizer = TfidfVectorizer(stop_words='english', max_df=75)
-train()
+
+if TRAIN_SPAMFILTER is True:
+    train()
+else:
+    pass

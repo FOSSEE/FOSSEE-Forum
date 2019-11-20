@@ -124,7 +124,7 @@ STATICFILES_FINDERS = (
 )
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = 'xj+a8@48-x+h1z4bmvjt_1b+=t4+sb)kujqh!efty9t=f_g!mo'
+SECRET_KEY = SECRET_KEY_CODE
 
 # List of callables that know how to import templates from various sources.
 
@@ -205,6 +205,8 @@ HTML_MINIFY = HTML_MINIFY
 #NOCAPTCHA = True
 RECAPTCHA_PUBLIC_KEY = PUB_KEY
 RECAPTCHA_PRIVATE_KEY = PRIV_KEY
+
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 #Google recaptcha for forum
 GOOGLE_RECAPTCHA_SECRET_KEY = FORUM_GOOGLE_RECAPTCHA_SECRET_KEY
