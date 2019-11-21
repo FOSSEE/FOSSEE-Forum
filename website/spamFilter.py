@@ -15,7 +15,7 @@ from forums.local import TRAIN_SPAMFILTER
 def store():
 
     # Add data from Excel file
-    file_location = settings.PROJECT_DIR + '/static/website/DataSet.xlsx'
+    file_location = settings.PROJECT_DIR + '/Spam_Filter_Data/DataSet.xlsx'
     workBookOld = openpyxl.load_workbook(file_location)
     dataSheetOld = workBookOld['Data set']
 
