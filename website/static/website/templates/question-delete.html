@@ -1,0 +1,17 @@
+{% extends MODERATOR_ACTIVATED|yesno:"website/templates/moderator/base.html,website/templates/base.html" %}
+<!DOCTYPE html>
+
+{% block title %} Question deleted {% endblock %}
+
+{% block pagetitle %} FOSSEE Forums {% endblock %}
+
+{% block content %}
+<h3>The question <strong>{{ title }}</strong> has been deleted successfully.</h3>
+<h4>
+	{% if MODERATOR_ACTIVATED %}
+		<a href="{% url 'website:moderator_home' %}">Go to moderator page.</a>
+	{% else %}
+		<a href="{% url 'website:home' %}">Go to home page.</a>
+	{% endif %}
+</h4>
+{% endblock %}

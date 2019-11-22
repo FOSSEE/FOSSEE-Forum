@@ -1,0 +1,17 @@
+<div class="notification">
+    
+    {% if notification.cid != 0 and notification.aid != 0 %}
+    <small>
+        <a class="rmc" data-nid="{{ notification.id }}" href="{% url 'website:get_question' answer.question.id %}#comment{{ answer.id }}">New <strong>Comment</strong> on  <strong>"{{ question.title }}"</strong></a>
+    </small>
+    
+    {% elif notification.cid == 0  %}
+    	
+        <a class="rmc" data-nid="{{ notification.id }}" href="{% url 'website:get_question' answer.question.id %}#answer{{ answer.id }}"+ >New <strong>Answer</strong> on <strong>"{{ question.title }}"</strong></a>
+    {% endif %}
+
+
+    <a class="remove" data-nid="{{ notification.id }}" href= "">
+        <span class="glyphicon glyphicon-remove-circle"></span>
+    </a>
+</div> <!-- /.notification -->

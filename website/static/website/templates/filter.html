@@ -1,0 +1,138 @@
+{% extends MODERATOR_ACTIVATED|yesno:'website/templates/moderator/base.html,website/templates/base.html' %}
+{% load helpers %}
+{% load count_tags %}
+{% block title %}
+    {{ category }} - FOSSEE Forums
+{% endblock %}
+{% block content %}
+
+<script>
+
+        $(document).ready(function()
+        {
+        $("#myTable").DataTable({
+          // 'sPaginationType': "scrolling"
+          });
+      });
+
+     </script>
+
+{% if questions %}
+{% block pagetop %}
+    <h5 style="padding-top: 15px;">
+    All questions under the category:
+        
+        {% if category %}
+            {{ category }}
+        {% endif %}
+        {% if tutorial %}
+        {{ name }}
+        {% endif %}
+        {% if not MODERATOR_ACTIVATED %}
+            <a class="btn btn-xs btn-success pull-right" href="{% url 'website:new_question' %}?category={{ category.id |urlencode }}">Ask a question</a>
+        {% endif %}
+    </h5>
+{% endblock %}
+<br>
+<div class="clearfix"></div>
+
+    <table id="myTable" class="tablesorter-blue">
+       <thead> 
+	<tr> 
+		<th>No.</th>
+	    <th>Category</th>
+		<th>Question </th>
+        <th>Date</th>
+        {% if MODERATOR_ACTIVATED %}
+            <th>Spam</th>
+            <th>Deleted</th>
+        {% else %}
+            <th>Views</th>
+        {% endif %}
+		<th>Answers</th>
+		<th>User</th>  
+	</tr> 
+	</thead> 
+
+	<tbody> 
+        {% for question in questions %}
+	    <td></td>
+            <td>
+                <span class="category" data-toggle="tooltip" data-placement="top" >
+                {% if question.sub_category %}
+                <a class="pull-left" href="{% url 'website:filter' question.category question.sub_category %}">
+                 {{ question.sub_category }}   
+                </a> 
+                {% else %}
+                 <a class="pull-left" href="{% url 'website:filter' question.category|lower %}">
+                 {{ question.category }}   
+                </a> 
+                {% endif %}
+                </span>
+            </td>
+
+            <td>
+                <span class="question" data-toggle="tooltip" data-placement="top" >
+                    <a href="{% url 'website:get_question' question.id %}">{{ question.title|truncatechars:40 }}</a>
+                </span>            
+            </td>
+
+            <td>    
+                <span>
+                    <i>
+                        {{ question.date_created|date:"d-m-y" }}
+                    </i>
+                </span>
+            </td>
+                    
+            {% if MODERATOR_ACTIVATED %}
+            <td>
+                {{ question.is_spam|yesno:"Yes, No" }}
+            </td>
+            <td>
+                {{ question.is_active|yesno:"No, Yes" }}
+            </td>
+
+            {% else %}
+            <td>
+                {{ question.views }}
+            </td>
+            {% endif %}
+
+            <td>
+            {% if MODERATOR_ACTIVATED %}
+                {{ question.answer_set.count }}
+            {% else %}
+                {% answer_count question %}
+            {% endif %}
+            </td>
+
+            <td>
+                    <span class="title" data-toggle="tooltip" data-placement="top" >
+                    <a href="{% url 'view_profile' question.user.id %}">{{ question.user|truncatechars:10 }}
+                </span>
+            </td>
+
+        </tr>
+        {% endfor %}
+    <tbody> 
+    </table>
+{% else %}
+<h4>There are no similar questions.</h4>
+{% endif %}
+{% endblock %}
+
+{% block javascript %}
+<script>
+
+     $('table tbody tr').each(function(idx){
+                $(this).children(":eq(0)").html(idx + 1);
+    });
+
+
+    $(document).ready(function() {
+        $('span').tooltip();
+        $('.parent-filter').css("background", "#ffffe0");
+    });
+</script>
+{% endblock %}

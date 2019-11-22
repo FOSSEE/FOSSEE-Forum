@@ -1,0 +1,27 @@
+{% extends 'website/templates/new-question.html' %}
+{% load widget_tweaks %}
+
+{% block pagetitle %}
+    Edit your question . . .
+{% endblock %}
+
+{% block picturetitle %}
+    <label for="id_image" >
+        {% if not question.image %}
+            <strong>Upload an image: </strong>
+        {% endif %}
+    </label>
+{% endblock %}
+
+{% block spamCheckbox %}
+    {% if MODERATOR_ACTIVATED %}
+        <label for="id_is_spam">
+            <strong>Mark as spam: </strong>
+        </label>
+        {% render_field form.is_spam %}
+    {% endif %}
+{% endblock %}
+
+{% block submitbutton %}
+    <input id="submit_question" class="btn btn-success" type="submit" onclick = "return validate_dd();" value="Save Question" disabled>
+{% endblock %}
