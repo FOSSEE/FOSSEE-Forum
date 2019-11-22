@@ -673,7 +673,7 @@ def edit_question(request, question_id):
 
 
 def add_Spam(question_body, is_spam):
-    xfile = openpyxl.load_workbook(settings.PROJECT_DIR + '/static/website/DataSet.xlsx')
+    xfile = openpyxl.load_workbook(settings.BASE_DIR + '/Spam_Filter_Data/DataSet.xlsx')
     sheet = xfile['Data set']
     n = len(sheet['A']) + 1
     for i in range(2, n):
