@@ -3,18 +3,17 @@ DB_PASS = 'root'
 DB_NAME = 'forums_djago2_1'
 PUB_KEY = 'Public Key'
 PRIV_KEY = 'Private Key'
-TO_EMAIL_ID = 'to@email.id'
+TO_EMAIL_ID = 'prashant@fossee.in'
 SET_SITE_ID = 2
 
-SITE_DEBUG = ['False'] #set debug option
+SITE_DEBUG = False #set debug option
 
-SENDER_EMAIL = 'sender@mail.com'
-BCC_EMAIL_ID = 'bcc@mail.com'
-FORUM_NOTIFICATION = 'forumnotifications@email.id'
+SENDER_EMAIL = 'no-reply@fossee.in'
+FORUM_NOTIFICATION = 'forum-notifications@fossee.in'
+BCC_EMAIL_ID = 'web-team@fossee.in'
+EMAIL_URL = 'https://forums.fossee.in'
 
-EMAIL_URL = 'Site URL for email content'
-
-DOMAIN_NAME = '#http://domain.name'
+DOMAIN_NAME = 'https://forums.fossee.in'
 # Host for sending e-mail.
 EMAIL_HOST_SERVER = 'localhost'
 
@@ -27,22 +26,25 @@ EMAIL_PORT_SERVER = 25
 #EMAIL_USE_TLS_SERVER = 'Use TLS'
 
 
-ADMINS_EMAIL_ADDRESS = '[Admins mail address]' #[('name', 'id@email.id'), ('name', 'id@email.id')]
+ADMINS_EMAIL_ADDRESS = [('prashant','prashant@fossee.in'), ('Sysads', 'sysads@fossee.in')] #[('name', 'id@email.id')]
 
-SERVER_EMAIL_ADDRESS = 'server email address'
+SERVER_EMAIL_ADDRESS = 'webmaster@fossee.in'
 
 
-FORUM_GOOGLE_RECAPTCHA_SECRET_KEY = 'FORUM_GOOGLE_RECAPTCHA_SECRET_KEY'
-FORUM_GOOGLE_RECAPTCHA_SITE_KEY = 'FORUM_GOOGLE_RECAPTCHA_SITE_KEY'
+FORUM_GOOGLE_RECAPTCHA_SECRET_KEY = '6LfjLEUUAAAAACWfHEhE4-PD2ALTTjUiHMoQ28wT'
+FORUM_GOOGLE_RECAPTCHA_SITE_KEY = '6LfjLEUUAAAAAJJo4QuG0Ewb3bnHDoOQ6r5805-I'
+#FORUM_GOOGLE_RECAPTCHA_SECRET_KEY = '6LfhIhsTAAAAABQ_Qcyh82hpXKoyt07578m1CCoH'
+#FORUM_GOOGLE_RECAPTCHA_SITE_KEY = '6LfhIhsTAAAAANIJZWgN6oCYMGQpRbZTfXmVIkbL'
+
 
 #Train spamfilter(default set as True)
 TRAIN_SPAMFILTER = True
 
 #ALLOWED_HOSTS
-SYSTEM_ALLOWED_HOSTS = ['Enter the host name' ]
+SYSTEM_ALLOWED_HOSTS = ['127.0.0.1']
 
 #Secre key for application (any random 32 alphanumeric characters)
-SECRET_KEY_CODE = 'Any random 32 alphanumeric charaters'
+SECRET_KEY_CODE = 'LRkw0qob4PsTSuEGVktSzevmkEDYDpAvFuVe+dit8FQ='
 
 
 
