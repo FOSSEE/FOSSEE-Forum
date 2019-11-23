@@ -4,11 +4,11 @@
 config.py
 *.bkp
 forums/wsgi.py
-static/CACHE/*
+static/*
 *.py[cod]
 settings.json
 forums.sql
-local.py
+
 local_final.py
 website/DataSet.*
 # C extensions
