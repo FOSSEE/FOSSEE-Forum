@@ -48,3 +48,4 @@ SECRET_KEY_CODE = 'Any random 32 alphanumeric charaters'
 
 # Maximum file size in MB
 MAX_FILE_SIZE_MB = 2
+
