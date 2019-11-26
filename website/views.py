@@ -18,6 +18,8 @@ from django.core.mail import EmailMultiAlternatives
 from .spamFilter import predict, train
 from .decorators import check_recaptcha
 from django.urls import resolve, Resolver404
+from .auto_mail_send import *
+from datetime import date, datetime
 import openpyxl
 
 User = get_user_model()
@@ -64,7 +66,6 @@ def home(request):
         'categories': categories,
         'questions': questions,
     }
-
     return render(request, "website/templates/index.html", context)
 
 # to get all questions posted till now and pagination, 20 questions at a time
@@ -1379,3 +1380,29 @@ def get_user_email(uid):
     user = User.objects.get(id=uid)
     user_email = user.email
     return user_email
+
+
+def send_remider_mail():
+    if date.today().weekday() == 1 or date.today().weekday() == 3 :
+        #check in the database for last mail sent date
+        try:
+            is_mail_sent = Scheduled_Auto_Mail.objects\
+                    .get(pk=1, is_sent=1, is_active=1)
+            sent_date = is_mail_sent.mail_sent_date
+        except Scheduled_Auto_Mail.DoesNotExist:
+            sent_date = None
+        now = datetime.now()
+        date_string = now.strftime("%Y-%m-%d")
+        if sent_date == date_string:
+            print("***** Mail already sent on ",sent_date, " *****")
+            pass
+        else:
+            a = Cron()
+            a.unanswered_notification()
+            Scheduled_Auto_Mail.objects.get_or_create(id=1,defaults=dict(mail_sent_date=date_string,is_sent=1, is_active=1))
+            Scheduled_Auto_Mail.objects.filter(is_sent=1).update(mail_sent_date=date_string)
+            print("***** New Notification Mail sent *****")
+            a.train_spam_filter()
+    else:
+        print("***** Mail not sent *****")
+send_remider_mail()

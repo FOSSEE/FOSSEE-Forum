@@ -142,6 +142,11 @@ class Notification(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
 
 
+class Scheduled_Auto_Mail(models.Model):
+    mail_sent_date = models.CharField(max_length=255)
+    is_sent = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)
+
 class Profile(models.Model):
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
