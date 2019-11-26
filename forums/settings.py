@@ -219,7 +219,7 @@ EMAIL_URL = EMAIL_URL
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 #EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 #EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
-
+EMAIL_FILE_PATH = '/tmp/forums-app-messages'
 #Sender email, forum notification email, domain name
 SENDER_EMAIL = SENDER_EMAIL
 BCC_EMAIL_ID = BCC_EMAIL_ID
