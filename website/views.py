@@ -47,6 +47,7 @@ def account_credentials_defined(user):
 
 
 def home(request):
+    send_remider_mail()
     settings.MODERATOR_ACTIVATED = False
     next = request.GET.get('next', '')
     next = next.split('/')
@@ -1405,4 +1406,3 @@ def send_remider_mail():
             a.train_spam_filter()
     else:
         print("***** Mail not sent *****")
-send_remider_mail()
