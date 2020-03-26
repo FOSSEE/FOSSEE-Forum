@@ -155,7 +155,7 @@
             </div>
         </div>
 
-        <div class="answer {% if MODERATOR_ACTIVATED or user|can_edit:answer %}editable{% endif %}"
+        <div class="answer {% if MODERATOR_ACTIVATED or user|can_edit:answer %}editable {% else %} {% if answer.is_spam %}blur {% endif %}{% endif %}"
             id="answer{{answer.id}}" style="margin-left: 63px;">
             <div class="body" id="body{{ answer.id }}" style="padding-bottom: 12px; padding-top: 15px">
                 {% if MODERATOR_ACTIVATED or user|can_edit:answer and answer|havenot_comments %}
@@ -369,12 +369,12 @@
                     {% render_field form.body class+="form-control body" id=answer|comment_id %}
                 </div>
             </form>
-            <a class="add-comment"
+            <a class="add-comment {% if answer.is_spam %}blur{% endif %}"
                 style="background: #46B8DA none repeat scroll 0% 0%;color: #FFF;border-radius: 3px;padding: 5px 12px;"
                 data-target="comment{{ answer.id }}" id="comment{{ answer.id }}">
                 <small>add comment</small>
             </a>
-
+            {% if answer.is_spam %}<div class="text-danger">Oops! Looks like spam! Waiting for moderator approval</div>{% endif %}
             {% endif %}
 
 
@@ -389,9 +389,11 @@
             </a>
             {% else %}
             <br>
-            <a class="btn btn-xs btn-success vs" href="/accounts/login">
+
+            <a class="btn btn-xs btn-success vs {% if answer.is_spam %}blur{% endif %}" href="/accounts/login">
                 Login to add comment
             </a>
+            {% if answer.is_spam %}<div class="text-danger"Oops! Looks like spam! Waiting for moderator approval</div>{% endif %}
             {% endif %}
 
         </div> <!-- comments -->
@@ -440,6 +442,7 @@
 
         function changeText() {
             document.getElementById("submit_answer").value = "Submitting...";
+            alert("Thank you for answering. It will be published after moderator approval");
             return validate_dd();
         }
     </script>

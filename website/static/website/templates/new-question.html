@@ -2,31 +2,31 @@
 {% load static %}
 {% load widget_tweaks %}
 {% block title %}
-    Ask a question - FOSSEE Forums
+Ask a question - FOSSEE Forums
 {% endblock %}
 {% block content %}
-    <h4 style="padding-top: 15px;">
-        <span class="glyphicon glyphicon-pencil">
-        </span> {% block pagetitle %} Create a new question . . . {% endblock %}
-    </h4>
-    <hr>
-    <form role="form" action="" method="POST" enctype="multipart/form-data">{% csrf_token %}
+<h4 style="padding-top: 15px;">
+    <span class="glyphicon glyphicon-pencil">
+    </span> {% block pagetitle %} Create a new question . . . {% endblock %}
+</h4>
+<hr>
+<form role="form" action="" method="POST" enctype="multipart/form-data">{% csrf_token %}
     {{ form.media }}
     {% with WIDGET_ERROR_CLASS='field_error' %}
     <p>
-    <strong>Select the category:</strong>
+        <strong>Select the category:</strong>
         <img id="ajax-loader" src="{% static 'website/images/ajax-loader.gif' %}" style="display:none;">
     </p>
     <div class="row">
-    	{{ form.category.errors }}
+        {{ form.category.errors }}
         <div class="col-lg-3 col-md-3 col-sm-3">
-            {% render_field form.category class+="form-control category"%} 
+            {% render_field form.category class+="form-control category"%}
         </div>
-        <div id = 'tutorial' class="col-lg-3 col-md-3 col-sm-3">
+        <div id='tutorial' class="col-lg-3 col-md-3 col-sm-3">
             {% if category %}
-                {% render_field form.tutorial class+="form-control tutorial" %}
+            {% render_field form.tutorial class+="form-control tutorial" %}
             {% else %}
-                {% render_field form.tutorial class+="form-control" %} 
+            {% render_field form.tutorial class+="form-control" %}
             {% endif %}
         </div>
     </div>
@@ -38,18 +38,18 @@
             {{ form.title.errors }}
             <div class="form-group">
                 <label for="id_title"><strong>Question Title:</strong></label>
-                {% render_field form.title class+="form-control title" %} 
+                {% render_field form.title class+="form-control title" %}
             </div>
             {{ form.body.errors }}
             <div class="form-group">
-                <label for="id_body" ><strong>Question Description:</strong></label>
+                <label for="id_body"><strong>Question Description:</strong></label>
                 <br>
                 {% render_field form.body class+="form-control body" %}
             </div>
             {{ form.image.errors }}
             <div class="form-group">
                 {% block picturetitle %}
-                    <label for="id_image" ><strong>Upload a picture:</strong></label>
+                <label for="id_image"><strong>Upload a picture:</strong></label>
                 {% endblock %}
                 {% render_field form.image %}
             </div>
@@ -68,41 +68,42 @@
         function enableBtn() {
             document.getElementById("submit_question").disabled = false;
         }
+
         function changeText() {
             document.getElementById("submit_question").value = "Submitting...";
+            alert("Thank you for posting your query. It will be published after moderator approval");
             return validate_dd();
         }
     </script>
 
     {% block submitbutton %}
-        <br>
-        <input id="submit_question" class="btn btn-success" onclick="changeText()" type="submit" value="Submit Question" disabled>
+    <br>
+    <input id="submit_question" class="btn btn-success" onclick="changeText()" type="submit" value="Submit Question"
+        disabled>
     {% endblock %}
-    
-    {% endwith %}
-    </form>
 
-    <script>
-        window.onload = function(){        
-            var c2= "{{ category }}";   
-            if (c2 != '12'){      
-                $(".tutorial" ).hide();  
-            }
-            else {
-                $(".tutorial" ).show();    
-            }
-            if (c2 == "None"){  
-                // $("#id_category").val(c2);
-                $( "#id_category option" ).prop('disabled',false);         
-            }   
-            else  if(c2 != ""){   
-                $("#id_category").val(c2);
-                $( "#id_category option:not(:selected)" ).prop('disabled',true);     
-            }      
+    {% endwith %}
+</form>
+
+<script>
+    window.onload = function () {
+        var c2 = "{{ category }}";
+        if (c2 != '12') {
+            $(".tutorial").hide();
+        } else {
+            $(".tutorial").show();
         }
-    </script>
+        if (c2 == "None") {
+            // $("#id_category").val(c2);
+            $("#id_category option").prop('disabled', false);
+        } else if (c2 != "") {
+            $("#id_category").val(c2);
+            $("#id_category option:not(:selected)").prop('disabled', true);
+        }
+    }
+</script>
 {% endblock %}
 
 {% block javascript %}
-    <script src="{% static 'website/js/custom.js' %}"></script>
+<script src="{% static 'website/js/custom.js' %}"></script>
 {% endblock %}
