@@ -96,7 +96,7 @@ def get_question(request, question_id=None, pretty_url=None):
     else:
         question = get_object_or_404(Question, id=question_id, is_active=True)
         answers = question.answer_set.filter(
-                is_spam=False, is_active=True).all()
+                 is_active=True).all()
     sub_category = True
 
     if question.sub_category == "" or str(question.sub_category) == 'None':
