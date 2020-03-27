@@ -30,7 +30,6 @@ admins = (
 # Function to check if user is in any moderator group or to check whether user belongs to the moderator group of question's category
 
 
-
 def is_moderator(user, question=None):
     if question:
         return user.groups.filter(moderatorgroup=ModeratorGroup.objects.get(category=question.category)).exists()
@@ -88,7 +87,7 @@ def questions(request):
 
 
 def get_question(request, question_id=None, pretty_url=None):
-    if is_moderator(request.user,get_object_or_404(Question, id=question_id)) and settings.MODERATOR_ACTIVATED:
+    if is_moderator(request.user, get_object_or_404(Question, id=question_id)) and settings.MODERATOR_ACTIVATED:
         question = get_object_or_404(Question, id=question_id)
         answers = question.answer_set.all()
     elif is_moderator(request.user) and settings.MODERATOR_ACTIVATED:
@@ -96,7 +95,7 @@ def get_question(request, question_id=None, pretty_url=None):
     else:
         question = get_object_or_404(Question, id=question_id, is_active=True)
         answers = question.answer_set.filter(
-                 is_active=True).all()
+            is_active=True).all()
     sub_category = True
 
     if question.sub_category == "" or str(question.sub_category) == 'None':
@@ -139,6 +138,7 @@ def get_question(request, question_id=None, pretty_url=None):
     context['SITE_KEY'] = settings.GOOGLE_RECAPTCHA_SITE_KEY
     return render(request, 'website/templates/get-question.html', context)
 
+
 def to_uids(question):
     answers = Answer.objects.filter(
         question_id=question.id, is_active=True).distinct()
@@ -149,6 +149,7 @@ def to_uids(question):
         mail_uids.append(answer.uid)
     mail_uids = set(mail_uids)
     return mail_uids
+
 
 def send_email(sender_email, to, subject, message, bcc_email=None):
     email = EmailMultiAlternatives(
@@ -218,7 +219,8 @@ def question_answer(request, question_id):
                     """.format(
                     question.title,
                     question.category,
-                    settings.DOMAIN_NAME + '/question/' + str(question_id) + "#answer" + str(answer.id)
+                    settings.DOMAIN_NAME + '/question/' +
+                    str(question_id) + "#answer" + str(answer.id)
                 )
                 send_email(sender_email, to, subject, message, bcc_email)
 
@@ -254,14 +256,16 @@ def question_answer(request, question_id):
                     """.format(
                     question.title,
                     question.category,
-                    settings.DOMAIN_NAME + '/question/' + str(question_id) + "#answer" + str(answer.id)
+                    settings.DOMAIN_NAME + '/question/' +
+                    str(question_id) + "#answer" + str(answer.id)
                 )
                 send_email(sender_email, to, subject, message, bcc_email)
 
             return HttpResponseRedirect('/question/{0}/'.format(question_id))
 
         else:
-            messages.error(request,"Answer cann't be empty or only blank spaces.")
+            messages.error(
+                request, "Answer cann't be empty or only blank spaces.")
     return HttpResponseRedirect('/question/{0}/'.format(question_id))
 
 
@@ -317,7 +321,8 @@ def answer_comment(request):
                     """.format(
                     answer.question.title,
                     answer.question.category,
-                    settings.DOMAIN_NAME + '/question/' + str(answer.question.id) + "#answer" + str(answer.id)
+                    settings.DOMAIN_NAME + '/question/' +
+                    str(answer.question.id) + "#answer" + str(answer.id)
                 )
                 send_email(sender_email, to, subject, message, bcc_email)
 
@@ -351,13 +356,15 @@ def answer_comment(request):
                     """.format(
                     answer.question.title,
                     answer.question.category,
-                    settings.DOMAIN_NAME + '/question/' + str(answer.question.id) + "#answer" + str(answer.id)
+                    settings.DOMAIN_NAME + '/question/' +
+                    str(answer.question.id) + "#answer" + str(answer.id)
                 )
 
                 send_email(sender_email, to, subject, message, bcc_email)
 
             mail_uids = to_uids(answer.question)
-            mail_uids.difference_update({answer.uid, comment_creator, request.user.id})
+            mail_uids.difference_update(
+                {answer.uid, comment_creator, request.user.id})
 
             for mail_uid in mail_uids:
 
@@ -387,7 +394,8 @@ def answer_comment(request):
                     """.format(
                     answer.question.title,
                     answer.question.category,
-                    settings.DOMAIN_NAME + '/question/' + str(answer.question.id) + "#answer" + str(answer.id)
+                    settings.DOMAIN_NAME + '/question/' +
+                    str(answer.question.id) + "#answer" + str(answer.id)
                 )
 
                 send_email(sender_email, to, subject, message, bcc_email)
@@ -396,7 +404,8 @@ def answer_comment(request):
                 '/question/{0}/'.format(answer.question.id))
 
         else:
-            messages.error(request,"Comment cann't be empty or only blank spaces.")
+            messages.error(
+                request, "Comment cann't be empty or only blank spaces.")
             return HttpResponseRedirect(
                 '/question/{0}/'.format(answer.question.id))
     else:
@@ -616,7 +625,7 @@ def edit_question(request, question_id):
                     question.is_spam = True
 
             question.save()
-            
+
             sender_name = "FOSSEE Forums"
             sender_email = settings.SENDER_EMAIL
             subject = "FOSSEE Forums - {0} - New Question".format(
@@ -675,7 +684,8 @@ def edit_question(request, question_id):
 
 
 def add_Spam(question_body, is_spam):
-    xfile = openpyxl.load_workbook(settings.BASE_DIR + '/Spam_Filter_Data/DataSet.xlsx')
+    xfile = openpyxl.load_workbook(
+        settings.BASE_DIR + '/Spam_Filter_Data/DataSet.xlsx')
     sheet = xfile['Data set']
     n = len(sheet['A']) + 1
     for i in range(2, n):
@@ -830,6 +840,7 @@ def answer_restore(request, answer_id):
         comment.is_active = True
         comment.save()
     return HttpResponseRedirect('/question/{0}/'.format(answer.question.id))
+
 
 @login_required
 @user_passes_test(is_moderator)
@@ -1187,6 +1198,7 @@ def ajax_tutorials(request):
         return render(request, 'website/templates/404.html')
 
 
+@login_required
 def ajax_answer_update(request):
 
     if request.method == 'POST':
@@ -1194,7 +1206,7 @@ def ajax_answer_update(request):
         body = request.POST['answer_body']
         answer = get_object_or_404(Answer, pk=aid, is_active=True)
         if ((is_moderator(request.user, answer.question) and settings.MODERATOR_ACTIVATED) or (request.user.id ==
-                                                                              answer.uid and not AnswerComment.objects.filter(answer=answer).exclude(uid=answer.uid).exists())):
+                                                                                               answer.uid and not AnswerComment.objects.filter(answer=answer).exclude(uid=answer.uid).exists())):
             answer.body = str(body)
             answer.save()
             if settings.MODERATOR_ACTIVATED:
@@ -1234,6 +1246,7 @@ def ajax_answer_update(request):
         return render(request, 'website/templates/404.html')
 
 
+@login_required
 @csrf_exempt
 def ajax_answer_comment_delete(request):
     if request.method == 'POST':
@@ -1279,6 +1292,7 @@ def ajax_answer_comment_delete(request):
         return render(request, 'website/templates/404.html')
 
 
+@login_required
 @csrf_exempt
 def ajax_answer_comment_update(request):
     if request.method == 'POST':
@@ -1326,6 +1340,7 @@ def ajax_answer_comment_update(request):
         return render(request, 'website/templates/404.html')
 
 
+@login_required
 def can_delete(answer, comment_id):
     comments = answer.answercomment_set.filter(is_active=True).all()
     for c in comments:
@@ -1334,6 +1349,7 @@ def can_delete(answer, comment_id):
     return True
 
 
+@login_required
 @csrf_exempt
 def ajax_notification_remove(request):
     if request.method == "POST":
@@ -1384,24 +1400,26 @@ def get_user_email(uid):
 
 
 def send_remider_mail():
-    if date.today().weekday() == 1 or date.today().weekday() == 3 :
-        #check in the database for last mail sent date
+    if date.today().weekday() == 1 or date.today().weekday() == 3:
+        # check in the database for last mail sent date
         try:
             is_mail_sent = Scheduled_Auto_Mail.objects\
-                    .get(pk=1, is_sent=1, is_active=1)
+                .get(pk=1, is_sent=1, is_active=1)
             sent_date = is_mail_sent.mail_sent_date
         except Scheduled_Auto_Mail.DoesNotExist:
             sent_date = None
         now = datetime.now()
         date_string = now.strftime("%Y-%m-%d")
         if sent_date == date_string:
-            print("***** Mail already sent on ",sent_date, " *****")
+            print("***** Mail already sent on ", sent_date, " *****")
             pass
         else:
             a = Cron()
             a.unanswered_notification()
-            Scheduled_Auto_Mail.objects.get_or_create(id=1,defaults=dict(mail_sent_date=date_string,is_sent=1, is_active=1))
-            Scheduled_Auto_Mail.objects.filter(is_sent=1).update(mail_sent_date=date_string)
+            Scheduled_Auto_Mail.objects.get_or_create(id=1, defaults=dict(
+                mail_sent_date=date_string, is_sent=1, is_active=1))
+            Scheduled_Auto_Mail.objects.filter(
+                is_sent=1).update(mail_sent_date=date_string)
             print("***** New Notification Mail sent *****")
             a.train_spam_filter()
     else:
