@@ -17,12 +17,20 @@ register.filter(can_edit)
 
 
 def is_moderator(user):
+    print(user, "---template---")
     try:
         if user.groups.count() > 0:
+            print(user.groups.count(), "====")
             return True
         else:
+            print("------------")
+            print("No group")
+            print("------------")
             return False
-    except BaseException:
+    except BaseException as e:
+        print("------------")
+        print(e)
+        print("------------")
         return False
 
 
