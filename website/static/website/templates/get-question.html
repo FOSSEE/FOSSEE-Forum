@@ -523,21 +523,9 @@
 
         /* VOTE FOR QUESTION */
         $('div.vote img.vote-up').click(function () {
-            var question_user_id = {
-                {
-                    question.user_id
-                }
-            };
-            var current_user_id = {
-                {
-                    request.user.id
-                }
-            };
-            var id = {
-                {
-                    question.pk
-                }
-            };
+            var question_user_id = {{ question.user_id }};
+            var current_user_id = {{ request.user.id }};
+            var id = {{ question.pk }};
             var vote_type = 'up';
 
             if (question_user_id != current_user_id) {
@@ -585,21 +573,9 @@
         /* DOWNVOTE */
         $('div.vote img.vote-down').click(function () {
 
-            var question_user_id = {
-                {
-                    question.user_id
-                }
-            };
-            var current_user_id = {
-                {
-                    request.user.id
-                }
-            };
-            var id = {
-                {
-                    question.pk
-                }
-            };
+            var question_user_id = {{ question.user_id }};
+            var current_user_id = {{ request.user.id }};
+            var id = {{ question.pk }};
             var vote_type = 'down';
 
             if (question_user_id != current_user_id) {
@@ -645,16 +621,8 @@
         /* TO DISPLAY ERROR TEXT IF SAME USER VOTES */
         $('div.vote').hover(function () {
 
-            var question_user_id = {
-                {
-                    question.user_id
-                }
-            };
-            var current_user_id = {
-                {
-                    request.user.id
-                }
-            };
+            var question_user_id = {{ question.user_id }};
+            var current_user_id = {{ request.user.id }};
 
             if (question_user_id == current_user_id) {
                 $(this).attr("title", "User who posted cannot vote.");
@@ -671,11 +639,7 @@
             var up_id = event.target.id;
             var id = up_id.replace('up', '');
             var down_id = up_id.replace('up', 'down');
-            var current_user_id = {
-                {
-                    request.user.id
-                }
-            };
+            var current_user_id = {{ request.user.id }};
 
             // Getting the user ID of current answer
             if ($(this).hasClass('selected'))
@@ -732,11 +696,7 @@
             var down_id = event.target.id;
             var id = down_id.replace('down', '');
             var up_id = down_id.replace('down', 'up');
-            var current_user_id = {
-                {
-                    request.user.id
-                }
-            };
+            var current_user_id = {{ request.user.id }};
 
             // Getting the user ID of current answer
             if ($(this).hasClass('selected'))
