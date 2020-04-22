@@ -14,4 +14,5 @@ def booleans():
 
 
 def moderator_activated(request):
-    return {'MODERATOR_ACTIVATED': settings.MODERATOR_ACTIVATED}
+    # Always returns False for Anonymous Users and respective value for Authenticated Users
+    return {'MODERATOR_ACTIVATED': request.session.get('MODERATOR_ACTIVATED', False)}

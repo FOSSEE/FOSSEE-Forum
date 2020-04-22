@@ -32,6 +32,9 @@ admins = (
 
 def is_moderator(user, question=None):
     if question:
+        # REQUIRES CHANGES
+        # If we add a new Category and don't create a Moderator Group for it, it will throw Exception.
+        # Maybe just handle the Exception
         return user.groups.filter(moderatorgroup=ModeratorGroup.objects.get(category=question.category)).exists()
     return user.groups.count() > 0
 
@@ -47,14 +50,20 @@ def account_credentials_defined(user):
 
 def home(request):
     send_remider_mail()
-    settings.MODERATOR_ACTIVATED = False
+    
+    # CHANGES REQUIRED
+    # Should be redirected to /moderator/ if Moderator Panel is activated instead of deavtivating it
+    # Creating seperate views for activating/deactivating is an option
+    if request.session.get('MODERATOR_ACTIVATED', False):
+        request.session['MODERATOR_ACTIVATED'] = False
+
     next = request.GET.get('next', '')
     next = next.split('/')
     if 'moderator' in next:
         next.remove('moderator')
     next = '/'.join(next)
     try:
-        resolve(next)
+        resolve(next)   # Checks if there is a view corresponding to this URL, throws a Resolver404 Exception otherwise
         return HttpResponseRedirect(next)
     except Resolver404:
         if next:
@@ -72,7 +81,7 @@ def home(request):
 
 
 def questions(request):
-    if is_moderator(request.user) and settings.MODERATOR_ACTIVATED:
+    if request.session.get('MODERATOR_ACTIVATED', False):
         return HttpResponseRedirect('/moderator/questions/')
     categories = FossCategory.objects.order_by('name')
     questions = Question.objects.all().filter(
@@ -87,11 +96,12 @@ def questions(request):
 
 
 def get_question(request, question_id=None, pretty_url=None):
-    if is_moderator(request.user, get_object_or_404(Question, id=question_id)) and settings.MODERATOR_ACTIVATED:
-        question = get_object_or_404(Question, id=question_id)
-        answers = question.answer_set.all()
-    elif is_moderator(request.user) and settings.MODERATOR_ACTIVATED:
-        return HttpResponseRedirect("/moderator/")
+    if request.session.get('MODERATOR_ACTIVATED', False):
+        if is_moderator(request.user, get_object_or_404(Question, id=question_id)):
+            question = get_object_or_404(Question, id=question_id)
+            answers = question.answer_set.all()
+        else:
+            return HttpResponseRedirect("/moderator/")
     else:
         question = get_object_or_404(Question, id=question_id, is_active=True)
         answers = question.answer_set.filter(
@@ -138,6 +148,9 @@ def get_question(request, question_id=None, pretty_url=None):
     context['SITE_KEY'] = settings.GOOGLE_RECAPTCHA_SITE_KEY
     return render(request, 'website/templates/get-question.html', context)
 
+
+# Returns the mail ids of all people linked to the question.
+# That is, who posted the question and all who posted the answers and comments.
 
 def to_uids(question):
     answers = Answer.objects.filter(
@@ -424,7 +437,7 @@ def filter(request, category=None, tutorial=None):
         questions = Question.objects.filter(
             category__name=category).order_by('-date_created')
 
-    if (not settings.MODERATOR_ACTIVATED):
+    if (not request.session.get('MODERATOR_ACTIVATED', False)):
         questions = questions.filter(is_spam=False, is_active=True)
 
     context = {
@@ -441,7 +454,7 @@ def filter(request, category=None, tutorial=None):
 @user_passes_test(account_credentials_defined, login_url='/accounts/profile/')
 def new_question(request):
 
-    if settings.MODERATOR_ACTIVATED:
+    if request.session.get('MODERATOR_ACTIVATED', False):
         return HttpResponseRedirect('/moderator/')
 
     # settings.MODERATOR_ACTIVATED = False
@@ -574,7 +587,7 @@ def edit_question(request, question_id):
 
     # To prevent random user from manually entering the link and editing
     if ((request.user.id != question.user.id or question.answer_set.filter(is_active=True).count(
-    ) > 0) and (not is_moderator(request.user, question) or not settings.MODERATOR_ACTIVATED)):
+    ) > 0) and (not is_moderator(request.user, question) or not request.session.get('MODERATOR_ACTIVATED', False))):
         return render(request, 'website/templates/not-authorized.html')
 
     if (request.method == 'POST'):
@@ -620,7 +633,7 @@ def edit_question(request, question_id):
             question.userViews.add(request.user)
             if str(question.sub_category) == 'None':
                 question.sub_category = ""
-            if (not settings.MODERATOR_ACTIVATED):
+            if (not request.session.get('MODERATOR_ACTIVATED', False)):
                 if (predict(question.body) == "Spam"):
                     question.is_spam = True
 
@@ -657,7 +670,7 @@ def edit_question(request, question_id):
                 to = [get_user_email(uid)]
                 send_email(sender_email, to, subject, message, bcc_email)
 
-            if (question.is_spam and not settings.MODERATOR_ACTIVATED):
+            if (question.is_spam and not request.session.get('MODERATOR_ACTIVATED', False)):
                 return HttpResponseRedirect('/')
 
             return HttpResponseRedirect('/question/{0}/'.format(question.id))
@@ -707,13 +720,13 @@ def question_delete(request, question_id):
 
     # To prevent random user from manually entering the link and deleting
     if ((request.user.id != question.user.id or question.answer_set.filter(
-            is_active=True).count() > 0) and (not is_moderator(request.user, question) or not settings.MODERATOR_ACTIVATED)):
+            is_active=True).count() > 0) and (not is_moderator(request.user, question) or not request.session.get('MODERATOR_ACTIVATED', False))):
         return render(request, 'website/templates/not-authorized.html')
 
     if (request.method == "POST"):
 
         # Send a delete email only when moderator does so
-        if (settings.MODERATOR_ACTIVATED):
+        if (request.session.get('MODERATOR_ACTIVATED', False)):
             sender_name = "FOSSEE Forums"
             sender_email = settings.SENDER_EMAIL
             subject = "FOSSEE Forums - {0} - New Question".format(
@@ -757,9 +770,10 @@ def question_delete(request, question_id):
 
 
 @login_required
+@user_passes_test(is_moderator)
 def question_restore(request, question_id):
     question = get_object_or_404(Question, id=question_id, is_active=False)
-    if not is_moderator(request.user, question) or not settings.MODERATOR_ACTIVATED:
+    if not is_moderator(request.user, question) or not request.session.get('MODERATOR_ACTIVATED', False):
         return render(request, 'website/templates/not-authorized.html')
     question.is_active = True
     question.save()
@@ -779,11 +793,12 @@ def answer_delete(request, answer_id):
     answer = get_object_or_404(Answer, id=answer_id)
     question_id = answer.question.id
 
+    # The second statement in if condition excludes comments made by Answer's author.
     if ((request.user.id != answer.uid or AnswerComment.objects.filter(answer=answer,
-                                                                       is_active=True).exclude(uid=answer.uid).exists()) and (not is_moderator(request.user, answer.question) or not settings.MODERATOR_ACTIVATED)):
+                                                                       is_active=True).exclude(uid=answer.uid).exists()) and (not is_moderator(request.user, answer.question) or not request.session.get('MODERATOR_ACTIVATED', False))):
         return render(request, 'website/templates/not-authorized.html')
 
-    if (request.method == "POST") and (settings.MODERATOR_ACTIVATED):
+    if (request.method == "POST") and (request.session.get('MODERATOR_ACTIVATED', False)):
 
         # Sending email to user when answer is deleted
         sender_name = "FOSSEE Forums"
@@ -826,7 +841,7 @@ def answer_delete(request, answer_id):
 @user_passes_test(is_moderator)
 def answer_restore(request, answer_id):
     answer = get_object_or_404(Answer, id=answer_id, is_active=False)
-    if not is_moderator(request.user, answer.question) or not settings.MODERATOR_ACTIVATED:
+    if not is_moderator(request.user, answer.question) or not request.session.get('MODERATOR_ACTIVATED', False):
         return render(request, 'website/templates/not-authorized.html')
     if not answer.question.is_active:
         messages.error(
@@ -846,7 +861,7 @@ def answer_restore(request, answer_id):
 @user_passes_test(is_moderator)
 def comment_restore(request, comment_id):
     comment = get_object_or_404(AnswerComment, id=comment_id, is_active=False)
-    if not settings.MODERATOR_ACTIVATED:
+    if not is_moderator(request.user, comment.answer.question) or not request.session.get('MODERATOR_ACTIVATED', False):
         return render(request, 'website/templates/not-authorized.html')
     if not comment.answer.is_active:
         messages.error(
@@ -995,7 +1010,7 @@ def ans_vote_post(request):
 @user_passes_test(account_credentials_defined, login_url='/accounts/profile/')
 def user_notifications(request, user_id):
 
-    if settings.MODERATOR_ACTIVATED:
+    if request.session.get('MODERATOR_ACTIVATED', False):
         return HttpResponseRedirect('/moderator/')
 
     # settings.MODERATOR_ACTIVATED = False
@@ -1022,14 +1037,14 @@ def user_notifications(request, user_id):
 # to clear notification from header, once viewed or cancelled
 @login_required
 def clear_notifications(request):
-    settings.MODERATOR_ACTIVATED = False
+    request.session['MODERATOR_ACTIVATED'] = False   # WHY ??? Instead Moderator shouldn't be allowed to access it.
     Notification.objects.filter(uid=request.user.id).delete()
     return HttpResponseRedirect(
         "/user/{0}/notifications/".format(request.user.id))
 
 
 def search(request):
-    if settings.MODERATOR_ACTIVATED:
+    if request.session.get('MODERATOR_ACTIVATED', False):
         return HttpResponseRedirect('/moderator/')
     categories = FossCategory.objects.order_by('name')
     context = {
@@ -1047,7 +1062,7 @@ def search(request):
 @user_passes_test(is_moderator)
 def moderator_home(request):
 
-    settings.MODERATOR_ACTIVATED = True
+    request.session['MODERATOR_ACTIVATED'] = True
     next = request.GET.get('next', '')
     if next == '/':
         return HttpResponseRedirect('/moderator/')
@@ -1087,6 +1102,9 @@ def moderator_home(request):
 @login_required
 @user_passes_test(is_moderator)
 def moderator_questions(request):
+
+    # CHANGES REQUIRED
+    # No checks here if Moderator Panel is activated or not
 
     # If user is a master moderator
     if (request.user.groups.filter(name="forum_moderator").exists()):
@@ -1129,7 +1147,7 @@ def moderator_questions(request):
 @user_passes_test(is_moderator)
 def moderator_unanswered(request):
 
-    settings.MODERATOR_ACTIVATED = True
+    request.session['MODERATOR_ACTIVATED'] = True   # Why here???
     # If user is a master moderator
     if (request.user.groups.filter(name="forum_moderator").exists()):
         categories = FossCategory.objects.order_by('name')
@@ -1164,6 +1182,9 @@ def moderator_unanswered(request):
 @login_required
 @user_passes_test(is_moderator)
 def train_spam_filter(request):
+
+    # CHANGES REQUIRED
+    # Should be accessable only if Moserator Panel is activated
 
     next = request.GET.get('next', '')
     train()
@@ -1205,11 +1226,11 @@ def ajax_answer_update(request):
         aid = request.POST['answer_id']
         body = request.POST['answer_body']
         answer = get_object_or_404(Answer, pk=aid, is_active=True)
-        if ((is_moderator(request.user, answer.question) and settings.MODERATOR_ACTIVATED) or (request.user.id ==
+        if ((is_moderator(request.user, answer.question) and request.session.get('MODERATOR_ACTIVATED', False)) or (request.user.id ==
                                                                                                answer.uid and not AnswerComment.objects.filter(answer=answer).exclude(uid=answer.uid).exists())):
             answer.body = str(body)
             answer.save()
-            if settings.MODERATOR_ACTIVATED:
+            if request.session.get('MODERATOR_ACTIVATED', False):
                 sender_name = "FOSSEE Forums"
                 sender_email = settings.SENDER_EMAIL
                 subject = "FOSSEE Forums - {0} - Answer Deleted".format(
@@ -1252,11 +1273,11 @@ def ajax_answer_comment_delete(request):
     if request.method == 'POST':
         comment_id = request.POST['comment_id']
         comment = get_object_or_404(AnswerComment, pk=comment_id)
-        if (is_moderator(request.user, comment.answer.question) and settings.MODERATOR_ACTIVATED) or (
+        if (is_moderator(request.user, comment.answer.question) and request.session.get('MODERATOR_ACTIVATED', False)) or (
                 request.user.id == comment.uid and can_delete(comment.answer, comment_id)):
             comment.is_active = False
             comment.save()
-            if settings.MODERATOR_ACTIVATED:
+            if request.session.get('MODERATOR_ACTIVATED', False):
 
                 sender_name = "FOSSEE Forums"
                 sender_email = settings.SENDER_EMAIL
@@ -1299,11 +1320,11 @@ def ajax_answer_comment_update(request):
         cid = request.POST['comment_id']
         body = request.POST['comment_body']
         comment = get_object_or_404(AnswerComment, pk=cid, is_active=True)
-        if (is_moderator(request.user, comment.answer.question) and settings.MODERATOR_ACTIVATED) or (
+        if (is_moderator(request.user, comment.answer.question) and request.session.get('MODERATOR_ACTIVATED', False)) or (
                 request.user.id == comment.uid and can_delete(comment.answer, cid)):
             comment.body = str(body)
             comment.save()
-            if settings.MODERATOR_ACTIVATED:
+            if request.session.get('MODERATOR_ACTIVATED', False):
                 sender_name = "FOSSEE Forums"
                 sender_email = settings.SENDER_EMAIL
                 subject = "FOSSEE Forums - {0} - Answer Deleted".format(
@@ -1340,7 +1361,6 @@ def ajax_answer_comment_update(request):
         return render(request, 'website/templates/404.html')
 
 
-@login_required
 def can_delete(answer, comment_id):
     comments = answer.answercomment_set.filter(is_active=True).all()
     for c in comments:

@@ -90,6 +90,10 @@ def confirm(request, confirmation_code, username):
             user.backend = 'django.contrib.auth.backends.ModelBackend'
             login(request, user)
 
+            # Session Variable created to store if Moderator is using Forum
+            # Becomes True only if moderator_home view (website.views) is accessed by user.
+            request.session['MODERATOR_ACTIVATED'] = False
+
             messages.success(request, "Your account has been activated!. Please update your profile to complete your registration")
             return HttpResponseRedirect('/accounts/profile/')
 
@@ -153,10 +157,14 @@ def account_view_profile(request, user_id=None):
         profile = Profile(user = user)
     flag = False
 
-    if settings.MODERATOR_ACTIVATED:
+    if request.session['MODERATOR_ACTIVATED']:
+        # REQUIRES CHANGES
+        # Moderators should be able to view Ques and Ans of only his own Category
         questions = Question.objects.filter(user_id = user_id).order_by('date_created').reverse()
         answers = Answer.objects.filter(uid = user_id).order_by('date_created').reverse()
     else:
+        # REQUIRES CHANGES
+        # Deleted Ques and Ans shouldn't be visible
         questions = Question.objects.filter(user_id = user_id).filter(is_spam = False).order_by('date_created').reverse()
         answers = Answer.objects.filter(uid = user_id).filter(is_spam = False).order_by('date_created').reverse()
     form = ProfileForm(user, instance = profile)
@@ -216,6 +224,10 @@ def user_login(request):
                 cleaned_data = form.cleaned_data
                 user = cleaned_data.get("user")
                 login(request, user)
+                
+                # Session Variable created to store if Moderator is using Forum
+                # Becomes True only if moderator_home view (website.views) is accessed by user.
+                request.session['MODERATOR_ACTIVATED'] = False
 
                 if ('next' in request.POST):
                     next_url = request.POST.get('next')
@@ -248,6 +260,9 @@ def user_login(request):
         return HttpResponseRedirect('/')
 
 def user_logout(request):
+    # No session variable for Anonymous Users
+    del request.session['MODERATOR_ACTIVATED']
+    
     logout(request)
     return HttpResponseRedirect('/')
 
