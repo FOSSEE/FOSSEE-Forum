@@ -2,6 +2,7 @@
 {% load static %}
 {% load widget_tweaks %}
 {% load permission_tags %}
+{% load helpers %}
 {% load i18n %}
 
 <!-- Template Global Variables -->
@@ -172,7 +173,9 @@
                     {% csrf_token %}
                     <input type="hidden" name="answer_id" value="{{ answer.id }}">
                     <div class="edit-answer" id="ans{{ answer.id }}1">
-                        {% render_field form.body class+="form-control body" name="answer_body" id=answer.id %}
+                        {% with "ate"|addstr:answer.id as ate_id %}
+                        {% render_field form.body class+="form-control body" name="answer_body" id=ate_id %}
+                        {% endwith %}
                     </div>
                 </form>
                 {% endif %}
@@ -181,7 +184,7 @@
                 {% if MODERATOR_ACTIVATED or user|can_edit:answer and answer|havenot_comments %}
                 <script type="text/javascript">
                     CKEDITOR.on("instanceReady", function (event) {
-                        CKEDITOR.instances['{{ answer.id }}'].setData(document.getElementById(
+                        CKEDITOR.instances['ate{{ answer.id }}'].setData(document.getElementById(
                             "ans{{ answer.id }}2").innerHTML);
                     });
                 </script>
@@ -331,7 +334,9 @@
                                 <div id="editor{{ comment.id }}" style="padding-bottom: 20px; display: none;">
                                     {% csrf_token %}
                                     <input type="hidden" name="comment_id" value="{{ comment.id }}">
-                                    {% render_field form.body class+="form-control body" name="comment_body" id=comment.id %}
+                                    {% with "cte"|addstr:comment.id as cte_id %}
+                                    {% render_field form.body class+="form-control body" name="comment_body" id=cte_id %}
+                                    {% endwith %}
                                 </div>
                             </form>
                             <span class="meta_co" style="position: absolute; left: 0px; bottom: 0px; padding: 7px 7px;">
@@ -343,7 +348,7 @@
                             </span>
                             <script type="text/javascript">
                                 CKEDITOR.on("instanceReady", function (event) {
-                                    CKEDITOR.instances['{{ comment.id }}'].setData(document.getElementById(
+                                    CKEDITOR.instances['cte{{ comment.id }}'].setData(document.getElementById(
                                         "cbody{{ comment.id }}").innerHTML);
                                 });
                             </script>
