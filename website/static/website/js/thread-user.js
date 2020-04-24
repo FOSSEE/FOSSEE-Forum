@@ -27,13 +27,24 @@ $(document).ready(function() {
      */
 
     $edit_comment = $(".edit-comment");
+    $cancel_edit_comment = $(".cancel-edit-comment")
     $save_comment = $(".save-comment");
     $edit_comment.click(function(e){
         $(this).hide();
         var id = $(this).attr('data-id');
-        $("#com"+id).show();
+        $("#com"+id).attr('style', '');
         $("#cbody"+id).hide();
         $("#editor"+id).show();
+        $("#can-ed-com"+id).attr('style', '');
+    });
+
+    $cancel_edit_comment.click(function(e) {
+        $(this).hide();
+        var id = $(this).attr('data-id');
+        $("#com"+id).hide();
+        $("#cbody"+id).show();
+        $("#editor"+id).hide();
+        $("#ed-com"+id).attr('style', '');
     });
 
     $save_comment.click(function(e){

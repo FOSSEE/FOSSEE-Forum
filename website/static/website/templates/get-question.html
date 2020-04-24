@@ -2,6 +2,10 @@
 {% load static %}
 {% load widget_tweaks %}
 {% load permission_tags %}
+{% load i18n %}
+
+<!-- Template Global Variables -->
+{% trans '' as blur %}
 
 {% block title %}
 {{ question.category }} - {{ question.title }} - FOSSEE Forums
@@ -127,6 +131,11 @@
 
 {% for answer, ans_vote in main_list %}
 
+<!-- Checking if answer needs to be blurred -->
+{% if answer.is_spam and not MODERATOR_ACTIVATED and not user|can_edit:answer %}
+    {% trans 'blur' as blur %}
+{% endif %}
+
 <div class="row">
     <div class="answer-wrapper col-lg-12 col-md-12 col-sm-12 col-xs-12">
 
@@ -155,7 +164,7 @@
             </div>
         </div>
 
-        <div class="answer {% if MODERATOR_ACTIVATED or user|can_edit:answer %}editable {% else %} {% if answer.is_spam %}blur {% endif %}{% endif %}"
+        <div class="answer {{blur}} {% if user|can_edit:answer %}editable {% endif %}"
             id="answer{{answer.id}}" style="margin-left: 63px;">
             <div class="body" id="body{{ answer.id }}" style="padding-bottom: 12px; padding-top: 15px">
                 {% if MODERATOR_ACTIVATED or user|can_edit:answer and answer|havenot_comments %}
@@ -261,147 +270,166 @@
                                 <div class="pull-right">
                                     <input type="submit" class="btn btn-sm btn-success" value="Submit">
                                     <a class="btn btn-sm btn-default" data-dismiss="modal">Close</a>
+                                </div>
                             </form>
+                        
+                            <div class="clearfix"></div>
+                        </div> <!-- /.modal-body -->
+                    </div> <!-- /.modal-content -->
+                </div> <!-- /.modal-dialog -->
+            </div> <!-- /.modal -->
+
+            <!-- Modal to delete answer -->
+            <div class="modal fade" id="answerDeleteModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" id="myModalLabel">Delete answer</h4>
                         </div>
-                        <div class="clearfix"></div>
-                    </div> <!-- /.modal-body -->
-                </div> <!-- /.modal-content -->
-            </div> <!-- /.modal-dialog -->
-        </div> <!-- /.modal -->
+                        <div class="modal-body">
+                            <h5>Why is this answer being deleted?</h5>
+                            <form id="answerDeleteForm" method="POST" action="">
+                                {% csrf_token %}
+                                <textarea name="deleteAnswer" required></textarea>
+                                <hr>
+                                <div class="pull-right">
+                                    <input type="submit" class="btn btn-sm btn-success" value="Okay">
+                                    <a class="btn btn-sm btn-default" data-dismiss="modal">Close</a>
+                                </div>
+                            </form>
+                            <div class="clearfix"></div>
+                        </div> <!-- /.modal-body -->
+                    </div> <!-- /.modal-content -->
+                </div> <!-- /.modal-dialog -->
+            </div> <!-- /.modal -->
 
-        <!-- Modal to delete answer -->
-        <div class="modal fade" id="answerDeleteModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title" id="myModalLabel">Delete answer</h4>
+        </div> <!-- /.answer -->
+
+        <div class="row" style="padding-left: 40px">
+            <div class="comments pull-right col-lg-11 col-md-11 col-sm-11 col-xs-11">
+                <!-- displaying comments -->
+                {% for comment in answer.answercomment_set.all %}
+
+                    <!-- Checking if comment needs to be blurred (if not already) -->
+                    <!-- TO BE IMPLEMENTED AFTER SPAM FEATURE ON COMMENTS -->
+
+                    {% if comment.is_active or MODERATOR_ACTIVATED %}
+                    <!-- Comment -->
+                    <div class="comment comment{{ comment.id }} {{blur}}" style="padding: 15px 15px 15px 5px;">
+                        <div class="body" id="cbody{{ comment.id }}">
+                            {{ comment.body| safe }}
+                        </div>
+                        <br>
+                        <!-- Options provided on comment -->
+                        {% if MODERATOR_ACTIVATED or user|can_edit:comment and answer|can_delete:comment.id %}
+                            <!-- Accessible if user is a moderator OR 
+                                (user is the author of comment AND there are no comments after it) -->
+                            {% if comment.is_active %}
+                            <form id="save_comment{{ comment.id }}" method="POST"
+                                action="{% url 'website:ajax_answer_comment_update' %}">
+                                <div id="editor{{ comment.id }}" style="padding-bottom: 20px; display: none;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="comment_id" value="{{ comment.id }}">
+                                    {% render_field form.body class+="form-control body" name="comment_body" id=comment.id %}
+                                </div>
+                            </form>
+                            <span class="meta_co" style="position: absolute; left: 0px; bottom: 0px; padding: 7px 7px;">
+                                <a class="edit-comment btn btn-xs btn-info vs" id="ed-com{{ comment.id }}" data-id="{{ comment.id }}">Edit</a>
+                            </span>
+                            <span class="meta_co" style="position: absolute; left: 0px; bottom: 0px; padding: 7px 7px;">
+                                <a class="save-comment btn btn-xs btn-info vs" id="com{{ comment.id }}" data-form="{{ comment.id }}"
+                                    style="display: none;">Save</a>
+                            </span>
+                            <script type="text/javascript">
+                                CKEDITOR.on("instanceReady", function (event) {
+                                    CKEDITOR.instances['{{ comment.id }}'].setData(document.getElementById(
+                                        "cbody{{ comment.id }}").innerHTML);
+                                });
+                            </script>
+                            <span class="meta_co" style="position: absolute; left: 40px; bottom: 0px; padding: 7px 7px;">
+                                <a class="delete-comment btn btn-xs btn-info vs" data-id="{{ comment.id }}">Delete</a>
+                            </span>
+                            <span class="meta_co" style="position: absolute; left: 87px; bottom: 0px; padding: 7px 7px;">
+                                <a class="cancel-edit-comment btn btn-xs btn-info vs" id="can-ed-com{{ comment.id }}" data-id="{{ comment.id }}"
+                                    style="display: none;">Cancel</a>
+                            </span>
+                            {% else %}
+                                {% if MODERATOR_ACTIVATED %}
+                                <span class="meta_co" style="position: absolute; left: 0px; bottom: 0px; padding: 7px 7px;">
+                                    <a class="restore-comment btn btn-xs btn-info vs"
+                                        href="{% url 'website:comment_restore' comment.id %}">Restore</a>
+                                </span>
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+                        <!-- /.Options provided on comment -->
+
+                        <span class="meta_co" style="position: absolute;right: 0px; bottom: 0px;">
+                            <small>
+                                <i>
+                                    {{ comment.date_created|date:"d-m-y" }}, {{ comment.date_created|time }}
+                                </i>
+                            </small>
+                            <span style="padding: 2px 7px">
+                                <a href="/accounts/view-profile/{{ comment.user.id }}"> {{comment.user}} </a>
+                            </span>
+                        </span>
+
                     </div>
-                    <div class="modal-body">
-                        <h5>Why is this answer being deleted?</h5>
-                        <form id="answerDeleteForm" method="POST" action="">
-                            {% csrf_token %}
-                            <textarea name="deleteAnswer" required></textarea>
-                            <hr>
-                            <div class="pull-right">
-                                <input type="submit" class="btn btn-sm btn-success" value="Okay">
-                                <a class="btn btn-sm btn-default" data-dismiss="modal">Close</a>
-                            </div>
-                        </form>
-                        <div class="clearfix"></div>
-                    </div> <!-- /.modal-body -->
-                </div> <!-- /.modal-content -->
-            </div> <!-- /.modal-dialog -->
-        </div> <!-- /.modal -->
-
-    </div> <!-- /.answer -->
-
-    <div class="row" style="padding-left: 40px">
-        <div class="comments pull-right col-lg-11 col-md-11 col-sm-11 col-xs-11">
-            <!-- displaying comments -->
-            {% for comment in answer.answercomment_set.all %}
-            {% if comment.is_active or MODERATOR_ACTIVATED %}
-            <div class="comment comment{{ comment.id }}" style="padding: 15px 15px 15px 5px;">
-                <div class="body" id="cbody{{ comment.id }}">
-                    {{ comment.body| safe }}
-                </div>
-
+                    <!-- /.Comment -->
+                    {% endif %}
+                {% endfor %}
                 <br>
-                {% if MODERATOR_ACTIVATED or user|can_edit:comment and answer|can_delete:comment.id %}
-                {% if comment.is_active %}
-                <form id="save_comment{{ comment.id }}" method="POST"
-                    action="{% url 'website:ajax_answer_comment_update' %}">
-                    <div id="editor{{ comment.id }}" style="padding-bottom: 20px; display: none;">
+
+                <!-- Add New Comment -->
+                <!-- Only Authenticated users are allowed to post comments -->
+                {% if user.is_authenticated %} 
+
+                    {% if not MODERATOR_ACTIVATED %}
+                    <form id="comment_form{{ answer.id }}" method="post" action="{% url 'website:answer_comment' %}">
                         {% csrf_token %}
-                        <input type="hidden" name="comment_id" value="{{ comment.id }}">
-                        {% render_field form.body class+="form-control body" name="comment_body" id=comment.id %}
-                    </div>
-                </form>
-                <span class="meta_co" style="position: absolute; left: 0px; bottom: 0px; padding: 7px 7px;">
-                    <a class="edit-comment btn btn-xs btn-info vs" data-id="{{ comment.id }}">Edit</a>
-                </span>
-                <span class="meta_co" style="position: absolute; left: 0px; bottom: 0px; padding: 7px 7px;">
-                    <a class="save-comment btn btn-xs btn-info vs" id="com{{ comment.id }}" data-form="{{ comment.id }}"
-                        style="display: none;">Save</a>
-                </span>
-                <script type="text/javascript">
-                    CKEDITOR.on("instanceReady", function (event) {
-                        CKEDITOR.instances['{{ comment.id }}'].setData(document.getElementById(
-                            "cbody{{ comment.id }}").innerHTML);
-                    });
-                </script>
-                <span class="meta_co" style="position: absolute; left: 40px; bottom: 0px; padding: 7px 7px;">
-                    <a class="delete-comment btn btn-xs btn-info vs" data-id="{{ comment.id }}">Delete</a>
-                </span>
+                        <input type="hidden" name="answer_id" value="{{ answer.id }}">
+                        <div class="new-comment" id="comment{{ answer.id }}1">
+                            {% render_field form.body class+="form-control body" id=answer|comment_id %}
+                        </div>
+                    </form>
+                    <a class="add-comment {% if answer.is_spam %}blur{% endif %}"
+                        data-target="comment{{ answer.id }}" id="comment{{ answer.id }}">
+                        <small>Add Comment</small>
+                    </a>
+                        {% if answer.is_spam and not user|can_edit:answer %}
+                        <div class="text-danger" style="margin-top: 10px;">Oops! Looks like spam! Waiting for moderator approval</div>
+                        {% endif %}
+                    {% endif %}
+
+
+                <a class="post-comment" data-target="comment{{ answer.id }}" data-aid="comment{{ answer.id }}"
+                    data-form="comment_form{{ answer.id }}" onclick="submit_btn()">
+                    <small>Post Comment</small>
+                </a>
+
+                <a class="cancel-comment" data-target="comment{{ answer.id }}">
+                    <small>Cancel Comment</small>
+                </a>
                 {% else %}
-                {% if MODERATOR_ACTIVATED %}
-                <span class="meta_co" style="position: absolute; left: 0px; bottom: 0px; padding: 7px 7px;">
-                    <a class="restore-comment btn btn-xs btn-info vs"
-                        href="{% url 'website:comment_restore' comment.id %}">Restore</a>
-                </span>
+                
+
+                <a class="btn btn-xs btn-success vs {% if answer.is_spam %}blur{% endif %}" 
+                    href="{% url 'user_login'%}?next={{ request.get_full_path|urlencode }}"
+                    style="padding-top: 2px !important;">
+                    Login to add comment
+                </a>
+                    {% if answer.is_spam %}
+                    <div class="text-danger" style="margin-top: 10px;">Oops! Looks like spam! Waiting for moderator approval</div>
+                    {% endif %}
                 {% endif %}
-                {% endif %}
-                {% endif %}
 
-                <span class="meta_co" style="position: absolute;right: 0px; bottom: 0px;">
-                    <small>
-                        <i>
-                            {{ comment.date_created|date:"d-m-y" }}, {{ comment.date_created|time }}
-                        </i>
-                    </small>
-                    <span style="padding: 2px 7px">
-                        <a href="/accounts/view-profile/{{ comment.user.id }}"> {{comment.user}} </a>
-                    </span>
-                </span>
-
-            </div>
-            {% endif %}
-            {% endfor %}
-
-
-            <!-- form to add comment -->
-            {% if user.is_authenticated %}
-
-            {% if not MODERATOR_ACTIVATED %}
-            <form id="comment_form{{ answer.id }}" method="post" action="{% url 'website:answer_comment' %}">
-                {% csrf_token %}
-                <input type="hidden" name="answer_id" value="{{ answer.id }}">
-                <div class="new-comment" id="comment{{ answer.id }}1">
-                    {% render_field form.body class+="form-control body" id=answer|comment_id %}
-                </div>
-            </form>
-            <a class="add-comment {% if answer.is_spam %}blur{% endif %}"
-                style="background: #46B8DA none repeat scroll 0% 0%;color: #FFF;border-radius: 3px;padding: 5px 12px;"
-                data-target="comment{{ answer.id }}" id="comment{{ answer.id }}">
-                <small>add comment</small>
-            </a>
-            {% if answer.is_spam %}<div class="text-danger">Oops! Looks like spam! Waiting for moderator approval</div>{% endif %}
-            {% endif %}
-
-
-            <a class="post-comment" data-target="comment{{ answer.id }}" data-aid="comment{{ answer.id }}"
-                data-form="comment_form{{ answer.id }}" onclick="submit_btn()">
-
-                <small>post comment</small>
-            </a>
-
-            <a class="cancel-comment" data-target="comment{{ answer.id }}">
-                <small>cancel comment</small>
-            </a>
-            {% else %}
-            <br>
-
-            <a class="btn btn-xs btn-success vs {% if answer.is_spam %}blur{% endif %}" href="/accounts/login">
-                Login to add comment
-            </a>
-            {% if answer.is_spam %}<div class="text-danger">Oops! Looks like spam! Waiting for moderator approval</div>{% endif %}
-            {% endif %}
-
-        </div> <!-- comments -->
-    </div> <!-- /.row -->
-    <br>
-    <hr>
-</div> <!-- /.answer-wrapper -->
+            </div> <!-- comments -->
+        </div> <!-- /.row -->
+        <br>
+        <hr>
+    </div> <!-- /.answer-wrapper -->
 </div> <!-- /.row -->
 {% endfor %}
 

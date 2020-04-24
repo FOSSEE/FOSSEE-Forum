@@ -103,7 +103,7 @@ def get_question(request, question_id=None, pretty_url=None):
         else:
             return HttpResponseRedirect("/moderator/")
     else:
-        question = get_object_or_404(Question, id=question_id, is_active=True)
+        question = get_object_or_404(Question, id=question_id, is_active=True, is_spam=False)
         answers = question.answer_set.filter(
             is_active=True).all()
     sub_category = True
