@@ -34,7 +34,7 @@ $(document).ready(function() {
         var id = $(this).attr('data-id');
         $("#com"+id).attr('style', '');
         $("#cbody"+id).hide();
-        $("#editor"+id).show();
+        $("#ceditor"+id).show();
         $("#can-ed-com"+id).attr('style', '');
     });
 
@@ -43,7 +43,7 @@ $(document).ready(function() {
         var id = $(this).attr('data-id');
         $("#com"+id).hide();
         $("#cbody"+id).show();
-        $("#editor"+id).hide();
+        $("#ceditor"+id).hide();
         $("#ed-com"+id).attr('style', '');
     });
 

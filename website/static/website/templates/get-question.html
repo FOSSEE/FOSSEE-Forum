@@ -5,8 +5,6 @@
 {% load helpers %}
 {% load i18n %}
 
-<!-- Template Global Variables -->
-{% trans '' as blur %}
 
 {% block title %}
 {{ question.category }} - {{ question.title }} - FOSSEE Forums
@@ -331,7 +329,7 @@
                             {% if comment.is_active %}
                             <form id="save_comment{{ comment.id }}" method="POST"
                                 action="{% url 'website:ajax_answer_comment_update' %}">
-                                <div id="editor{{ comment.id }}" style="padding-bottom: 20px; display: none;">
+                                <div id="ceditor{{ comment.id }}" style="padding-bottom: 20px; display: none;">
                                     {% csrf_token %}
                                     <input type="hidden" name="comment_id" value="{{ comment.id }}">
                                     {% with "cte"|addstr:comment.id as cte_id %}
