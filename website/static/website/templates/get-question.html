@@ -286,13 +286,19 @@
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h4 class="modal-title" id="myModalLabel">Delete answer</h4>
+                            <h4 class="modal-title" id="myModalLabel">Delete Answer</h4>
                         </div>
                         <div class="modal-body">
+                            {% if MODERATOR_ACTIVATED %}
                             <h5>Why is this answer being deleted?</h5>
+                            {% else %}
+                            <h5>Are you sure about deleting the answer?</h5>
+                            {% endif %}
                             <form id="answerDeleteForm" method="POST" action="">
                                 {% csrf_token %}
+                                {% if MODERATOR_ACTIVATED %}
                                 <textarea name="deleteAnswer" required></textarea>
+                                {% endif %}
                                 <hr>
                                 <div class="pull-right">
                                     <input type="submit" class="btn btn-sm btn-success" value="Okay">
@@ -787,6 +793,8 @@
         });
     });
 </script>
+
+<!-- Script to POST answer delete form data -->
 <script type="text/javascript">
     $('.ansdel').on('click', function (event) {
         var button = $(event.relatedTarget) // Button that triggered the modal

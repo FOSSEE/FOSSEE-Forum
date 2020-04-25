@@ -103,9 +103,10 @@ def get_question(request, question_id=None, pretty_url=None):
         else:
             return HttpResponseRedirect("/moderator/")
     else:
+        # SHOULD SPAMMED QUESTIONS BE VISIBLE TO THE AUTHOR??
         question = get_object_or_404(Question, id=question_id, is_active=True, is_spam=False)
-        answers = question.answer_set.filter(
-            is_active=True).all()
+        answers = question.answer_set.filter(is_active=True).all()
+
     sub_category = True
 
     if question.sub_category == "" or str(question.sub_category) == 'None':
@@ -719,14 +720,15 @@ def question_delete(request, question_id):
     title = question.title
 
     # To prevent random user from manually entering the link and deleting
-    if ((request.user.id != question.user.id or question.answer_set.filter(
-            is_active=True).count() > 0) and (not is_moderator(request.user, question) or not request.session.get('MODERATOR_ACTIVATED', False))):
+    # NOT NEEDED THOUGH AS ONLY ALLOWED USERS CAN SEND POST REQUEST FROM TEMPLATE
+    if ((request.user.id != question.user.id or question.answer_set.filter(is_active=True).count() > 0) and 
+            (not is_moderator(request.user, question) or not request.session.get('MODERATOR_ACTIVATED', False))):
         return render(request, 'website/templates/not-authorized.html')
 
     if (request.method == "POST"):
 
         # Send a delete email only when moderator does so
-        if (request.session.get('MODERATOR_ACTIVATED', False)):
+        if request.session.get('MODERATOR_ACTIVATED', False):
             sender_name = "FOSSEE Forums"
             sender_email = settings.SENDER_EMAIL
             subject = "FOSSEE Forums - {0} - New Question".format(
@@ -755,34 +757,26 @@ def question_delete(request, question_id):
                 to = [get_user_email(uid)]
                 send_email(sender_email, to, subject, message, bcc_email)
 
-    question.is_active = False
-    question.save()
-    answers = question.answer_set.all()
-    for answer in answers:
-        answer.is_active = False
-        answer.save()
-        for comment in answer.answercomment_set.all():
-            comment.is_active = False
-            comment.save()
-    return render(request,
-                  'website/templates/question-delete.html',
-                  {'title': title})
+        question.is_active = False
+        question.save()
+
+        return render(request, 'website/templates/question-delete.html', {'title': title})
+    
+    # Question can only be deleted by sending POST requests and not by GET requests (directly accessing the link)
+    return render(request, 'website/templates/not-authorized.html')
 
 
 @login_required
 @user_passes_test(is_moderator)
 def question_restore(request, question_id):
     question = get_object_or_404(Question, id=question_id, is_active=False)
+
     if not is_moderator(request.user, question) or not request.session.get('MODERATOR_ACTIVATED', False):
         return render(request, 'website/templates/not-authorized.html')
+
     question.is_active = True
     question.save()
-    for answer in question.answer_set.all():
-        answer.is_active = True
-        answer.save()
-        for comment in answer.answercomment_set.all():
-            comment.is_active = True
-            comment.save()
+
     return HttpResponseRedirect('/question/{0}/'.format(question_id))
 
 # View for deleting answer, notification is sent to person who posted answer
@@ -790,89 +784,95 @@ def question_restore(request, question_id):
 @login_required
 def answer_delete(request, answer_id):
 
-    answer = get_object_or_404(Answer, id=answer_id)
+    answer = get_object_or_404(Answer, id=answer_id, is_active=True)
     question_id = answer.question.id
 
     # The second statement in if condition excludes comments made by Answer's author.
-    if ((request.user.id != answer.uid or AnswerComment.objects.filter(answer=answer,
-                                                                       is_active=True).exclude(uid=answer.uid).exists()) and (not is_moderator(request.user, answer.question) or not request.session.get('MODERATOR_ACTIVATED', False))):
+    # NOT NEEDED THOUGH AS ONLY ALLOWED USERS CAN SEND POST REQUEST FROM TEMPLATE
+    if ((request.user.id != answer.uid or AnswerComment.objects.filter(answer=answer, is_active=True).exclude(uid=answer.uid).exists()) and
+            (not is_moderator(request.user, answer.question) or not request.session.get('MODERATOR_ACTIVATED', False))):
         return render(request, 'website/templates/not-authorized.html')
 
-    if (request.method == "POST") and (request.session.get('MODERATOR_ACTIVATED', False)):
+    if (request.method == "POST"):
 
-        # Sending email to user when answer is deleted
-        sender_name = "FOSSEE Forums"
-        sender_email = settings.SENDER_EMAIL
-        subject = "FOSSEE Forums - {0} - Answer Deleted".format(
-            answer.question.category)
-        bcc_email = settings.BCC_EMAIL_ID
-        delete_reason = request.POST.get('deleteAnswer')
-        message = """
-            The following answer has been deleted by a moderator in the FOSSEE Forum: <br>
-            <b> Answer: </b>{0}<br>
-            <b> Category: </b>{1}<br>
-            <b> Question: </b>{2}<br>
-            <b> Moderator comments: </b>{3}<br><br>
-            Regards,<br>
-            FOSSEE Team,<br>
-            FOSSEE, IIT Bombay
-            <br><br><br>
-            <center><h6>*** This is an automatically generated email, please do not reply***</h6></center>
-            """.format(
-            answer.body,
-            answer.question.category,
-            answer.question.body,
-            delete_reason,
-        )
-        mail_uids = to_uids(answer.question)
-        for uid in mail_uids:
-            to = [get_user_email(uid)]
-            send_email(sender_email, to, subject, message, bcc_email)
+        if request.session.get('MODERATOR_ACTIVATED', False):
+
+            # Sending email to user when answer is deleted
+            sender_name = "FOSSEE Forums"
+            sender_email = settings.SENDER_EMAIL
+            subject = "FOSSEE Forums - {0} - Answer Deleted".format(
+                answer.question.category)
+            bcc_email = settings.BCC_EMAIL_ID
+            delete_reason = request.POST.get('deleteAnswer')
+            message = """
+                The following answer has been deleted by a moderator in the FOSSEE Forum: <br>
+                <b> Answer: </b>{0}<br>
+                <b> Category: </b>{1}<br>
+                <b> Question: </b>{2}<br>
+                <b> Moderator comments: </b>{3}<br><br>
+                Regards,<br>
+                FOSSEE Team,<br>
+                FOSSEE, IIT Bombay
+                <br><br><br>
+                <center><h6>*** This is an automatically generated email, please do not reply***</h6></center>
+                """.format(
+                answer.body,
+                answer.question.category,
+                answer.question.body,
+                delete_reason,
+            )
+
+            # MAYBE not needed to send email to everyone related to the question but only to those related the answer.
+            mail_uids = to_uids(answer.question)
+            for uid in mail_uids:
+                to = [get_user_email(uid)]
+                send_email(sender_email, to, subject, message, bcc_email)
 
         answer.is_active = False
         answer.save()
-        for comment in answer.answercomment_set.all():
-            comment.is_active = False
-            comment.save()
-    return HttpResponseRedirect('/question/{0}/'.format(question_id))
+
+        return HttpResponseRedirect('/question/{0}/'.format(question_id))
+
+    # Answer can only be deleted by sending POST requests and not by GET requests (directly accessing the link)
+    return render(request, 'website/templates/not-authorized.html')
 
 
 @login_required
 @user_passes_test(is_moderator)
 def answer_restore(request, answer_id):
     answer = get_object_or_404(Answer, id=answer_id, is_active=False)
+
     if not is_moderator(request.user, answer.question) or not request.session.get('MODERATOR_ACTIVATED', False):
         return render(request, 'website/templates/not-authorized.html')
+
     if not answer.question.is_active:
-        messages.error(
-            request,
-            "Answer can only be restored when its question is not deleted.")
-        return HttpResponseRedirect(
-            '/question/{0}/'.format(answer.question.id))
+        messages.error(request, "Answer can only be restored when its question is not deleted.")
+        return HttpResponseRedirect('/question/{0}/'.format(answer.question.id))
+
     answer.is_active = True
     answer.save()
-    for comment in answer.answercomment_set.all():
-        comment.is_active = True
-        comment.save()
+
     return HttpResponseRedirect('/question/{0}/'.format(answer.question.id))
 
+
+# COMMENT DELETION IS THROUGH AJAX
 
 @login_required
 @user_passes_test(is_moderator)
 def comment_restore(request, comment_id):
     comment = get_object_or_404(AnswerComment, id=comment_id, is_active=False)
+
     if not is_moderator(request.user, comment.answer.question) or not request.session.get('MODERATOR_ACTIVATED', False):
         return render(request, 'website/templates/not-authorized.html')
+
     if not comment.answer.is_active:
-        messages.error(
-            request,
-            "Comment can only be restored when its answer is not deleted")
-        return HttpResponseRedirect(
-            '/question/{0}/'.format(comment.answer.question.id))
+        messages.error(request, "Comment can only be restored when its answer is not deleted")
+        return HttpResponseRedirect('/question/{0}/'.format(comment.answer.question.id))
+
     comment.is_active = True
     comment.save()
-    return HttpResponseRedirect(
-        '/question/{0}/'.format(comment.answer.question.id))
+
+    return HttpResponseRedirect('/question/{0}/'.format(comment.answer.question.id))
 
 # View to mark answer as spam/non-spam
 @login_required

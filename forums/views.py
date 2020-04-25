@@ -155,22 +155,24 @@ def account_view_profile(request, user_id=None):
         profile = Profile.objects.get(user = user)
     except:
         profile = Profile(user = user)
-    flag = False
 
-    if request.session['MODERATOR_ACTIVATED']:
-        # REQUIRES CHANGES
-        # Moderators should be able to view Ques and Ans of only his own Category
-        questions = Question.objects.filter(user_id = user_id).order_by('date_created').reverse()
-        answers = Answer.objects.filter(uid = user_id).order_by('date_created').reverse()
-    else:
-        # REQUIRES CHANGES
-        # Deleted Ques and Ans shouldn't be visible
-        questions = Question.objects.filter(user_id = user_id).filter(is_spam = False).order_by('date_created').reverse()
-        answers = Answer.objects.filter(uid = user_id).filter(is_spam = False).order_by('date_created').reverse()
-    form = ProfileForm(user, instance = profile)
-
+    flag = False   # True if user is requesting for his own profile
     if str(user_id) == str(request.user.id):
         flag = True
+
+    if request.session.get('MODERATOR_ACTIVATED', False):
+        # REQUIRES CHANGES
+        # Moderators should be able to view Ques and Ans of only his own Category
+        # if forum_moderator, show all otherwise show only respective content.
+        questions = Question.objects.filter(user_id = user_id).order_by('-date_created')
+        answers = Answer.objects.filter(uid = user_id).order_by('-date_created')
+    else:
+        # REQUIRES CHANGES
+        # Spammed questions should be visible if flag=True
+        questions = Question.objects.filter(user_id=user_id, is_active=True, is_spam = False).order_by('-date_created')
+        answers = Answer.objects.filter(uid=user_id, is_active=True, is_spam = False, question__is_active=True).order_by('-date_created')
+
+    form = ProfileForm(user, instance = profile)
 
     context = {
         'show': flag,
@@ -261,7 +263,8 @@ def user_login(request):
 
 def user_logout(request):
     # No session variable for Anonymous Users
-    del request.session['MODERATOR_ACTIVATED']
+    if request.session.get('MODERATOR_ACTIVATED', None) is not None:
+        del request.session['MODERATOR_ACTIVATED']
     
     logout(request)
     return HttpResponseRedirect('/')
