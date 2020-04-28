@@ -1,0 +1,19 @@
+The following new question has been posted in the FOSSEE Forum: <br><br>
+{% if spam %}
+<b style="color: red;">**Classified as Spam**</b><br>
+<br>
+{% endif %}
+<b>Title: </b>{{ title }}<br>
+<b>Category: </b>{{ category }}<br>
+<b>Link: </b><a href="{{ link }}">{{ link }}</a><br>
+<b>Question : </b>
+
+{% autoescape off %}{{ body }}{% endautoescape %}
+<br>
+
+Regards,<br>
+FOSSEE Team,<br>
+FOSSEE, IIT Bombay<br>
+<br>
+<br>
+<center><h6>*** This is an automatically generated email, please do not reply***</h6></center>

@@ -323,7 +323,7 @@
 
                     {% if comment.is_active or MODERATOR_ACTIVATED %}
                     <!-- Comment -->
-                    <div class="comment comment{{ comment.id }} {{blur}}" style="padding: 15px 15px 15px 5px;">
+                    <div class="comment comment{{ comment.id }} {{blur}}" id="comment{{ comment.id }}" style="padding: 15px 15px 15px 5px;">
                         <div class="body" id="cbody{{ comment.id }}">
                             {{ comment.body| safe }}
                         </div>

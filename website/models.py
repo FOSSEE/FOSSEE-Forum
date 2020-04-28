@@ -134,11 +134,11 @@ class AnswerComment(models.Model):
 
 class Notification(models.Model):
 
-    uid = models.IntegerField()
-    qid = models.IntegerField()
+    uid = models.IntegerField()   # User id
+    qid = models.IntegerField()   # Question id
     pid = models.IntegerField(default=0)
-    aid = models.IntegerField(default=0)
-    cid = models.IntegerField(default=0)
+    aid = models.IntegerField(default=0)   # Answer id
+    cid = models.IntegerField(default=0)   # Comment id
     date_created = models.DateTimeField(auto_now_add=True)
 
 
