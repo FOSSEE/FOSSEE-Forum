@@ -1,10 +1,8 @@
-from website.views import admins
 from django.conf import settings
-
+from .views import admins
 
 def admin_processor(request):
     return {'admins': admins}
-
 
 def booleans():
     return {
@@ -12,7 +10,9 @@ def booleans():
         'False': False,
     }
 
-
 def moderator_activated(request):
-    # Always returns False for Anonymous Users and respective value for Authenticated Users
+    """
+    Return False for Anonymous Users.
+    Return the value of MODERATOR_ACTIVATED session variable for Authenticated Users.
+    """
     return {'MODERATOR_ACTIVATED': request.session.get('MODERATOR_ACTIVATED', False)}
