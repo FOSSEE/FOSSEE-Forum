@@ -237,6 +237,8 @@
                     id="ans{{ answer.id }}">Edit</a>
                 <a class="save btn btn-xs btn-success vs" data-target="body{{ answer.id }}" data-aid="{{ answer.id }}"
                     data-form="form{{ answer.id }}" style="display: none;">Save</a>
+                <a class="cancel btn btn-xs btn-info vs" data-target="body{{ answer.id }}"
+                    data-id="ans{{ answer.id }}" style="display: none;">Cancel</a>
                 {% else %}
                 {% if MODERATOR_ACTIVATED %}
                 <a class="restore btn btn-xs btn-info vs ansres" data-id="{{ answer.id }}"

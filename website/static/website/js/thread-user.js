@@ -4,6 +4,7 @@ $(document).ready(function() {
      * set the dom variables
     */
     $answer_edit = $('.answer .edit');
+    $answer_cancel = $('.answer .cancel');
     $answer_save = $(".answer .save");
 
     $answer_edit.click(function(e) {
@@ -12,7 +13,18 @@ $(document).ready(function() {
         $("#"+id+"1").show();
         $("#"+id+"2").hide();
         $(this).hide();
-        $(this).next().show();
+        $(this).siblings(".cancel").show();
+        $(this).siblings(".save").show();
+    });
+
+    $answer_cancel.click(function(e) {
+        var target = $(this).data("target");
+        var id = $(this).data("id");
+        $("#"+id+"1").hide();
+        $("#"+id+"2").show();
+        $(this).hide();
+        $(this).siblings(".save").hide();
+        $(this).siblings(".edit").show();
     });
 
     $answer_save.click(function() {
