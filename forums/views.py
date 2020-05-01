@@ -167,10 +167,13 @@ def account_view_profile(request, user_id=None):
         questions = Question.objects.filter(user_id = user_id).order_by('-date_created')
         answers = Answer.objects.filter(uid = user_id).order_by('-date_created')
     else:
-        # REQUIRES CHANGES
         # Spammed questions should be visible if flag=True
-        questions = Question.objects.filter(user_id=user_id, is_active=True, is_spam = False).order_by('-date_created')
-        answers = Answer.objects.filter(uid=user_id, is_active=True, is_spam = False, question__is_active=True).order_by('-date_created')
+        if flag:
+            questions = Question.objects.filter(user_id=user_id, is_active=True).order_by('-date_created')
+            answers = Answer.objects.filter(uid=user_id, is_active=True, question__is_active=True).order_by('-date_created')
+        else:
+            questions = Question.objects.filter(user_id=user_id, is_active=True, is_spam = False).order_by('-date_created')
+            answers = Answer.objects.filter(uid=user_id, is_active=True, is_spam = False, question__is_active=True).order_by('-date_created')
 
     form = ProfileForm(user, instance = profile)
 

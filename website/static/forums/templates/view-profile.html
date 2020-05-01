@@ -168,9 +168,15 @@
       
             {% for question in questions %}
             <div class="my-question">
+                {% if question.is_spam or not question.is_active %}
+                <span class="title"><a href="{% url 'website:get_question' question.id %}" style="color: red;">
+                    {{ question.title }}</a>
+                </span>
+                {% else %}
                 <span class="title"><a href="{% url 'website:get_question' question.id %}">
                     {{ question.title }}</a>
                 </span>
+                {% endif %}
                 <br />
                 <span class="date">
                     <small>Asked on:{{ question.date_created }}</small>
@@ -189,9 +195,15 @@
                 
             {% for answer in answers%}
             <div class="my-answer">
+                {% if answer.is_spam or not answer.is_active %}
                 <span class="body">
-                    <a href="{% url 'website:get_question' answer.question.id %}">{{ answer.question.title }}</a> 
+                    <a href="{% url 'website:get_question' answer.question.id %}#answer{{ answer.id }}" style="color: red;">{{ answer.question.title }}</a> 
                 </span>
+                {% else %}
+                <span class="body">
+                    <a href="{% url 'website:get_question' answer.question.id %}#answer{{ answer.id }}">{{ answer.question.title }}</a> 
+                </span>
+                {% endif %}
                 <br><br>
                 <span class="date">
                     <small>Replied on:{{ answer.date_created }}

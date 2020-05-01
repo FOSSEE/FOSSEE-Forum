@@ -188,8 +188,7 @@ def home(request):
         if next:
             return HttpResponseRedirect('/')
     categories = FossCategory.objects.order_by('name')
-    questions = Question.objects.filter(
-        is_spam=False, is_active=True).order_by('-date_created')
+    questions = Question.objects.filter(is_spam=False, is_active=True).order_by('-date_created')
     context = {
         'categories': categories,
         'questions': questions,
@@ -219,8 +218,10 @@ def get_question(request, question_id=None, pretty_url=None):
         else:
             return HttpResponseRedirect("/moderator/")
     else:
-        # SHOULD SPAMMED QUESTIONS BE VISIBLE TO THE AUTHOR??
-        question = get_object_or_404(Question, id=question_id, is_active=True, is_spam=False)
+        # Spam Questions should be accessible to its Author only.
+        question = get_object_or_404(Question, id=question_id, is_active=True)
+        if question.user != request.user and question.is_spam:
+            raise Http404
         answers = question.answer_set.filter(is_active=True).all()
 
     sub_category = True
@@ -231,8 +232,7 @@ def get_question(request, question_id=None, pretty_url=None):
     ans_count = len(answers)
     form = AnswerQuestionForm()
     thisuserupvote = question.userUpVotes.filter(id=request.user.id).count()
-    thisuserdownvote = question.userDownVotes.filter(
-        id=request.user.id).count()
+    thisuserdownvote = question.userDownVotes.filter(id=request.user.id).count()
 
     ans_votes = []
     for vote in answers:
@@ -343,8 +343,6 @@ def new_question(request):
             plain_message = strip_tags(html_message)
             send_email(subject, plain_message, html_message, from_email, to)
 
-            if (question.is_spam):
-                return HttpResponseRedirect('/')
             return HttpResponseRedirect('/question/{0}/'.format(question.id))
 
         else:
@@ -459,7 +457,7 @@ def answer_comment(request):
             html_message = render_to_string('website/templates/emails/new_comment_email.html', {
                 'title': answer.question.title,
                 'category': answer.question.category,
-                'link': settings.DOMAIN_NAME + '/question/' + str(answer.question.id) + "#comment" + str(comment.id),
+                'link': settings.DOMAIN_NAME + '/question/' + str(answer.question.id) + "#comm" + str(comment.id),
             })
             plain_message = strip_tags(html_message)
 
@@ -612,9 +610,6 @@ def edit_question(request, question_id):
                 to.append(get_user_email(uid))
 
             send_email_as_to(subject, plain_message, html_message, from_email, to)
-
-            if (question.is_spam and not request.session.get('MODERATOR_ACTIVATED', False)):
-                return HttpResponseRedirect('/')
 
             return HttpResponseRedirect('/question/{0}/'.format(question.id))
 
@@ -1222,7 +1217,7 @@ def ajax_answer_comment_update(request):
                     'title': comment.answer.question.title,
                     'category': comment.answer.question.category,
                     'body': comment.answer.question.body,
-                    'link': settings.DOMAIN_NAME + '/question/' + str(comment.answer.question.id) + "#comment" + str(comment.id),
+                    'link': settings.DOMAIN_NAME + '/question/' + str(comment.answer.question.id) + "#comm" + str(comment.id),
                     'by_moderator': True,
                 })
                 plain_message = strip_tags(html_message)
@@ -1238,7 +1233,7 @@ def ajax_answer_comment_update(request):
                     'title': comment.answer.question.title,
                     'category': comment.answer.question.category,
                     'body': comment.answer.question.body,
-                    'link': settings.DOMAIN_NAME + '/question/' + str(comment.answer.question.id) + "#comment" + str(comment.id),
+                    'link': settings.DOMAIN_NAME + '/question/' + str(comment.answer.question.id) + "#comm" + str(comment.id),
                 })
                 plain_message = strip_tags(html_message)
 
