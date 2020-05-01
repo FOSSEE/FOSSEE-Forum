@@ -43,7 +43,7 @@ admins = (
 def account_credentials_defined(user):
     """
     Return True if the user has completed his Profile OR
-    If the user is a Moderator (Moderators don't need to complete their Profile).
+    if the user is a Moderator (Moderators don't need to complete their Profile).
     """
     return ((user.first_name and user.last_name) or is_moderator(user))
 
@@ -53,10 +53,7 @@ def is_moderator(user, question=None):
     Return True if the user is a moderator of any category, if question is not provided.
     """
     if question:
-        # REQUIRES CHANGES
-        # If we add a new Category and don't create a Moderator Group for it, it will throw Exception.
-        # Maybe just handle the Exception
-        return user.groups.filter(moderatorgroup=ModeratorGroup.objects.get(category=question.category)).exists()
+        return user.groups.filter(moderatorgroup=get_object_or_404(ModeratorGroup, category=question.category)).exists()
     return user.groups.count() > 0
 
 def to_uids(question):
@@ -979,9 +976,9 @@ def mark_answer_spam(request, answer_id):
     answer = get_object_or_404(Answer, id=answer_id, is_active=True)
     question_id = answer.question.id
 
-    if (request.method == "POST"):
-        type = request.POST['selector']
-        if (type == "spam"):
+    if request.method == "POST":
+        choice = request.POST['selector']
+        if choice == "spam":
             answer.is_spam = True
         else:
             answer.is_spam = False
@@ -1331,7 +1328,7 @@ def ajax_keyword_search(request):
     if request.method == "POST":
         key = request.POST['key']
         questions = (
-            Question.objects.filter(title__contains=key).filter(
+            Question.objects.filter(title__icontains=key).filter(
                 is_spam=False,
                 is_active=True
             ) | Question.objects.filter(category__name=key).filter(
