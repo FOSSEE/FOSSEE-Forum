@@ -1,4 +1,4 @@
-{% extends "website/templates/base.html" %}
+{% extends MODERATOR_ACTIVATED|yesno:'website/templates/moderator/base.html,website/templates/base.html' %}
 <!DOCTYPE html>
 
 {% block title %} Page not found {% endblock %}
@@ -10,6 +10,6 @@
 <h3>Not authorized to access this page.</h3>
 <br>
 <h4>
-	Please check the URL address or <a href='/'>go to home page</a>.
+	Please check the URL address or {% if MODERATOR_ACTIVATED %}<a href='/moderator/'>{% else %}<a href='/'>{% endif %}go to home page</a>.
 </h4>
 {% endblock %}

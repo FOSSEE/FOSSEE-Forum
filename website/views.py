@@ -1036,8 +1036,8 @@ def moderator_home(request):
 @user_passes_test(is_moderator)
 def moderator_questions(request):
     """Display all the questions belonging to the Moderator's Categories."""
-    # CHANGES REQUIRED
-    # No checks here if Moderator Panel is activated or not
+    if not request.session.get('MODERATOR_ACTIVATED', False):
+        return HttpResponseRedirect('/questions/')
 
     # If user is a master moderator
     if (request.user.groups.filter(name="forum_moderator").exists()):
@@ -1077,11 +1077,10 @@ def moderator_questions(request):
 def moderator_unanswered(request):
     """Display all the Unanswered Questions belonging to the Moderator's Categories."""
     request.session['MODERATOR_ACTIVATED'] = True   # Why here???
-    # If user is a master moderator
+    # If user is a super moderator
     if (request.user.groups.filter(name="forum_moderator").exists()):
         categories = FossCategory.objects.order_by('name')
-        questions = Question.objects.all().filter(
-            is_active=True).order_by('date_created').reverse()
+        questions = Question.objects.all().filter(is_active=True).order_by('date_created').reverse()
 
     else:
         # Finding the moderator's category questions
@@ -1107,9 +1106,6 @@ def moderator_unanswered(request):
 @user_passes_test(is_moderator)
 def train_spam_filter(request):
     """Re-train the Spam Filter."""
-    # CHANGES REQUIRED
-    # Should be accessable only if Moserator Panel is activated
-
     next = request.GET.get('next', '')
     train()
     try:
