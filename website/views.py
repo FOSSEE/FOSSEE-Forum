@@ -1080,7 +1080,7 @@ def moderator_unanswered(request):
     # If user is a super moderator
     if (request.user.groups.filter(name="forum_moderator").exists()):
         categories = FossCategory.objects.order_by('name')
-        questions = Question.objects.all().filter(is_active=True).order_by('date_created').reverse()
+        questions = Question.objects.filter(is_active=True).order_by('-date_created')
 
     else:
         # Finding the moderator's category questions

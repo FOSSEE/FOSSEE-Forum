@@ -161,11 +161,25 @@ def account_view_profile(request, user_id=None):
         flag = True
 
     if request.session.get('MODERATOR_ACTIVATED', False):
-        # REQUIRES CHANGES
-        # Moderators should be able to view Ques and Ans of only his own Category
-        # if forum_moderator, show all otherwise show only respective content.
-        questions = Question.objects.filter(user_id = user_id).order_by('-date_created')
-        answers = Answer.objects.filter(uid = user_id).order_by('-date_created')
+        # Moderators other than super moderator (forum_moderator) should be able to view Ques/Ans of only their Categories.
+        if request.user.groups.filter(name="forum_moderator").exists():
+            questions = Question.objects.filter(user_id=user_id).order_by('-date_created')
+            answers = Answer.objects.filter(uid=user_id).order_by('-date_created')
+        else:
+            questions = []
+            answers = []
+            for group in request.user.groups.all():
+                category = ModeratorGroup.objects.get(group=group).category
+                questions.extend(Question.objects.filter(user_id=user_id, category__name=category.name))
+                answers.extend(Answer.objects.filter(uid=user_id, question__category__name=category.name))
+            questions.sort(
+                key=lambda question: question.date_created,
+                reverse=True,
+            )
+            answers.sort(
+                key=lambda answer: answer.date_created,
+                reverse=True,
+            )
     else:
         # Spammed questions should be visible if flag=True
         if flag:
