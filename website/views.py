@@ -53,7 +53,9 @@ def is_moderator(user, question=None):
     Return True if the user is a moderator of any category, if question is not provided.
     """
     if question:
-        return user.groups.filter(moderatorgroup=get_object_or_404(ModeratorGroup, category=question.category)).exists()
+        return (user.groups.filter(name="forum_moderator").exists() or
+                user.groups.filter(moderatorgroup=get_object_or_404(
+                    ModeratorGroup, category=question.category)).exists())
     return user.groups.count() > 0
 
 def to_uids(question):
@@ -1002,7 +1004,7 @@ def moderator_home(request):
     except Resolver404:
         if next:
             return HttpResponseRedirect('/moderator/')
-    # If user is a master moderator
+    # If user is a super moderator
     if (request.user.groups.filter(name="forum_moderator").exists()):
         questions = Question.objects.filter().order_by('-date_created')
         categories = FossCategory.objects.order_by('name')
@@ -1036,7 +1038,7 @@ def moderator_questions(request):
     if not request.session.get('MODERATOR_ACTIVATED', False):
         return HttpResponseRedirect('/questions/')
 
-    # If user is a master moderator
+    # If user is a super moderator
     if (request.user.groups.filter(name="forum_moderator").exists()):
         categories = FossCategory.objects.order_by('name')
         questions = Question.objects.filter().order_by('-date_created')
