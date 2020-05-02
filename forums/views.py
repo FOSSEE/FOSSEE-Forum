@@ -8,12 +8,14 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth import login, logout, authenticate
 from django.shortcuts import render, redirect
 from django.template.context_processors import csrf
+from django.template.loader import render_to_string
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from django.core.mail import EmailMultiAlternatives
 from django.contrib import messages
 from django.conf import settings
 from django.core.mail import send_mail
+from django.utils.html import strip_tags
 from forums.forms import *
 from website.models import *
 
@@ -206,26 +208,25 @@ def send_registration_confirmation(user):
     p = Profile.objects.get(user = user)
 
     # Sending email when an answer is posted
-    subject = 'Account Active Notification'
-    message = """Dear {0}, \n
-    Thank you for registering at {1}.\n\n You may activate your account by clicking on this link or copying and pasting it in your browser
-    {2}\n
-    Regards, \n
-    FOSSEE forum\n
-    IIT Bombay.
-    """.format(
-        user.username,
-        settings.DOMAIN_NAME,
-        settings.DOMAIN_NAME + "/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
-    )
+    subject = 'Account Activation Notification'
+    html_message = render_to_string('forums/templates/account_activation_email.html', {
+        'username': user.username,
+        'domain': settings.DOMAIN_NAME,
+        'link': settings.DOMAIN_NAME + "/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username,
+    })
+    plain_message = strip_tags(html_message)
+
     email = EmailMultiAlternatives(
-        subject, message, settings.SENDER_EMAIL,
-        to = [user.email], bcc = [], cc = [settings.FORUM_NOTIFICATION],
-        headers = {'Reply-To': settings.SENDER_EMAIL, "Content-type":"text/html;charset = iso-8859-1"}
+        subject,
+        plain_message,
+        settings.SENDER_EMAIL,
+        to=[user.email],
+        cc=[settings.FORUM_NOTIFICATION],
+        headers={'Reply-To': settings.SENDER_EMAIL, "Content-type":"text/html;charset = iso-8859-1"},
     )
-    email.attach_alternative(message, "text/html")
+    email.attach_alternative(html_message, "text/html")
     try:
-        result = email.send(fail_silently = False)
+        result = email.send(fail_silently=False)
     except:
         pass
 
