@@ -518,7 +518,7 @@ def answer_comment(request):
             return HttpResponseRedirect('/question/{0}/'.format(answer.question.id))
 
         else:
-            messages.error(request, "Comment cann't be empty or only blank spaces.")
+            messages.error(request, "Comment can't be empty or only blank spaces.")
             return HttpResponseRedirect('/question/{0}/'.format(answer.question.id))
     
     return render(request, '404.html')
@@ -638,7 +638,6 @@ def question_delete(request, question_id):
     question = get_object_or_404(Question, id=question_id, is_active=True)
 
     # To prevent random user from manually entering the link and deleting
-    # NOT NEEDED THOUGH AS ONLY ALLOWED USERS CAN SEND POST REQUEST FROM TEMPLATE
     if ((request.user.id != question.user.id or question.answer_set.filter(is_active=True).count() > 0) and 
             (not is_moderator(request.user, question) or not request.session.get('MODERATOR_ACTIVATED', False))):
         return render(request, 'website/templates/not-authorized.html')
@@ -680,12 +679,11 @@ def question_delete(request, question_id):
 def answer_delete(request, answer_id):
     """Delete an answer."""
     answer = get_object_or_404(Answer, id=answer_id, is_active=True)
-    question_id = answer.question.id
+    question = answer.question
 
     # The second statement in if condition excludes comments made by Answer's author.
-    # NOT NEEDED THOUGH AS ONLY ALLOWED USERS CAN SEND POST REQUEST FROM TEMPLATE
     if ((request.user.id != answer.uid or AnswerComment.objects.filter(answer=answer, is_active=True).exclude(uid=answer.uid).exists()) and
-            (not is_moderator(request.user, answer.question) or not request.session.get('MODERATOR_ACTIVATED', False))):
+            (not is_moderator(request.user, question) or not request.session.get('MODERATOR_ACTIVATED', False))):
         return render(request, 'website/templates/not-authorized.html')
 
     if (request.method == "POST"):
@@ -693,17 +691,17 @@ def answer_delete(request, answer_id):
         answer.save()
 
         # Sending Emails for Answer Delete
-        subject = "FOSSEE Forums - {0} - Answer Deleted".format(answer.question.category)
+        subject = "FOSSEE Forums - {0} - Answer Deleted".format(question.category)
         from_email = settings.SENDER_EMAIL
-        to = [settings.BCC_EMAIL_ID, answer.question.user.email]
+        to = [settings.BCC_EMAIL_ID, question.user.email]
         
         if request.session.get('MODERATOR_ACTIVATED', False):
             delete_reason = request.POST.get('deleteAnswer')
 
             html_message = render_to_string('website/templates/emails/deleted_answer_email.html', {
-                'title': answer.question.title,
-                'category': answer.question.category,
-                'body': answer.question.body,
+                'title': question.title,
+                'category': question.category,
+                'body': question.body,
                 'answer': answer.body,
                 'reason': delete_reason,
                 'by_moderator': True,
@@ -718,19 +716,78 @@ def answer_delete(request, answer_id):
             send_email_as_to(subject, plain_message, html_message, from_email, to)
         else:
             html_message = render_to_string('website/templates/emails/deleted_answer_email.html', {
-                'title': answer.question.title,
-                'category': answer.question.category,
-                'body': answer.question.body,
+                'title': question.title,
+                'category': question.category,
+                'body': question.body,
                 'answer': answer.body,
             })
             plain_message = strip_tags(html_message)
 
-            to.append(answer.question.category.email)
+            to.append(question.category.email)
             send_email_as_to(subject, plain_message, html_message, from_email, to)
 
-        return HttpResponseRedirect('/question/{0}/'.format(question_id))
+        messages.success(request, "Answer Deleted Successfully!")
+        return HttpResponseRedirect('/question/{0}/'.format(question.id))
 
     # Answer can only be deleted by sending POST requests and not by GET requests (directly accessing the link)
+    return render(request, 'website/templates/not-authorized.html')
+
+@login_required
+def comment_delete(request, comment_id):
+    """Delete the comment and send emails to the concerned."""
+    comment = get_object_or_404(AnswerComment, pk=comment_id)
+    question = comment.answer.question
+
+    if ((request.user != question.user or not can_delete(comment.answer, comment_id)) and
+            (not is_moderator(request.user, question) or not request.session.get('MODERATOR_ACTIVATED', False))):
+        return render(request, 'website/templates/not-authorized.html')
+
+    if request.method == 'POST':
+        comment.is_active = False
+        comment.save()
+
+        # Sending Emails regarding Comment Deletion
+        subject = "FOSSEE Forums - {0} - Comment Deleted".format(question.category)
+        from_email = settings.SENDER_EMAIL
+        to = [settings.BCC_EMAIL_ID]
+
+        if request.session.get('MODERATOR_ACTIVATED', False):
+            delete_reason = request.POST.get('deleteComment')
+
+            html_message = render_to_string('website/templates/emails/deleted_comment_email.html', {
+                'title': question.title,
+                'category': question.category,
+                'body': question.body,
+                'answer': comment.answer.body,
+                'comment': comment.body,
+                'reason': delete_reason,
+                'by_moderator': True,
+            })
+            plain_message = strip_tags(html_message)
+
+            mail_uids = to_uids(question)
+            for uid in mail_uids:
+                to.append(get_user_email(uid))
+
+            send_email_as_to(subject, plain_message, html_message, from_email, to)
+
+        else:
+            html_message = render_to_string('website/templates/emails/deleted_comment_email.html', {
+                'title': question.title,
+                'category': question.category,
+                'body': question.body,
+                'answer': comment.answer.body,
+                'comment': comment.body,
+            })
+            plain_message = strip_tags(html_message)
+
+            to.append(get_user_email(comment.answer.uid))
+            send_email_as_to(subject, plain_message, html_message, from_email, to)
+
+        messages.success(request, "Comment Deleted Successfully!")
+        return HttpResponseRedirect('/question/{0}/'.format(question.id))
+
+    # Comment can only be deleted by sending POST requests and not by GET requests (directly accessing the link)
     return render(request, 'website/templates/not-authorized.html')
 
 
@@ -1240,64 +1297,6 @@ def ajax_answer_comment_update(request):
         else:
             messages.error(request, "Only moderator can update.")
             return HttpResponseRedirect('/question/{0}/'.format(comment.answer.question.id))
-    else:
-        return render(request, '404.html')
-
-
-@login_required
-@csrf_exempt
-def ajax_answer_comment_delete(request):
-    """Delete the comment and send emails to the concerned."""
-    if request.method == 'POST':
-        comment_id = request.POST['comment_id']
-        comment = get_object_or_404(AnswerComment, pk=comment_id)
-
-        if ((is_moderator(request.user, comment.answer.question) and request.session.get('MODERATOR_ACTIVATED', False)) or
-                (request.user.id == comment.uid and can_delete(comment.answer, comment_id))):
-            comment.is_active = False
-            comment.save()
-
-            # Sending Emails regarding Comment Deletion
-            subject = "FOSSEE Forums - {0} - Comment Deleted".format(comment.answer.question.category)
-            from_email = settings.SENDER_EMAIL
-            to = [settings.BCC_EMAIL_ID]
-
-            if request.session.get('MODERATOR_ACTIVATED', False):
-                html_message = render_to_string('website/templates/emails/deleted_comment_email.html', {
-                    'title': comment.answer.question.title,
-                    'category': comment.answer.question.category,
-                    'body': comment.answer.question.body,
-                    'answer': comment.answer.body,
-                    'comment': comment.body,
-                    'by_moderator': True,
-                })
-                plain_message = strip_tags(html_message)
-
-                mail_uids = to_uids(comment.answer.question)
-                for uid in mail_uids:
-                    to.append(get_user_email(uid))
-
-                send_email_as_to(subject, plain_message, html_message, from_email, to)
-
-            else:
-                html_message = render_to_string('website/templates/emails/deleted_comment_email.html', {
-                    'title': comment.answer.question.title,
-                    'category': comment.answer.question.category,
-                    'body': comment.answer.question.body,
-                    'answer': comment.answer.body,
-                    'comment': comment.body,
-                })
-                plain_message = strip_tags(html_message)
-
-                to.append(get_user_email(comment.answer.uid))
-                send_email_as_to(subject, plain_message, html_message, from_email, to)
-
-
-            return HttpResponse('deleted')
-        else:
-            messages.error(request, "Only Moderator can delete.")
-            return HttpResponseRedirect(
-                '/question/{0}/'.format(comment.answer.question.id))
     else:
         return render(request, '404.html')
 

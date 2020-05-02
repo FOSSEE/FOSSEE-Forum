@@ -21,6 +21,7 @@ urlpatterns = [
 
     path('question/delete/<int:question_id>/', views.question_delete, name='question_delete'),
     path('answer_delete/<int:answer_id>/', views.answer_delete, name='answer_delete'),
+    path('comment_delete/<int:comment_id>/', views.comment_delete, name='comment_delete'),
 
     path('question_restore/<int:question_id>/', views.question_restore, name='question_restore'),
     path('answer_restore/<int:answer_id>/', views.answer_restore, name='answer_restore'),
@@ -49,7 +50,6 @@ urlpatterns = [
     path('ajax-tutorials/', views.ajax_tutorials, name='ajax_tutorials'),
     path('ajax-answer-update/', views.ajax_answer_update, name='ajax_answer_update'),
     path('ajax-answer-comment-update/', views.ajax_answer_comment_update, name='ajax_answer_comment_update'),
-    path('ajax-answer-comment-delete/', views.ajax_answer_comment_delete, name='ajax_answer_comment_delete'),
     path('ajax-notification-remove/', views.ajax_notification_remove, name='ajax_notification_remove'),
     path('ajax-keyword-search/', views.ajax_keyword_search, name='ajax_keyword_search'),
 ]

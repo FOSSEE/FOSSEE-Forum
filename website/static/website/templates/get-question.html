@@ -283,37 +283,6 @@
                 </div> <!-- /.modal-dialog -->
             </div> <!-- /.modal -->
 
-            <!-- Modal to delete answer -->
-            <div class="modal fade" id="answerDeleteModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel"
-                aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h4 class="modal-title" id="myModalLabel">Delete Answer</h4>
-                        </div>
-                        <div class="modal-body">
-                            {% if MODERATOR_ACTIVATED %}
-                            <h5>Why is this answer being deleted?</h5>
-                            {% else %}
-                            <h5>Are you sure about deleting the answer?</h5>
-                            {% endif %}
-                            <form id="answerDeleteForm" method="POST" action="">
-                                {% csrf_token %}
-                                {% if MODERATOR_ACTIVATED %}
-                                <textarea name="deleteAnswer" required></textarea>
-                                {% endif %}
-                                <hr>
-                                <div class="pull-right">
-                                    <input type="submit" class="btn btn-sm btn-success" value="Okay">
-                                    <a class="btn btn-sm btn-default" data-dismiss="modal">Close</a>
-                                </div>
-                            </form>
-                            <div class="clearfix"></div>
-                        </div> <!-- /.modal-body -->
-                    </div> <!-- /.modal-content -->
-                </div> <!-- /.modal-dialog -->
-            </div> <!-- /.modal -->
-
         </div> <!-- /.answer -->
 
         <div class="row" style="padding-left: 40px">
@@ -360,7 +329,8 @@
                                 });
                             </script>
                             <span class="meta_co" style="position: absolute; left: 40px; bottom: 0px; padding: 7px 7px;">
-                                <a class="delete-comment btn btn-xs btn-info vs" data-id="{{ comment.id }}">Delete</a>
+                                <a class="delete-comment btn btn-xs btn-info vs" data-toggle="modal" data-target="#commentDeleteModal"
+                                    data-id="{{ comment.id }}">Delete</a>
                             </span>
                             <span class="meta_co" style="position: absolute; left: 87px; bottom: 0px; padding: 7px 7px;">
                                 <a class="cancel-edit-comment btn btn-xs btn-info vs" id="can-ed-com{{ comment.id }}" data-id="{{ comment.id }}"
@@ -532,6 +502,68 @@
             </div> <!-- /.modal-body -->
         </div> <!-- /.modal-content -->
     </div> <!-- /.modal-dialog -->
+</div> <!-- /.modal -->
+
+<!-- Modal to delete answer -->
+<div class="modal fade" id="answerDeleteModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel"
+aria-hidden="true">
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4 class="modal-title" id="myModalLabel">Delete Answer</h4>
+        </div>
+        <div class="modal-body">
+            {% if MODERATOR_ACTIVATED %}
+            <h5>Why is this answer being deleted?</h5>
+            {% else %}
+            <h5>Are you sure about deleting the answer?</h5>
+            {% endif %}
+            <form id="answerDeleteForm" method="POST" action="">
+                {% csrf_token %}
+                {% if MODERATOR_ACTIVATED %}
+                <textarea name="deleteAnswer" required></textarea>
+                {% endif %}
+                <hr>
+                <div class="pull-right">
+                    <input type="submit" class="btn btn-sm btn-success" value="Okay">
+                    <a class="btn btn-sm btn-default" data-dismiss="modal">Close</a>
+                </div>
+            </form>
+            <div class="clearfix"></div>
+        </div> <!-- /.modal-body -->
+    </div> <!-- /.modal-content -->
+</div> <!-- /.modal-dialog -->
+</div> <!-- /.modal -->
+
+<!-- Modal to delete comment -->
+<div class="modal fade" id="commentDeleteModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel"
+aria-hidden="true">
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4 class="modal-title" id="myModalLabel">Delete Comment</h4>
+        </div>
+        <div class="modal-body">
+            {% if MODERATOR_ACTIVATED %}
+            <h5>Why is this comment being deleted?</h5>
+            {% else %}
+            <h5>Are you sure about deleting the comment?</h5>
+            {% endif %}
+            <form id="commentDeleteForm" method="POST" action="">
+                {% csrf_token %}
+                {% if MODERATOR_ACTIVATED %}
+                <textarea name="deleteComment" required></textarea>
+                {% endif %}
+                <hr>
+                <div class="pull-right">
+                    <input type="submit" class="btn btn-sm btn-success" value="Okay">
+                    <a class="btn btn-sm btn-default" data-dismiss="modal">Close</a>
+                </div>
+            </form>
+            <div class="clearfix"></div>
+        </div> <!-- /.modal-body -->
+    </div> <!-- /.modal-content -->
+</div> <!-- /.modal-dialog -->
 </div> <!-- /.modal -->
 
 {% endblock %}
@@ -784,16 +816,6 @@
                 }
             }
         });
-
-        /* DELTETING A COMMENT */
-        $('.delete-comment').click(function (event) {
-            var id = $(this).attr('data-id');
-            $.post('/ajax-answer-comment-delete/', {
-                comment_id: id
-            }, function () {
-                location.reload();
-            });
-        });
     });
 </script>
 
@@ -805,6 +827,16 @@
         $("#answerDeleteForm").attr("action", "/answer_delete/" + id + "/");
     })
 </script>
+
+<!-- Script to POST comment delete form data -->
+<script type="text/javascript">
+    $('.delete-comment').on('click', function (event) {
+        var button = $(event.relatedTarget) // Button that triggered the modal
+        var id = $(this).data('id') // Extract info from data-* attributes
+        $("#commentDeleteForm").attr("action", "/comment_delete/" + id + "/");
+    })
+</script>
+
 <script src="{% static 'website/js/thread-user.js' %}"></script>
 <script src="{% static 'website/js/custom.js' %}"></script>
 

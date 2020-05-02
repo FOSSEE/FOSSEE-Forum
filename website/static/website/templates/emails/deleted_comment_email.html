@@ -14,6 +14,7 @@ The following comment has been deleted by {% if by_moderator %}a moderator{% els
 
 {% autoescape off %}{{ comment }}{% endautoescape %}
 
+{% if by_moderator %}<b>Moderator Comments: </b>{{ reason }}<br><br>{% endif %}
 <br>
 Regards,<br>
 FOSSEE Team,<br>
