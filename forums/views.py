@@ -54,14 +54,15 @@ def account_register(request):
                 user.save()
             else:
                 messages.error(request, 'Invalid reCAPTCHA. Please try again.')
+                return HttpResponseRedirect('/accounts/register/')
 
             confirmation_code = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for x in range(33))
             p = Profile(user = user, confirmation_code = confirmation_code)
             p.save()
             send_registration_confirmation(user)
-            messages.success(request, """
-                Please confirm your registration by clicking on the activation link which has been sent to your registered email id.
-            """)
+            # messages.success(request, """
+            #     Please confirm your registration by clicking on the activation link which has been sent to your registered email id.
+            # """)
 
             return render(request, 'forums/templates/message.html')
 
@@ -97,15 +98,15 @@ def confirm(request, confirmation_code, username):
             # Becomes True only if moderator_home view (website.views) is accessed by user.
             request.session['MODERATOR_ACTIVATED'] = False
 
-            messages.success(request, "Your account has been activated!. Please update your profile to complete your registration")
+            messages.success(request, "Your account has been activated! Please update your profile to complete your registration.")
             return HttpResponseRedirect('/accounts/profile/')
 
         else:
-            messages.success(request, "Something went wrong!. Please try again!")
+            messages.error(request, "Something went wrong! Please try again!")
             return HttpResponseRedirect('/')
 
     except Exception as e:
-        messages.success(request, "Your account not activated!. Please try again!")
+        messages.error(request, "Your account not activated! Please try again!")
         return HttpResponseRedirect('/')
 
 

@@ -1313,10 +1313,10 @@ def ajax_answer_comment_update(request):
                 to.append(get_user_email(comment.answer.uid))
                 send_email_as_to(subject, plain_message, html_message, from_email, to)
 
-            messages.success(request, "Comment is Successfully Saved")
+            messages.success(request, "Comment is Successfully Saved!")
             return HttpResponseRedirect('/question/{0}/'.format(comment.answer.question.id))
         else:
-            messages.error(request, "Only moderator can update.")
+            messages.error(request, "Failed to Update Comment!")
             return HttpResponseRedirect('/question/{0}/'.format(comment.answer.question.id))
     else:
         return render(request, 'website/templates/get-requests-not-allowed.html')

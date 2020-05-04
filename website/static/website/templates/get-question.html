@@ -17,10 +17,14 @@
 <div class="row">
     {% if messages %}
     {% for message in messages %}
-    <div class="alert alert-danger h5">
-        <a class="close" data-dismiss="alert" aria-label="close" style="color: black;">&times;</a>
-        <b>{{ message }}</b>
-    </div>
+        {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+        <div class="alert alert-success h5">
+        {% else %}
+        <div class="alert alert-danger h5">
+        {% endif %}
+            <a class="close" data-dismiss="alert" aria-label="close" style="color: black;">&times;</a>
+            <b>{{ message }}</b>
+        </div>
     {% endfor %}
     {% endif %}
     <div class="question-wrapper col-lg-12 col-md-12 col-sm-12 col-xs-12">
