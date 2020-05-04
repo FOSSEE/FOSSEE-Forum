@@ -13,7 +13,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core import mail
 from django.core.mail import EmailMultiAlternatives
-from django.http import Http404, HttpResponse, HttpResponseRedirect 
+from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.template.context_processors import csrf
 from django.template.loader import render_to_string
@@ -399,20 +399,24 @@ def question_answer(request, question_id):
             })
             plain_message = strip_tags(html_message)
 
+            not_to_notify = [request.user.id]
+
             # Notifying the Question Author
-            if question.user.id != request.user.id and answer.is_spam == False:
+            if question.user.id not in not_to_notify and answer.is_spam == False:
                 notification = Notification(uid=question.user.id, qid=question.id, aid=answer.id)
                 notification.save()
 
-                subject = "FOSSEE Forums - {0} - Your question has been answered".format(question.category)
+                subject = "FOSSEE Forums - {0} - Your question has been Answered".format(question.category)
                 to = [question.user.email]
                 send_email(subject, plain_message, html_message, from_email, to)
 
+                not_to_notify.append(question.user.id)
+
             # Email and Notification for all user in this thread
             mail_uids = to_uids(question)
-            mail_uids.difference_update({question.user.id, request.user.id})
+            mail_uids.difference_update(set(not_to_notify))
 
-            subject = "FOSSEE Forums - {0} - Question has been answered".format(question.category)
+            subject = "FOSSEE Forums - {0} - Question has been Answered".format(question.category)
             to = [settings.BCC_EMAIL_ID]
             
             for mail_uid in mail_uids:
@@ -446,20 +450,12 @@ def answer_comment(request):
         form = AnswerCommentForm(request.POST)
 
         if form.is_valid():
-
             body = request.POST['body']
             comment = AnswerComment(uid=request.user.id, answer=answer, body=body)
             comment.save()
 
             # SENDING EMAILS AND NOTIFICATIONS ABOUT NEW COMMENT
             from_email = settings.SENDER_EMAIL
-            html_message = render_to_string('website/templates/emails/new_comment_email.html', {
-                'title': answer.question.title,
-                'category': answer.question.category,
-                'link': settings.DOMAIN_NAME + '/question/' + str(answer.question.id) + "#comm" + str(comment.id),
-            })
-            plain_message = strip_tags(html_message)
-
             not_to_notify = [request.user.id]
 
             # Notifying the Question Author
@@ -469,6 +465,12 @@ def answer_comment(request):
 
                 subject = "FOSSEE Forums - {0} - New Comment under your Question".format(answer.question.category)
                 to = [answer.question.user.email]
+                html_message = render_to_string('website/templates/emails/new_comment_email.html', {
+                    'title': answer.question.title,
+                    'category': answer.question.category,
+                    'link': settings.DOMAIN_NAME + '/question/' + str(answer.question.id) + "#comm" + str(comment.id),
+                })
+                plain_message = strip_tags(html_message)
                 send_email(subject, plain_message, html_message, from_email, to)
 
                 not_to_notify.append(answer.question.user.id)
@@ -480,6 +482,13 @@ def answer_comment(request):
 
                 subject = "FOSSEE Forums - {0} - New Comment on your answer".format(answer.question.category)
                 to = [answer_creator.email]
+                html_message = render_to_string('website/templates/emails/new_comment_email.html', {
+                    'title': answer.question.title,
+                    'category': answer.question.category,
+                    'answer': answer.body,
+                    'link': settings.DOMAIN_NAME + '/question/' + str(answer.question.id) + "#comm" + str(comment.id),
+                })
+                plain_message = strip_tags(html_message)
                 send_email(subject, plain_message, html_message, from_email, to)
 
                 not_to_notify.append(answer.uid)
@@ -494,6 +503,13 @@ def answer_comment(request):
 
                 subject = "FOSSEE Forums - {0} - Your Comment has a Reply".format(answer.question.category)
                 to = [get_user_email(last_comment.uid)]
+                html_message = render_to_string('website/templates/emails/new_comment_email.html', {
+                    'title': answer.question.title,
+                    'category': answer.question.category,
+                    'last_comment': last_comment.body,
+                    'link': settings.DOMAIN_NAME + '/question/' + str(answer.question.id) + "#comm" + str(comment.id), 
+                })
+                plain_message = strip_tags(html_message)
                 send_email(subject, plain_message, html_message, from_email, to)
 
                 not_to_notify.append(last_comment.uid)
@@ -503,6 +519,13 @@ def answer_comment(request):
             mail_uids.difference_update(set(not_to_notify))
             
             subject = "FOSSEE Forums - {0} - New Comment under the Question".format(answer.question.category)
+            html_message = render_to_string('website/templates/emails/new_comment_email.html', {
+                'title': answer.question.title,
+                'category': answer.question.category,
+                'body': answer.question.body,
+                'link': settings.DOMAIN_NAME + '/question/' + str(answer.question.id) + "#comm" + str(comment.id),
+            })
+            plain_message = strip_tags(html_message)
 
             to = [settings.BCC_EMAIL_ID]
             for mail_uid in mail_uids:
@@ -521,7 +544,7 @@ def answer_comment(request):
             messages.error(request, "Comment can't be empty or only blank spaces.")
             return HttpResponseRedirect('/question/{0}/'.format(answer.question.id))
     
-    return render(request, '404.html')
+    return render(request, 'website/templates/get-requests-not-allowed.html')
 
 
 # Edit a question on forums, notification is sent to mailing list
@@ -670,7 +693,7 @@ def question_delete(request, question_id):
         return render(request, 'website/templates/question-delete.html', {'title': question.title})
     
     # Question can only be deleted by sending POST requests and not by GET requests (directly accessing the link)
-    return render(request, 'website/templates/not-authorized.html')
+    return render(request, 'website/templates/get-requests-not-allowed.html')
 
 
 # View for deleting answer, notification is sent to person who posted answer
@@ -730,7 +753,7 @@ def answer_delete(request, answer_id):
         return HttpResponseRedirect('/question/{0}/'.format(question.id))
 
     # Answer can only be deleted by sending POST requests and not by GET requests (directly accessing the link)
-    return render(request, 'website/templates/not-authorized.html')
+    return render(request, 'website/templates/get-requests-not-allowed.html')
 
 @login_required
 def comment_delete(request, comment_id):
@@ -788,7 +811,7 @@ def comment_delete(request, comment_id):
         return HttpResponseRedirect('/question/{0}/'.format(question.id))
 
     # Comment can only be deleted by sending POST requests and not by GET requests (directly accessing the link)
-    return render(request, 'website/templates/not-authorized.html')
+    return render(request, 'website/templates/get-requests-not-allowed.html')
 
 
 @login_required
@@ -1187,7 +1210,7 @@ def ajax_tutorials(request):
         else:
             return HttpResponse('No sub-category in category.')
     else:
-        return render(request, '404.html')
+        return render(request, 'website/templates/get-requests-not-allowed.html')
 
 
 @login_required
@@ -1242,7 +1265,7 @@ def ajax_answer_update(request):
             messages.error(request, "Failed to Update Answer!")
             return HttpResponseRedirect('/question/{0}/'.format(answer.question.id))
     else:
-        return render(request, '404.html')
+        return render(request, 'website/templates/get-requests-not-allowed.html')
 
 
 @login_required
@@ -1298,7 +1321,7 @@ def ajax_answer_comment_update(request):
             messages.error(request, "Only moderator can update.")
             return HttpResponseRedirect('/question/{0}/'.format(comment.answer.question.id))
     else:
-        return render(request, '404.html')
+        return render(request, 'website/templates/get-requests-not-allowed.html')
 
 
 @login_required
@@ -1320,7 +1343,7 @@ def ajax_notification_remove(request):
             return HttpResponse('Notification not found.')
 
     else:
-        return render(request, '404.html')
+        return render(request, 'website/templates/get-requests-not-allowed.html')
 
 
 @csrf_exempt
@@ -1345,4 +1368,4 @@ def ajax_keyword_search(request):
             'website/templates/ajax-keyword-search.html',
             context)
     else:
-        return render(request, '404.html')
+        return render(request, 'website/templates/get-requests-not-allowed.html')

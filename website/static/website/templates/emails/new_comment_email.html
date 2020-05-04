@@ -2,6 +2,19 @@ A new comment has been posted under the following question in the FOSSEE Forum:<
 <br>
 <b>Title:</b> {{ title }}<br>
 <b>Category:</b> {{ category }}<br>
+{% if body %}
+<b>Question: </b>
+
+{% autoescape off %}{{ body }}{% endautoescape %}
+{% elif answer %}
+<b>Your Answer: </b>
+
+{% autoescape off %}{{ answer }}{% endautoescape %}
+{% elif last_comment %}
+<b>Your Comment: </b>
+
+{% autoescape off %}{{ last_comment }}{% endautoescape %}
+{% endif %}
 <b>Link: </b><a href="{{ link }}">{{ link }}</a><br>
 <br>
 <br>

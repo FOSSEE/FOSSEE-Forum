@@ -15,6 +15,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.contrib import messages
 from django.conf import settings
 from django.core.mail import send_mail
+from django.urls import Resolver404, resolve
 from django.utils.html import strip_tags
 from forums.forms import *
 from website.models import *
@@ -135,7 +136,12 @@ def account_profile(request):
             profile.save()
 
             messages.success(request, "Your profile has been updated!")
-            return HttpResponseRedirect("/accounts/view-profile/{0}/".format(user.id))
+            next = request.GET.get('next', '')
+            try:
+                resolve(next)
+                return HttpResponseRedirect(next)
+            except Resolver404:
+                return HttpResponseRedirect("/accounts/view-profile/{0}/".format(user.id))
 
         # return account_view_profile(request, user.id)
         context = {'form':form}
