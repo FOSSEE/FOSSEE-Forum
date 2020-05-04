@@ -369,9 +369,8 @@
                 {% if user.is_authenticated %} 
 
                     {% if not MODERATOR_ACTIVATED %}
-                    <form id="comment_form{{ answer.id }}" method="post" action="{% url 'website:answer_comment' %}">
+                    <form id="comment_form{{ answer.id }}" method="post" action="{% url 'website:answer_comment' answer.id %}">
                         {% csrf_token %}
-                        <input type="hidden" name="answer_id" value="{{ answer.id }}">
                         <div class="new-comment" id="comment{{ answer.id }}1">
                             {% render_field form.body class+="form-control body" id=answer|comment_id %}
                         </div>

@@ -372,8 +372,8 @@ def new_question(request):
 def question_answer(request, question_id):
     """Post an answer to a question asked om the forum."""
     question = get_object_or_404(Question, id=question_id, is_active=True)
-    if (request.method == 'POST'):
 
+    if (request.method == 'POST'):
         form = AnswerQuestionForm(request.POST, request.FILES)
         answer = Answer()
         answer.uid = request.user.id
@@ -439,14 +439,12 @@ def question_answer(request, question_id):
 
 @login_required
 @user_passes_test(account_credentials_defined, login_url='/accounts/profile/')
-def answer_comment(request):
+def answer_comment(request, answer_id):
     """Post a comment on an answer to a question asked on the forum."""
-    if (request.method == 'POST'):
+    answer = get_object_or_404(Answer, id=answer_id, is_active=True, is_spam=False)
+    answer_creator = answer.user()
 
-        answer_id = request.POST['answer_id']
-        answer = Answer.objects.get(pk=answer_id, is_active=True)
-        # answers = answer.question.answer_set.filter(is_spam=False, is_active=True).all()
-        answer_creator = answer.user()
+    if (request.method == 'POST'):
         form = AnswerCommentForm(request.POST)
 
         if form.is_valid():
@@ -543,8 +541,8 @@ def answer_comment(request):
         else:
             messages.error(request, "Comment can't be empty or only blank spaces.")
             return HttpResponseRedirect('/question/{0}/'.format(answer.question.id))
-    
-    return render(request, 'website/templates/get-requests-not-allowed.html')
+
+    return HttpResponseRedirect('/question/{0}/answer#{1}/'.format(question_id, answer_id))
 
 
 # Edit a question on forums, notification is sent to mailing list
