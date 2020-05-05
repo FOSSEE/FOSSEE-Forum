@@ -28,8 +28,10 @@ class FossCategory(models.Model):
 
 class ModeratorGroup(models.Model):
     group = models.OneToOneField(Group, on_delete=models.CASCADE)
-    category = models.ForeignKey(FossCategory, on_delete=models.CASCADE)
+    category = models.ForeignKey(FossCategory, on_delete=models.CASCADE, unique=True)
 
+    def __str__(self):
+        return self.group.name + " - " + self.category.name
 
 class AdvertiseBanner(models.Model):
     body = models.TextField(default='Null')

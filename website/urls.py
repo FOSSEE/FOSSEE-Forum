@@ -36,6 +36,7 @@ urlpatterns = [
 
     path('vote_post/', views.vote_post, name='vote_post'),
     path('ans_vote_post/', views.ans_vote_post, name='ans_vote_post'),
+    path('approve_spam_question/<int:question_id>/', views.approve_spam_question, name='approve_spam_question'),
     path('mark_answer_spam/<int:answer_id>/', views.mark_answer_spam, name='mark_answer_spam'),
 
 

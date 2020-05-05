@@ -11,8 +11,10 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.models import Group
 from django.core import mail
 from django.core.mail import EmailMultiAlternatives
+from django.db.models import Q
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.template.context_processors import csrf
@@ -71,6 +73,23 @@ def to_uids(question):
         mail_uids.append(answer.uid)
     mail_uids = set(mail_uids)
     return mail_uids
+
+def mod_uids(question=None):
+    """
+    Return a list of all moderators of the Question, is question is provided.
+    Return a list of all moderators on the forum, otherwise.
+    """
+    if question:
+        mods = User.objects.filter(
+            Q(groups__moderatorgroup__category=question.category) | 
+            Q(groups__name="forum_moderator")
+        )    
+    else:
+        mods = User.objects.filter(groups__isnull=False)
+    uids = []
+    for mod in mods:
+        uids.append(mod.id)
+    return uids
 
 def get_user_email(uid):
     user = User.objects.get(id=uid)
@@ -1048,6 +1067,20 @@ def ans_vote_post(request):
         return HttpResponse(initial_votes)
 
 
+# View to approve question marked as spam
+@login_required
+@user_passes_test(is_moderator)
+def approve_spam_question(request, question_id):
+    question = get_object_or_404(Question, id=question_id, is_active=True, is_spam=True)
+
+    if is_moderator(request.user, question) and request.session.get('MODERATOR_ACTIVATED', False):
+        question.is_spam = False
+        question.save()
+
+    messages.success(request, "Question marked successfully as Not-Spam!")
+    return HttpResponseRedirect('/question/{0}/'.format(question_id))
+
+
 # View to mark answer as spam/non-spam
 @login_required
 @user_passes_test(is_moderator)
@@ -1221,6 +1254,9 @@ def ajax_answer_update(request):
         if ((request.user.id == answer.uid and not AnswerComment.objects.filter(answer=answer, is_active=True).exclude(uid=answer.uid).exists()) or
                 (is_moderator(request.user, answer.question) and request.session.get('MODERATOR_ACTIVATED', False))):
             answer.body = str(body)
+            if (not request.session.get('MODERATOR_ACTIVATED', False) and
+                    predict(answer.body) == "Spam"):
+                answer.is_spam = True
             answer.save()
 
             # Sending Emails regarding Answer Update
