@@ -133,410 +133,6 @@ def send_email_as_to(subject, plain_message, html_message, from_email, to, reply
         messages.append(email)
     connection.send_messages(messages)
 
-def send_question_notification(user, question, previous_title=None, delete_reason=None):
-    # Values of flag:
-    # 0 --> No Pending Notifications, 1 --> Recently Added,
-    # 2 --> Recently Updated,  3 --> Recently Deleted.
-    flag = question.notif_flag
-    # Question Added Recently
-    if flag == 1:
-        subject = "FOSSEE Forums - {0} - New Question".format(question.category)
-        from_email = settings.SENDER_EMAIL
-        to = [settings.BCC_EMAIL_ID, question.category.email]
-        html_message = render_to_string('website/templates/emails/new_question_email.html', {
-            'title': question.title,
-            'category': question.category,
-            'body': question.body,
-            'link': settings.DOMAIN_NAME + '/question/' + str(question.id),
-        })
-        plain_message = strip_tags(html_message)
-        send_email_as_to(subject, plain_message, html_message, from_email, to)
-    # Question Edited Recently
-    elif flag == 2:
-        subject = "FOSSEE Forums - {0} - Question Edited".format(question.category)
-        from_email = settings.SENDER_EMAIL
-        html_message = render_to_string('website/templates/emails/edited_question_email.html', {
-            'title': question.title,
-            'previous_title': previous_title,
-            'category': question.category,
-            'body': question.body,
-            'link': settings.DOMAIN_NAME + '/question/' + str(question.id),
-        })
-        plain_message = strip_tags(html_message)
-        to = [question.category.email, settings.FORUM_NOTIFICATION]
-
-        # Getting emails of everyone in Question Thread and appending in 'to'
-        if question.user != user:
-            mail_uids = to_uids(question)
-            for uid in mail_uids:
-                to.append(get_user_email(uid))
-
-        send_email_as_to(subject, plain_message, html_message, from_email, to)
-    # Question Deleted Recently
-    # No need to send any notif if deleted by author
-    elif flag == 3 and question.user != user:
-        subject = "FOSSEE Forums - {0} - Question Deleted".format(question.category)
-        from_email = settings.SENDER_EMAIL
-        to = [settings.BCC_EMAIL_ID]
-        html_message = render_to_string('website/templates/emails/deleted_question_email.html', {
-            'title': question.title,
-            'category': question.category,
-            'body': question.body,
-            'reason': delete_reason,
-        })
-        plain_message = strip_tags(html_message)
-        # If Spam Question is deleted, send mail to question author only
-        if question.is_spam:
-            to = [question.user.email]
-        else:
-            mail_uids = to_uids(question)
-            for uid in mail_uids:
-                to.append(get_user_email(uid))
-
-        send_email_as_to(subject, plain_message, html_message, from_email, to)
-
-    question.notif_flag = 0
-    question.save()
-
-def send_answer_notification(user, answer, delete_reason=None):
-    flag = answer.notif_flag
-    question = answer.question
-    # Answer Added Recently
-    if flag == 1:
-        from_email = settings.SENDER_EMAIL
-        html_message = render_to_string('website/templates/emails/new_answer_email.html', {
-            'title': question.title,
-            'category': question.category,
-            'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#answer" + str(answer.id),
-        })
-        plain_message = strip_tags(html_message)
-
-        not_to_notify = [user.id]
-
-        # Notifying the Question Author
-        # if question.user.id not in not_to_notify and answer.is_spam == False:
-        if question.user.id not in not_to_notify:
-            notification = Notification(uid=question.user.id, qid=question.id, aid=answer.id)
-            notification.save()
-
-            subject = "FOSSEE Forums - {0} - Your question has been Answered".format(question.category)
-            to = [question.user.email]
-            send_email(subject, plain_message, html_message, from_email, to)
-
-            not_to_notify.append(question.user.id)
-
-        # Email and Notification for all user in this thread
-        mail_uids = to_uids(question)
-        mail_uids.difference_update(set(not_to_notify))
-
-        subject = "FOSSEE Forums - {0} - Question has been Answered".format(question.category)
-        to = [settings.BCC_EMAIL_ID]
-        
-        for mail_uid in mail_uids:
-            notification = Notification(uid=mail_uid, qid=question.id, aid=answer.id)
-            notification.save()
-
-            # Appending user email in 'to' list
-            to.append(get_user_email(mail_uid))
-
-        # Sending Email to everyone in 'to' list individually
-        send_email_as_to(subject, plain_message, html_message, from_email, to)
-    # Answer Edited Recently
-    elif flag == 2:
-        subject = "FOSSEE Forums - {0} - Answer Edited".format(question.category)
-        from_email = settings.SENDER_EMAIL
-        to = [settings.BCC_EMAIL_ID]
-
-        if answer.uid == user.id:
-            # Answer edited by Answer Author
-            html_message = render_to_string('website/templates/emails/edited_answer_email.html', {
-                'title': question.title,
-                'category': question.category,
-                'body': question.body,
-                'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#answer" + str(answer.id),
-            })
-            plain_message = strip_tags(html_message)
-
-            to.append(question.user.email)
-            send_email_as_to(subject, plain_message, html_message, from_email, to)
-        else:
-            # Answer edited by a Moderator
-            html_message = render_to_string('website/templates/emails/edited_answer_email.html', {
-                'title': question.title,
-                'category': question.category,
-                'body': question.body,
-                'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#answer" + str(answer.id),
-                'by_moderator': True,
-            })
-            plain_message = strip_tags(html_message)
-
-            mail_uids = to_uids(question)
-            for uid in mail_uids:
-                to.append(get_user_email(uid))
-
-            send_email_as_to(subject, plain_message, html_message, from_email, to)
-    # Answer deleted recently
-    elif flag == 3:
-        subject = "FOSSEE Forums - {0} - Answer Deleted".format(question.category)
-        from_email = settings.SENDER_EMAIL
-        to = [settings.BCC_EMAIL_ID, question.user.email]
-
-        if answer.uid == user.id:
-            # Answer deleted by Answer Author
-            # Don't send mail if spam answer is deleted by author
-            if not answer.is_spam:
-                html_message = render_to_string('website/templates/emails/deleted_answer_email.html', {
-                    'title': question.title,
-                    'category': question.category,
-                    'body': question.body,
-                    'answer': answer.body,
-                })
-                plain_message = strip_tags(html_message)
-
-                to.append(question.category.email)
-                send_email_as_to(subject, plain_message, html_message, from_email, to)
-        else:
-            # Answer deleted by a Moderator
-            html_message = render_to_string('website/templates/emails/deleted_answer_email.html', {
-                'title': question.title,
-                'category': question.category,
-                'body': question.body,
-                'answer': answer.body,
-                'reason': delete_reason,
-                'by_moderator': True,
-            })
-            plain_message = strip_tags(html_message)
-
-            if answer.is_spam:
-                # Send mail to Answer Author only if spam answer deleted by moderator
-                to = [get_user_email(answer.uid)]
-            else:
-                to.append(get_user_email(answer.uid))
-                for comment in AnswerComment.objects.filter(answer=answer, is_active=True):
-                    to.append(get_user_email(comment.uid))
-                to = list(set(to))   # Removing Duplicates
-
-            send_email_as_to(subject, plain_message, html_message, from_email, to)
-
-    # Updating notif flag after sending mails according to the previous flag.
-    answer.notif_flag = 0
-    answer.save()
-
-def send_comment_notification(user, comment, delete_reason=None):
-    flag = comment.notif_flag
-    answer = comment.answer
-    question = comment.answer.question
-    # Comment Added Recently
-    if flag == 1:
-        from_email = settings.SENDER_EMAIL
-        not_to_notify = [user.id]
-
-        # Notifying the Question Author
-        if question.user.id not in not_to_notify:
-            notification = Notification(uid=question.user.id, qid=question.id, aid=answer.id, cid=comment.id)
-            notification.save()
-
-            subject = "FOSSEE Forums - {0} - New Comment under your Question".format(question.category)
-            to = [question.user.email]
-            html_message = render_to_string('website/templates/emails/new_comment_email.html', {
-                'title': question.title,
-                'category': question.category,
-                'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#comm" + str(comment.id),
-            })
-            plain_message = strip_tags(html_message)
-            send_email(subject, plain_message, html_message, from_email, to)
-
-            not_to_notify.append(question.user.id)
-
-        # Notifying the Answer Author
-        if answer.uid not in not_to_notify:
-            notification = Notification(uid=answer.uid, qid=question.id, aid=answer.id, cid=comment.id)
-            notification.save()
-
-            subject = "FOSSEE Forums - {0} - New Comment on your answer".format(question.category)
-            to = [answer_creator.email]
-            html_message = render_to_string('website/templates/emails/new_comment_email.html', {
-                'title': question.title,
-                'category': question.category,
-                'answer': answer.body,
-                'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#comm" + str(comment.id),
-            })
-            plain_message = strip_tags(html_message)
-            send_email(subject, plain_message, html_message, from_email, to)
-
-            not_to_notify.append(answer.uid)
-
-        # Notifying the Last Comment Author
-        answer_comments = AnswerComment.objects.filter(answer=answer, is_active=True).exclude(uid=request.user.id).order_by('-date_created')
-        if answer_comments.exists() and answer_comments[0].uid not in not_to_notify:
-            last_comment = answer_comments[0]
-
-            notification = Notification(uid=last_comment.uid, qid=question.id, aid=answer.id, cid=comment.id)
-            notification.save()
-
-            subject = "FOSSEE Forums - {0} - Your Comment has a Reply".format(question.category)
-            to = [get_user_email(last_comment.uid)]
-            html_message = render_to_string('website/templates/emails/new_comment_email.html', {
-                'title': question.title,
-                'category': question.category,
-                'last_comment': last_comment.body,
-                'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#comm" + str(comment.id), 
-            })
-            plain_message = strip_tags(html_message)
-            send_email(subject, plain_message, html_message, from_email, to)
-
-            not_to_notify.append(last_comment.uid)
-
-        # Notifying all other users in the thread
-        mail_uids = to_uids(question)
-        mail_uids.difference_update(set(not_to_notify))
-        
-        subject = "FOSSEE Forums - {0} - New Comment under the Question".format(question.category)
-        html_message = render_to_string('website/templates/emails/new_comment_email.html', {
-            'title': question.title,
-            'category': question.category,
-            'body': question.body,
-            'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#comm" + str(comment.id),
-        })
-        plain_message = strip_tags(html_message)
-
-        to = [settings.BCC_EMAIL_ID]
-        for mail_uid in mail_uids:
-            notification = Notification(uid=mail_uid, qid=question.id, aid=answer.id, cid=comment.id)
-            notification.save()
-
-            # Appending user email in 'to' list                
-            to.append(get_user_email(mail_uid))
-
-        # Sending Email to everyone in 'to' list individually
-        send_email_as_to(subject, plain_message, html_message, from_email, to)
-    # Comment Edited Recently
-    if flag == 2:
-        subject = "FOSSEE Forums - {0} - Comment Edited".format(question.category)
-        from_email = settings.SENDER_EMAIL
-        to = [settings.BCC_EMAIL_ID]
-
-        if comment.uid == user.id:
-            # Comment edited by Comment Author
-            html_message = render_to_string('website/templates/emails/edited_comment_email.html', {
-                'title': question.title,
-                'category': question.category,
-                'body': question.body,
-                'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#comm" + str(comment.id),
-            })
-            plain_message = strip_tags(html_message)
-
-            to.append(get_user_email(answer.uid))
-            send_email_as_to(subject, plain_message, html_message, from_email, to)
-        else:
-            # Comment edited by a Moderator
-            html_message = render_to_string('website/templates/emails/edited_comment_email.html', {
-                'title': question.title,
-                'category': question.category,
-                'body': question.body,
-                'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#comm" + str(comment.id),
-                'by_moderator': True,
-            })
-            plain_message = strip_tags(html_message)
-
-            mail_uids = to_uids(question)
-            mail_uids.discard(request.user.id)
-            for uid in mail_uids:
-                to.append(get_user_email(uid))
-
-            send_email_as_to(subject, plain_message, html_message, from_email, to)
-            
-    # Comment Deleted Recently
-    elif flag == 3:
-        subject = "FOSSEE Forums - {0} - Comment Deleted".format(question.category)
-        from_email = settings.SENDER_EMAIL
-        to = [settings.BCC_EMAIL_ID]
-
-        if comment.uid == user.id:
-            # Comment Deleted by Comment Author
-            html_message = render_to_string('website/templates/emails/deleted_comment_email.html', {
-                'title': question.title,
-                'category': question.category,
-                'body': question.body,
-                'answer': answer.body,
-                'comment': comment.body,
-            })
-            plain_message = strip_tags(html_message)
-
-            to.append(get_user_email(answer.uid))
-            send_email_as_to(subject, plain_message, html_message, from_email, to)
-
-        else:
-            # Comment deleted by a Moderator
-            html_message = render_to_string('website/templates/emails/deleted_comment_email.html', {
-                'title': question.title,
-                'category': question.category,
-                'body': question.body,
-                'answer': answer.body,
-                'comment': comment.body,
-                'reason': delete_reason,
-                'by_moderator': True,
-            })
-            plain_message = strip_tags(html_message)
-
-            mail_uids = to_uids(question)
-            for uid in mail_uids:
-                to.append(get_user_email(uid))
-
-            send_email_as_to(subject, plain_message, html_message, from_email, to)
-
-    comment.notif_flag = 0
-    comment.save()
-
-def send_spam_question_notification(question):
-    subject = "FOSSEE Forums - {0} - Question Classified as Spam".format(question.category)
-    from_email = settings.SENDER_EMAIL
-    html_message = render_to_string('website/templates/emails/spam_question_email.html', {
-        'title': question.title,
-        'category': question.category,
-        'body': question.body,
-        'link': settings.DOMAIN_NAME + '/question/' + str(question.id),
-    })
-    plain_message = strip_tags(html_message)
-
-    to = [question.user.email]
-    mod_uids = mod_uids(question)
-    for uid in mod_uid:
-        to.append(get_user_email(uid))
-
-    send_email_as_to(subject, plain_message, html_message, from_email, to)
-
-def send_spam_answer_notification(user, answer):
-    question = answer.question
-
-    subject = "FOSSEE Forums - {0} - Answer Classified as Spam".format(question.category)
-    from_email = settings.SENDER_EMAIL
-    html_message = render_to_string('website/templates/emails/spam_answer_email.html', {
-        'title': question.title,
-        'category': question.category,
-        'body': question.body,
-        'answer': answer.body,
-        'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#answer" + str(answer.id),
-    })
-    plain_message = strip_tags(html_message)
-
-    to = [get_user_email(answer.uid)]
-    # Don't send mail to moderators if answer is marked as spam by a moderator itself
-    if answer.uid == user.uid:
-        # Answer marked as spam during the interaction by Ans Author
-        mod_uids = mod_uids(question)
-        for uid in mod_uid:
-            to.append(get_user_email(uid))
-
-    send_email_as_to(subject, plain_message, html_message, from_email, to)
-
-def send_question_approve_notification(question):
-    pass
-
-def send_answer_approve_notification(answer):
-    pass
-
-
 def can_delete_comment(answer, comment_id):
     """ Return True if there are no active comments after the comment to be deleted."""
     comments = answer.answercomment_set.filter(is_active=True).all()
@@ -1568,3 +1164,409 @@ def ajax_keyword_search(request):
             context)
     else:
         return render(request, 'website/templates/get-requests-not-allowed.html')
+
+
+# ALL NOTIFICATIONS BELOW
+
+def send_question_notification(user, question, previous_title=None, delete_reason=None):
+    # Values of flag:
+    # 0 --> No Pending Notifications, 1 --> Recently Added,
+    # 2 --> Recently Updated,  3 --> Recently Deleted.
+    flag = question.notif_flag
+    # Question Added Recently
+    if flag == 1:
+        subject = "FOSSEE Forums - {0} - New Question".format(question.category)
+        from_email = settings.SENDER_EMAIL
+        to = [settings.BCC_EMAIL_ID, question.category.email]
+        html_message = render_to_string('website/templates/emails/new_question_email.html', {
+            'title': question.title,
+            'category': question.category,
+            'body': question.body,
+            'link': settings.DOMAIN_NAME + '/question/' + str(question.id),
+        })
+        plain_message = strip_tags(html_message)
+        send_email_as_to(subject, plain_message, html_message, from_email, to)
+    # Question Edited Recently
+    elif flag == 2:
+        subject = "FOSSEE Forums - {0} - Question Edited".format(question.category)
+        from_email = settings.SENDER_EMAIL
+        html_message = render_to_string('website/templates/emails/edited_question_email.html', {
+            'title': question.title,
+            'previous_title': previous_title,
+            'category': question.category,
+            'body': question.body,
+            'link': settings.DOMAIN_NAME + '/question/' + str(question.id),
+        })
+        plain_message = strip_tags(html_message)
+        to = [question.category.email, settings.FORUM_NOTIFICATION]
+
+        # Getting emails of everyone in Question Thread and appending in 'to'
+        if question.user != user:
+            mail_uids = to_uids(question)
+            for uid in mail_uids:
+                to.append(get_user_email(uid))
+
+        send_email_as_to(subject, plain_message, html_message, from_email, to)
+    # Question Deleted Recently
+    # No need to send any notif if deleted by author
+    elif flag == 3 and question.user != user:
+        subject = "FOSSEE Forums - {0} - Question Deleted".format(question.category)
+        from_email = settings.SENDER_EMAIL
+        to = [settings.BCC_EMAIL_ID]
+        html_message = render_to_string('website/templates/emails/deleted_question_email.html', {
+            'title': question.title,
+            'category': question.category,
+            'body': question.body,
+            'reason': delete_reason,
+        })
+        plain_message = strip_tags(html_message)
+        # If Spam Question is deleted, send mail to question author only
+        if question.is_spam:
+            to = [question.user.email]
+        else:
+            mail_uids = to_uids(question)
+            for uid in mail_uids:
+                to.append(get_user_email(uid))
+
+        send_email_as_to(subject, plain_message, html_message, from_email, to)
+
+    question.notif_flag = 0
+    question.save()
+
+def send_answer_notification(user, answer, delete_reason=None):
+    flag = answer.notif_flag
+    question = answer.question
+    # Answer Added Recently
+    if flag == 1:
+        from_email = settings.SENDER_EMAIL
+        html_message = render_to_string('website/templates/emails/new_answer_email.html', {
+            'title': question.title,
+            'category': question.category,
+            'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#answer" + str(answer.id),
+        })
+        plain_message = strip_tags(html_message)
+
+        not_to_notify = [user.id]
+
+        # Notifying the Question Author
+        # if question.user.id not in not_to_notify and answer.is_spam == False:
+        if question.user.id not in not_to_notify:
+            notification = Notification(uid=question.user.id, qid=question.id, aid=answer.id)
+            notification.save()
+
+            subject = "FOSSEE Forums - {0} - Your question has been Answered".format(question.category)
+            to = [question.user.email]
+            send_email(subject, plain_message, html_message, from_email, to)
+
+            not_to_notify.append(question.user.id)
+
+        # Email and Notification for all user in this thread
+        mail_uids = to_uids(question)
+        mail_uids.difference_update(set(not_to_notify))
+
+        subject = "FOSSEE Forums - {0} - Question has been Answered".format(question.category)
+        to = [settings.BCC_EMAIL_ID]
+        
+        for mail_uid in mail_uids:
+            notification = Notification(uid=mail_uid, qid=question.id, aid=answer.id)
+            notification.save()
+
+            # Appending user email in 'to' list
+            to.append(get_user_email(mail_uid))
+
+        # Sending Email to everyone in 'to' list individually
+        send_email_as_to(subject, plain_message, html_message, from_email, to)
+    # Answer Edited Recently
+    elif flag == 2:
+        subject = "FOSSEE Forums - {0} - Answer Edited".format(question.category)
+        from_email = settings.SENDER_EMAIL
+        to = [settings.BCC_EMAIL_ID]
+
+        if answer.uid == user.id:
+            # Answer edited by Answer Author
+            html_message = render_to_string('website/templates/emails/edited_answer_email.html', {
+                'title': question.title,
+                'category': question.category,
+                'body': question.body,
+                'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#answer" + str(answer.id),
+            })
+            plain_message = strip_tags(html_message)
+
+            to.append(question.user.email)
+            send_email_as_to(subject, plain_message, html_message, from_email, to)
+        else:
+            # Answer edited by a Moderator
+            html_message = render_to_string('website/templates/emails/edited_answer_email.html', {
+                'title': question.title,
+                'category': question.category,
+                'body': question.body,
+                'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#answer" + str(answer.id),
+                'by_moderator': True,
+            })
+            plain_message = strip_tags(html_message)
+
+            mail_uids = to_uids(question)
+            for uid in mail_uids:
+                to.append(get_user_email(uid))
+
+            send_email_as_to(subject, plain_message, html_message, from_email, to)
+    # Answer deleted recently
+    elif flag == 3:
+        subject = "FOSSEE Forums - {0} - Answer Deleted".format(question.category)
+        from_email = settings.SENDER_EMAIL
+        to = [settings.BCC_EMAIL_ID, question.user.email]
+
+        if answer.uid == user.id:
+            # Answer deleted by Answer Author
+            # Don't send mail if spam answer is deleted by author
+            if not answer.is_spam:
+                html_message = render_to_string('website/templates/emails/deleted_answer_email.html', {
+                    'title': question.title,
+                    'category': question.category,
+                    'body': question.body,
+                    'answer': answer.body,
+                })
+                plain_message = strip_tags(html_message)
+
+                to.append(question.category.email)
+                send_email_as_to(subject, plain_message, html_message, from_email, to)
+        else:
+            # Answer deleted by a Moderator
+            html_message = render_to_string('website/templates/emails/deleted_answer_email.html', {
+                'title': question.title,
+                'category': question.category,
+                'body': question.body,
+                'answer': answer.body,
+                'reason': delete_reason,
+                'by_moderator': True,
+            })
+            plain_message = strip_tags(html_message)
+
+            if answer.is_spam:
+                # Send mail to Answer Author only if spam answer deleted by moderator
+                to = [get_user_email(answer.uid)]
+            else:
+                to.append(get_user_email(answer.uid))
+                for comment in AnswerComment.objects.filter(answer=answer, is_active=True):
+                    to.append(get_user_email(comment.uid))
+                to = list(set(to))   # Removing Duplicates
+
+            send_email_as_to(subject, plain_message, html_message, from_email, to)
+
+    # Updating notif flag after sending mails according to the previous flag.
+    answer.notif_flag = 0
+    answer.save()
+
+def send_comment_notification(user, comment, delete_reason=None):
+    flag = comment.notif_flag
+    answer = comment.answer
+    question = comment.answer.question
+    # Comment Added Recently
+    if flag == 1:
+        from_email = settings.SENDER_EMAIL
+        not_to_notify = [user.id]
+
+        # Notifying the Question Author
+        if question.user.id not in not_to_notify:
+            notification = Notification(uid=question.user.id, qid=question.id, aid=answer.id, cid=comment.id)
+            notification.save()
+
+            subject = "FOSSEE Forums - {0} - New Comment under your Question".format(question.category)
+            to = [question.user.email]
+            html_message = render_to_string('website/templates/emails/new_comment_email.html', {
+                'title': question.title,
+                'category': question.category,
+                'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#comm" + str(comment.id),
+            })
+            plain_message = strip_tags(html_message)
+            send_email(subject, plain_message, html_message, from_email, to)
+
+            not_to_notify.append(question.user.id)
+
+        # Notifying the Answer Author
+        if answer.uid not in not_to_notify:
+            notification = Notification(uid=answer.uid, qid=question.id, aid=answer.id, cid=comment.id)
+            notification.save()
+
+            subject = "FOSSEE Forums - {0} - New Comment on your answer".format(question.category)
+            to = [answer_creator.email]
+            html_message = render_to_string('website/templates/emails/new_comment_email.html', {
+                'title': question.title,
+                'category': question.category,
+                'answer': answer.body,
+                'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#comm" + str(comment.id),
+            })
+            plain_message = strip_tags(html_message)
+            send_email(subject, plain_message, html_message, from_email, to)
+
+            not_to_notify.append(answer.uid)
+
+        # Notifying the Last Comment Author
+        answer_comments = AnswerComment.objects.filter(answer=answer, is_active=True).exclude(uid=request.user.id).order_by('-date_created')
+        if answer_comments.exists() and answer_comments[0].uid not in not_to_notify:
+            last_comment = answer_comments[0]
+
+            notification = Notification(uid=last_comment.uid, qid=question.id, aid=answer.id, cid=comment.id)
+            notification.save()
+
+            subject = "FOSSEE Forums - {0} - Your Comment has a Reply".format(question.category)
+            to = [get_user_email(last_comment.uid)]
+            html_message = render_to_string('website/templates/emails/new_comment_email.html', {
+                'title': question.title,
+                'category': question.category,
+                'last_comment': last_comment.body,
+                'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#comm" + str(comment.id), 
+            })
+            plain_message = strip_tags(html_message)
+            send_email(subject, plain_message, html_message, from_email, to)
+
+            not_to_notify.append(last_comment.uid)
+
+        # Notifying all other users in the thread
+        mail_uids = to_uids(question)
+        mail_uids.difference_update(set(not_to_notify))
+        
+        subject = "FOSSEE Forums - {0} - New Comment under the Question".format(question.category)
+        html_message = render_to_string('website/templates/emails/new_comment_email.html', {
+            'title': question.title,
+            'category': question.category,
+            'body': question.body,
+            'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#comm" + str(comment.id),
+        })
+        plain_message = strip_tags(html_message)
+
+        to = [settings.BCC_EMAIL_ID]
+        for mail_uid in mail_uids:
+            notification = Notification(uid=mail_uid, qid=question.id, aid=answer.id, cid=comment.id)
+            notification.save()
+
+            # Appending user email in 'to' list                
+            to.append(get_user_email(mail_uid))
+
+        # Sending Email to everyone in 'to' list individually
+        send_email_as_to(subject, plain_message, html_message, from_email, to)
+    # Comment Edited Recently
+    if flag == 2:
+        subject = "FOSSEE Forums - {0} - Comment Edited".format(question.category)
+        from_email = settings.SENDER_EMAIL
+        to = [settings.BCC_EMAIL_ID]
+
+        if comment.uid == user.id:
+            # Comment edited by Comment Author
+            html_message = render_to_string('website/templates/emails/edited_comment_email.html', {
+                'title': question.title,
+                'category': question.category,
+                'body': question.body,
+                'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#comm" + str(comment.id),
+            })
+            plain_message = strip_tags(html_message)
+
+            to.append(get_user_email(answer.uid))
+            send_email_as_to(subject, plain_message, html_message, from_email, to)
+        else:
+            # Comment edited by a Moderator
+            html_message = render_to_string('website/templates/emails/edited_comment_email.html', {
+                'title': question.title,
+                'category': question.category,
+                'body': question.body,
+                'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#comm" + str(comment.id),
+                'by_moderator': True,
+            })
+            plain_message = strip_tags(html_message)
+
+            mail_uids = to_uids(question)
+            mail_uids.discard(request.user.id)
+            for uid in mail_uids:
+                to.append(get_user_email(uid))
+
+            send_email_as_to(subject, plain_message, html_message, from_email, to)
+            
+    # Comment Deleted Recently
+    elif flag == 3:
+        subject = "FOSSEE Forums - {0} - Comment Deleted".format(question.category)
+        from_email = settings.SENDER_EMAIL
+        to = [settings.BCC_EMAIL_ID]
+
+        if comment.uid == user.id:
+            # Comment Deleted by Comment Author
+            html_message = render_to_string('website/templates/emails/deleted_comment_email.html', {
+                'title': question.title,
+                'category': question.category,
+                'body': question.body,
+                'answer': answer.body,
+                'comment': comment.body,
+            })
+            plain_message = strip_tags(html_message)
+
+            to.append(get_user_email(answer.uid))
+            send_email_as_to(subject, plain_message, html_message, from_email, to)
+
+        else:
+            # Comment deleted by a Moderator
+            html_message = render_to_string('website/templates/emails/deleted_comment_email.html', {
+                'title': question.title,
+                'category': question.category,
+                'body': question.body,
+                'answer': answer.body,
+                'comment': comment.body,
+                'reason': delete_reason,
+                'by_moderator': True,
+            })
+            plain_message = strip_tags(html_message)
+
+            mail_uids = to_uids(question)
+            for uid in mail_uids:
+                to.append(get_user_email(uid))
+
+            send_email_as_to(subject, plain_message, html_message, from_email, to)
+
+    comment.notif_flag = 0
+    comment.save()
+
+def send_spam_question_notification(question):
+    subject = "FOSSEE Forums - {0} - Question Classified as Spam".format(question.category)
+    from_email = settings.SENDER_EMAIL
+    html_message = render_to_string('website/templates/emails/spam_question_email.html', {
+        'title': question.title,
+        'category': question.category,
+        'body': question.body,
+        'link': settings.DOMAIN_NAME + '/question/' + str(question.id),
+    })
+    plain_message = strip_tags(html_message)
+
+    to = [question.user.email]
+    mod_uids = mod_uids(question)
+    for uid in mod_uid:
+        to.append(get_user_email(uid))
+
+    send_email_as_to(subject, plain_message, html_message, from_email, to)
+
+def send_spam_answer_notification(user, answer):
+    question = answer.question
+
+    subject = "FOSSEE Forums - {0} - Answer Classified as Spam".format(question.category)
+    from_email = settings.SENDER_EMAIL
+    html_message = render_to_string('website/templates/emails/spam_answer_email.html', {
+        'title': question.title,
+        'category': question.category,
+        'body': question.body,
+        'answer': answer.body,
+        'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#answer" + str(answer.id),
+    })
+    plain_message = strip_tags(html_message)
+
+    to = [get_user_email(answer.uid)]
+    # Don't send mail to moderators if answer is marked as spam by a moderator itself
+    if answer.uid == user.uid:
+        # Answer marked as spam during the interaction by Ans Author itself
+        mod_uids = mod_uids(question)
+        for uid in mod_uid:
+            to.append(get_user_email(uid))
+
+    send_email_as_to(subject, plain_message, html_message, from_email, to)
+
+def send_question_approve_notification(question):
+    pass
+
+def send_answer_approve_notification(answer):
+    pass
