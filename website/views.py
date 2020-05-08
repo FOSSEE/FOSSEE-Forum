@@ -324,40 +324,42 @@ def send_answer_notification(user, answer, delete_reason=None):
 
 def send_comment_notification(user, comment, delete_reason=None):
     flag = comment.notif_flag
-
+    answer = comment.answer
+    question = comment.answer.question
+    # Comment Added Recently
     if flag == 1:
         from_email = settings.SENDER_EMAIL
-        not_to_notify = [request.user.id]
+        not_to_notify = [user.id]
 
         # Notifying the Question Author
-        if answer.question.user.id not in not_to_notify:
-            notification = Notification(uid=answer.question.user.id, qid=answer.question.id, aid=answer.id, cid=comment.id)
+        if question.user.id not in not_to_notify:
+            notification = Notification(uid=question.user.id, qid=question.id, aid=answer.id, cid=comment.id)
             notification.save()
 
-            subject = "FOSSEE Forums - {0} - New Comment under your Question".format(answer.question.category)
-            to = [answer.question.user.email]
+            subject = "FOSSEE Forums - {0} - New Comment under your Question".format(question.category)
+            to = [question.user.email]
             html_message = render_to_string('website/templates/emails/new_comment_email.html', {
-                'title': answer.question.title,
-                'category': answer.question.category,
-                'link': settings.DOMAIN_NAME + '/question/' + str(answer.question.id) + "#comm" + str(comment.id),
+                'title': question.title,
+                'category': question.category,
+                'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#comm" + str(comment.id),
             })
             plain_message = strip_tags(html_message)
             send_email(subject, plain_message, html_message, from_email, to)
 
-            not_to_notify.append(answer.question.user.id)
+            not_to_notify.append(question.user.id)
 
         # Notifying the Answer Author
         if answer.uid not in not_to_notify:
-            notification = Notification(uid=answer.uid, qid=answer.question.id, aid=answer.id, cid=comment.id)
+            notification = Notification(uid=answer.uid, qid=question.id, aid=answer.id, cid=comment.id)
             notification.save()
 
-            subject = "FOSSEE Forums - {0} - New Comment on your answer".format(answer.question.category)
+            subject = "FOSSEE Forums - {0} - New Comment on your answer".format(question.category)
             to = [answer_creator.email]
             html_message = render_to_string('website/templates/emails/new_comment_email.html', {
-                'title': answer.question.title,
-                'category': answer.question.category,
+                'title': question.title,
+                'category': question.category,
                 'answer': answer.body,
-                'link': settings.DOMAIN_NAME + '/question/' + str(answer.question.id) + "#comm" + str(comment.id),
+                'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#comm" + str(comment.id),
             })
             plain_message = strip_tags(html_message)
             send_email(subject, plain_message, html_message, from_email, to)
@@ -369,16 +371,16 @@ def send_comment_notification(user, comment, delete_reason=None):
         if answer_comments.exists() and answer_comments[0].uid not in not_to_notify:
             last_comment = answer_comments[0]
 
-            notification = Notification(uid=last_comment.uid, qid=answer.question.id, aid=answer.id, cid=comment.id)
+            notification = Notification(uid=last_comment.uid, qid=question.id, aid=answer.id, cid=comment.id)
             notification.save()
 
-            subject = "FOSSEE Forums - {0} - Your Comment has a Reply".format(answer.question.category)
+            subject = "FOSSEE Forums - {0} - Your Comment has a Reply".format(question.category)
             to = [get_user_email(last_comment.uid)]
             html_message = render_to_string('website/templates/emails/new_comment_email.html', {
-                'title': answer.question.title,
-                'category': answer.question.category,
+                'title': question.title,
+                'category': question.category,
                 'last_comment': last_comment.body,
-                'link': settings.DOMAIN_NAME + '/question/' + str(answer.question.id) + "#comm" + str(comment.id), 
+                'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#comm" + str(comment.id), 
             })
             plain_message = strip_tags(html_message)
             send_email(subject, plain_message, html_message, from_email, to)
@@ -386,21 +388,21 @@ def send_comment_notification(user, comment, delete_reason=None):
             not_to_notify.append(last_comment.uid)
 
         # Notifying all other users in the thread
-        mail_uids = to_uids(answer.question)
+        mail_uids = to_uids(question)
         mail_uids.difference_update(set(not_to_notify))
         
-        subject = "FOSSEE Forums - {0} - New Comment under the Question".format(answer.question.category)
+        subject = "FOSSEE Forums - {0} - New Comment under the Question".format(question.category)
         html_message = render_to_string('website/templates/emails/new_comment_email.html', {
-            'title': answer.question.title,
-            'category': answer.question.category,
-            'body': answer.question.body,
-            'link': settings.DOMAIN_NAME + '/question/' + str(answer.question.id) + "#comm" + str(comment.id),
+            'title': question.title,
+            'category': question.category,
+            'body': question.body,
+            'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#comm" + str(comment.id),
         })
         plain_message = strip_tags(html_message)
 
         to = [settings.BCC_EMAIL_ID]
         for mail_uid in mail_uids:
-            notification = Notification(uid=mail_uid, qid=answer.question.id, aid=answer.id, cid=comment.id)
+            notification = Notification(uid=mail_uid, qid=question.id, aid=answer.id, cid=comment.id)
             notification.save()
 
             # Appending user email in 'to' list                
@@ -408,53 +410,69 @@ def send_comment_notification(user, comment, delete_reason=None):
 
         # Sending Email to everyone in 'to' list individually
         send_email_as_to(subject, plain_message, html_message, from_email, to)
-
+    # Comment Edited Recently
     if flag == 2:
-        subject = "FOSSEE Forums - {0} - Comment Edited".format(comment.answer.question.category)
+        subject = "FOSSEE Forums - {0} - Comment Edited".format(question.category)
         from_email = settings.SENDER_EMAIL
         to = [settings.BCC_EMAIL_ID]
 
-        if request.session.get('MODERATOR_ACTIVATED', False):
+        if comment.uid == user.id:
+            # Comment edited by Comment Author
             html_message = render_to_string('website/templates/emails/edited_comment_email.html', {
-                'title': comment.answer.question.title,
-                'category': comment.answer.question.category,
-                'body': comment.answer.question.body,
-                'link': settings.DOMAIN_NAME + '/question/' + str(comment.answer.question.id) + "#comm" + str(comment.id),
+                'title': question.title,
+                'category': question.category,
+                'body': question.body,
+                'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#comm" + str(comment.id),
+            })
+            plain_message = strip_tags(html_message)
+
+            to.append(get_user_email(answer.uid))
+            send_email_as_to(subject, plain_message, html_message, from_email, to)
+        else:
+            # Comment edited by a Moderator
+            html_message = render_to_string('website/templates/emails/edited_comment_email.html', {
+                'title': question.title,
+                'category': question.category,
+                'body': question.body,
+                'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#comm" + str(comment.id),
                 'by_moderator': True,
             })
             plain_message = strip_tags(html_message)
 
-            mail_uids = to_uids(comment.answer.question)
+            mail_uids = to_uids(question)
             mail_uids.discard(request.user.id)
             for uid in mail_uids:
                 to.append(get_user_email(uid))
 
             send_email_as_to(subject, plain_message, html_message, from_email, to)
-        else:
-            html_message = render_to_string('website/templates/emails/edited_comment_email.html', {
-                'title': comment.answer.question.title,
-                'category': comment.answer.question.category,
-                'body': comment.answer.question.body,
-                'link': settings.DOMAIN_NAME + '/question/' + str(comment.answer.question.id) + "#comm" + str(comment.id),
-            })
-            plain_message = strip_tags(html_message)
-
-            to.append(get_user_email(comment.answer.uid))
-            send_email_as_to(subject, plain_message, html_message, from_email, to)
-
+            
+    # Comment Deleted Recently
     elif flag == 3:
         subject = "FOSSEE Forums - {0} - Comment Deleted".format(question.category)
         from_email = settings.SENDER_EMAIL
         to = [settings.BCC_EMAIL_ID]
 
-        if request.session.get('MODERATOR_ACTIVATED', False):
-            delete_reason = request.POST.get('deleteComment')
-
+        if comment.uid == user.id:
+            # Comment Deleted by Comment Author
             html_message = render_to_string('website/templates/emails/deleted_comment_email.html', {
                 'title': question.title,
                 'category': question.category,
                 'body': question.body,
-                'answer': comment.answer.body,
+                'answer': answer.body,
+                'comment': comment.body,
+            })
+            plain_message = strip_tags(html_message)
+
+            to.append(get_user_email(answer.uid))
+            send_email_as_to(subject, plain_message, html_message, from_email, to)
+
+        else:
+            # Comment deleted by a Moderator
+            html_message = render_to_string('website/templates/emails/deleted_comment_email.html', {
+                'title': question.title,
+                'category': question.category,
+                'body': question.body,
+                'answer': answer.body,
                 'comment': comment.body,
                 'reason': delete_reason,
                 'by_moderator': True,
@@ -465,19 +483,6 @@ def send_comment_notification(user, comment, delete_reason=None):
             for uid in mail_uids:
                 to.append(get_user_email(uid))
 
-            send_email_as_to(subject, plain_message, html_message, from_email, to)
-
-        else:
-            html_message = render_to_string('website/templates/emails/deleted_comment_email.html', {
-                'title': question.title,
-                'category': question.category,
-                'body': question.body,
-                'answer': comment.answer.body,
-                'comment': comment.body,
-            })
-            plain_message = strip_tags(html_message)
-
-            to.append(get_user_email(comment.answer.uid))
             send_email_as_to(subject, plain_message, html_message, from_email, to)
 
     comment.notif_flag = 0
@@ -821,88 +826,7 @@ def answer_comment(request, answer_id):
             comment.save()
 
             # SENDING EMAILS AND NOTIFICATIONS ABOUT NEW COMMENT
-            from_email = settings.SENDER_EMAIL
-            not_to_notify = [request.user.id]
-
-            # Notifying the Question Author
-            if answer.question.user.id not in not_to_notify:
-                notification = Notification(uid=answer.question.user.id, qid=answer.question.id, aid=answer.id, cid=comment.id)
-                notification.save()
-
-                subject = "FOSSEE Forums - {0} - New Comment under your Question".format(answer.question.category)
-                to = [answer.question.user.email]
-                html_message = render_to_string('website/templates/emails/new_comment_email.html', {
-                    'title': answer.question.title,
-                    'category': answer.question.category,
-                    'link': settings.DOMAIN_NAME + '/question/' + str(answer.question.id) + "#comm" + str(comment.id),
-                })
-                plain_message = strip_tags(html_message)
-                send_email(subject, plain_message, html_message, from_email, to)
-
-                not_to_notify.append(answer.question.user.id)
-
-            # Notifying the Answer Author
-            if answer.uid not in not_to_notify:
-                notification = Notification(uid=answer.uid, qid=answer.question.id, aid=answer.id, cid=comment.id)
-                notification.save()
-
-                subject = "FOSSEE Forums - {0} - New Comment on your answer".format(answer.question.category)
-                to = [answer_creator.email]
-                html_message = render_to_string('website/templates/emails/new_comment_email.html', {
-                    'title': answer.question.title,
-                    'category': answer.question.category,
-                    'answer': answer.body,
-                    'link': settings.DOMAIN_NAME + '/question/' + str(answer.question.id) + "#comm" + str(comment.id),
-                })
-                plain_message = strip_tags(html_message)
-                send_email(subject, plain_message, html_message, from_email, to)
-
-                not_to_notify.append(answer.uid)
-
-            # Notifying the Last Comment Author
-            answer_comments = AnswerComment.objects.filter(answer=answer, is_active=True).exclude(uid=request.user.id).order_by('-date_created')
-            if answer_comments.exists() and answer_comments[0].uid not in not_to_notify:
-                last_comment = answer_comments[0]
-
-                notification = Notification(uid=last_comment.uid, qid=answer.question.id, aid=answer.id, cid=comment.id)
-                notification.save()
-
-                subject = "FOSSEE Forums - {0} - Your Comment has a Reply".format(answer.question.category)
-                to = [get_user_email(last_comment.uid)]
-                html_message = render_to_string('website/templates/emails/new_comment_email.html', {
-                    'title': answer.question.title,
-                    'category': answer.question.category,
-                    'last_comment': last_comment.body,
-                    'link': settings.DOMAIN_NAME + '/question/' + str(answer.question.id) + "#comm" + str(comment.id), 
-                })
-                plain_message = strip_tags(html_message)
-                send_email(subject, plain_message, html_message, from_email, to)
-
-                not_to_notify.append(last_comment.uid)
-
-            # Notifying all other users in the thread
-            mail_uids = to_uids(answer.question)
-            mail_uids.difference_update(set(not_to_notify))
-            
-            subject = "FOSSEE Forums - {0} - New Comment under the Question".format(answer.question.category)
-            html_message = render_to_string('website/templates/emails/new_comment_email.html', {
-                'title': answer.question.title,
-                'category': answer.question.category,
-                'body': answer.question.body,
-                'link': settings.DOMAIN_NAME + '/question/' + str(answer.question.id) + "#comm" + str(comment.id),
-            })
-            plain_message = strip_tags(html_message)
-
-            to = [settings.BCC_EMAIL_ID]
-            for mail_uid in mail_uids:
-                notification = Notification(uid=mail_uid, qid=answer.question.id, aid=answer.id, cid=comment.id)
-                notification.save()
-
-                # Appending user email in 'to' list                
-                to.append(get_user_email(mail_uid))
-
-            # Sending Email to everyone in 'to' list individually
-            send_email_as_to(subject, plain_message, html_message, from_email, to)
+            send_comment_notification(request.user, comment)
 
             return HttpResponseRedirect('/question/{0}/'.format(answer.question.id))
 
@@ -1093,44 +1017,6 @@ def comment_delete(request, comment_id):
         # Sending notifications
         delete_reason = request.POST.get('deleteComment', None)
         send_comment_notification(request.user, comment, delete_reason=delete_reason)
-
-        # # Sending Emails regarding Comment Deletion
-        # subject = "FOSSEE Forums - {0} - Comment Deleted".format(question.category)
-        # from_email = settings.SENDER_EMAIL
-        # to = [settings.BCC_EMAIL_ID]
-
-        # if request.session.get('MODERATOR_ACTIVATED', False):
-        #     delete_reason = request.POST.get('deleteComment')
-
-        #     html_message = render_to_string('website/templates/emails/deleted_comment_email.html', {
-        #         'title': question.title,
-        #         'category': question.category,
-        #         'body': question.body,
-        #         'answer': comment.answer.body,
-        #         'comment': comment.body,
-        #         'reason': delete_reason,
-        #         'by_moderator': True,
-        #     })
-        #     plain_message = strip_tags(html_message)
-
-        #     mail_uids = to_uids(question)
-        #     for uid in mail_uids:
-        #         to.append(get_user_email(uid))
-
-        #     send_email_as_to(subject, plain_message, html_message, from_email, to)
-
-        # else:
-        #     html_message = render_to_string('website/templates/emails/deleted_comment_email.html', {
-        #         'title': question.title,
-        #         'category': question.category,
-        #         'body': question.body,
-        #         'answer': comment.answer.body,
-        #         'comment': comment.body,
-        #     })
-        #     plain_message = strip_tags(html_message)
-
-        #     to.append(get_user_email(comment.answer.uid))
-        #     send_email_as_to(subject, plain_message, html_message, from_email, to)
 
         messages.success(request, "Comment Deleted Successfully!")
         return HttpResponseRedirect('/question/{0}/'.format(question.id))
@@ -1590,7 +1476,6 @@ def ajax_answer_update(request):
                     send_spam_answer_notification(request.user, answer)
                 else:
                     send_answer_notification(request.user, answer)
-
             else:
                 # A new or recently edited answer marked as Spam is Edited
                 # (notifications for it as a new/edited answer were not sent)
@@ -1626,38 +1511,8 @@ def ajax_answer_comment_update(request):
             comment.notif_flag = 2
             comment.save()
 
-            # Sending Emails regarding Comment Updation
-            subject = "FOSSEE Forums - {0} - Comment Edited".format(comment.answer.question.category)
-            from_email = settings.SENDER_EMAIL
-            to = [settings.BCC_EMAIL_ID]
-
-            if request.session.get('MODERATOR_ACTIVATED', False):
-                html_message = render_to_string('website/templates/emails/edited_comment_email.html', {
-                    'title': comment.answer.question.title,
-                    'category': comment.answer.question.category,
-                    'body': comment.answer.question.body,
-                    'link': settings.DOMAIN_NAME + '/question/' + str(comment.answer.question.id) + "#comm" + str(comment.id),
-                    'by_moderator': True,
-                })
-                plain_message = strip_tags(html_message)
-
-                mail_uids = to_uids(comment.answer.question)
-                mail_uids.discard(request.user.id)
-                for uid in mail_uids:
-                    to.append(get_user_email(uid))
-
-                send_email_as_to(subject, plain_message, html_message, from_email, to)
-            else:
-                html_message = render_to_string('website/templates/emails/edited_comment_email.html', {
-                    'title': comment.answer.question.title,
-                    'category': comment.answer.question.category,
-                    'body': comment.answer.question.body,
-                    'link': settings.DOMAIN_NAME + '/question/' + str(comment.answer.question.id) + "#comm" + str(comment.id),
-                })
-                plain_message = strip_tags(html_message)
-
-                to.append(get_user_email(comment.answer.uid))
-                send_email_as_to(subject, plain_message, html_message, from_email, to)
+            # Sending Notifications
+            send_comment_notification(request.user, comment)
 
             messages.success(request, "Comment is Successfully Saved!")
             return HttpResponseRedirect('/question/{0}/'.format(comment.answer.question.id))
