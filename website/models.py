@@ -67,6 +67,7 @@ class Question(models.Model):
     num_votes = models.IntegerField(default=0)
     is_spam = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
+    notif_flag = models.IntegerField(default=0)
     image = ResizedImageField(
         size=[
             800,
@@ -97,6 +98,7 @@ class Answer(models.Model):
     num_votes = models.IntegerField(default=0)
     is_spam = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
+    notif_flag = models.IntegerField(default=0)
     image = ResizedImageField(
         size=[
             800,
@@ -128,6 +130,7 @@ class AnswerComment(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
+    notif_flag = models.IntegerField(default=0)
 
     def user(self):
         user = User.objects.get(id=self.uid)
