@@ -328,6 +328,7 @@ def new_question(request):
             question.body = cleaned_data['body']
             question.views = 1
             question.save()
+
             question.userViews.add(request.user)
             if (str(question.sub_category) == 'None'):
                 question.sub_category = ""
@@ -866,11 +867,11 @@ def approve_spam_question(request, question_id):
     if is_moderator(request.user, question) and request.session.get('MODERATOR_ACTIVATED', False):
         question.is_spam = False
         question.save()
-    # Send Approval Notification to Author
-    send_question_approve_notification(question)
-    # Send Pending Notifications
-    send_question_notification(question.user, question, previous_title=question.title)
-    messages.success(request, "Question marked successfully as Not-Spam!")
+        # Send Approval Notification to Author
+        send_question_approve_notification(question)
+        # Send Pending Notifications
+        send_question_notification(question.user, question, previous_title=question.title)
+        messages.success(request, "Question marked successfully as Not-Spam!")
     return HttpResponseRedirect('/question/{0}/'.format(question_id))
 
 
@@ -894,8 +895,8 @@ def mark_answer_spam(request, answer_id):
             answer.save()
             # Send Approval Notification to Author
             send_answer_approve_notification(answer)
-            # Send Pending Notifications
-            send_answer_notification(answer.question.user, answer)
+            # Send Pending Notifications (by the name of author)
+            send_answer_notification(get_object_or_404(User, id=answer.uid), answer)
     return HttpResponseRedirect('/question/{0}/#answer{1}/'.format(question_id, answer.id))
 
 
@@ -1058,7 +1059,6 @@ def ajax_answer_update(request):
             if (not request.session.get('MODERATOR_ACTIVATED', False) and
                     predict(answer.body) == "Spam"):
                 answer.is_spam = True
-            # answer.notif_flag = 2
             answer.save()
 
             # SENDING NOTIFICATIONS
@@ -1077,7 +1077,7 @@ def ajax_answer_update(request):
                 # (notifications for it as a new/edited answer were not sent)
                 # If answer is still spam, do nothing.
                 if not answer.is_spam:
-                    if answer.user != request.user:
+                    if answer.uid != request.user.id:
                         # Send Approval Notification to Author
                         send_answer_approve_notification(answer)
                     # Send pending Notifications (by the name of author)
@@ -1402,7 +1402,7 @@ def send_comment_notification(user, comment, delete_reason=None):
             not_to_notify.append(answer.uid)
 
         # Notifying the Last Comment Author
-        answer_comments = AnswerComment.objects.filter(answer=answer, is_active=True).exclude(uid=request.user.id).order_by('-date_created')
+        answer_comments = AnswerComment.objects.filter(answer=answer, is_active=True).exclude(uid=user.id).order_by('-date_created')
         if answer_comments.exists() and answer_comments[0].uid not in not_to_notify:
             last_comment = answer_comments[0]
 
@@ -1475,7 +1475,7 @@ def send_comment_notification(user, comment, delete_reason=None):
             plain_message = strip_tags(html_message)
 
             mail_uids = to_uids(question)
-            mail_uids.discard(request.user.id)
+            mail_uids.discard(user.id)
             for uid in mail_uids:
                 to.append(get_user_email(uid))
 
@@ -1557,8 +1557,8 @@ def send_spam_answer_notification(user, answer):
 
     to = [get_user_email(answer.uid)]
     # Don't send mail to moderators if answer is marked as spam by a moderator itself
-    if answer.uid == user.uid:
-        # Answer marked as spam during the interaction by Ans Author itself
+    if answer.uid == user.id:
+        # Answer marked as spam during the interaction of Answer Author
         mod_uids = mod_uids(question)
         for uid in mod_uid:
             to.append(get_user_email(uid))
@@ -1566,7 +1566,28 @@ def send_spam_answer_notification(user, answer):
     send_email_as_to(subject, plain_message, html_message, from_email, to)
 
 def send_question_approve_notification(question):
-    pass
+    subject = "FOSSEE Forums - {0} - Question Approved".format(question.category)
+    to = [question.user.email]
+    from_email = settings.SENDER_EMAIL
+    html_message = render_to_string('website/templates/emails/approved_question_email.html', {
+        'title': question.title,
+        'category': question.category,
+        'body': question.body,
+        'link': settings.DOMAIN_NAME + '/question/' + str(question.id),
+    })
+    plain_message = strip_tags(html_message)
+    send_email(subject, plain_message, html_message, from_email, to)
 
 def send_answer_approve_notification(answer):
-    pass
+    subject = "FOSSEE Forums - {0} - Answer Approved".format(question.category)
+    to = [get_user_email(answer.uid)]
+    from_email = settings.SENDER_EMAIL
+    html_message = render_to_string('website/templates/emails/approved_answer_answer_email.html', {
+        'title': question.title,
+        'category': question.category,
+        'body': question.body,
+        'answer': answer.body,
+        'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#answer" + str(answer.id),
+    })
+    plain_message = strip_tags(html_message)
+    send_email(subject, plain_message, html_message, from_email, to)
