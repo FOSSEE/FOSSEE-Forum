@@ -108,7 +108,7 @@
                 {% if question.is_active %}
                 <a class="edit btn btn-xs btn-info" href="{% url 'website:edit_question' question.id %}">Edit</a>
                 <a class="delete btn btn-xs btn-info" data-toggle="modal" data-target="#questionDeleteModal">Delete</a>
-                {% if question.is_spam %}
+                {% if question.is_spam and MODERATOR_ACTIVATED %}
                 <a class="btn btn-xs btn-info" href="{% url 'website:approve_spam_question' question.id %}">Mark Not-Spam</a>
                 {% endif %}
                 {% else %}

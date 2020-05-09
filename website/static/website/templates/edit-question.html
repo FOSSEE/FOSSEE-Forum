@@ -18,7 +18,8 @@
         <label for="id_is_spam">
             <strong>Mark as spam: </strong>
         </label>
-        {% render_field form.is_spam %}
+        <input type="checkbox" name="is_spam" id="id_is_spam" style="margin: 0 7px; height: 16px; width: 16px; vertical-align: sub;">
+        <!-- {% render_field form.is_spam %} -->
     {% endif %}
 {% endblock %}
 

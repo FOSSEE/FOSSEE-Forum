@@ -339,7 +339,7 @@ def new_question(request):
 
             # Sending email when a new question is asked
             if question.is_spam:
-                send_spam_question_notification(question)
+                send_spam_question_notification(request.user, question)
             else:
                 send_question_notification(request.user, question)
 
@@ -502,11 +502,13 @@ def edit_question(request, question_id):
             # Sending Notifications
             if question.notif_flag == 0:
                 # A Non-Spam Question is Edited
-                question.notif_flag = 2
-                question.save()
+                if not (request.session.get('MODERATOR_ACTIVATED', False) and question.is_spam):
+                    # Question not marked as spam by a Moderator
+                    question.notif_flag = 2
+                    question.save()
 
                 if question.is_spam:
-                    send_spam_question_notification(question)
+                    send_spam_question_notification(request.user, question)
                 else:
                     send_question_notification(request.user, question, previous_title=previous_title)
 
@@ -524,7 +526,6 @@ def edit_question(request, question_id):
             return HttpResponseRedirect('/question/{0}/'.format(question.id))
 
         else:
-
             context.update(csrf(request))
             category = request.POST.get('category', None)
             tutorial = request.POST.get('tutorial', None)
@@ -602,7 +603,7 @@ def comment_delete(request, comment_id):
     comment = get_object_or_404(AnswerComment, pk=comment_id)
     question = comment.answer.question
 
-    if ((request.user != question.user or not can_delete_comment(comment.answer, comment_id)) and
+    if ((request.user.id != comment.uid or not can_delete_comment(comment.answer, comment_id)) and
             (not is_moderator(request.user, question) or not request.session.get('MODERATOR_ACTIVATED', False))):
         return render(request, 'website/templates/not-authorized.html')
 
@@ -1523,7 +1524,7 @@ def send_comment_notification(user, comment, delete_reason=None):
     comment.notif_flag = 0
     comment.save()
 
-def send_spam_question_notification(question):
+def send_spam_question_notification(user, question):
     subject = "FOSSEE Forums - {0} - Question Classified as Spam".format(question.category)
     from_email = settings.SENDER_EMAIL
     html_message = render_to_string('website/templates/emails/spam_question_email.html', {
@@ -1534,10 +1535,16 @@ def send_spam_question_notification(question):
     })
     plain_message = strip_tags(html_message)
 
-    to = [question.user.email]
-    mod_uids = mod_uids(question)
-    for uid in mod_uid:
-        to.append(get_user_email(uid))
+    if question.user != user:
+        # Question marked as spam by a Moderator
+        to = [question.user.email]
+    else:
+        # Question marked as spam during interaction by Author
+        # (by the spamFilter), send notification to Moderators
+        to = []
+        uids = mod_uids(question)
+        for uid in uids:
+            to.append(get_user_email(uid))
 
     send_email_as_to(subject, plain_message, html_message, from_email, to)
 
@@ -1555,12 +1562,15 @@ def send_spam_answer_notification(user, answer):
     })
     plain_message = strip_tags(html_message)
 
-    to = [get_user_email(answer.uid)]
-    # Don't send mail to moderators if answer is marked as spam by a moderator itself
-    if answer.uid == user.id:
-        # Answer marked as spam during the interaction of Answer Author
-        mod_uids = mod_uids(question)
-        for uid in mod_uid:
+    if answer.uid != user.id:
+        # Answer marked as spam by a Moderator
+        to = [get_user_email(answer.uid)]
+    else:
+        # Answer marked as spam during interaction by Author
+        # (by the spamFilter), send notification to Moderators
+        to = []
+        uids = mod_uids(question)
+        for uid in uids:
             to.append(get_user_email(uid))
 
     send_email_as_to(subject, plain_message, html_message, from_email, to)
@@ -1579,10 +1589,12 @@ def send_question_approve_notification(question):
     send_email(subject, plain_message, html_message, from_email, to)
 
 def send_answer_approve_notification(answer):
+    question = answer.question
+
     subject = "FOSSEE Forums - {0} - Answer Approved".format(question.category)
     to = [get_user_email(answer.uid)]
     from_email = settings.SENDER_EMAIL
-    html_message = render_to_string('website/templates/emails/approved_answer_answer_email.html', {
+    html_message = render_to_string('website/templates/emails/approved_answer_email.html', {
         'title': question.title,
         'category': question.category,
         'body': question.body,
