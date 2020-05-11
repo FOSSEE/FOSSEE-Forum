@@ -143,7 +143,7 @@ def can_delete_comment(answer, comment_id):
 
 def add_Spam(question_body, is_spam):
     """
-    Update the value of is_spam if the question_body already exists in DataSet.
+    Update the value of is_spam in DataSet if the question_body already exists in DataSet.
     Add the question body and the corresponding value of is_spam in DataSet, otherwise.
     """
     xfile = openpyxl.load_workbook(settings.BASE_DIR + '/Spam_Filter_Data/DataSet.xlsx')
@@ -372,7 +372,7 @@ def new_question(request):
 @user_passes_test(account_credentials_defined, login_url='/accounts/profile/')
 def question_answer(request, question_id):
     """Post an answer to a question asked om the forum."""
-    question = get_object_or_404(Question, id=question_id, is_active=True)
+    question = get_object_or_404(Question, id=question_id, is_active=True, is_spam=False)
 
     if (request.method == 'POST'):
         form = AnswerQuestionForm(request.POST, request.FILES)
@@ -419,11 +419,16 @@ def answer_comment(request, answer_id):
         if form.is_valid():
             body = request.POST['body']
             comment = AnswerComment(uid=request.user.id, answer=answer, body=body)
+            if (predict(comment.body) == "Spam"):
+                comment.is_spam = True
             comment.notif_flag = 1
             comment.save()
 
             # SENDING EMAILS AND NOTIFICATIONS ABOUT NEW COMMENT
-            send_comment_notification(request.user, comment)
+            if comment.is_spam:
+                send_spam_comment_notification(request.user, comment)
+            else:
+                send_comment_notification(request.user, comment)
 
             return HttpResponseRedirect('/question/{0}/'.format(answer.question.id))
 
@@ -503,7 +508,7 @@ def edit_question(request, question_id):
             if question.notif_flag == 0:
                 # A Non-Spam Question is Edited
                 if not (request.session.get('MODERATOR_ACTIVATED', False) and question.is_spam):
-                    # Question not marked as spam by a Moderator
+                    # Question not marked as spam by a Moderator during edit
                     question.notif_flag = 2
                     question.save()
 
@@ -898,7 +903,32 @@ def mark_answer_spam(request, answer_id):
             send_answer_approve_notification(answer)
             # Send Pending Notifications (by the name of author)
             send_answer_notification(get_object_or_404(User, id=answer.uid), answer)
-    return HttpResponseRedirect('/question/{0}/#answer{1}/'.format(question_id, answer.id))
+    return HttpResponseRedirect('/question/{0}/#answer{1}'.format(question_id, answer.id))
+
+
+# View to mark comment as spam/non-spam
+@login_required
+@user_passes_test(is_moderator)
+def mark_comment_spam(request, comment_id):
+    """Mark/Unmark an Comment as a spam."""
+    comment = get_object_or_404(AnswerComment, id=comment_id, is_active=True)
+    question_id = comment.answer.question.id
+
+    if request.method == "POST":
+        choice = request.POST['choice']
+        if choice == "spam":
+            comment.is_spam = True
+            comment.save()
+            # Send Spam Classification Notification to Author
+            send_spam_comment_notification(request.user, comment)
+        else:
+            comment.is_spam = False
+            comment.save()
+            # Send Approval Notification to Author
+            send_comment_approve_notification(comment)
+            # Send Pending Notifications (by the name of author)
+            send_comment_notification(get_object_or_404(User, id=comment.uid), comment)
+    return HttpResponseRedirect('/question/{0}/#comm{1}'.format(question_id, comment.id))
 
 
 # MODERATOR SECTION
@@ -1105,11 +1135,33 @@ def ajax_answer_comment_update(request):
         if ((is_moderator(request.user, comment.answer.question) and request.session.get('MODERATOR_ACTIVATED', False)) or
                 (request.user.id == comment.uid and can_delete_comment(comment.answer, cid))):
             comment.body = str(body)
-            comment.notif_flag = 2
+            comment.is_spam = False
+            if (not request.session.get('MODERATOR_ACTIVATED', False) and
+                    predict(comment.body) == "Spam"):
+                comment.is_spam = True
             comment.save()
 
-            # Sending Notifications
-            send_comment_notification(request.user, comment)
+            # SENDING NOTIFICATIONS
+            if comment.notif_flag == 0:
+                # A Non-Spam comment or an comment marked as Spam by a Moderator
+                # is Edited (no Notifications pending)
+                comment.notif_flag = 2
+                comment.save()
+
+                if comment.is_spam:
+                    send_spam_comment_notification(request.user, comment)
+                else:
+                    send_comment_notification(request.user, comment)
+            else:
+                # A new or recently edited comment marked as Spam is Edited
+                # (notifications for it as a new/edited comment were not sent)
+                # If comment is still spam, do nothing.
+                if not comment.is_spam:
+                    if comment.uid != request.user.id:
+                        # Send Approval Notification to Author
+                        send_comment_approve_notification(comment)
+                    # Send pending Notifications (by the name of author)
+                    send_comment_notification(get_object_or_404(User, id=comment.uid), comment)
 
             messages.success(request, "Comment is Successfully Saved!")
             return HttpResponseRedirect('/question/{0}/'.format(comment.answer.question.id))
@@ -1490,17 +1542,19 @@ def send_comment_notification(user, comment, delete_reason=None):
 
         if comment.uid == user.id:
             # Comment Deleted by Comment Author
-            html_message = render_to_string('website/templates/emails/deleted_comment_email.html', {
-                'title': question.title,
-                'category': question.category,
-                'body': question.body,
-                'answer': answer.body,
-                'comment': comment.body,
-            })
-            plain_message = strip_tags(html_message)
+            # Don't send mail if spam comment is deleted by author
+            if not comment.is_spam:
+                html_message = render_to_string('website/templates/emails/deleted_comment_email.html', {
+                    'title': question.title,
+                    'category': question.category,
+                    'body': question.body,
+                    'answer': answer.body,
+                    'comment': comment.body,
+                })
+                plain_message = strip_tags(html_message)
 
-            to.append(get_user_email(answer.uid))
-            send_email_as_to(subject, plain_message, html_message, from_email, to)
+                to.append(get_user_email(answer.uid))
+                send_email_as_to(subject, plain_message, html_message, from_email, to)
 
         else:
             # Comment deleted by a Moderator
@@ -1515,12 +1569,17 @@ def send_comment_notification(user, comment, delete_reason=None):
             })
             plain_message = strip_tags(html_message)
 
-            mail_uids = to_uids(question)
-            for uid in mail_uids:
-                to.append(get_user_email(uid))
+            if comment.is_spam:
+                # Send mail to Comment Author only if spam comment deleted by moderator
+                to = [get_user_email(comment.uid)]
+            else:
+                mail_uids = to_uids(question)
+                for uid in mail_uids:
+                    to.append(get_user_email(uid))
 
             send_email_as_to(subject, plain_message, html_message, from_email, to)
 
+    # Updating notif flag after sending mails according to the previous flag.
     comment.notif_flag = 0
     comment.save()
 
@@ -1575,6 +1634,35 @@ def send_spam_answer_notification(user, answer):
 
     send_email_as_to(subject, plain_message, html_message, from_email, to)
 
+def send_spam_comment_notification(user, comment):
+    answer = comment.answer
+    question = answer.question
+
+    subject = "FOSSEE Forums - {0} - Comment Classified as Spam".format(question.category)
+    from_email = settings.SENDER_EMAIL
+    html_message = render_to_string('website/templates/emails/spam_comment_email.html', {
+        'title': question.title,
+        'category': question.category,
+        'body': question.body,
+        'answer': answer.body,
+        'comment': comment.body,
+        'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#comm" + str(comment.id),
+    })
+    plain_message = strip_tags(html_message)
+
+    if comment.uid != user.id:
+        # Comment marked as spam by a Moderator
+        to = [get_user_email(comment.uid)]
+    else:
+        # Comment marked as spam during interaction by Author
+        # (by the spamFilter), send notification to Moderators
+        to = []
+        uids = mod_uids(question)
+        for uid in uids:
+            to.append(get_user_email(uid))
+
+    send_email_as_to(subject, plain_message, html_message, from_email, to)    
+
 def send_question_approve_notification(question):
     subject = "FOSSEE Forums - {0} - Question Approved".format(question.category)
     to = [question.user.email]
@@ -1600,6 +1688,24 @@ def send_answer_approve_notification(answer):
         'body': question.body,
         'answer': answer.body,
         'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#answer" + str(answer.id),
+    })
+    plain_message = strip_tags(html_message)
+    send_email(subject, plain_message, html_message, from_email, to)
+
+def send_comment_approve_notification(comment):
+    answer = comment.answer
+    question = answer.question
+
+    subject = "FOSSEE Forums - {0} - Comment Approved".format(question.category)
+    to = [get_user_email(comment.uid)]
+    from_email = settings.SENDER_EMAIL
+    html_message = render_to_string('website/templates/emails/approved_comment_email.html', {
+        'title': question.title,
+        'category': question.category,
+        'body': question.body,
+        'answer': answer.body,
+        'comment': comment.body,
+        'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#comm" + str(comment.id),
     })
     plain_message = strip_tags(html_message)
     send_email(subject, plain_message, html_message, from_email, to)

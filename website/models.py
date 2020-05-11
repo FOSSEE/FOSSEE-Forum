@@ -129,6 +129,7 @@ class AnswerComment(models.Model):
     body = models.TextField(blank=False)
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
+    is_spam = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     notif_flag = models.IntegerField(default=0)
 

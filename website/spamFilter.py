@@ -7,7 +7,7 @@ from .cleanText import clean_string
 from sklearn.svm import LinearSVC
 from sklearn.metrics import confusion_matrix, f1_score, precision_score, recall_score
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
-from website.models import Question, Answer
+from website.models import Question, Answer, AnswerComment
 from forums.local import TRAIN_SPAMFILTER
 # Get the original dataset
 
@@ -46,6 +46,14 @@ def store():
     for answer in Answer.objects.all().exclude(is_active=False):
         xData.append(str(clean_string(answer.body)))
         if (answer.is_spam):
+            yData.append(1)
+        else:
+            yData.append(0)
+
+    # Add data from forum comments
+    for comment in AnswerComment.objects.all().exclude(is_active=False):
+        xData.append(str(clean_string(comment.body)))
+        if (comment.is_spam):
             yData.append(1)
         else:
             yData.append(0)

@@ -61,7 +61,7 @@
                 {% if question.image %}
                 <img src={{ question.image.url }} />
                 {% endif %}
-                {% if question.is_spam %}<div class="text-danger"> Oops! Looks like spam! Waiting for moderator approval</div>{% endif %}
+                {% if question.is_spam %}<div class="text-danger"> Oops! Looks like spam! Waiting for moderator approval.</div>{% endif %}
             </div>
             <br>
 
@@ -186,7 +186,7 @@
                 </form>
                 {% endif %}
                 <div id="ans{{ answer.id }}2">{{ answer.body| safe }}</div>
-                {% if answer.is_spam %}<div class="text-danger"> Oops! Looks like spam! Waiting for moderator approval</div>{% endif %}
+                {% if answer.is_spam %}<div class="text-danger"> Oops! Looks like spam! Waiting for moderator approval.</div>{% endif %}
                 {% if MODERATOR_ACTIVATED or user|can_edit:answer and answer|havenot_comments %}
                 <script type="text/javascript">
                     CKEDITOR.on("instanceReady", function (event) {
@@ -298,7 +298,13 @@
                 {% for comment in answer.answercomment_set.all %}
 
                     <!-- Checking if comment needs to be blurred (if not already) -->
-                    <!-- TO BE IMPLEMENTED AFTER SPAM FEATURE ON COMMENTS -->
+                    {% if not answer.is_spam or not blur %}
+                        {% if comment.is_spam and not MODERATOR_ACTIVATED and not user|can_edit:comment %}
+                            {% trans 'blur' as blur %}
+                        {% else %}
+                            {% trans '' as blur %}
+                        {% endif %}
+                    {% endif %}
 
                     {% if comment.is_active or MODERATOR_ACTIVATED %}
                     <!-- Comment -->
@@ -306,6 +312,7 @@
                         <div class="body" id="cbody{{ comment.id }}">
                             {{ comment.body| safe }}
                         </div>
+                        {% if comment.is_spam %}<div class="text-danger"> Oops! Looks like spam! Waiting for moderator approval.</div>{% endif %}
                         <br>
                         <!-- Options provided on comment -->
                         {% if MODERATOR_ACTIVATED or user|can_edit:comment and answer|can_delete:comment.id %}
@@ -364,6 +371,18 @@
                                 <a href="/accounts/view-profile/{{ comment.user.id }}"> {{comment.user}} </a>
                             </span>
                         </span>
+
+                        {% if MODERATOR_ACTIVATED %}
+                        <span class="modify" style="display:block">
+                            {% if comment.is_spam %}
+                            <a class="btn btn-xs btn-info vs spam-comment" data-toggle="modal" data-target="#commentSpamModal"
+                                data-id="{{ comment.id }}" data-spam="not-spam" href="#{{ comment.id }}">Mark Not-Spam</a>
+                            {% else %}
+                            <a class="btn btn-xs btn-danger vs spam-comment" data-toggle="modal" data-target="#commentSpamModal"
+                                data-id="{{ comment.id }}" data-spam="spam" href="#{{ comment.id }}">Mark Spam</a>
+                            {% endif %}
+                        </span>
+                        {% endif %}
 
                     </div>
                     <!-- /.Comment -->
@@ -560,6 +579,31 @@ aria-hidden="true">
                 {% if MODERATOR_ACTIVATED %}
                 <textarea name="deleteComment" required></textarea>
                 {% endif %}
+                <hr>
+                <div class="pull-right">
+                    <input type="submit" class="btn btn-sm btn-success" value="Okay">
+                    <a class="btn btn-sm btn-default" data-dismiss="modal">Close</a>
+                </div>
+            </form>
+            <div class="clearfix"></div>
+        </div> <!-- /.modal-body -->
+    </div> <!-- /.modal-content -->
+</div> <!-- /.modal-dialog -->
+</div> <!-- /.modal -->
+
+<!-- Modal to Mark Comment as Spam/Not-Spam -->
+<div class="modal fade" id="commentSpamModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel"
+aria-hidden="true">
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4 class="modal-title" id="commentSpamModalTitle"></h4>
+        </div>
+        <div class="modal-body">
+            <h5 id="commentSpamModalBody"></h5>
+            <form id="commentSpamForm" method="POST" action="">
+                {% csrf_token %}
+                <input type="hidden" name="choice" id="commentSpamModalChoice" value="">
                 <hr>
                 <div class="pull-right">
                     <input type="submit" class="btn btn-sm btn-success" value="Okay">
@@ -840,6 +884,29 @@ aria-hidden="true">
         var button = $(event.relatedTarget) // Button that triggered the modal
         var id = $(this).data('id') // Extract info from data-* attributes
         $("#commentDeleteForm").attr("action", "/comment_delete/" + id + "/");
+    })
+</script>
+
+<!-- Script to POST comment spam form data -->
+<script type="text/javascript">
+    $('.spam-comment').on('click', function (event) {
+        var id = $(this).data('id') // Extract info from data-* attributes
+        var choice = $(this).data('spam')
+
+        var title = document.querySelector('#commentSpamModalTitle');
+        var body = document.querySelector('#commentSpamModalBody');
+        var input = document.querySelector('#commentSpamModalChoice');
+        if(choice == "spam"){
+            title.innerHTML = "Mark Comment as Spam";
+            body.innerHTML = "Are you sure about marking this comment as Spam?"
+            input.value = "spam";
+        }
+        else{
+            title.innerHTML = "Mark Comment as Not-Spam";
+            body.innerHTML = "Are you sure about marking this comment as Not-Spam?"
+            input.value = "not-spam";
+        }
+        $("#commentSpamForm").attr("action", "/mark_comment_spam/" + id + "/");
     })
 </script>
 

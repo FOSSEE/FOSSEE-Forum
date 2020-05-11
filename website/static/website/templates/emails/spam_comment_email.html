@@ -1,0 +1,25 @@
+The following comment posted in the FOSSEE Forum has been <b style="color: red;">Classified as Spam</b>: <br>
+<br>
+<b>Question Title:</b> {{ title }} <br>
+<b>Category:</b> {{ category }}<br>
+<b>Question: </b>
+
+{% autoescape off %}{{ body }}{% endautoescape %}
+
+<b>Answer: </b>
+
+{% autoescape off %}{{ answer }}{% endautoescape %}
+
+<b>Comment: </b>
+
+{% autoescape off %}{{ comment }}{% endautoescape %}
+
+<b>Link: </b><a href="{{ link }}">{{ link }}</a><br>
+<br>
+<br>
+Regards,<br>
+FOSSEE Team,<br>
+FOSSEE, IIT Bombay<br>
+<br>
+<br>
+<center><h6>*** This is an automatically generated email, please do not reply***</h6></center>
