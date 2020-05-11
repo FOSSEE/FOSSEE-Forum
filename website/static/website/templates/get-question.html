@@ -201,27 +201,28 @@
             </div>
 
             {% if MODERATOR_ACTIVATED %}
-            {% if answer.is_spam %}
-            <span class="spam">
-                <small>
-                    <a href="#">
-                        Spam
-                    </a>
-                </small>
-            </span>
-            {% else %}
-            <span class="non-spam">
-                <small>
-                    <a href="#">
-                        Not Spam
-                    </a>
-                </small>
-            </span>
-            {% endif %}
-
-            <a data-toggle="modal" data-target="#detailsModal{{ answer.id }}" href="#">
-                <span class="glyphicon glyphicon-edit"></span>
-            </a>
+                {% if answer.is_spam %}
+                <span class="spam">
+                    <small>
+                        <a href="#">
+                            Spam
+                        </a>
+                    </small>
+                </span>
+                {% else %}
+                <span class="non-spam">
+                    <small>
+                        <a href="#">
+                            Not Spam
+                        </a>
+                    </small>
+                </span>
+                {% endif %}
+                {% if answer.is_active %}
+                <a data-toggle="modal" data-target="#detailsModal{{ answer.id }}" href="#">
+                    <span class="glyphicon glyphicon-edit"></span>
+                </a>
+                {% endif %}
             {% endif %}
 
             <span class="meta">
@@ -308,7 +309,13 @@
 
                     {% if comment.is_active or MODERATOR_ACTIVATED %}
                     <!-- Comment -->
-                    <div class="comment comment{{ comment.id }} {{blur}}" id="comm{{ comment.id }}" style="padding: 15px 15px 15px 5px;">
+                    {% if comment.is_active %}
+                    <div class="comment comment{{ comment.id }} {{blur}}" id="comm{{ comment.id }}"
+                        style="padding: 15px 15px 15px 5px;">
+                    {% else %}
+                    <div class="comment comment{{ comment.id }} {{blur}}" id="comm{{ comment.id }}"
+                        style="padding: 15px 15px 15px 5px; border-bottom: 1.5px solid red;">
+                    {% endif %}
                         <div class="body" id="cbody{{ comment.id }}">
                             {{ comment.body| safe }}
                         </div>
@@ -372,7 +379,7 @@
                             </span>
                         </span>
 
-                        {% if MODERATOR_ACTIVATED %}
+                        {% if MODERATOR_ACTIVATED and comment.is_active %}
                         <span class="modify" style="display:block">
                             {% if comment.is_spam %}
                             <a class="btn btn-xs btn-info vs spam-comment" data-toggle="modal" data-target="#commentSpamModal"

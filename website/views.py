@@ -896,6 +896,7 @@ def mark_answer_spam(request, answer_id):
             answer.save()
             # Send Spam Classification Notification to Author
             send_spam_answer_notification(request.user, answer)
+            messages.success(request, "Answer marked successfully as Spam!")
         else:
             answer.is_spam = False
             answer.save()
@@ -903,6 +904,7 @@ def mark_answer_spam(request, answer_id):
             send_answer_approve_notification(answer)
             # Send Pending Notifications (by the name of author)
             send_answer_notification(get_object_or_404(User, id=answer.uid), answer)
+            messages.success(request, "Answer marked successfully as Not-Spam!")
     return HttpResponseRedirect('/question/{0}/#answer{1}'.format(question_id, answer.id))
 
 
@@ -921,6 +923,7 @@ def mark_comment_spam(request, comment_id):
             comment.save()
             # Send Spam Classification Notification to Author
             send_spam_comment_notification(request.user, comment)
+            messages.success(request, "Comment marked successfully as Spam!")
         else:
             comment.is_spam = False
             comment.save()
@@ -928,6 +931,7 @@ def mark_comment_spam(request, comment_id):
             send_comment_approve_notification(comment)
             # Send Pending Notifications (by the name of author)
             send_comment_notification(get_object_or_404(User, id=comment.uid), comment)
+            messages.success(request, "Comment marked successfully as Not-Spam!")
     return HttpResponseRedirect('/question/{0}/#comm{1}'.format(question_id, comment.id))
 
 
