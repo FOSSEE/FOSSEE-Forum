@@ -104,7 +104,7 @@
             {% endif %}
 
             <span class="modify">
-                {% if user|can_edit:question and not ans_count or MODERATOR_ACTIVATED %}
+                {% if user|is_author:question and not ans_count or MODERATOR_ACTIVATED %}
                 {% if question.is_active %}
                 <a class="edit btn btn-xs btn-info" href="{% url 'website:edit_question' question.id %}">Edit</a>
                 <a class="delete btn btn-xs btn-info" data-toggle="modal" data-target="#questionDeleteModal">Delete</a>
@@ -139,7 +139,7 @@
 {% for answer, ans_vote in main_list %}
 
 <!-- Checking if answer needs to be blurred -->
-{% if answer.is_spam and not MODERATOR_ACTIVATED and not user|can_edit:answer %}
+{% if answer.is_spam and not MODERATOR_ACTIVATED and not user|is_author:answer %}
     {% trans 'blur' as blur %}
 {% endif %}
 
@@ -171,10 +171,10 @@
             </div>
         </div>
 
-        <div class="answer {{blur}} {% if user|can_edit:answer %}editable {% endif %}"
+        <div class="answer {{blur}} {% if user|is_author:answer %}editable {% endif %}"
             id="answer{{answer.id}}" style="margin-left: 63px;">
             <div class="body" id="body{{ answer.id }}" style="padding-bottom: 12px; padding-top: 15px">
-                {% if MODERATOR_ACTIVATED or user|can_edit:answer and answer|havenot_comments %}
+                {% if MODERATOR_ACTIVATED or user|is_author:answer and answer|havenot_comments %}
                 <form id="form{{ answer.id }}" method="POST" action="{% url 'website:ajax_answer_update' %}">
                     {% csrf_token %}
                     <input type="hidden" name="answer_id" value="{{ answer.id }}">
@@ -187,7 +187,7 @@
                 {% endif %}
                 <div id="ans{{ answer.id }}2">{{ answer.body| safe }}</div>
                 {% if answer.is_spam %}<div class="text-danger"> Oops! Looks like spam! Waiting for moderator approval.</div>{% endif %}
-                {% if MODERATOR_ACTIVATED or user|can_edit:answer and answer|havenot_comments %}
+                {% if MODERATOR_ACTIVATED or user|is_author:answer and answer|havenot_comments %}
                 <script type="text/javascript">
                     CKEDITOR.on("instanceReady", function (event) {
                         CKEDITOR.instances['ate{{ answer.id }}'].setData(document.getElementById(
@@ -236,7 +236,7 @@
                 </span>
             </span>
 
-            {% if MODERATOR_ACTIVATED or user|can_edit:answer and answer|havenot_comments %}
+            {% if MODERATOR_ACTIVATED or user|is_author:answer and answer|havenot_comments %}
             <span class="modify" style="display:block">
                 {% if answer.is_active %}
                 <a class="delete btn btn-xs btn-info vs ansdel" data-toggle="modal" data-target="#answerDeleteModal"
@@ -299,7 +299,7 @@
 
                     <!-- Checking if comment needs to be blurred (if not already) -->
                     {% if not answer.is_spam or not blur %}
-                        {% if comment.is_spam and not MODERATOR_ACTIVATED and not user|can_edit:comment %}
+                        {% if comment.is_spam and not MODERATOR_ACTIVATED and not user|is_author:comment %}
                             {% trans 'blur' as blur %}
                         {% else %}
                             {% trans '' as blur %}
@@ -315,7 +315,7 @@
                         {% if comment.is_spam %}<div class="text-danger"> Oops! Looks like spam! Waiting for moderator approval.</div>{% endif %}
                         <br>
                         <!-- Options provided on comment -->
-                        {% if MODERATOR_ACTIVATED or user|can_edit:comment and answer|can_delete:comment.id %}
+                        {% if MODERATOR_ACTIVATED or user|is_author:comment and answer|can_delete:comment.id %}
                             <!-- Accessible if user is a moderator OR 
                                 (user is the author of comment AND there are no comments after it) -->
                             {% if comment.is_active %}
@@ -405,7 +405,7 @@
                         data-target="comment{{ answer.id }}" id="comment{{ answer.id }}">
                         <small>Add Comment</small>
                     </a>
-                        {% if answer.is_spam and not user|can_edit:answer %}
+                        {% if answer.is_spam and not user|is_author:answer %}
                         <div class="text-danger" style="margin-top: 10px;">Oops! Looks like spam! Waiting for moderator approval</div>
                         {% endif %}
                     {% endif %}

@@ -3,7 +3,7 @@ from django import template
 register = template.Library()
 
 
-def can_edit(user, obj):
+def is_author(user, obj):
     try:
         if user == obj.user or user.id == obj.uid:
             return True
@@ -13,7 +13,7 @@ def can_edit(user, obj):
         return False
 
 
-register.filter(can_edit)
+register.filter(is_author)
 
 
 def is_moderator(user):
