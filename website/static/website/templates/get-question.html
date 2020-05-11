@@ -873,6 +873,10 @@ aria-hidden="true">
                 }
             }
         });
+
+        // Highlight the Hash div on load
+        var hash_div = window.location.hash;
+        $(hash_div).effect("highlight", {color: '#99cfe0'}, 3000);
     });
 </script>
 
