@@ -184,27 +184,44 @@ def send_remider_mail():
 
 # VIEWS FUNCTIONS
 
-def home(request):
-    """Render the index Page of the Website."""
-    send_remider_mail()
-    
-    # CHANGES REQUIRED
-    # Should be redirected to /moderator/ if Moderator Panel is activated instead of deavtivating it
-    # Creating seperate views for activating/deactivating is an option
+@login_required
+@user_passes_test(is_moderator)
+def moderator_activate(request):
+    """Activate the Moderator Panel."""
+    request.session['MODERATOR_ACTIVATED'] = True
+
+    next = request.GET.get('next', '')
+    try:
+        # Check if there is a view corresponding to this URL,
+        # throw a Resolver404 Exception otherwise
+        resolve(next)
+        return HttpResponseRedirect(next)
+    except Resolver404:
+        return HttpResponseRedirect('/moderator/')
+
+
+@login_required
+@user_passes_test(is_moderator)
+def moderator_deactivate(request):
+    """Deactivate the Moderator Panel."""
     if request.session.get('MODERATOR_ACTIVATED', False):
         request.session['MODERATOR_ACTIVATED'] = False
 
     next = request.GET.get('next', '')
-    next = next.split('/')
-    if 'moderator' in next:
-        next.remove('moderator')
-    next = '/'.join(next)
     try:
-        resolve(next)   # Checks if there is a view corresponding to this URL, throws a Resolver404 Exception otherwise
+        resolve(next)
         return HttpResponseRedirect(next)
     except Resolver404:
-        if next:
-            return HttpResponseRedirect('/')
+        return HttpResponseRedirect('/')
+
+
+def home(request):
+    """Render the index Page of the Website."""
+    send_remider_mail()
+
+    if request.session.get('MODERATOR_ACTIVATED', False):
+        return HttpResponseRedirect('/moderator/')
+
     categories = FossCategory.objects.order_by('name')
     questions = Question.objects.filter(is_spam=False, is_active=True).order_by('-date_created')
     context = {
@@ -218,6 +235,7 @@ def questions(request):
     """Show all the Questions posted till now with Pagination."""
     if request.session.get('MODERATOR_ACTIVATED', False):
         return HttpResponseRedirect('/moderator/questions/')
+
     categories = FossCategory.objects.order_by('name')
     questions = Question.objects.all().filter(is_spam=False, is_active=True).order_by('-date_created')
     context = {
@@ -234,7 +252,7 @@ def get_question(request, question_id=None, pretty_url=None):
             question = get_object_or_404(Question, id=question_id)
             answers = question.answer_set.all()
         else:
-            return HttpResponseRedirect("/moderator/")
+            return render(request, 'website/templates/not-authorized.html')
     else:
         # Spam Questions should be accessible to its Author only.
         question = get_object_or_404(Question, id=question_id, is_active=True)
@@ -291,6 +309,7 @@ def get_question(request, question_id=None, pretty_url=None):
 def new_question(request):
     """Render the page to post a new question onto the forum."""
     if request.session.get('MODERATOR_ACTIVATED', False):
+        messages.error(request, "Moderators cannot Post a New Question!")
         return HttpResponseRedirect('/moderator/')
 
     context = {}
@@ -684,7 +703,9 @@ def comment_restore(request, comment_id):
 def search(request):
     """Render 'Search Questions by Category' Page."""
     if request.session.get('MODERATOR_ACTIVATED', False):
+        messages.error(request, "Moderators cannot access the Search Page!")
         return HttpResponseRedirect('/moderator/')
+
     categories = FossCategory.objects.order_by('name')
     context = {
         'categories': categories,
@@ -719,6 +740,7 @@ def filter(request, category=None, tutorial=None):
 def user_notifications(request, user_id):
     """Display all the Notifications recieved by the user."""
     if request.session.get('MODERATOR_ACTIVATED', False):
+        messages.error(request, "Moderators cannot access the Notifications!")
         return HttpResponseRedirect('/moderator/')
 
     # settings.MODERATOR_ACTIVATED = False
@@ -745,7 +767,10 @@ def user_notifications(request, user_id):
 @login_required
 def clear_notifications(request):
     """Delete all the Notifications recieved by the user."""
-    request.session['MODERATOR_ACTIVATED'] = False   # WHY ??? Instead Moderator shouldn't be allowed to access it.
+    if request.session.get('MODERATOR_ACTIVATED', False):
+        messages.error(request, "Moderators cannot clear the Notifications!")
+        return HttpResponseRedirect('/moderator/')
+
     Notification.objects.filter(uid=request.user.id).delete()
     return HttpResponseRedirect("/user/{0}/notifications/".format(request.user.id))
 
@@ -941,16 +966,9 @@ def mark_comment_spam(request, comment_id):
 @user_passes_test(is_moderator)
 def moderator_home(request):
     """Render Moderator Panel Home Page."""
-    request.session['MODERATOR_ACTIVATED'] = True
-    next = request.GET.get('next', '')
-    if next == '/':
-        return HttpResponseRedirect('/moderator/')
-    try:
-        resolve(next)
-        return HttpResponseRedirect(next)
-    except Resolver404:
-        if next:
-            return HttpResponseRedirect('/moderator/')
+    if not request.session.get('MODERATOR_ACTIVATED', False):
+        return HttpResponseRedirect('/')
+
     # If user is a super moderator
     if (request.user.groups.filter(name="forum_moderator").exists()):
         questions = Question.objects.filter().order_by('-date_created')
@@ -1022,7 +1040,9 @@ def moderator_questions(request):
 @user_passes_test(is_moderator)
 def moderator_unanswered(request):
     """Display all the Unanswered Questions belonging to the Moderator's Categories."""
-    request.session['MODERATOR_ACTIVATED'] = True   # Why here???
+    if not request.session.get('MODERATOR_ACTIVATED', False):
+        return HttpResponseRedirect('/')
+
     # If user is a super moderator
     if (request.user.groups.filter(name="forum_moderator").exists()):
         categories = FossCategory.objects.order_by('name')

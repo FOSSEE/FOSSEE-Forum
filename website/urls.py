@@ -43,6 +43,8 @@ urlpatterns = [
 
     # Moderator Panel
     path('moderator/', views.moderator_home, name='moderator_home'),
+    path('moderator/activate/', views.moderator_activate, name='moderator_activate'),
+    path('moderator/deactivate/', views.moderator_deactivate, name='moderator_deactivate'),
     path('moderator/questions/', views.moderator_questions, name='moderator_questions'),
     path('moderator/unanswered/', views.moderator_unanswered, name='moderator_unanswered'),
     path('moderator/train_spam_filter/', views.train_spam_filter, name='train_spam_filter'),

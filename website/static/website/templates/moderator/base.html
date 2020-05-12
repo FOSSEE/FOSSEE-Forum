@@ -62,7 +62,7 @@
                                 </a>
                                 <script type="text/javascript">
                                     function user_panel(){
-                                        window.location.replace("{% url 'website:home' %}?next={{ request.path }}");
+                                        window.location.replace("{% url 'website:moderator_deactivate' %}?next={{ request.path }}");
                                     }
                                     function retrain_spam_filter(){
                                         window.location.replace("{% url 'website:train_spam_filter' %}?next={{ request.path }}")
