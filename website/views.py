@@ -917,19 +917,21 @@ def mark_answer_spam(request, answer_id):
     if request.method == "POST":
         choice = request.POST['selector']
         if choice == "spam":
-            answer.is_spam = True
-            answer.save()
-            # Send Spam Classification Notification to Author
-            send_spam_answer_notification(request.user, answer)
-            messages.success(request, "Answer marked successfully as Spam!")
+            if not answer.is_spam:
+                answer.is_spam = True
+                answer.save()
+                # Send Spam Classification Notification to Author
+                send_spam_answer_notification(request.user, answer)
+                messages.success(request, "Answer marked successfully as Spam!")
         else:
-            answer.is_spam = False
-            answer.save()
-            # Send Approval Notification to Author
-            send_answer_approve_notification(answer)
-            # Send Pending Notifications (by the name of author)
-            send_answer_notification(get_object_or_404(User, id=answer.uid), answer)
-            messages.success(request, "Answer marked successfully as Not-Spam!")
+            if answer.is_spam:
+                answer.is_spam = False
+                answer.save()
+                # Send Approval Notification to Author
+                send_answer_approve_notification(answer)
+                # Send Pending Notifications (by the name of author)
+                send_answer_notification(get_object_or_404(User, id=answer.uid), answer)
+                messages.success(request, "Answer marked successfully as Not-Spam!")
     return HttpResponseRedirect('/question/{0}/#answer{1}'.format(question_id, answer.id))
 
 
