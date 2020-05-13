@@ -175,7 +175,7 @@
             id="answer{{answer.id}}" style="margin-left: 63px;">
             <div class="body" id="body{{ answer.id }}" style="padding-bottom: 12px; padding-top: 15px">
                 {% if MODERATOR_ACTIVATED or user|is_author:answer and answer|havenot_comments %}
-                <form id="form{{ answer.id }}" method="POST" action="{% url 'website:ajax_answer_update' %}">
+                <form id="form{{ answer.id }}" method="POST" action="{% url 'website:answer_update' %}">
                     {% csrf_token %}
                     <input type="hidden" name="answer_id" value="{{ answer.id }}">
                     <div class="edit-answer" id="ans{{ answer.id }}1">
@@ -327,7 +327,7 @@
                                 (user is the author of comment AND there are no comments after it) -->
                             {% if comment.is_active %}
                             <form id="save_comment{{ comment.id }}" method="POST"
-                                action="{% url 'website:ajax_answer_comment_update' %}">
+                                action="{% url 'website:answer_comment_update' %}">
                                 <div id="ceditor{{ comment.id }}" style="padding-bottom: 20px; display: none;">
                                     {% csrf_token %}
                                     <input type="hidden" name="comment_id" value="{{ comment.id }}">
@@ -662,7 +662,7 @@ aria-hidden="true">
                 /* USER HAS ALREADY VOTED */
                 if ($(this).hasClass('selected')) {
                     var vote_action = 'recall-vote'
-                    $.post('/vote_post/', {
+                    $.post('/ajax-vote-post/', {
                         id: id,
                         type: vote_type,
                         action: vote_action
@@ -677,7 +677,7 @@ aria-hidden="true">
                 /* USER WISHES TO VOTE */
                 else {
                     var vote_action = 'vote'
-                    $.post('/vote_post/', {
+                    $.post('/ajax-vote-post/', {
                         id: id,
                         type: vote_type,
                         action: vote_action
@@ -712,7 +712,7 @@ aria-hidden="true">
                 /* USER HAS ALREADY DOWN-VOTED */
                 if ($(this).hasClass('selected')) {
                     var vote_action = 'recall-vote';
-                    $.post('/vote_post/', {
+                    $.post('/ajax-vote-post/', {
                         id: id,
                         type: vote_type,
                         action: vote_action
@@ -727,7 +727,7 @@ aria-hidden="true">
                 /* USER WISHES TO VOTE */
                 else {
                     var vote_action = 'vote';
-                    $.post('/vote_post/', {
+                    $.post('/ajax-vote-post/', {
                         id: id,
                         type: vote_type,
                         action: vote_action
@@ -781,7 +781,7 @@ aria-hidden="true">
                 /* USER WISHES TO RECALL VOTE */
                 if ($('img#' + up_id).hasClass('selected')) {
                     var vote_action = 'recall-vote'
-                    $.post('/ans_vote_post/', {
+                    $.post('/ajax-ans-vote-post/', {
                         id: id,
                         type: vote_type,
                         action: vote_action
@@ -796,7 +796,7 @@ aria-hidden="true">
                 /* USER WISHES TO VOTE */
                 else {
                     var vote_action = 'vote'
-                    $.post('/ans_vote_post/', {
+                    $.post('/ajax-ans-vote-post/', {
                         id: id,
                         type: vote_type,
                         action: vote_action
@@ -840,7 +840,7 @@ aria-hidden="true">
                 if ($('img#' + down_id).hasClass('selected')) {
                     var vote_action = 'recall-vote'
 
-                    $.post('/ans_vote_post/', {
+                    $.post('/ajax-ans-vote-post/', {
                         id: id,
                         type: vote_type,
                         action: vote_action
@@ -855,7 +855,7 @@ aria-hidden="true">
                 /* USER WISHES TO VOTE */
                 else {
                     var vote_action = 'vote'
-                    $.post('/ans_vote_post/', {
+                    $.post('/ajax-ans-vote-post/', {
                         id: id,
                         type: vote_type,
                         action: vote_action

@@ -566,6 +566,105 @@ def edit_question(request, question_id):
     return render(request, 'website/templates/edit-question.html', context)
 
 
+@login_required
+def answer_update(request):
+    """Update the Answer and send emails to the concerned."""
+    if request.method == 'POST':
+        aid = request.POST['answer_id']
+        body = request.POST['answer_body']
+        answer = get_object_or_404(Answer, pk=aid, is_active=True)
+
+        # Answer comments excluding author's
+        comments = AnswerComment.objects.filter(answer=answer, is_active=True).exclude(uid=answer.uid)
+
+        if ((is_moderator(request.user, answer.question) and request.session.get('MODERATOR_ACTIVATED', False)) or
+                (request.user.id == answer.uid and not comments.exists())):
+            answer.body = str(body)
+            answer.is_spam = False
+            if (not request.session.get('MODERATOR_ACTIVATED', False)
+                    and predict(answer.body) == "Spam"):
+                answer.is_spam = True
+            answer.save()
+
+            # SENDING NOTIFICATIONS
+            if answer.notif_flag == 0:
+                # A Non-Spam Answer or an Answer marked as Spam by a Moderator
+                # is Edited (no Notifications pending)
+                answer.notif_flag = 2
+                answer.save()
+
+                if answer.is_spam:
+                    send_spam_answer_notification(request.user, answer)
+                else:
+                    send_answer_notification(request.user, answer)
+            else:
+                # A new or recently edited answer marked as Spam is Edited
+                # (notifications for it as a new/edited answer were not sent)
+                # If answer is still spam, do nothing.
+                if not answer.is_spam:
+                    if answer.uid != request.user.id:
+                        # Send Approval Notification to Author
+                        send_answer_approve_notification(answer)
+                    # Send pending Notifications (by the name of author)
+                    send_answer_notification(get_object_or_404(User, id=answer.uid), answer)
+
+            messages.success(request, "Answer is Successfully Saved!")
+            return HttpResponseRedirect('/question/{0}/'.format(answer.question.id))
+        else:
+            messages.error(request, "Failed to Update Answer!")
+            return HttpResponseRedirect('/question/{0}/'.format(answer.question.id))
+
+    return render(request, 'website/templates/get-requests-not-allowed.html')
+
+
+@login_required
+def answer_comment_update(request):
+    """Update the comment and send emails to the concerned."""
+    if request.method == 'POST':
+        cid = request.POST['comment_id']
+        body = request.POST['comment_body']
+        comment = get_object_or_404(AnswerComment, pk=cid, is_active=True)
+        question = comment.answer.question
+
+        if ((is_moderator(request.user, question) and request.session.get('MODERATOR_ACTIVATED', False)) or
+                (request.user.id == comment.uid and can_delete_comment(comment.answer, cid))):
+            comment.body = str(body)
+            comment.is_spam = False
+            if (not request.session.get('MODERATOR_ACTIVATED', False) and
+                    predict(comment.body) == "Spam"):
+                comment.is_spam = True
+            comment.save()
+
+            # SENDING NOTIFICATIONS
+            if comment.notif_flag == 0:
+                # A Non-Spam comment or an comment marked as Spam by a Moderator
+                # is Edited (no Notifications pending)
+                comment.notif_flag = 2
+                comment.save()
+
+                if comment.is_spam:
+                    send_spam_comment_notification(request.user, comment)
+                else:
+                    send_comment_notification(request.user, comment)
+            else:
+                # A new or recently edited comment marked as Spam is Edited
+                # (notifications for it as a new/edited comment were not sent)
+                # If comment is still spam, do nothing.
+                if not comment.is_spam:
+                    if comment.uid != request.user.id:
+                        # Send Approval Notification to Author
+                        send_comment_approve_notification(comment)
+                    # Send pending Notifications (by the name of author)
+                    send_comment_notification(get_object_or_404(User, id=comment.uid), comment)
+
+            messages.success(request, "Comment is Successfully Saved!")
+            return HttpResponseRedirect('/question/{0}/'.format(question.id))
+        else:
+            messages.error(request, "Failed to Update Comment!")
+            return HttpResponseRedirect('/question/{0}/'.format(question.id))
+    return render(request, 'website/templates/get-requests-not-allowed.html')
+
+
 # View for deleting question, notification is sent to mailing list
 # team@fossee.in
 @login_required
@@ -773,120 +872,6 @@ def clear_notifications(request):
 
     Notification.objects.filter(uid=request.user.id).delete()
     return HttpResponseRedirect("/user/{0}/notifications/".format(request.user.id))
-
-
-# return number of votes and initial votes
-# user who asked the question,cannot vote his/or anwser,
-# other users can post votes
-@login_required
-def vote_post(request):
-
-    post_id = int(request.POST.get('id'))
-    vote_type = request.POST.get('type')
-    vote_action = request.POST.get('action')
-    cur_post = get_object_or_404(Question, id=post_id, is_active=True)
-    thisuserupvote = cur_post.userUpVotes.filter(
-        id=request.user.id, is_active=True).count()
-    thisuserdownvote = cur_post.userDownVotes.filter(
-        id=request.user.id, is_active=True).count()
-    initial_votes = cur_post.num_votes
-
-    if (request.user.id != cur_post.user.id):
-
-        # This condition is for adding vote
-        if vote_action == 'vote':
-            if (thisuserupvote == 0) and (thisuserdownvote == 0):
-                if vote_type == 'up':
-                    cur_post.userUpVotes.add(request.user)
-                elif vote_type == 'down':
-                    cur_post.userDownVotes.add(request.user)
-                else:
-                    return HttpResponse(initial_votes)
-            else:
-                if (thisuserupvote == 1) and (vote_type == 'down'):
-                    cur_post.userUpVotes.remove(request.user)
-                    cur_post.userDownVotes.add(request.user)
-                elif (thisuserdownvote == 1) and (vote_type == 'up'):
-                    cur_post.userDownVotes.remove(request.user)
-                    cur_post.userUpVotes.add(request.user)
-                else:
-                    return HttpResponse(initial_votes)
-
-        # This condition is for canceling vote
-        elif vote_action == 'recall-vote':
-            if (vote_type == 'up') and (thisuserupvote == 1):
-                cur_post.userUpVotes.remove(request.user)
-            elif (vote_type == 'down') and (thisuserdownvote == 1):
-                cur_post.userDownVotes.remove(request.user)
-            else:
-                return HttpResponse(initial_votes)
-        else:
-            return HttpResponse("Error: Bad Action.")
-
-        num_votes = cur_post.userUpVotes.count() - cur_post.userDownVotes.count()
-        cur_post.num_votes = num_votes
-        cur_post.save()
-        return HttpResponse(num_votes)
-
-    else:
-        return HttpResponse(initial_votes)
-
-
-# return number of votes and initial votes
-# user who posted the answer, cannot vote his/or anwser,
-# other users can post votes
-@login_required
-def ans_vote_post(request):
-
-    post_id = int(request.POST.get('id'))
-    vote_type = request.POST.get('type')
-    vote_action = request.POST.get('action')
-    cur_post = get_object_or_404(Answer, id=post_id, is_active=True)
-    thisuserupvote = cur_post.userUpVotes.filter(
-        id=request.user.id, is_active=True).count()
-    thisuserdownvote = cur_post.userDownVotes.filter(
-        id=request.user.id, is_active=True).count()
-    initial_votes = cur_post.num_votes
-
-    if (request.user.id != cur_post.uid):
-
-        # This condition is for voting
-        if (vote_action == 'vote'):
-            if (thisuserupvote == 0) and (thisuserdownvote == 0):
-                if vote_type == 'up':
-                    cur_post.userUpVotes.add(request.user)
-                elif vote_type == 'down':
-                    cur_post.userDownVotes.add(request.user)
-                else:
-                    return HttpResponse(initial_votes)
-            else:
-                if (thisuserupvote == 1) and (vote_type == 'down'):
-                    cur_post.userUpVotes.remove(request.user)
-                    cur_post.userDownVotes.add(request.user)
-                elif (thisuserdownvote == 1) and (vote_type == 'up'):
-                    cur_post.userDownVotes.remove(request.user)
-                    cur_post.userUpVotes.add(request.user)
-                else:
-                    return HttpResponse(initial_votes)
-
-        # This condition is for canceling vote
-        elif (vote_action == 'recall-vote'):
-            if (vote_type == 'up') and (thisuserupvote == 1):
-                cur_post.userUpVotes.remove(request.user)
-            elif (vote_type == 'down') and (thisuserdownvote == 1):
-                cur_post.userDownVotes.remove(request.user)
-            else:
-                return HttpResponse(initial_votes)
-        else:
-            return HttpResponse(initial_votes)
-
-        num_votes = cur_post.userUpVotes.count() - cur_post.userDownVotes.count()
-        cur_post.num_votes = num_votes
-        cur_post.save()
-        return HttpResponse(num_votes)
-
-    else:
-        return HttpResponse(initial_votes)
 
 
 # View to approve question marked as spam
@@ -1103,102 +1088,6 @@ def ajax_tutorials(request):
 
 
 @login_required
-def ajax_answer_update(request):
-    """Update the Answer and send emails to the concerned."""
-    if request.method == 'POST':
-        aid = request.POST['answer_id']
-        body = request.POST['answer_body']
-        answer = get_object_or_404(Answer, pk=aid, is_active=True)
-        if ((request.user.id == answer.uid and not AnswerComment.objects.filter(answer=answer, is_active=True).exclude(uid=answer.uid).exists()) or
-                (is_moderator(request.user, answer.question) and request.session.get('MODERATOR_ACTIVATED', False))):
-            answer.body = str(body)
-            answer.is_spam = False
-            if (not request.session.get('MODERATOR_ACTIVATED', False) and
-                    predict(answer.body) == "Spam"):
-                answer.is_spam = True
-            answer.save()
-
-            # SENDING NOTIFICATIONS
-            if answer.notif_flag == 0:
-                # A Non-Spam Answer or an Answer marked as Spam by a Moderator
-                # is Edited (no Notifications pending)
-                answer.notif_flag = 2
-                answer.save()
-
-                if answer.is_spam:
-                    send_spam_answer_notification(request.user, answer)
-                else:
-                    send_answer_notification(request.user, answer)
-            else:
-                # A new or recently edited answer marked as Spam is Edited
-                # (notifications for it as a new/edited answer were not sent)
-                # If answer is still spam, do nothing.
-                if not answer.is_spam:
-                    if answer.uid != request.user.id:
-                        # Send Approval Notification to Author
-                        send_answer_approve_notification(answer)
-                    # Send pending Notifications (by the name of author)
-                    send_answer_notification(get_object_or_404(User, id=answer.uid), answer)
-
-            messages.success(request, "Answer is Successfully Saved!")
-            return HttpResponseRedirect('/question/{0}/'.format(answer.question.id))
-        else:
-            messages.error(request, "Failed to Update Answer!")
-            return HttpResponseRedirect('/question/{0}/'.format(answer.question.id))
-    else:
-        return render(request, 'website/templates/get-requests-not-allowed.html')
-
-
-@login_required
-@csrf_exempt
-def ajax_answer_comment_update(request):
-    """Update the comment and send emails to the concerned."""
-    if request.method == 'POST':
-        cid = request.POST['comment_id']
-        body = request.POST['comment_body']
-        comment = get_object_or_404(AnswerComment, pk=cid, is_active=True)
-
-        if ((is_moderator(request.user, comment.answer.question) and request.session.get('MODERATOR_ACTIVATED', False)) or
-                (request.user.id == comment.uid and can_delete_comment(comment.answer, cid))):
-            comment.body = str(body)
-            comment.is_spam = False
-            if (not request.session.get('MODERATOR_ACTIVATED', False) and
-                    predict(comment.body) == "Spam"):
-                comment.is_spam = True
-            comment.save()
-
-            # SENDING NOTIFICATIONS
-            if comment.notif_flag == 0:
-                # A Non-Spam comment or an comment marked as Spam by a Moderator
-                # is Edited (no Notifications pending)
-                comment.notif_flag = 2
-                comment.save()
-
-                if comment.is_spam:
-                    send_spam_comment_notification(request.user, comment)
-                else:
-                    send_comment_notification(request.user, comment)
-            else:
-                # A new or recently edited comment marked as Spam is Edited
-                # (notifications for it as a new/edited comment were not sent)
-                # If comment is still spam, do nothing.
-                if not comment.is_spam:
-                    if comment.uid != request.user.id:
-                        # Send Approval Notification to Author
-                        send_comment_approve_notification(comment)
-                    # Send pending Notifications (by the name of author)
-                    send_comment_notification(get_object_or_404(User, id=comment.uid), comment)
-
-            messages.success(request, "Comment is Successfully Saved!")
-            return HttpResponseRedirect('/question/{0}/'.format(comment.answer.question.id))
-        else:
-            messages.error(request, "Failed to Update Comment!")
-            return HttpResponseRedirect('/question/{0}/'.format(comment.answer.question.id))
-    else:
-        return render(request, 'website/templates/get-requests-not-allowed.html')
-
-
-@login_required
 @csrf_exempt
 def ajax_notification_remove(request):
     """Clear (Delete) the Notification."""
@@ -1243,6 +1132,120 @@ def ajax_keyword_search(request):
             context)
     else:
         return render(request, 'website/templates/get-requests-not-allowed.html')
+
+
+# return number of votes and initial votes
+# user who asked the question,cannot vote his/or anwser,
+# other users can post votes
+@login_required
+def ajax_vote_post(request):
+
+    post_id = int(request.POST.get('id'))
+    vote_type = request.POST.get('type')
+    vote_action = request.POST.get('action')
+    cur_post = get_object_or_404(Question, id=post_id, is_active=True)
+    thisuserupvote = cur_post.userUpVotes.filter(
+        id=request.user.id, is_active=True).count()
+    thisuserdownvote = cur_post.userDownVotes.filter(
+        id=request.user.id, is_active=True).count()
+    initial_votes = cur_post.num_votes
+
+    if (request.user.id != cur_post.user.id):
+
+        # This condition is for adding vote
+        if vote_action == 'vote':
+            if (thisuserupvote == 0) and (thisuserdownvote == 0):
+                if vote_type == 'up':
+                    cur_post.userUpVotes.add(request.user)
+                elif vote_type == 'down':
+                    cur_post.userDownVotes.add(request.user)
+                else:
+                    return HttpResponse(initial_votes)
+            else:
+                if (thisuserupvote == 1) and (vote_type == 'down'):
+                    cur_post.userUpVotes.remove(request.user)
+                    cur_post.userDownVotes.add(request.user)
+                elif (thisuserdownvote == 1) and (vote_type == 'up'):
+                    cur_post.userDownVotes.remove(request.user)
+                    cur_post.userUpVotes.add(request.user)
+                else:
+                    return HttpResponse(initial_votes)
+
+        # This condition is for canceling vote
+        elif vote_action == 'recall-vote':
+            if (vote_type == 'up') and (thisuserupvote == 1):
+                cur_post.userUpVotes.remove(request.user)
+            elif (vote_type == 'down') and (thisuserdownvote == 1):
+                cur_post.userDownVotes.remove(request.user)
+            else:
+                return HttpResponse(initial_votes)
+        else:
+            return HttpResponse("Error: Bad Action.")
+
+        num_votes = cur_post.userUpVotes.count() - cur_post.userDownVotes.count()
+        cur_post.num_votes = num_votes
+        cur_post.save()
+        return HttpResponse(num_votes)
+
+    else:
+        return HttpResponse(initial_votes)
+
+
+# return number of votes and initial votes
+# user who posted the answer, cannot vote his/or anwser,
+# other users can post votes
+@login_required
+def ajax_ans_vote_post(request):
+
+    post_id = int(request.POST.get('id'))
+    vote_type = request.POST.get('type')
+    vote_action = request.POST.get('action')
+    cur_post = get_object_or_404(Answer, id=post_id, is_active=True)
+    thisuserupvote = cur_post.userUpVotes.filter(
+        id=request.user.id, is_active=True).count()
+    thisuserdownvote = cur_post.userDownVotes.filter(
+        id=request.user.id, is_active=True).count()
+    initial_votes = cur_post.num_votes
+
+    if (request.user.id != cur_post.uid):
+
+        # This condition is for voting
+        if (vote_action == 'vote'):
+            if (thisuserupvote == 0) and (thisuserdownvote == 0):
+                if vote_type == 'up':
+                    cur_post.userUpVotes.add(request.user)
+                elif vote_type == 'down':
+                    cur_post.userDownVotes.add(request.user)
+                else:
+                    return HttpResponse(initial_votes)
+            else:
+                if (thisuserupvote == 1) and (vote_type == 'down'):
+                    cur_post.userUpVotes.remove(request.user)
+                    cur_post.userDownVotes.add(request.user)
+                elif (thisuserdownvote == 1) and (vote_type == 'up'):
+                    cur_post.userDownVotes.remove(request.user)
+                    cur_post.userUpVotes.add(request.user)
+                else:
+                    return HttpResponse(initial_votes)
+
+        # This condition is for canceling vote
+        elif (vote_action == 'recall-vote'):
+            if (vote_type == 'up') and (thisuserupvote == 1):
+                cur_post.userUpVotes.remove(request.user)
+            elif (vote_type == 'down') and (thisuserdownvote == 1):
+                cur_post.userDownVotes.remove(request.user)
+            else:
+                return HttpResponse(initial_votes)
+        else:
+            return HttpResponse(initial_votes)
+
+        num_votes = cur_post.userUpVotes.count() - cur_post.userDownVotes.count()
+        cur_post.num_votes = num_votes
+        cur_post.save()
+        return HttpResponse(num_votes)
+
+    else:
+        return HttpResponse(initial_votes)
 
 
 # ALL NOTIFICATIONS BELOW

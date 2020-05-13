@@ -18,6 +18,12 @@ urlpatterns = [
     path('answer-comment/<int:answer_id>/', views.answer_comment, name='answer_comment'),
 
     path('question/edit/<int:question_id>/', views.edit_question, name='edit_question'),
+    path('answer-update/', views.answer_update, name='answer_update'),
+    path('answer-comment-update/', views.answer_comment_update, name='answer_comment_update'),
+
+    path('approve_spam_question/<int:question_id>/', views.approve_spam_question, name='approve_spam_question'),
+    path('mark_answer_spam/<int:answer_id>/', views.mark_answer_spam, name='mark_answer_spam'),
+    path('mark_comment_spam/<int:comment_id>/', views.mark_comment_spam, name='mark_comment_spam'),
 
     path('question/delete/<int:question_id>/', views.question_delete, name='question_delete'),
     path('answer_delete/<int:answer_id>/', views.answer_delete, name='answer_delete'),
@@ -34,12 +40,6 @@ urlpatterns = [
     path('user/<int:user_id>/notifications/', views.user_notifications, name='user_notifications'),
     path('clear-notifications/', views.clear_notifications, name='clear_notifications'),
 
-    path('vote_post/', views.vote_post, name='vote_post'),
-    path('ans_vote_post/', views.ans_vote_post, name='ans_vote_post'),
-    path('approve_spam_question/<int:question_id>/', views.approve_spam_question, name='approve_spam_question'),
-    path('mark_answer_spam/<int:answer_id>/', views.mark_answer_spam, name='mark_answer_spam'),
-    path('mark_comment_spam/<int:comment_id>/', views.mark_comment_spam, name='mark_comment_spam'),
-
 
     # Moderator Panel
     path('moderator/', views.moderator_home, name='moderator_home'),
@@ -52,10 +52,10 @@ urlpatterns = [
 
     # AJAX
     path('ajax-tutorials/', views.ajax_tutorials, name='ajax_tutorials'),
-    path('ajax-answer-update/', views.ajax_answer_update, name='ajax_answer_update'),
-    path('ajax-answer-comment-update/', views.ajax_answer_comment_update, name='ajax_answer_comment_update'),
     path('ajax-notification-remove/', views.ajax_notification_remove, name='ajax_notification_remove'),
     path('ajax-keyword-search/', views.ajax_keyword_search, name='ajax_keyword_search'),
+    path('ajax-vote-post/', views.ajax_vote_post, name='ajax_vote_post'),
+    path('ajax-ans-vote-post/', views.ajax_ans_vote_post, name='ajax_ans_vote_post'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
