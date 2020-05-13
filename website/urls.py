@@ -21,10 +21,6 @@ urlpatterns = [
     path('answer-update/', views.answer_update, name='answer_update'),
     path('answer-comment-update/', views.answer_comment_update, name='answer_comment_update'),
 
-    path('approve_spam_question/<int:question_id>/', views.approve_spam_question, name='approve_spam_question'),
-    path('mark_answer_spam/<int:answer_id>/', views.mark_answer_spam, name='mark_answer_spam'),
-    path('mark_comment_spam/<int:comment_id>/', views.mark_comment_spam, name='mark_comment_spam'),
-
     path('question/delete/<int:question_id>/', views.question_delete, name='question_delete'),
     path('answer_delete/<int:answer_id>/', views.answer_delete, name='answer_delete'),
     path('comment_delete/<int:comment_id>/', views.comment_delete, name='comment_delete'),
@@ -32,6 +28,10 @@ urlpatterns = [
     path('question_restore/<int:question_id>/', views.question_restore, name='question_restore'),
     path('answer_restore/<int:answer_id>/', views.answer_restore, name='answer_restore'),
     path('comment_restore/<int:comment_id>/', views.comment_restore, name='comment_restore'),
+
+    path('approve_spam_question/<int:question_id>/', views.approve_spam_question, name='approve_spam_question'),
+    path('mark_answer_spam/<int:answer_id>/', views.mark_answer_spam, name='mark_answer_spam'),
+    path('mark_comment_spam/<int:comment_id>/', views.mark_comment_spam, name='mark_comment_spam'),
 
     path('search/', views.search, name='search'),
     path('filter/<str:category>/', views.filter, name='filter'),

@@ -799,6 +799,79 @@ def comment_restore(request, comment_id):
     return HttpResponseRedirect('/question/{0}/'.format(comment.answer.question.id))
 
 
+# View to approve question marked as spam
+@login_required
+@user_passes_test(is_moderator)
+def approve_spam_question(request, question_id):
+    question = get_object_or_404(Question, id=question_id, is_active=True, is_spam=True)
+
+    if is_moderator(request.user, question) and request.session.get('MODERATOR_ACTIVATED', False):
+        question.is_spam = False
+        question.save()
+        # Send Approval Notification to Author
+        send_question_approve_notification(question)
+        # Send Pending Notifications
+        send_question_notification(question.user, question, previous_title=question.title)
+        messages.success(request, "Question marked successfully as Not-Spam!")
+    return HttpResponseRedirect('/question/{0}/'.format(question_id))
+
+
+# View to mark answer as spam/non-spam
+@login_required
+@user_passes_test(is_moderator)
+def mark_answer_spam(request, answer_id):
+    """Mark/Unmark an Answer as a spam."""
+    answer = get_object_or_404(Answer, id=answer_id, is_active=True)
+    question_id = answer.question.id
+
+    if request.method == "POST":
+        choice = request.POST['selector']
+        if choice == "spam":
+            if not answer.is_spam:
+                answer.is_spam = True
+                answer.save()
+                # Send Spam Classification Notification to Author
+                send_spam_answer_notification(request.user, answer)
+                messages.success(request, "Answer marked successfully as Spam!")
+        else:
+            if answer.is_spam:
+                answer.is_spam = False
+                answer.save()
+                # Send Approval Notification to Author
+                send_answer_approve_notification(answer)
+                # Send Pending Notifications (by the name of author)
+                send_answer_notification(get_object_or_404(User, id=answer.uid), answer)
+                messages.success(request, "Answer marked successfully as Not-Spam!")
+    return HttpResponseRedirect('/question/{0}/#answer{1}'.format(question_id, answer.id))
+
+
+# View to mark comment as spam/non-spam
+@login_required
+@user_passes_test(is_moderator)
+def mark_comment_spam(request, comment_id):
+    """Mark/Unmark an Comment as a spam."""
+    comment = get_object_or_404(AnswerComment, id=comment_id, is_active=True)
+    question_id = comment.answer.question.id
+
+    if request.method == "POST":
+        choice = request.POST['choice']
+        if choice == "spam":
+            comment.is_spam = True
+            comment.save()
+            # Send Spam Classification Notification to Author
+            send_spam_comment_notification(request.user, comment)
+            messages.success(request, "Comment marked successfully as Spam!")
+        else:
+            comment.is_spam = False
+            comment.save()
+            # Send Approval Notification to Author
+            send_comment_approve_notification(comment)
+            # Send Pending Notifications (by the name of author)
+            send_comment_notification(get_object_or_404(User, id=comment.uid), comment)
+            messages.success(request, "Comment marked successfully as Not-Spam!")
+    return HttpResponseRedirect('/question/{0}/#comm{1}'.format(question_id, comment.id))
+
+
 def search(request):
     """Render 'Search Questions by Category' Page."""
     if request.session.get('MODERATOR_ACTIVATED', False):
@@ -872,79 +945,6 @@ def clear_notifications(request):
 
     Notification.objects.filter(uid=request.user.id).delete()
     return HttpResponseRedirect("/user/{0}/notifications/".format(request.user.id))
-
-
-# View to approve question marked as spam
-@login_required
-@user_passes_test(is_moderator)
-def approve_spam_question(request, question_id):
-    question = get_object_or_404(Question, id=question_id, is_active=True, is_spam=True)
-
-    if is_moderator(request.user, question) and request.session.get('MODERATOR_ACTIVATED', False):
-        question.is_spam = False
-        question.save()
-        # Send Approval Notification to Author
-        send_question_approve_notification(question)
-        # Send Pending Notifications
-        send_question_notification(question.user, question, previous_title=question.title)
-        messages.success(request, "Question marked successfully as Not-Spam!")
-    return HttpResponseRedirect('/question/{0}/'.format(question_id))
-
-
-# View to mark answer as spam/non-spam
-@login_required
-@user_passes_test(is_moderator)
-def mark_answer_spam(request, answer_id):
-    """Mark/Unmark an Answer as a spam."""
-    answer = get_object_or_404(Answer, id=answer_id, is_active=True)
-    question_id = answer.question.id
-
-    if request.method == "POST":
-        choice = request.POST['selector']
-        if choice == "spam":
-            if not answer.is_spam:
-                answer.is_spam = True
-                answer.save()
-                # Send Spam Classification Notification to Author
-                send_spam_answer_notification(request.user, answer)
-                messages.success(request, "Answer marked successfully as Spam!")
-        else:
-            if answer.is_spam:
-                answer.is_spam = False
-                answer.save()
-                # Send Approval Notification to Author
-                send_answer_approve_notification(answer)
-                # Send Pending Notifications (by the name of author)
-                send_answer_notification(get_object_or_404(User, id=answer.uid), answer)
-                messages.success(request, "Answer marked successfully as Not-Spam!")
-    return HttpResponseRedirect('/question/{0}/#answer{1}'.format(question_id, answer.id))
-
-
-# View to mark comment as spam/non-spam
-@login_required
-@user_passes_test(is_moderator)
-def mark_comment_spam(request, comment_id):
-    """Mark/Unmark an Comment as a spam."""
-    comment = get_object_or_404(AnswerComment, id=comment_id, is_active=True)
-    question_id = comment.answer.question.id
-
-    if request.method == "POST":
-        choice = request.POST['choice']
-        if choice == "spam":
-            comment.is_spam = True
-            comment.save()
-            # Send Spam Classification Notification to Author
-            send_spam_comment_notification(request.user, comment)
-            messages.success(request, "Comment marked successfully as Spam!")
-        else:
-            comment.is_spam = False
-            comment.save()
-            # Send Approval Notification to Author
-            send_comment_approve_notification(comment)
-            # Send Pending Notifications (by the name of author)
-            send_comment_notification(get_object_or_404(User, id=comment.uid), comment)
-            messages.success(request, "Comment marked successfully as Not-Spam!")
-    return HttpResponseRedirect('/question/{0}/#comm{1}'.format(question_id, comment.id))
 
 
 # MODERATOR SECTION
