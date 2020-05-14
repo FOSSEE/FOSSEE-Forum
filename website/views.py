@@ -51,8 +51,10 @@ def account_credentials_defined(user):
 
 def is_moderator(user, question=None):
     """ 
-    Return True if the user is a moderator of the category to which the question belongs, if question is provided.
-    Return True if the user is a moderator of any category, if question is not provided.
+    Return True if the user is a moderator of the category
+    to which the question belongs, if question is provided.
+    Return True if the user is a moderator of any category,
+    if question is not provided.
     """
     if question:
         return (user.groups.filter(name="forum_moderator").exists() or
@@ -62,13 +64,15 @@ def is_moderator(user, question=None):
 
 def to_uids(question):
     """
-    Return a set of user ids of all the people linked to the Question, i.e.,
-    User IDs of Question, Answers and Comments' Authors.
+    Return a set of user ids of all the people linked to the Question,
+    i.e., User IDs of Question, Answers and Comments' Authors.
     """
     mail_uids = [question.user.id]
-    answers = Answer.objects.filter(question_id=question.id, is_active=True).distinct()
+    answers = Answer.objects.filter(question_id=question.id,
+                                    is_active=True).distinct()
     for answer in answers:
-        for comment in AnswerComment.objects.values('uid').filter(answer=answer, is_active=True).distinct():
+        for comment in AnswerComment.objects.values('uid').filter(
+                answer=answer, is_active=True).distinct():
             mail_uids.append(comment['uid'])
         mail_uids.append(answer.uid)
     mail_uids = set(mail_uids)
@@ -95,10 +99,12 @@ def get_user_email(uid):
     user = User.objects.get(id=uid)
     return user.email
 
-def send_email(subject, plain_message, html_message, from_email, to, bcc=None, cc=None, reply_to=None):
+def send_email(subject, plain_message, html_message, from_email, to,
+               bcc=None, cc=None, reply_to=None):
     """ 
     Send Emails to Everyone in the 'to' list, 'bcc' list, and 'cc' list.
-    The Email IDs of everyone in the 'to' list and 'cc' list will be visible to the recipents of the email.
+    The Email IDs of everyone in the 'to' list and 'cc' list will be
+    visible to the recipents of the email.
     """
     email = EmailMultiAlternatives(
         subject,
@@ -111,13 +117,16 @@ def send_email(subject, plain_message, html_message, from_email, to, bcc=None, c
         headers={"Content-type": "text/html;charset=iso-8859-1"},
     )
     email.attach_alternative(html_message, "text/html")
-    # email.content_subtype = 'html'  # Only content is text/html (No need to use in EmailMultiAlternative)
-    # email.mixed_subtype = 'related'  # if you are sending attachment with content id, subtype must be 'related'.
+    # if you are sending attachment with content id,
+    # subtype must be 'related'.
+    # email.mixed_subtype = 'related'  
     email.send(fail_silently=True)
 
-def send_email_as_to(subject, plain_message, html_message, from_email, to, reply_to=None):
+def send_email_as_to(subject, plain_message, html_message,
+                     from_email, to, reply_to=None):
     """Send Emails to everyone in the 'to' list individually."""
-    # The connection to be used for sending the emails so that all the emails can be sent by opening a single connection.
+    # The connection to be used for sending the emails so that
+    # all the emails can be sent by opening a single connection.
     connection = mail.get_connection(fail_silently=True)
     messages = []
     for to_email in to:
@@ -134,7 +143,7 @@ def send_email_as_to(subject, plain_message, html_message, from_email, to, reply
     connection.send_messages(messages)
 
 def can_delete_comment(answer, comment_id):
-    """ Return True if there are no active comments after the comment to be deleted."""
+    """Return True if there are no active comments after the comment to be deleted."""
     comments = answer.answercomment_set.filter(is_active=True).all()
     for c in comments:
         if c.id > int(comment_id):
@@ -174,7 +183,8 @@ def send_remider_mail():
         else:
             a = Cron()
             a.unanswered_notification()
-            Scheduled_Auto_Mail.objects.get_or_create(id=1, defaults=dict(mail_sent_date=date_string, is_sent=1, is_active=1))
+            Scheduled_Auto_Mail.objects.get_or_create(
+                id=1, defaults=dict(mail_sent_date=date_string, is_sent=1, is_active=1))
             Scheduled_Auto_Mail.objects.filter(is_sent=1).update(mail_sent_date=date_string)
             print("***** New Notification Mail sent *****")
             a.train_spam_filter()
@@ -223,7 +233,8 @@ def home(request):
         return HttpResponseRedirect('/moderator/')
 
     categories = FossCategory.objects.order_by('name')
-    questions = Question.objects.filter(is_spam=False, is_active=True).order_by('-date_created')
+    questions = Question.objects.filter(
+        is_spam=False, is_active=True).order_by('-date_created')
     context = {
         'categories': categories,
         'questions': questions,
@@ -237,7 +248,8 @@ def questions(request):
         return HttpResponseRedirect('/moderator/questions/')
 
     categories = FossCategory.objects.order_by('name')
-    questions = Question.objects.all().filter(is_spam=False, is_active=True).order_by('-date_created')
+    questions = Question.objects.all().filter(
+        is_spam=False, is_active=True).order_by('-date_created')
     context = {
         'categories': categories,
         'questions': questions,
@@ -391,7 +403,8 @@ def new_question(request):
 @user_passes_test(account_credentials_defined, login_url='/accounts/profile/')
 def question_answer(request, question_id):
     """Post an answer to a question asked om the forum."""
-    question = get_object_or_404(Question, id=question_id, is_active=True, is_spam=False)
+    question = get_object_or_404(Question, id=question_id,
+                                 is_active=True, is_spam=False)
 
     if (request.method == 'POST'):
         form = AnswerQuestionForm(request.POST, request.FILES)
@@ -534,7 +547,8 @@ def edit_question(request, question_id):
                 if question.is_spam:
                     send_spam_question_notification(request.user, question)
                 else:
-                    send_question_notification(request.user, question, previous_title=previous_title)
+                    send_question_notification(request.user, question,
+                                               previous_title=previous_title)
 
             else:
                 # A new or recently edited Question marked as Spam is Edited
@@ -545,7 +559,8 @@ def edit_question(request, question_id):
                         # Send Approval Notification to Author
                         send_question_approve_notification(question)
                     # Send pending Notifications (by the name of author)
-                    send_question_notification(question.user, question, previous_title=previous_title)
+                    send_question_notification(question.user, question,
+                                               previous_title=previous_title)
 
             return HttpResponseRedirect('/question/{0}/'.format(question.id))
 
@@ -575,7 +590,8 @@ def answer_update(request):
         answer = get_object_or_404(Answer, pk=aid, is_active=True)
 
         # Answer comments excluding author's
-        comments = AnswerComment.objects.filter(answer=answer, is_active=True).exclude(uid=answer.uid)
+        comments = AnswerComment.objects.filter(
+            answer=answer, is_active=True).exclude(uid=answer.uid)
 
         if ((is_moderator(request.user, answer.question) and request.session.get('MODERATOR_ACTIVATED', False)) or
                 (request.user.id == answer.uid and not comments.exists())):
@@ -655,7 +671,8 @@ def answer_comment_update(request):
                         # Send Approval Notification to Author
                         send_comment_approve_notification(comment)
                     # Send pending Notifications (by the name of author)
-                    send_comment_notification(get_object_or_404(User, id=comment.uid), comment)
+                    send_comment_notification(
+                        get_object_or_404(User, id=comment.uid), comment)
 
             messages.success(request, "Comment is Successfully Saved!")
             return HttpResponseRedirect('/question/{0}/'.format(question.id))
@@ -684,11 +701,14 @@ def question_delete(request, question_id):
 
         # SENDING NOTIFICATIONS
         delete_reason = request.POST.get('deleteQuestion', None)
-        send_question_notification(request.user, question, delete_reason=delete_reason)
+        send_question_notification(request.user, question,
+                                   delete_reason=delete_reason)
 
-        return render(request, 'website/templates/question-delete.html', {'title': question.title})
+        return render(request, 'website/templates/question-delete.html',
+                      {'title': question.title})
     
-    # Question can only be deleted by sending POST requests and not by GET requests (directly accessing the link)
+    # Question can only be deleted by sending POST requests
+    # and not by GET requests (directly accessing the link)
     return render(request, 'website/templates/get-requests-not-allowed.html')
 
 
@@ -700,8 +720,12 @@ def answer_delete(request, answer_id):
     answer = get_object_or_404(Answer, id=answer_id, is_active=True)
     question = answer.question
 
+    # Answer comments excluding author's
+    comments = AnswerComment.objects.filter(
+        answer=answer, is_active=True).exclude(uid=answer.uid)
+
     # The second statement in if condition excludes comments made by Answer's author.
-    if ((request.user.id != answer.uid or AnswerComment.objects.filter(answer=answer, is_active=True).exclude(uid=answer.uid).exists()) and
+    if ((request.user.id != answer.uid or comments.exists()) and
             (not is_moderator(request.user, question) or not request.session.get('MODERATOR_ACTIVATED', False))):
         return render(request, 'website/templates/not-authorized.html')
 
@@ -712,12 +736,14 @@ def answer_delete(request, answer_id):
 
         # Sending Emails for Answer Delete
         delete_reason = request.POST.get('deleteAnswer', None)
-        send_answer_notification(request.user, answer, delete_reason=delete_reason)
+        send_answer_notification(request.user, answer,
+                                 delete_reason=delete_reason)
 
         messages.success(request, "Answer Deleted Successfully!")
         return HttpResponseRedirect('/question/{0}/'.format(question.id))
 
-    # Answer can only be deleted by sending POST requests and not by GET requests (directly accessing the link)
+    # Answer can only be deleted by sending POST requests
+    # and not by GET requests (directly accessing the link)
     return render(request, 'website/templates/get-requests-not-allowed.html')
 
 @login_required
@@ -737,12 +763,14 @@ def comment_delete(request, comment_id):
 
         # Sending notifications
         delete_reason = request.POST.get('deleteComment', None)
-        send_comment_notification(request.user, comment, delete_reason=delete_reason)
+        send_comment_notification(request.user, comment,
+                                  delete_reason=delete_reason)
 
         messages.success(request, "Comment Deleted Successfully!")
         return HttpResponseRedirect('/question/{0}/'.format(question.id))
 
-    # Comment can only be deleted by sending POST requests and not by GET requests (directly accessing the link)
+    # Comment can only be deleted by sending POST requests
+    # and not by GET requests (directly accessing the link)
     return render(request, 'website/templates/get-requests-not-allowed.html')
 
 
@@ -784,9 +812,11 @@ def answer_restore(request, answer_id):
 @user_passes_test(is_moderator)
 def comment_restore(request, comment_id):
     """Restore a Comment."""
-    comment = get_object_or_404(AnswerComment, id=comment_id, is_active=False)
+    comment = get_object_or_404(
+        AnswerComment, id=comment_id, is_active=False)
 
-    if not is_moderator(request.user, comment.answer.question) or not request.session.get('MODERATOR_ACTIVATED', False):
+    if (not is_moderator(request.user, comment.answer.question) or
+            not request.session.get('MODERATOR_ACTIVATED', False)):
         return render(request, 'website/templates/not-authorized.html')
 
     if not comment.answer.is_active:
@@ -803,15 +833,18 @@ def comment_restore(request, comment_id):
 @login_required
 @user_passes_test(is_moderator)
 def approve_spam_question(request, question_id):
-    question = get_object_or_404(Question, id=question_id, is_active=True, is_spam=True)
+    question = get_object_or_404(
+        Question, id=question_id, is_active=True, is_spam=True)
 
-    if is_moderator(request.user, question) and request.session.get('MODERATOR_ACTIVATED', False):
+    if (is_moderator(request.user, question) and
+            request.session.get('MODERATOR_ACTIVATED', False)):
         question.is_spam = False
         question.save()
         # Send Approval Notification to Author
         send_question_approve_notification(question)
         # Send Pending Notifications
-        send_question_notification(question.user, question, previous_title=question.title)
+        send_question_notification(question.user, question,
+                                   previous_title=question.title)
         messages.success(request, "Question marked successfully as Not-Spam!")
     return HttpResponseRedirect('/question/{0}/'.format(question_id))
 
@@ -886,7 +919,8 @@ def search(request):
 
 
 def filter(request, category=None, tutorial=None):
-    """Filter Questions based on the category and tutorial (sub-category) provided as arguments."""
+    """Filter Questions based on the category and
+       tutorial (sub-category) provided as arguments."""
     if category and tutorial:
         questions = Question.objects.filter(
             category__name=category).filter(
@@ -1006,7 +1040,8 @@ def moderator_questions(request):
         for group in request.user.groups.all():
             category = ModeratorGroup.objects.get(group=group).category
             categories.append(category)
-            questions_to_add = Question.objects.filter(category__name=category.name).order_by('-date_created')
+            questions_to_add = Question.objects.filter(
+                category__name=category.name).order_by('-date_created')
             if ('spam' in request.GET):
                 questions_to_add = questions_to_add.filter(is_spam=True)
             elif ('non-spam' in request.GET):
@@ -1042,8 +1077,8 @@ def moderator_unanswered(request):
         for group in request.user.groups.all():
             category = ModeratorGroup.objects.get(group=group).category
             categories.append(category)
-            questions.extend(
-                Question.objects.filter(category__name=category.name, is_active=True).order_by('-date_created'))
+            questions.extend(Question.objects.filter(
+                category__name=category.name, is_active=True).order_by('-date_created'))
         questions.sort(
             key=lambda question: question.date_created,
             reverse=True,
