@@ -129,7 +129,7 @@ class AnswerQuestionForm(forms.ModelForm):
 
     body = forms.CharField(widget=CKEditorWidget(),
                            required=True,
-                           error_messages={'required': 'Answer field required'}
+                           error_messages={'required': 'Answer field cannot be empty.'}
                            )
 
     image = forms.ImageField(
@@ -144,15 +144,17 @@ class AnswerQuestionForm(forms.ModelForm):
         body = str(self.cleaned_data['body'])
         body = body.replace('&nbsp;', ' ')
         body = body.replace('<br>', '\n')
+        body = body.replace('<p>', '')
+        body = body.replace('</p>', '')
+
         if body.isspace():
-            raise forms.ValidationError("Body cannot be only spaces")
-        if len(body) < 12:
-            raise forms.ValidationError(
-                "Body should be minimum 12 characters long")
+            raise forms.ValidationError("Answer body cannot have spaces only.")
         temp = BeautifulSoup(body, 'html.parser').get_text()
         if (temp.isspace() or temp == ''):
-            raise forms.ValidationError("Body cannot be only tags")
-
+            raise forms.ValidationError("Answer body cannot have tags only.")
+        if len(temp) < 12:
+            raise forms.ValidationError(
+                "Answer body should be minimum 12 characters long.")
         return body
 
     def clean_image(self):
@@ -178,17 +180,20 @@ class AnswerCommentForm(forms.Form):
         widget=CKEditorWidget(),
         required=True,
         error_messages={
-            'required': 'Comment field required'})
+            'required': 'Comment body cannot be empty.'})
     spam_honeypot_field = HoneypotField()
 
     def clean_body(self):
         body = str(self.cleaned_data['body'])
         body = body.replace('&nbsp;', ' ')
         body = body.replace('<br>', '\n')
+        body = body.replace('<p>', '')
+        body = body.replace('</p>', '')
+
         if body.isspace():
-            raise forms.ValidationError("Body cannot be only spaces")
+            raise forms.ValidationError("Comment body cannot have spaces only.")
 
         temp = BeautifulSoup(body, 'html.parser').get_text()
         if (temp.isspace() or temp == ''):
-            raise forms.ValidationError("Body cannot be only tags")
+            raise forms.ValidationError("Comment body cannot have tags only.")
         return body

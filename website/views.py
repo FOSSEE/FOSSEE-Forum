@@ -277,7 +277,7 @@ def get_question(request, question_id=None, pretty_url=None):
     if question.sub_category == "" or str(question.sub_category) == 'None':
         sub_category = False
 
-    ans_count = len(answers)
+    ans_count = len(answers)  # Includes Spam Answers
     form = AnswerQuestionForm()
     thisuserupvote = question.userUpVotes.filter(id=request.user.id).count()
     thisuserdownvote = question.userDownVotes.filter(id=request.user.id).count()
@@ -433,7 +433,10 @@ def question_answer(request, question_id):
             return HttpResponseRedirect('/question/{0}/'.format(question_id))
 
         else:
-            messages.error(request, "Answer can't be empty or only blank spaces.")
+            if 'body' in form.errors.as_data():
+                messages.error(request, form.errors['body'].as_data()[0].message)
+            if 'image' in form.errors.as_data():
+                messages.error(request, form.errors['image'].as_data()[0].message)
 
     return HttpResponseRedirect('/question/{0}/'.format(question_id))
 
@@ -443,7 +446,7 @@ def question_answer(request, question_id):
 def answer_comment(request, answer_id):
     """Post a comment on an answer to a question asked on the forum."""
     answer = get_object_or_404(Answer, id=answer_id, is_active=True, is_spam=False)
-    answer_creator = answer.user()
+    question_id = answer.question.id
 
     if (request.method == 'POST'):
         form = AnswerCommentForm(request.POST)
@@ -462,13 +465,14 @@ def answer_comment(request, answer_id):
             else:
                 send_comment_notification(request.user, comment)
 
-            return HttpResponseRedirect('/question/{0}/'.format(answer.question.id))
+            return HttpResponseRedirect('/question/{0}/'.format(question_id))
 
         else:
-            messages.error(request, "Comment can't be empty or only blank spaces.")
-            return HttpResponseRedirect('/question/{0}/'.format(answer.question.id))
+            if 'body' in form.errors.as_data():
+                messages.error(request, form.errors['body'].as_data()[0].message)
+            return HttpResponseRedirect('/question/{0}/'.format(question_id))
 
-    return HttpResponseRedirect('/question/{0}/answer#{1}/'.format(question_id, answer_id))
+    return HttpResponseRedirect('/question/{0}/#answer{1}'.format(question_id, answer_id))
 
 
 # Edit a question on forums, notification is sent to mailing list
@@ -622,7 +626,7 @@ def answer_update(request):
                         # Send Approval Notification to Author
                         send_answer_approve_notification(answer)
                     # Send pending Notifications (by the name of author)
-                    send_answer_notification(get_object_or_404(User, id=answer.uid), answer)
+                    send_answer_notification(answer.user(), answer)
 
             messages.success(request, "Answer is Successfully Saved!")
             return HttpResponseRedirect('/question/{0}/'.format(answer.question.id))
@@ -671,8 +675,7 @@ def answer_comment_update(request):
                         # Send Approval Notification to Author
                         send_comment_approve_notification(comment)
                     # Send pending Notifications (by the name of author)
-                    send_comment_notification(
-                        get_object_or_404(User, id=comment.uid), comment)
+                    send_comment_notification(comment.user(), comment)
 
             messages.success(request, "Comment is Successfully Saved!")
             return HttpResponseRedirect('/question/{0}/'.format(question.id))
@@ -873,7 +876,7 @@ def mark_answer_spam(request, answer_id):
                 # Send Approval Notification to Author
                 send_answer_approve_notification(answer)
                 # Send Pending Notifications (by the name of author)
-                send_answer_notification(get_object_or_404(User, id=answer.uid), answer)
+                send_answer_notification(answer.user(), answer)
                 messages.success(request, "Answer marked successfully as Not-Spam!")
     return HttpResponseRedirect('/question/{0}/#answer{1}'.format(question_id, answer.id))
 
@@ -900,7 +903,7 @@ def mark_comment_spam(request, comment_id):
             # Send Approval Notification to Author
             send_comment_approve_notification(comment)
             # Send Pending Notifications (by the name of author)
-            send_comment_notification(get_object_or_404(User, id=comment.uid), comment)
+            send_comment_notification(comment.user(), comment)
             messages.success(request, "Comment marked successfully as Not-Spam!")
     return HttpResponseRedirect('/question/{0}/#comm{1}'.format(question_id, comment.id))
 
@@ -1506,7 +1509,7 @@ def send_comment_notification(user, comment, delete_reason=None):
             notification.save()
 
             subject = "FOSSEE Forums - {0} - New Comment on your answer".format(question.category)
-            to = [answer_creator.email]
+            to = [get_user_email(answer.uid)]
             html_message = render_to_string('website/templates/emails/new_comment_email.html', {
                 'title': question.title,
                 'category': question.category,
