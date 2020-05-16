@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.contrib.auth.models import User
 from django.conf import settings
@@ -35,59 +35,62 @@ class AccountRegisterViewTest(TestCase):
         self.assertEqual(response.context['SITE_KEY'], settings.GOOGLE_RECAPTCHA_SITE_KEY)
 
     def test_view_post_context_improper_username(self):
-        response = self.client.post(reverse('user_register'),\
-                                    {'username': 'johndoe#', 'email': 'admin@example.com',\
-                                    'password': 'johndoe1234', 'password_confirm': 'johndoe1234'})
+        response = self.client.post(reverse('user_register'),
+                                    {'username': 'johndoe#', 'email': 'admin@example.com',
+                                     'password': 'johndoe1234', 'password_confirm': 'johndoe1234'})
         self.assertEqual(response.status_code, 200)
         self.assertFormError(response, 'form', 'username', 'Username required. 5-30 characters. \
                 Letters, digits and @/./+/-/_ only.')
 
     def test_view_post_context_short_username(self):
-        response = self.client.post(reverse('user_register'),\
-                                    {'username': 'john', 'email': 'admin@example.com',\
-                                    'password': 'johndoe1234', 'password_confirm': 'johndoe1234'})
+        response = self.client.post(reverse('user_register'),
+                                    {'username': 'john', 'email': 'admin@example.com',
+                                     'password': 'johndoe1234', 'password_confirm': 'johndoe1234'})
         self.assertEqual(response.status_code, 200)
         self.assertFormError(response, 'form', 'username', 'Username must at least be 5 characters long.')
 
     def test_view_post_context_long_username(self):
-        response = self.client.post(reverse('user_register'),\
-                                    {'username': 'johnjohnjohnjohnjohnjohnjohnjohn', 'email': 'admin@example.com',\
-                                    'password': 'johndoe1234', 'password_confirm': 'johndoe1234'})
+        response = self.client.post(reverse('user_register'),
+                                    {'username': 'johnjohnjohnjohnjohnjohnjohnjohn', 'email': 'admin@example.com',
+                                     'password': 'johndoe1234', 'password_confirm': 'johndoe1234'})
         self.assertEqual(response.status_code, 200)
         self.assertFormError(response, 'form', 'username', 'Username cannot be longer than 30 characters.')
 
     def test_view_post_context_short_password(self):
-        response = self.client.post(reverse('user_register'),\
-                                    {'username': 'johndoe2', 'email': 'johndoe2@example.com',\
-                                    'password': 'johndoe', 'password_confirm': 'johndoe'})
+        response = self.client.post(reverse('user_register'),
+                                    {'username': 'johndoe2', 'email': 'johndoe2@example.com',
+                                     'password': 'johndoe', 'password_confirm': 'johndoe'})
         self.assertEqual(response.status_code, 200)
         self.assertFormError(response, 'form', 'password', 'Password must at least be 8 characters long.')
 
     def test_view_post_username_exists(self):
-        response = self.client.post(reverse('user_register'),\
-                                    {'username': 'johndoe', 'email': 'johndoe2@example.com',\
-                                    'password': 'johndoe1234', 'password_confirm': 'johndoe1234'})
+        response = self.client.post(reverse('user_register'),
+                                    {'username': 'johndoe', 'email': 'johndoe2@example.com',
+                                     'password': 'johndoe1234', 'password_confirm': 'johndoe1234'})
         self.assertEqual(response.status_code, 200)
         self.assertFormError(response, 'form', 'username', 'This username already exists')
 
     def test_view_post_email_exists(self):
-        response = self.client.post(reverse('user_register'),\
-                                    {'username': 'johndoe2', 'email': 'johndoe@example.com',\
-                                    'password': 'johndoe1234', 'password_confirm': 'johndoe1234'})
+        response = self.client.post(reverse('user_register'),
+                                    {'username': 'johndoe2', 'email': 'johndoe@example.com',
+                                     'password': 'johndoe1234', 'password_confirm': 'johndoe1234'})
         self.assertEqual(response.status_code, 200)
         self.assertFormError(response, 'form', 'email', 'This email is already taken')
 
     def test_view_post_passwords_no_match(self):
-        response = self.client.post(reverse('user_register'),\
-                                    {'username': 'johndoe2', 'email': 'johndoe2@example.com',\
-                                    'password': 'johndoe1234', 'password_confirm': 'johndoe123'})
+        response = self.client.post(reverse('user_register'),
+                                    {'username': 'johndoe2', 'email': 'johndoe2@example.com',
+                                     'password': 'johndoe1234', 'password_confirm': 'johndoe123'})
         self.assertEqual(response.status_code, 200)
         self.assertFormError(response, 'form', 'password_confirm', 'Passwords do not match')
 
+    @override_settings(GOOGLE_RECAPTCHA_SECRET_KEY = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe',
+                       GOOGLE_RECAPTCHA_SITE_KEY = '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI')
     def test_view_post_valid_data(self):
-        response = self.client.post(reverse('user_register'),\
-                                    {'username': 'johndoe2', 'email': 'johndoe2@example.com',\
-                                    'password': 'johndoe1234', 'password_confirm': 'johndoe1234'})
+        response = self.client.post(reverse('user_register'),
+                                    {'username': 'johndoe2', 'email': 'johndoe2@example.com',
+                                     'password': 'johndoe1234', 'password_confirm': 'johndoe1234'})
+        self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'forums/templates/message.html')
 
 class ConfirmViewTest(TestCase):
@@ -349,13 +352,13 @@ class UserLoginViewTest(TestCase):
 
     def test_view_post_no_username(self):
         response = self.client.post(reverse('user_login'),\
-            {'username': None, 'password': 'johndoe'})
+            {'username': '', 'password': 'johndoe'})
         self.assertEqual(response.status_code, 200)
         self.assertFormError(response, 'form', '__all__', 'Invalid username or password')
 
     def test_view_post_no_password(self):
         response = self.client.post(reverse('user_login'),\
-            {'username': 'johndoe', 'password': None})
+            {'username': 'johndoe', 'password': ''})
         self.assertEqual(response.status_code, 200)
         self.assertFormError(response, 'form', '__all__', 'Invalid username or password')
 
