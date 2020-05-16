@@ -128,7 +128,7 @@ class AnswerQuestionFormTest(TestCase):
     def test_body_error_required(self):
         form = AnswerQuestionForm()
         self.assertEqual(form.fields['body'].error_messages['required'],\
-                            'Answer field required')
+                         'Answer field cannot be empty.')
 
     def test_image_help_text(self):
         form = AnswerQuestionForm()
@@ -170,8 +170,8 @@ class AnswerCommentFormTest(TestCase):
 
     def test_body_error_required(self):
         form = AnswerCommentForm()
-        self.assertEqual(form.fields['body'].error_messages['required'],\
-                            'Comment field required')
+        self.assertEqual(form.fields['body'].error_messages['required'],
+                         'Comment body cannot be empty.')
 
     def test_body_is_space(self):
         body = '         '
