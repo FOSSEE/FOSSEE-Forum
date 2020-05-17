@@ -26,6 +26,82 @@ from .forms import ProfileForm, RegisterForm, UserLoginForm
 from website.models import Answer, ModeratorGroup, Profile, Question
 
 
+# NON-VIEWS FUNCTIONS
+
+def send_registration_confirmation(user):
+    """Send Confirmation link to user's registered email id."""
+    profile = Profile.objects.get(user = user)
+
+    # Sending email when an answer is posted
+    subject = 'Account Activation Notification'
+    html_message = render_to_string('forums/templates/account_activation_email.html', {
+        'username': user.username,
+        'domain': settings.DOMAIN_NAME,
+        'link': settings.DOMAIN_NAME + "/accounts/confirm/" + str(profile.confirmation_code) + "/" + user.username,
+    })
+    plain_message = strip_tags(html_message)
+
+    email = EmailMultiAlternatives(
+        subject,
+        plain_message,
+        settings.SENDER_EMAIL,
+        to=[user.email],
+        cc=[settings.FORUM_NOTIFICATION],
+        headers={'Reply-To': settings.SENDER_EMAIL, "Content-type":"text/html;charset = iso-8859-1"},
+    )
+    email.attach_alternative(html_message, "text/html")
+    try:
+        email.send(fail_silently=False)
+    except:
+        pass
+
+
+# VIEWS FUNCTIONS
+
+def user_login(request):
+    """Log in the User."""
+    if request.user.is_anonymous:
+        if request.method == 'POST':
+            form = UserLoginForm(request.POST)
+            if form.is_valid():
+                # Valid credentials are entered
+                cleaned_data = form.cleaned_data
+                user = cleaned_data.get("user")
+                login(request, user)
+                
+                # Session Variable created to store if Moderator is using Forum
+                # Becomes True only if moderator_home view (website.views) is accessed by user.
+                request.session['MODERATOR_ACTIVATED'] = False
+
+                if 'next' in request.POST:
+                    next_url = request.POST.get('next')
+                    return HttpResponseRedirect(next_url)
+
+                return HttpResponseRedirect('/')
+            else:
+                # Invalid credentials entered
+                next_url = request.POST.get('next')
+                context = {
+                    'form': form, 
+                    'next': next_url, 
+                }
+                context.update(csrf(request))
+                return render(request, 'forums/templates/user-login.html', context)     
+        else:
+            form = UserLoginForm()
+        
+        next_url = request.GET.get('next')
+        context = {
+            'form': form, 
+            'next': next_url, 
+        }
+        context.update(csrf(request))
+        return render(request, 'forums/templates/user-login.html', context)
+
+    else:
+        return HttpResponseRedirect('/')
+
+
 def account_register(request):
     """Register New User and send confirmation link to user's email id."""
 
@@ -205,77 +281,6 @@ def account_view_profile(request, user_id=None):
     }
     return render(request, 'forums/templates/view-profile.html', context)
 
-
-def send_registration_confirmation(user):
-    """Send Confirmation link to user's registered email id."""
-    profile = Profile.objects.get(user = user)
-
-    # Sending email when an answer is posted
-    subject = 'Account Activation Notification'
-    html_message = render_to_string('forums/templates/account_activation_email.html', {
-        'username': user.username,
-        'domain': settings.DOMAIN_NAME,
-        'link': settings.DOMAIN_NAME + "/accounts/confirm/" + str(profile.confirmation_code) + "/" + user.username,
-    })
-    plain_message = strip_tags(html_message)
-
-    email = EmailMultiAlternatives(
-        subject,
-        plain_message,
-        settings.SENDER_EMAIL,
-        to=[user.email],
-        cc=[settings.FORUM_NOTIFICATION],
-        headers={'Reply-To': settings.SENDER_EMAIL, "Content-type":"text/html;charset = iso-8859-1"},
-    )
-    email.attach_alternative(html_message, "text/html")
-    try:
-        email.send(fail_silently=False)
-    except:
-        pass
-
-   
-def user_login(request):
-    """Log in the User."""
-    if request.user.is_anonymous:
-        if request.method == 'POST':
-            form = UserLoginForm(request.POST)
-            if form.is_valid():
-                # Valid credentials are entered
-                cleaned_data = form.cleaned_data
-                user = cleaned_data.get("user")
-                login(request, user)
-                
-                # Session Variable created to store if Moderator is using Forum
-                # Becomes True only if moderator_home view (website.views) is accessed by user.
-                request.session['MODERATOR_ACTIVATED'] = False
-
-                if 'next' in request.POST:
-                    next_url = request.POST.get('next')
-                    return HttpResponseRedirect(next_url)
-
-                return HttpResponseRedirect('/')
-            else:
-                # Invalid credentials entered
-                next_url = request.POST.get('next')
-                context = {
-                    'form': form, 
-                    'next': next_url, 
-                }
-                context.update(csrf(request))
-                return render(request, 'forums/templates/user-login.html', context)     
-        else:
-            form = UserLoginForm()
-        
-        next_url = request.GET.get('next')
-        context = {
-            'form': form, 
-            'next': next_url, 
-        }
-        context.update(csrf(request))
-        return render(request, 'forums/templates/user-login.html', context)
-
-    else:
-        return HttpResponseRedirect('/')
 
 def user_logout(request):
     """Log out the User."""
