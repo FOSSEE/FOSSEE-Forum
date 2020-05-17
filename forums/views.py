@@ -1,36 +1,37 @@
-from builtins import str
-from builtins import range
-import urllib.parse, urllib.request
+# standard library
 import json
+import random
 import ssl
-import random, string
+import string
+import urllib.parse, urllib.request
+from builtins import range, str
+
+# Django
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.core.mail import EmailMultiAlternatives, send_mail
 from django.http import HttpResponse, HttpResponseRedirect
-from django.contrib.auth import login, logout, authenticate
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect, render
 from django.template.context_processors import csrf
 from django.template.loader import render_to_string
 from django.template import RequestContext
-from django.contrib.auth.decorators import login_required
-from django.core.mail import EmailMultiAlternatives
-from django.contrib import messages
-from django.conf import settings
-from django.core.mail import send_mail
 from django.urls import Resolver404, resolve
 from django.utils.html import strip_tags
-from forums.forms import *
-from website.models import *
 
-# to register new user and send confirmation link to registerd email id
+# local Django
+from .forms import ProfileForm, RegisterForm, UserLoginForm
+from website.models import Answer, ModeratorGroup, Profile, Question
+
+
 def account_register(request):
+    """Register New User and send confirmation link to user's email id."""
 
-    context = {}
-
-    if (request.method == 'POST'):
-
+    if request.method == 'POST':
         form = RegisterForm(request.POST)
-
         if form.is_valid():
-
             ''' Begin reCAPTCHA validation '''
             recaptcha_response = request.POST.get('g-recaptcha-response')
             url = 'https://www.google.com/recaptcha/api/siteverify'
@@ -56,13 +57,11 @@ def account_register(request):
                 messages.error(request, 'Invalid reCAPTCHA. Please try again.')
                 return HttpResponseRedirect('/accounts/register/')
 
-            confirmation_code = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for x in range(33))
-            p = Profile(user = user, confirmation_code = confirmation_code)
-            p.save()
+            confirmation_code = ''.join(random.choice(
+                string.ascii_uppercase + string.digits + string.ascii_lowercase) for x in range(33))
+            profile = Profile(user=user, confirmation_code=confirmation_code)
+            profile.save()
             send_registration_confirmation(user)
-            # messages.success(request, """
-            #     Please confirm your registration by clicking on the activation link which has been sent to your registered email id.
-            # """)
 
             return render(request, 'forums/templates/message.html')
 
@@ -81,14 +80,14 @@ def account_register(request):
         context.update(csrf(request))
         return render(request, 'forums/templates/user-register.html', context)
 
-# alert user after user account confirmation
+
 def confirm(request, confirmation_code, username):
-
+    """Confirm User Account from the confirmation link sent to user's email id."""
     try:
-        user = User.objects.get(username = username)
-        profile = Profile.objects.get(user = user)
+        user = User.objects.get(username=username)
+        profile = Profile.objects.get(user=user)
 
-        if (profile.confirmation_code == confirmation_code):
+        if profile.confirmation_code == confirmation_code:
             user.is_active = True
             user.save()
             user.backend = 'django.contrib.auth.backends.ModelBackend'
@@ -100,33 +99,28 @@ def confirm(request, confirmation_code, username):
 
             messages.success(request, "Your account has been activated! Please update your profile to complete your registration.")
             return HttpResponseRedirect('/accounts/profile/')
-
         else:
             messages.error(request, "Something went wrong! Please try again!")
             return HttpResponseRedirect('/')
 
-    except Exception as e:
+    except Exception:
         messages.error(request, "Your account not activated! Please try again!")
         return HttpResponseRedirect('/')
 
 
-# add details to the profile table of the user
-# update profile after registration confirmation
 @login_required
 def account_profile(request):
-
+    """Complete Profile after Registration Confirmation."""
     user = request.user
     try:
-        profile = Profile.objects.get(user_id = user.id)
+        profile = Profile.objects.get(user_id=user.id)
     except:
-        profile = Profile(user = user)
+        profile = Profile(user=user)
 
-    if (request.method == 'POST'):
-
+    if request.method == 'POST':
         form = ProfileForm(user, request.POST)
-
         if form.is_valid():
-
+            # Save the user details
             user.first_name = request.POST['first_name']
             user.last_name = request.POST['last_name']
             profile.address = request.POST['address']
@@ -137,6 +131,7 @@ def account_profile(request):
             profile.save()
 
             messages.success(request, "Your profile has been updated!")
+
             next = request.GET.get('next', '')
             try:
                 resolve(next)
@@ -155,10 +150,11 @@ def account_profile(request):
         context['form'] = ProfileForm(user, instance = instance)
         return render(request, 'forums/templates/profile.html', context)
 
-# view all profile details saved for the user, when clicked on my profile
+
 @login_required
 def account_view_profile(request, user_id=None):
-
+    """Show user's details along with contribution made by user 
+       on the forum as Questions and Answers."""
     user = User.objects.get(pk = user_id)
     try:
         profile = Profile.objects.get(user = user)
@@ -209,17 +205,17 @@ def account_view_profile(request, user_id=None):
     }
     return render(request, 'forums/templates/view-profile.html', context)
 
-# send confirm registration link
-def send_registration_confirmation(user):
 
-    p = Profile.objects.get(user = user)
+def send_registration_confirmation(user):
+    """Send Confirmation link to user's registered email id."""
+    profile = Profile.objects.get(user = user)
 
     # Sending email when an answer is posted
     subject = 'Account Activation Notification'
     html_message = render_to_string('forums/templates/account_activation_email.html', {
         'username': user.username,
         'domain': settings.DOMAIN_NAME,
-        'link': settings.DOMAIN_NAME + "/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username,
+        'link': settings.DOMAIN_NAME + "/accounts/confirm/" + str(profile.confirmation_code) + "/" + user.username,
     })
     plain_message = strip_tags(html_message)
 
@@ -233,21 +229,18 @@ def send_registration_confirmation(user):
     )
     email.attach_alternative(html_message, "text/html")
     try:
-        result = email.send(fail_silently=False)
+        email.send(fail_silently=False)
     except:
         pass
 
-# user login        
+   
 def user_login(request):
-
+    """Log in the User."""
     if request.user.is_anonymous:
-
-        if (request.method == 'POST'):
+        if request.method == 'POST':
             form = UserLoginForm(request.POST)
-
-            # Valid credentials are entered
             if form.is_valid():
-                
+                # Valid credentials are entered
                 cleaned_data = form.cleaned_data
                 user = cleaned_data.get("user")
                 login(request, user)
@@ -256,22 +249,20 @@ def user_login(request):
                 # Becomes True only if moderator_home view (website.views) is accessed by user.
                 request.session['MODERATOR_ACTIVATED'] = False
 
-                if ('next' in request.POST):
+                if 'next' in request.POST:
                     next_url = request.POST.get('next')
                     return HttpResponseRedirect(next_url)
 
                 return HttpResponseRedirect('/')
-            
-            # Invalid credentials entered
             else:
+                # Invalid credentials entered
                 next_url = request.POST.get('next')
                 context = {
                     'form': form, 
                     'next': next_url, 
                 }
                 context.update(csrf(request))
-                return render(request, 'forums/templates/user-login.html', context)
-                
+                return render(request, 'forums/templates/user-login.html', context)     
         else:
             form = UserLoginForm()
         
@@ -287,6 +278,7 @@ def user_login(request):
         return HttpResponseRedirect('/')
 
 def user_logout(request):
+    """Log out the User."""
     # No session variable for Anonymous Users
     if request.session.get('MODERATOR_ACTIVATED', None) is not None:
         del request.session['MODERATOR_ACTIVATED']
