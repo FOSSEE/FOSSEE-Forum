@@ -1925,7 +1925,13 @@ class SearchViewTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         """Setup test data"""
-        FossCategory.objects.create(name="TestCategory", email="category@example.com")
+        # Create a Question Category
+        category1 = FossCategory.objects.create(name="TestCategory", email="category@example.com")
+        # Create a Moderator for 'category1'
+        mod1 = User.objects.create_user('mod1', 'mod1@example.com', 'mod1')
+        group1 = Group.objects.create(name="TestCategory1 Group")
+        moderator_group1 = ModeratorGroup.objects.create(group=group1, category=category1)
+        mod1.groups.add(group1)
     
     def test_view_url_at_desired_location(self):
         response = self.client.get('/search/')
@@ -1938,12 +1944,23 @@ class SearchViewTest(TestCase):
     def test_view_uses_correct_template(self):
         response = self.client.get(reverse('website:search'))
         self.assertTemplateUsed(response, 'website/templates/search.html')
+
+    def test_view_redirects_if_moderator_activated(self):
+        # Log in the Moderator
+        self.client.login(username='mod1', password='mod1')
+        # Activating Moderator Panel
+        session = self.client.session
+        session['MODERATOR_ACTIVATED'] = True
+        session.save()
+        response = self.client.get(reverse('website:search'))
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, '/moderator/')
     
     def test_view_context_category(self):
         response = self.client.get(reverse('website:search'))
         self.assertTrue('categories' in response.context)
-        self.assertQuerysetEqual(response.context['categories'],\
-                                    ['<FossCategory: TestCategory>'])
+        self.assertQuerysetEqual(response.context['categories'],
+                                 ['<FossCategory: TestCategory>'])
 
 class FilterViewTest(TestCase):
 
@@ -1985,41 +2002,46 @@ class FilterViewTest(TestCase):
         question_id = Question.objects.get(title='TestQuestion').id
         question2_id = Question.objects.get(title='TestQuestion2').id
         self.assertTrue('questions' in response.context)
-        self.assertQuerysetEqual(response.context['questions'],\
-                                    ['<Question: {0} - TestCategory - TestSubCategory - TestQuestion2 - johndoe>'.format(question2_id),\
-                                    '<Question: {0} - TestCategory -  - TestQuestion - johndoe>'.format(question_id)])
+        self.assertQuerysetEqual(response.context['questions'],
+                                 ['<Question: {0} - TestCategory - TestSubCategory - TestQuestion2 - johndoe>'.format(question2_id),
+                                  '<Question: {0} - TestCategory -  - TestQuestion - johndoe>'.format(question_id)])
 
     def test_view_context_questions_by_category_tutorial(self):
         response = self.client.get(reverse('website:filter', args=('TestCategory', 'TestSubCategory', )))
         question2_id = Question.objects.get(title='TestQuestion2').id
         self.assertTrue('questions' in response.context)
-        self.assertQuerysetEqual(response.context['questions'],\
-                                    ['<Question: {0} - TestCategory - TestSubCategory - TestQuestion2 - johndoe>'.format(question2_id)])
+        self.assertQuerysetEqual(response.context['questions'],
+                                 ['<Question: {0} - TestCategory - TestSubCategory - TestQuestion2 - johndoe>'.format(question2_id)])
 
     def test_view_context_questions_by_category_moderator_activated(self):
         session = self.client.session
         session['MODERATOR_ACTIVATED'] = True
         session.save()
         response = self.client.get(reverse('website:filter', args=('TestCategory2', )))
-        session['MODERATOR_ACTIVATED'] = False
-        session.save()
         question_id = Question.objects.get(title='TestQuestion3').id
         question2_id = Question.objects.get(title='TestQuestion4').id
         self.assertTrue('questions' in response.context)
-        self.assertQuerysetEqual(response.context['questions'],\
-                                    ['<Question: {0} - TestCategory2 -  - TestQuestion4 - johndoe>'.format(question2_id),\
-                                    '<Question: {0} - TestCategory2 -  - TestQuestion3 - johndoe>'.format(question_id)])
+        self.assertQuerysetEqual(response.context['questions'],
+                                 ['<Question: {0} - TestCategory2 -  - TestQuestion4 - johndoe>'.format(question2_id),
+                                  '<Question: {0} - TestCategory2 -  - TestQuestion3 - johndoe>'.format(question_id)])
 
 class UserNotificationsViewTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
         """Create sample data"""
+        # Create two users
         user = User.objects.create_user("johndoe", "johndoe@example.com", "johndoe", first_name="John", last_name="John")
         User.objects.create_user("johndoe2", "johndoe2@example.com", "johndoe2")
-        User.objects.create_user("johndoe3", "johndoe3@example.com", "johndoe3", first_name="John", last_name="Doe")
-        category = FossCategory.objects.create(name="TestCategory", email="category@example.com")
-        question = Question.objects.create(user=user, category=category, title="TestQuestion")
+        # Create a Question Category
+        category1 = FossCategory.objects.create(name="TestCategory1", email="category1@example.com")
+        # Create a Moderator for 'category1'
+        mod1 = User.objects.create_user('mod1', 'mod1@example.com', 'mod1')
+        group1 = Group.objects.create(name="TestCategory1 Group")
+        moderator_group1 = ModeratorGroup.objects.create(group=group1, category=category1)
+        mod1.groups.add(group1)
+        # Create sample question and notification
+        question = Question.objects.create(user=user, category=category1, title="TestQuestion")
         Notification.objects.create(uid=user.id, qid=question.id)
 
     def test_view_redirect_if_not_logged_in(self):
@@ -2035,11 +2057,25 @@ class UserNotificationsViewTest(TestCase):
         self.assertRedirects(response, '/accounts/profile/?next=/user/{0}/notifications/'.format(user_id))
 
     def test_view_if_unauthorized_user(self):
-        self.client.login(username='johndoe3', password='johndoe3')
+        self.client.login(username='mod1', password='mod1')
         user_id = User.objects.get(username='johndoe').id
         response = self.client.get(reverse('website:user_notifications', args=(user_id, )))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'website/templates/not-authorized.html')
+
+    def test_view_if_moderator_activated(self):
+        # Log in the Moderator
+        self.client.login(username='mod1', password='mod1')
+        # Activating Moderator Panel
+        session = self.client.session
+        session['MODERATOR_ACTIVATED'] = True
+        session.save()
+        user_id = User.objects.get(username='johndoe').id
+        response = self.client.get(reverse('website:user_notifications', args=(user_id, )))
+        self.assertTrue("Moderators cannot access the Notifications!"
+                        in response.cookies['messages'].value)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, '/moderator/')
 
     def test_view_url_at_desired_location(self):
         self.client.login(username='johndoe', password='johndoe')
@@ -2065,23 +2101,44 @@ class UserNotificationsViewTest(TestCase):
         response = self.client.get(reverse('website:user_notifications', args=(user_id, )))
         self.assertTrue('notifications' in response.context)
         notification_id = Notification.objects.get(uid=user_id)
-        self.assertQuerysetEqual(response.context['notifications'],\
-                            ['<Notification: {0}>'.format(notification_id)])
+        self.assertQuerysetEqual(response.context['notifications'],
+                                 ['<Notification: {0}>'.format(notification_id)])
 
 class ClearNotificationsViewTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
         """Create sample data"""
+        # Create a user
         user = User.objects.create_user("johndoe", "johndoe@example.com", "johndoe")
-        category = FossCategory.objects.create(name="TestCategory", email="category@example.com")
-        question = Question.objects.create(user=user, category=category, title="TestQuestion")
+        # Create a Question Category
+        category1 = FossCategory.objects.create(name="TestCategory1", email="category1@example.com")
+        # Create a Moderator for 'category1'
+        mod1 = User.objects.create_user('mod1', 'mod1@example.com', 'mod1')
+        group1 = Group.objects.create(name="TestCategory1 Group")
+        moderator_group1 = ModeratorGroup.objects.create(group=group1, category=category1)
+        mod1.groups.add(group1)
+        # Create sample question and notification
+        question = Question.objects.create(user=user, category=category1, title="TestQuestion")
         Notification.objects.create(uid=user.id, qid=question.id)
 
     def test_view_redirect_if_not_logged_in(self):
         response = self.client.get(reverse('website:clear_notifications'))
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.startswith('/accounts/login/'))
+
+    def test_view_if_moderator_activated(self):
+        # Log in the Moderator
+        self.client.login(username='mod1', password='mod1')
+        # Activating Moderator Panel
+        session = self.client.session
+        session['MODERATOR_ACTIVATED'] = True
+        session.save()
+        response = self.client.get(reverse('website:clear_notifications'))
+        self.assertTrue("Moderators cannot clear the Notifications!"
+                        in response.cookies['messages'].value)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, '/moderator/')
 
     def test_view_url_at_desired_location(self):
         self.client.login(username='johndoe', password='johndoe')

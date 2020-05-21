@@ -954,8 +954,6 @@ def user_notifications(request, user_id):
         messages.error(request, "Moderators cannot access the Notifications!")
         return HttpResponseRedirect('/moderator/')
 
-    # settings.MODERATOR_ACTIVATED = False
-
     if (user_id == request.user.id):
         try:
             notifications = Notification.objects.filter(
