@@ -272,6 +272,7 @@ class ModeratorQuestionsViewTest(TestCase):
         self.assertTrue(response.url.startswith('/accounts/login/'))
 
     def test_view_redirect_if_not_moderator(self):
+        # Log in the user
         self.client.login(username='johndoe', password='johndoe')
         # Accessing the Page
         response = self.client.get(reverse('website:moderator_questions'), follow=True)

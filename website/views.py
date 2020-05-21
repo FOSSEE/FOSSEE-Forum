@@ -716,7 +716,6 @@ def question_delete(request, question_id):
 
 
 # View for deleting answer, notification is sent to person who posted answer
-# @user_passes_test(is_moderator)
 @login_required
 def answer_delete(request, answer_id):
     """Delete an answer."""
@@ -789,6 +788,7 @@ def question_restore(request, question_id):
     question.is_active = True
     question.save()
 
+    messages.success(request, "Question Restored Successfully!")
     return HttpResponseRedirect('/question/{0}/'.format(question_id))
 
 
@@ -808,7 +808,8 @@ def answer_restore(request, answer_id):
     answer.is_active = True
     answer.save()
 
-    return HttpResponseRedirect('/question/{0}/'.format(answer.question.id))
+    messages.success(request, "Answer Restored Successfully!")
+    return HttpResponseRedirect('/question/{0}/#answer{1}'.format(answer.question.id, answer.id))
 
 
 @login_required
@@ -823,13 +824,14 @@ def comment_restore(request, comment_id):
         return render(request, 'website/templates/not-authorized.html')
 
     if not comment.answer.is_active:
-        messages.error(request, "Comment can only be restored when its answer is not deleted")
+        messages.error(request, "Comment can only be restored when its answer is not deleted.")
         return HttpResponseRedirect('/question/{0}/'.format(comment.answer.question.id))
 
     comment.is_active = True
     comment.save()
 
-    return HttpResponseRedirect('/question/{0}/'.format(comment.answer.question.id))
+    messages.success(request, "Comment Restored Successfully!")
+    return HttpResponseRedirect('/question/{0}/#comm{1}'.format(comment.answer.question.id, comment.id))
 
 
 # View to approve question marked as spam
