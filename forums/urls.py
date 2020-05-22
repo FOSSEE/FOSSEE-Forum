@@ -15,9 +15,13 @@ urlpatterns = [
     re_path(r'^', include('website.urls', namespace='website')),
 
     # URLs for password reset and password change
-    re_path('^forgotpassword/', auth_views.PasswordResetView.as_view(\
-    template_name= 'forums/templates/registration/password_reset_form.html'),\
-    name = "password_reset"),
+    re_path('^forgotpassword/', auth_views.PasswordResetView.as_view(
+                template_name= 'forums/templates/registration/password_reset_form.html',
+                email_template_name = 'forums/templates/registration/password_reset_email.html',
+                subject_template_name = 'forums/templates/registration/password_reset_subject.txt',
+                from_email = settings.SENDER_EMAIL),
+            name = "password_reset",
+    ),
 
     re_path(r'^password_reset/(?P<uidb64>[0-9A-Za-z]+)/(?P<token>.+)/$',\
     auth_views.PasswordResetConfirmView.as_view(\
