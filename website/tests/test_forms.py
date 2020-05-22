@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from website.models import FossCategory, Question
 from website.forms import NewQuestionForm, AnswerQuestionForm, AnswerCommentForm
 from forums.forms import *
