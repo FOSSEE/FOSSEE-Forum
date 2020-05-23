@@ -106,6 +106,11 @@ def send_email(subject, plain_message, html_message, from_email, to,
     The Email IDs of everyone in the 'to' list and 'cc' list will be
     visible to the recipents of the email.
     """
+    if bcc is None:
+        bcc = [settings.BCC_EMAIL_ID]
+    else:
+        bcc.append(settings.BCC_EMAIL_ID)
+
     email = EmailMultiAlternatives(
         subject,
         plain_message,
@@ -129,6 +134,7 @@ def send_email_as_to(subject, plain_message, html_message,
     # all the emails can be sent by opening a single connection.
     connection = mail.get_connection(fail_silently=True)
     messages = []
+    to.append(settings.BCC_EMAIL_ID)
     for to_email in to:
         email = EmailMultiAlternatives(
             subject,
@@ -1297,7 +1303,7 @@ def send_question_notification(user, question, previous_title=None, delete_reaso
     if flag == 1:
         subject = "FOSSEE Forums - {0} - New Question".format(question.category)
         from_email = settings.SENDER_EMAIL
-        to = [settings.BCC_EMAIL_ID, question.category.email]
+        to = [question.category.email]
         html_message = render_to_string('website/templates/emails/new_question_email.html', {
             'title': question.title,
             'category': question.category,
@@ -1305,7 +1311,7 @@ def send_question_notification(user, question, previous_title=None, delete_reaso
             'link': settings.DOMAIN_NAME + '/question/' + str(question.id),
         })
         plain_message = strip_tags(html_message)
-        send_email_as_to(subject, plain_message, html_message, from_email, to)
+        send_email(subject, plain_message, html_message, from_email, to)
     # Question Edited Recently
     elif flag == 2:
         subject = "FOSSEE Forums - {0} - Question Edited".format(question.category)
@@ -1332,7 +1338,7 @@ def send_question_notification(user, question, previous_title=None, delete_reaso
     elif flag == 3 and question.user != user:
         subject = "FOSSEE Forums - {0} - Question Deleted".format(question.category)
         from_email = settings.SENDER_EMAIL
-        to = [settings.BCC_EMAIL_ID]
+        to = []
         html_message = render_to_string('website/templates/emails/deleted_question_email.html', {
             'title': question.title,
             'category': question.category,
@@ -1385,12 +1391,10 @@ def send_answer_notification(user, answer, delete_reason=None):
         mail_uids.difference_update(set(not_to_notify))
 
         subject = "FOSSEE Forums - {0} - Question has been Answered".format(question.category)
-        to = [settings.BCC_EMAIL_ID]
-        
+        to = []
         for mail_uid in mail_uids:
             notification = Notification(uid=mail_uid, qid=question.id, aid=answer.id)
             notification.save()
-
             # Appending user email in 'to' list
             to.append(get_user_email(mail_uid))
 
@@ -1400,7 +1404,7 @@ def send_answer_notification(user, answer, delete_reason=None):
     elif flag == 2:
         subject = "FOSSEE Forums - {0} - Answer Edited".format(question.category)
         from_email = settings.SENDER_EMAIL
-        to = [settings.BCC_EMAIL_ID]
+        to = []
 
         if answer.uid == user.id:
             # Answer edited by Answer Author
@@ -1434,7 +1438,7 @@ def send_answer_notification(user, answer, delete_reason=None):
     elif flag == 3:
         subject = "FOSSEE Forums - {0} - Answer Deleted".format(question.category)
         from_email = settings.SENDER_EMAIL
-        to = [settings.BCC_EMAIL_ID, question.user.email]
+        to = [question.user.email]
 
         if answer.uid == user.id:
             # Answer deleted by Answer Author
@@ -1555,11 +1559,10 @@ def send_comment_notification(user, comment, delete_reason=None):
         })
         plain_message = strip_tags(html_message)
 
-        to = [settings.BCC_EMAIL_ID]
+        to = []
         for mail_uid in mail_uids:
             notification = Notification(uid=mail_uid, qid=question.id, aid=answer.id, cid=comment.id)
             notification.save()
-
             # Appending user email in 'to' list                
             to.append(get_user_email(mail_uid))
 
@@ -1569,7 +1572,7 @@ def send_comment_notification(user, comment, delete_reason=None):
     if flag == 2:
         subject = "FOSSEE Forums - {0} - Comment Edited".format(question.category)
         from_email = settings.SENDER_EMAIL
-        to = [settings.BCC_EMAIL_ID]
+        to = []
 
         if comment.uid == user.id:
             # Comment edited by Comment Author
@@ -1605,7 +1608,7 @@ def send_comment_notification(user, comment, delete_reason=None):
     elif flag == 3:
         subject = "FOSSEE Forums - {0} - Comment Deleted".format(question.category)
         from_email = settings.SENDER_EMAIL
-        to = [settings.BCC_EMAIL_ID]
+        to = []
 
         if comment.uid == user.id:
             # Comment Deleted by Comment Author
