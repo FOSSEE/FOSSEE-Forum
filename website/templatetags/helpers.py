@@ -7,8 +7,7 @@ import os.path
 register = template.Library()
 
 # Cleaning a string
-
-
+@register.simple_tag
 def prettify(string):
     string = string.lower()
     string = string.replace('-', ' ')
@@ -18,19 +17,10 @@ def prettify(string):
     string = re.sub('-+', '-', string)
     return string
 
-
-register.simple_tag(prettify)
-
-
 # Getting only the 100 most recent questions
-
-
+@register.filter
 def get_recent_questions(questions):
     return questions[:100]
-
-
-register.filter('get_recent_questions', get_recent_questions)
-
 
 # Concatenating two strings in template
 @register.filter

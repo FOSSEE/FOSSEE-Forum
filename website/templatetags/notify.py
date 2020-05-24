@@ -4,7 +4,8 @@ from website.models import Question, Answer, Notification
 
 register = template.Library()
 
-
+# Display the notifications of the user
+@register.inclusion_tag('website/templates/notify.html')
 def get_notification(nid):
     notification = Notification.objects.get(pk=nid)
     question = Question.objects.get(pk=notification.qid)
@@ -17,19 +18,14 @@ def get_notification(nid):
     return context
 
 
-register.inclusion_tag('website/templates/notify.html')(get_notification)
-
-
+@register.simple_tag
 def notification_count(user_id):
     count = Notification.objects.filter(uid=user_id).count()
     return count
 
 
-register.simple_tag(notification_count)
-
 # retriving the latest post of a category
-
-
+@register.inclusion_tag('website/templates/latest_question.html')
 def latest_question(category):
     question = None
     try:
@@ -41,7 +37,3 @@ def latest_question(category):
         'question': question
     }
     return context
-
-
-register.inclusion_tag(
-    'website/templates/latest_question.html')(latest_question)
