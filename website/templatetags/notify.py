@@ -1,6 +1,6 @@
 from django import template
 
-from website.models import Question, Answer, Notification
+from website.models import Question, Answer, AnswerComment, Notification
 
 register = template.Library()
 
@@ -10,10 +10,14 @@ def get_notification(nid):
     notification = Notification.objects.get(pk=nid)
     question = Question.objects.get(pk=notification.qid)
     answer = Answer.objects.get(pk=notification.aid)
+    comment = None
+    if notification.cid != 0:
+        comment = AnswerComment.objects.get(pk=notification.cid)
     context = {
         'notification': notification,
         'question': question,
         'answer': answer,
+        'comment': comment,
     }
     return context
 
