@@ -742,6 +742,10 @@ def answer_delete(request, answer_id):
         answer.notif_flag = 3
         answer.save()
 
+        # Delete all Notifications related to it
+        notifications = Notification.objects.filter(aid=answer.id)
+        notifications.delete()
+
         # Sending Emails for Answer Delete
         delete_reason = request.POST.get('deleteAnswer', None)
         send_answer_notification(request.user, answer,
@@ -768,6 +772,10 @@ def comment_delete(request, comment_id):
         comment.is_active = False
         comment.notif_flag = 3
         comment.save()
+
+        # Delete all Notifications related to it
+        notifications = Notification.objects.filter(cid=comment.id)
+        notifications.delete()
 
         # Sending notifications
         delete_reason = request.POST.get('deleteComment', None)
