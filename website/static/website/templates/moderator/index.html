@@ -36,6 +36,7 @@
     });
 </script>
 
+{% if categories %}
 <div id="carousel-container">
     <div class="carousel">
         {% for category in categories %}
@@ -58,6 +59,7 @@
         {% endfor %}
     </div>
 </div> <!-- /.carousel -->
+{% endif %}
 
 
 <div id="filter-container">

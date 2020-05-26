@@ -15,6 +15,8 @@ class FossCategory(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
     email = models.CharField(max_length=50)
+    disabled = models.BooleanField(default=False)
+    hidden = models.BooleanField(default=False)
     image = ResizedImageField(
         size=[
             800,

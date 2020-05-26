@@ -247,13 +247,19 @@ def account_view_profile(request, user_id=None):
         # Moderators other than super moderator (forum_moderator)
         # should be able to view Ques/Ans of only their Categories.
         if request.user.groups.filter(name="forum_moderator").exists():
-            questions = Question.objects.filter(user_id=user_id).order_by('-date_created')
-            answers = Answer.objects.filter(uid=user_id).order_by('-date_created')
+            questions = Question.objects.filter(
+                user_id=user_id, category__hidden=False).order_by('-date_created')
+            answers = Answer.objects.filter(
+                uid=user_id,
+                question__category__hidden=False).order_by('-date_created')
         else:
             questions = []
             answers = []
             for group in request.user.groups.all():
                 category = ModeratorGroup.objects.get(group=group).category
+                # Don't include hidden categories
+                if category.hidden:
+                    continue
                 questions.extend(Question.objects.filter(
                     user_id=user_id, category__name=category.name))
                 answers.extend(Answer.objects.filter(
@@ -270,15 +276,17 @@ def account_view_profile(request, user_id=None):
         # Spammed questions should be visible if flag=True
         if flag:
             questions = Question.objects.filter(
-                user_id=user_id, is_active=True).order_by('-date_created')
+                user_id=user_id, is_active=True, category__hidden=False).order_by('-date_created')
             answers = Answer.objects.filter(
-                uid=user_id, is_active=True, question__is_active=True).order_by('-date_created')
+                uid=user_id, is_active=True, question__is_active=True,
+                question__category__hidden=False).order_by('-date_created')
         else:
             questions = Question.objects.filter(
-                user_id=user_id, is_active=True, is_spam=False).order_by('-date_created')
+                user_id=user_id, is_active=True,
+                is_spam=False, category__hidden=False).order_by('-date_created')
             answers = Answer.objects.filter(
-                uid=user_id, is_active=True,
-                is_spam=False, question__is_active=True).order_by('-date_created')
+                uid=user_id, is_active=True, is_spam=False,
+                question__is_active=True, question__category__hidden=False).order_by('-date_created')
 
     form = ProfileForm(user, instance=profile)
 

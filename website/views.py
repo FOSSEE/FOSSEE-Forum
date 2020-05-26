@@ -29,7 +29,7 @@ from .decorators import check_recaptcha
 from .forms import AnswerCommentForm, AnswerQuestionForm, NewQuestionForm
 from .models import (
     Answer, AnswerComment, FossCategory, ModeratorGroup,
-    Notification, Question, Scheduled_Auto_Mail, SubFossCategory, 
+    Notification, Question, Scheduled_Auto_Mail, SubFossCategory,
 )
 from .spamFilter import predict, train
 from .templatetags.helpers import prettify
@@ -238,9 +238,10 @@ def home(request):
     if request.session.get('MODERATOR_ACTIVATED', False):
         return HttpResponseRedirect('/moderator/')
 
-    categories = FossCategory.objects.order_by('name')
+    categories = FossCategory.objects.filter(hidden=False).order_by('name')
     questions = Question.objects.filter(
-        is_spam=False, is_active=True).order_by('-date_created')
+        is_spam=False, is_active=True, category__hidden=False,
+    ).order_by('-date_created')
     context = {
         'categories': categories,
         'questions': questions,
@@ -253,9 +254,10 @@ def questions(request):
     if request.session.get('MODERATOR_ACTIVATED', False):
         return HttpResponseRedirect('/moderator/questions/')
 
-    categories = FossCategory.objects.order_by('name')
-    questions = Question.objects.all().filter(
-        is_spam=False, is_active=True).order_by('-date_created')
+    categories = FossCategory.objects.filter(hidden=False).order_by('name')
+    questions = Question.objects.filter(
+        is_spam=False, is_active=True, category__hidden=False,
+    ).order_by('-date_created')
     context = {
         'categories': categories,
         'questions': questions,
@@ -267,13 +269,13 @@ def get_question(request, question_id=None, pretty_url=None):
     """Show the details of the Question, its Answers and Comments under it."""
     if request.session.get('MODERATOR_ACTIVATED', False):
         if is_moderator(request.user, get_object_or_404(Question, id=question_id)):
-            question = get_object_or_404(Question, id=question_id)
+            question = get_object_or_404(Question, id=question_id, category__hidden=False)
             answers = question.answer_set.all()
         else:
             return render(request, 'website/templates/not-authorized.html')
     else:
         # Spam Questions should be accessible to its Author only.
-        question = get_object_or_404(Question, id=question_id, is_active=True)
+        question = get_object_or_404(Question, id=question_id, is_active=True, category__hidden=False)
         if question.user != request.user and question.is_spam:
             raise Http404
         answers = question.answer_set.filter(is_active=True).all()
@@ -332,7 +334,7 @@ def new_question(request):
 
     context = {}
     context['SITE_KEY'] = settings.GOOGLE_RECAPTCHA_SITE_KEY
-    all_category = FossCategory.objects.all()
+    # all_category = FossCategory.objects.all()
 
     if (request.method == 'POST'):
 
@@ -409,10 +411,10 @@ def new_question(request):
 @user_passes_test(account_credentials_defined, login_url='/accounts/profile/')
 def question_answer(request, question_id):
     """Post an answer to a question asked om the forum."""
-    question = get_object_or_404(Question, id=question_id,
-                                 is_active=True, is_spam=False)
+    question = get_object_or_404(Question, id=question_id, is_active=True, is_spam=False,
+                                 category__hidden=False, category__disabled=False)
 
-    if (request.method == 'POST'):
+    if request.method == 'POST':
         form = AnswerQuestionForm(request.POST, request.FILES)
         answer = Answer()
         answer.uid = request.user.id
@@ -435,7 +437,7 @@ def question_answer(request, question_id):
                 send_spam_answer_notification(request.user, answer)
             else:
                 send_answer_notification(request.user, answer)
-            
+
             return HttpResponseRedirect('/question/{0}/'.format(question_id))
 
         else:
@@ -452,7 +454,10 @@ def question_answer(request, question_id):
 def answer_comment(request, answer_id):
     """Post a comment on an answer to a question asked on the forum."""
     answer = get_object_or_404(Answer, id=answer_id, is_active=True, is_spam=False)
-    question_id = answer.question.id
+    question = answer.question
+
+    if question.category.hidden or question.category.disabled:
+        raise Http404
 
     if (request.method == 'POST'):
         form = AnswerCommentForm(request.POST)
@@ -471,14 +476,14 @@ def answer_comment(request, answer_id):
             else:
                 send_comment_notification(request.user, comment)
 
-            return HttpResponseRedirect('/question/{0}/'.format(question_id))
+            return HttpResponseRedirect('/question/{0}/'.format(question.id))
 
         else:
             if 'body' in form.errors.as_data():
                 messages.error(request, form.errors['body'].as_data()[0].message)
-            return HttpResponseRedirect('/question/{0}/'.format(question_id))
+            return HttpResponseRedirect('/question/{0}/'.format(question.id))
 
-    return HttpResponseRedirect('/question/{0}/#answer{1}'.format(question_id, answer_id))
+    return HttpResponseRedirect('/question/{0}/#answer{1}'.format(question.id, answer_id))
 
 
 # Edit a question on forums, notification is sent to mailing list
@@ -490,8 +495,9 @@ def edit_question(request, question_id):
     context = {}
     user = request.user
     context['SITE_KEY'] = settings.GOOGLE_RECAPTCHA_SITE_KEY
-    all_category = FossCategory.objects.all()
-    question = get_object_or_404(Question, id=question_id, is_active=True)
+    # all_category = FossCategory.objects.all()
+    question = get_object_or_404(Question, id=question_id, is_active=True,
+                                 category__hidden=False, category__disabled=False)
 
     # To prevent random user from manually entering the link and editing
     if ((request.user.id != question.user.id or question.answer_set.filter(is_active=True).count() > 0) and 
@@ -598,12 +604,16 @@ def answer_update(request):
         aid = request.POST['answer_id']
         body = request.POST['answer_body']
         answer = get_object_or_404(Answer, pk=aid, is_active=True)
+        question = answer.question
+
+        if question.category.hidden or question.category.disabled:
+            raise Http404
 
         # Answer comments excluding author's
         comments = AnswerComment.objects.filter(
             answer=answer, is_active=True).exclude(uid=answer.uid)
 
-        if ((is_moderator(request.user, answer.question) and request.session.get('MODERATOR_ACTIVATED', False)) or
+        if ((is_moderator(request.user, question) and request.session.get('MODERATOR_ACTIVATED', False)) or
                 (request.user.id == answer.uid and not comments.exists())):
             answer.body = str(body)
             answer.is_spam = False
@@ -635,10 +645,10 @@ def answer_update(request):
                     send_answer_notification(answer.user(), answer)
 
             messages.success(request, "Answer is Successfully Saved!")
-            return HttpResponseRedirect('/question/{0}/'.format(answer.question.id))
+            return HttpResponseRedirect('/question/{0}/'.format(question.id))
         else:
             messages.error(request, "Failed to Update Answer!")
-            return HttpResponseRedirect('/question/{0}/'.format(answer.question.id))
+            return HttpResponseRedirect('/question/{0}/'.format(question.id))
 
     return render(request, 'website/templates/get-requests-not-allowed.html')
 
@@ -651,6 +661,9 @@ def answer_comment_update(request):
         body = request.POST['comment_body']
         comment = get_object_or_404(AnswerComment, pk=cid, is_active=True)
         question = comment.answer.question
+
+        if question.category.hidden or question.category.disabled:
+            raise Http404
 
         if ((is_moderator(request.user, question) and request.session.get('MODERATOR_ACTIVATED', False)) or
                 (request.user.id == comment.uid and can_delete_comment(comment.answer, cid))):
@@ -696,7 +709,8 @@ def answer_comment_update(request):
 @login_required
 def question_delete(request, question_id):
     """Delete question asked on the forum."""
-    question = get_object_or_404(Question, id=question_id, is_active=True)
+    question = get_object_or_404(Question, id=question_id, is_active=True,
+                                 category__hidden=False, category__disabled=False)
 
     # To prevent random user from manually entering the link and deleting
     if ((request.user.id != question.user.id or question.answer_set.filter(is_active=True).count() > 0) and 
@@ -727,6 +741,9 @@ def answer_delete(request, answer_id):
     """Delete an answer."""
     answer = get_object_or_404(Answer, id=answer_id, is_active=True)
     question = answer.question
+
+    if question.category.hidden or question.category.disabled:
+        raise Http404
 
     # Answer comments excluding author's
     comments = AnswerComment.objects.filter(
@@ -764,6 +781,9 @@ def comment_delete(request, comment_id):
     comment = get_object_or_404(AnswerComment, pk=comment_id)
     question = comment.answer.question
 
+    if question.category.hidden or question.category.disabled:
+        raise Http404
+
     if ((request.user.id != comment.uid or not can_delete_comment(comment.answer, comment_id)) and
             (not is_moderator(request.user, question) or not request.session.get('MODERATOR_ACTIVATED', False))):
         return render(request, 'website/templates/not-authorized.html')
@@ -794,7 +814,8 @@ def comment_delete(request, comment_id):
 @user_passes_test(is_moderator)
 def question_restore(request, question_id):
     """Restore a Question."""
-    question = get_object_or_404(Question, id=question_id, is_active=False)
+    question = get_object_or_404(Question, id=question_id, is_active=False,
+                                 category__hidden=False, category__disabled=False)
 
     if not is_moderator(request.user, question) or not request.session.get('MODERATOR_ACTIVATED', False):
         return render(request, 'website/templates/not-authorized.html')
@@ -811,19 +832,23 @@ def question_restore(request, question_id):
 def answer_restore(request, answer_id):
     """Restore an Answer."""
     answer = get_object_or_404(Answer, id=answer_id, is_active=False)
+    question = answer.question
 
-    if not is_moderator(request.user, answer.question) or not request.session.get('MODERATOR_ACTIVATED', False):
+    if question.category.hidden or question.category.disabled:
+        raise Http404
+
+    if not is_moderator(request.user, question) or not request.session.get('MODERATOR_ACTIVATED', False):
         return render(request, 'website/templates/not-authorized.html')
 
-    if not answer.question.is_active:
+    if not question.is_active:
         messages.error(request, "Answer can only be restored when its question is not deleted.")
-        return HttpResponseRedirect('/question/{0}/'.format(answer.question.id))
+        return HttpResponseRedirect('/question/{0}/'.format(question.id))
 
     answer.is_active = True
     answer.save()
 
     messages.success(request, "Answer Restored Successfully!")
-    return HttpResponseRedirect('/question/{0}/#answer{1}'.format(answer.question.id, answer.id))
+    return HttpResponseRedirect('/question/{0}/#answer{1}'.format(question.id, answer.id))
 
 
 @login_required
@@ -832,20 +857,24 @@ def comment_restore(request, comment_id):
     """Restore a Comment."""
     comment = get_object_or_404(
         AnswerComment, id=comment_id, is_active=False)
+    question = comment.answer.question
 
-    if (not is_moderator(request.user, comment.answer.question) or
+    if question.category.hidden or question.category.disabled:
+        raise Http404
+
+    if (not is_moderator(request.user, question) or
             not request.session.get('MODERATOR_ACTIVATED', False)):
         return render(request, 'website/templates/not-authorized.html')
 
     if not comment.answer.is_active:
         messages.error(request, "Comment can only be restored when its answer is not deleted.")
-        return HttpResponseRedirect('/question/{0}/'.format(comment.answer.question.id))
+        return HttpResponseRedirect('/question/{0}/'.format(question.id))
 
     comment.is_active = True
     comment.save()
 
     messages.success(request, "Comment Restored Successfully!")
-    return HttpResponseRedirect('/question/{0}/#comm{1}'.format(comment.answer.question.id, comment.id))
+    return HttpResponseRedirect('/question/{0}/#comm{1}'.format(question.id, comment.id))
 
 
 # View to approve question marked as spam
@@ -853,7 +882,8 @@ def comment_restore(request, comment_id):
 @user_passes_test(is_moderator)
 def approve_spam_question(request, question_id):
     question = get_object_or_404(
-        Question, id=question_id, is_active=True, is_spam=True)
+        Question, id=question_id, is_active=True, is_spam=True,
+        category__hidden=False, category__disabled=False)
 
     if (is_moderator(request.user, question) and
             request.session.get('MODERATOR_ACTIVATED', False)):
@@ -874,7 +904,10 @@ def approve_spam_question(request, question_id):
 def mark_answer_spam(request, answer_id):
     """Mark/Unmark an Answer as a spam."""
     answer = get_object_or_404(Answer, id=answer_id, is_active=True)
-    question_id = answer.question.id
+    question = answer.question
+
+    if question.category.hidden or question.category.disabled:
+        raise Http404
 
     if request.method == "POST":
         choice = request.POST['selector']
@@ -894,7 +927,7 @@ def mark_answer_spam(request, answer_id):
                 # Send Pending Notifications (by the name of author)
                 send_answer_notification(answer.user(), answer)
                 messages.success(request, "Answer marked successfully as Not-Spam!")
-    return HttpResponseRedirect('/question/{0}/#answer{1}'.format(question_id, answer.id))
+    return HttpResponseRedirect('/question/{0}/#answer{1}'.format(question.id, answer.id))
 
 
 # View to mark comment as spam/non-spam
@@ -903,7 +936,10 @@ def mark_answer_spam(request, answer_id):
 def mark_comment_spam(request, comment_id):
     """Mark/Unmark an Comment as a spam."""
     comment = get_object_or_404(AnswerComment, id=comment_id, is_active=True)
-    question_id = comment.answer.question.id
+    question = comment.answer.question
+
+    if question.category.hidden or question.category.disabled:
+        raise Http404
 
     if request.method == "POST":
         choice = request.POST['choice']
@@ -921,7 +957,7 @@ def mark_comment_spam(request, comment_id):
             # Send Pending Notifications (by the name of author)
             send_comment_notification(comment.user(), comment)
             messages.success(request, "Comment marked successfully as Not-Spam!")
-    return HttpResponseRedirect('/question/{0}/#comm{1}'.format(question_id, comment.id))
+    return HttpResponseRedirect('/question/{0}/#comm{1}'.format(question.id, comment.id))
 
 
 def search(request):
@@ -930,7 +966,7 @@ def search(request):
         messages.error(request, "Moderators cannot access the Search Page!")
         return HttpResponseRedirect('/moderator/')
 
-    categories = FossCategory.objects.order_by('name')
+    categories = FossCategory.objects.filter(hidden=False).order_by('name')
     context = {
         'categories': categories,
     }
@@ -942,11 +978,13 @@ def filter(request, category=None, tutorial=None):
        tutorial (sub-category) provided as arguments."""
     if category and tutorial:
         questions = Question.objects.filter(
-            category__name=category).filter(
-            sub_category=tutorial).order_by('-date_created')
+            category__name=category,
+            sub_category=tutorial,
+            category__hidden=False).order_by('-date_created')
     elif tutorial is None:
         questions = Question.objects.filter(
-            category__name=category).order_by('-date_created')
+            category__name=category,
+            category__hidden=False).order_by('-date_created')
 
     if (not request.session.get('MODERATOR_ACTIVATED', False)):
         questions = questions.filter(is_spam=False, is_active=True)
@@ -1009,8 +1047,8 @@ def moderator_home(request):
 
     # If user is a super moderator
     if (request.user.groups.filter(name="forum_moderator").exists()):
-        questions = Question.objects.filter().order_by('-date_created')
-        categories = FossCategory.objects.order_by('name')
+        questions = Question.objects.filter(category__hidden=False).order_by('-date_created')
+        categories = FossCategory.objects.filter(hidden=False).order_by('name')
 
     else:
         # Finding the moderator's categories and Getting the questions related
@@ -1019,6 +1057,9 @@ def moderator_home(request):
         questions = []
         for group in request.user.groups.all():
             category = ModeratorGroup.objects.get(group=group).category
+            # Don't include hidden categories
+            if category.hidden:
+                continue
             categories.append(category)
             questions.extend(
                 Question.objects.filter(
@@ -1043,8 +1084,8 @@ def moderator_questions(request):
 
     # If user is a super moderator
     if (request.user.groups.filter(name="forum_moderator").exists()):
-        categories = FossCategory.objects.order_by('name')
-        questions = Question.objects.filter().order_by('-date_created')
+        categories = FossCategory.objects.filter(hidden=False).order_by('name')
+        questions = Question.objects.filter(category__hidden=False).order_by('-date_created')
         if ('spam' in request.GET):
             questions = questions.filter(is_spam=True)
         elif ('non-spam' in request.GET):
@@ -1056,6 +1097,9 @@ def moderator_questions(request):
         categories = []
         for group in request.user.groups.all():
             category = ModeratorGroup.objects.get(group=group).category
+            # Don't include hidden categories
+            if category.hidden:
+                continue
             categories.append(category)
             questions_to_add = Question.objects.filter(
                 category__name=category.name).order_by('-date_created')
@@ -1084,8 +1128,9 @@ def moderator_unanswered(request):
 
     # If user is a super moderator
     if (request.user.groups.filter(name="forum_moderator").exists()):
-        categories = FossCategory.objects.order_by('name')
-        questions = Question.objects.filter(is_active=True).order_by('-date_created')
+        categories = FossCategory.objects.filter(hidden=False).order_by('name')
+        questions = Question.objects.filter(
+            is_active=True, category__hidden=False).order_by('-date_created')
 
     else:
         # Finding the moderator's category questions
@@ -1093,6 +1138,9 @@ def moderator_unanswered(request):
         categories = []
         for group in request.user.groups.all():
             category = ModeratorGroup.objects.get(group=group).category
+            # Don't include hidden categories
+            if category.hidden:
+                continue
             categories.append(category)
             questions.extend(Question.objects.filter(
                 category__name=category.name, is_active=True).order_by('-date_created'))
@@ -1169,10 +1217,12 @@ def ajax_keyword_search(request):
         questions = (
             Question.objects.filter(title__icontains=key).filter(
                 is_spam=False,
-                is_active=True
+                is_active=True,
+                category__hidden=False,
             ) | Question.objects.filter(category__name=key).filter(
                 is_spam=False,
-                is_active=True
+                is_active=True,
+                category__hidden=False,
             )
         ).distinct().order_by('-date_created')
         context = {

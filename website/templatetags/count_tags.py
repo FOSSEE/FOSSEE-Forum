@@ -18,14 +18,14 @@ def answer_count(question):
 
 @register.simple_tag
 def total_question_count():
-    """Return total number of active and non-spam questions on forum."""
-    count = Question.objects.filter(is_active=True, is_spam=False).count()
+    """Return total number of active and non-spam questions of unhidden categories on forum."""
+    count = Question.objects.filter(is_active=True, is_spam=False, category__hidden=False).count()
     return count
 
 @register.simple_tag
 def total_answer_count():
-    """Return total number of active and non-spam answers on forum."""
-    count = Answer.objects.filter(is_active=True, is_spam=False).count()
+    """Return total number of active and non-spam answers in unhidden categories on forum."""
+    count = Answer.objects.filter(is_active=True, is_spam=False, question__category__hidden=False).count()
     return count
 
 
