@@ -431,6 +431,24 @@ class AccountViewProfileViewTest(TestCase):
         # All Questions by 'johndoe' must be in context
         self.assertEqual(len(response.context['questions']), 4)
 
+    def test_view_context_questions_super_moderator_hidden_category(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Log in Super Moderator
+        self.client.login(username='super_mod', password='super_mod')
+        # Activate the Moderator Panel
+        session = self.client.session
+        session['MODERATOR_ACTIVATED'] = True
+        session.save()
+        # Viewing profile of 'johndoe'
+        user = User.objects.get(username='johndoe')
+        response = self.client.get(reverse('view_profile', args=(user.id, )))
+        self.assertTrue('questions' in response.context)
+        # All Questions by 'johndoe' must be in context
+        self.assertEqual(len(response.context['questions']), 1)
+
     def test_view_context_questions_moderator(self):
         # Log in the Moderator of 'category1'
         self.client.login(username='mod1', password='mod1')
@@ -444,6 +462,24 @@ class AccountViewProfileViewTest(TestCase):
         self.assertTrue('questions' in response.context)
         # All Questions of 'category1' by 'johndoe' must be in context
         self.assertEqual(len(response.context['questions']), 3)
+
+    def test_view_context_questions_moderator_hidden_category(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Log in the Moderator of 'category1'
+        self.client.login(username='mod1', password='mod1')
+        # Activate the Moderator Panel
+        session = self.client.session
+        session['MODERATOR_ACTIVATED'] = True
+        session.save()
+        # Viewing profile of 'johndoe'
+        user = User.objects.get(username='johndoe')
+        response = self.client.get(reverse('view_profile', args=(user.id, )))
+        self.assertTrue('questions' in response.context)
+        # All Questions of 'category1' by 'johndoe' must be in context
+        self.assertEqual(len(response.context['questions']), 0)
 
     def test_view_context_questions_other_user_profile(self):
         # Log in 'johndoe2'
@@ -459,6 +495,24 @@ class AccountViewProfileViewTest(TestCase):
         self.assertQuerysetEqual(response.context['questions'],
                 [f'<Question: {ques2.id} - {ques2.category} -  - {ques2.title} - johndoe>',
                  f'<Question: {ques1.id} - {ques1.category} -  - {ques1.title} - johndoe>'])
+
+    def test_view_context_questions_other_user_profile_hidden_category(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Log in 'johndoe2'
+        self.client.login(username='johndoe2', password='johndoe2')
+        # Viewing profile of 'johndoe'
+        user = User.objects.get(username='johndoe')
+        response = self.client.get(reverse('view_profile', args=(user.id, )))
+        ques1 = Question.objects.get(title='TestQuestion1')
+        ques2 = Question.objects.get(title='TestQuestion2')
+        self.assertTrue('questions' in response.context)
+        # All active and non-spam Questions by 'johndoe' must be in context
+        self.assertEqual(len(response.context['questions']), 1)
+        self.assertQuerysetEqual(response.context['questions'],
+                [f'<Question: {ques2.id} - {ques2.category} -  - {ques2.title} - johndoe>'])
 
     def test_view_context_questions_self_profile(self):
         # Log in 'johndoe'
@@ -477,6 +531,23 @@ class AccountViewProfileViewTest(TestCase):
                  f'<Question: {ques2.id} - {ques2.category} -  - {ques2.title} - johndoe>',
                  f'<Question: {ques1.id} - {ques1.category} -  - {ques1.title} - johndoe>'])
 
+    def test_view_context_questions_self_hidden_category(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Log in 'johndoe'
+        self.client.login(username='johndoe', password='johndoe')
+        # Viewing profile of self
+        user = User.objects.get(username='johndoe')
+        response = self.client.get(reverse('view_profile', args=(user.id, )))
+        ques2 = Question.objects.get(title='TestQuestion2')
+        self.assertTrue('questions' in response.context)
+         # All active Questions by 'johndoe' must be in context
+        self.assertEqual(len(response.context['questions']), 1)
+        self.assertQuerysetEqual(response.context['questions'],
+                [f'<Question: {ques2.id} - {ques2.category} -  - {ques2.title} - johndoe>'])
+
     def test_view_context_answers_super_moderator(self):
         # Log in Super Moderator
         self.client.login(username='super_mod', password='super_mod')
@@ -490,6 +561,24 @@ class AccountViewProfileViewTest(TestCase):
         self.assertTrue('answers' in response.context)
         # All Answers by 'johndoe' must be in context
         self.assertEqual(len(response.context['answers']), 4)
+
+    def test_view_context_answers_super_moderator_hidden_category(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Log in Super Moderator
+        self.client.login(username='super_mod', password='super_mod')
+        # Activate the Moderator Panel
+        session = self.client.session
+        session['MODERATOR_ACTIVATED'] = True
+        session.save()
+        # Viewing profile of 'johndoe'
+        user = User.objects.get(username='johndoe')
+        response = self.client.get(reverse('view_profile', args=(user.id, )))
+        self.assertTrue('answers' in response.context)
+        # All Answers by 'johndoe' must be in context
+        self.assertEqual(len(response.context['answers']), 1)
 
     def test_view_context_answers_moderator(self):
         # Log in the Moderator of 'category1'
@@ -505,6 +594,24 @@ class AccountViewProfileViewTest(TestCase):
         # All Answers of 'category1' by 'johndoe' must be in context
         self.assertEqual(len(response.context['answers']), 3)
 
+    def test_view_context_answers_moderator_hidden_category(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Log in the Moderator of 'category1'
+        self.client.login(username='mod1', password='mod1')
+        # Activate the Moderator Panel
+        session = self.client.session
+        session['MODERATOR_ACTIVATED'] = True
+        session.save()
+        # Viewing profile of 'johndoe'
+        user = User.objects.get(username='johndoe')
+        response = self.client.get(reverse('view_profile', args=(user.id, )))
+        self.assertTrue('answers' in response.context)
+        # All Answers of 'category1' by 'johndoe' must be in context
+        self.assertEqual(len(response.context['answers']), 0)
+
     def test_view_context_answers_other_user_profile(self):
         # Log in 'johndoe2'
         self.client.login(username='johndoe2', password='johndoe2')
@@ -518,7 +625,24 @@ class AccountViewProfileViewTest(TestCase):
         self.assertQuerysetEqual(response.context['answers'],
                 [f'<Answer: {ans3.question.category} - {ans3.question.title} - {ans3.body}>'])
 
-def test_view_context_answers_self_profile(self):
+    def test_view_context_answers_other_user_profile_hidden_category(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Log in 'johndoe2'
+        self.client.login(username='johndoe2', password='johndoe2')
+        # Viewing profile of 'johndoe'
+        user = User.objects.get(username='johndoe')
+        response = self.client.get(reverse('view_profile', args=(user.id, )))
+        ans3 = Answer.objects.get(body='TestAnswer3')
+        self.assertTrue('answers' in response.context)
+        # All active and non-spam Answers (of active Questions) by 'johndoe' must be in context
+        self.assertEqual(len(response.context['answers']), 1)
+        self.assertQuerysetEqual(response.context['answers'],
+                [f'<Answer: {ans3.question.category} - {ans3.question.title} - {ans3.body}>'])
+
+    def test_view_context_answers_self_profile(self):
         # Log in 'johndoe'
         self.client.login(username='johndoe', password='johndoe')
         # Viewing profile of self
@@ -532,6 +656,24 @@ def test_view_context_answers_self_profile(self):
         self.assertQuerysetEqual(response.context['answers'],
                 [f'<Answer: {ans3.question.category} - {ans3.question.title} - {ans3.body}>',
                  f'<Answer: {ans2.question.category} - {ans2.question.title} - {ans2.body}>'])
+
+    def test_view_context_answers_self_profile_hidden_category(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Log in 'johndoe'
+        self.client.login(username='johndoe', password='johndoe')
+        # Viewing profile of self
+        user = User.objects.get(username='johndoe')
+        response = self.client.get(reverse('view_profile', args=(user.id, )))
+        ans2 = Answer.objects.get(body='TestAnswer2')
+        ans3 = Answer.objects.get(body='TestAnswer3')
+        self.assertTrue('answers' in response.context)
+        # All active and non-spam Answers (of active Questions) by 'johndoe' must be in context
+        self.assertEqual(len(response.context['answers']), 1)
+        self.assertQuerysetEqual(response.context['answers'],
+                [f'<Answer: {ans3.question.category} - {ans3.question.title} - {ans3.body}>'])
 
 class UserLogoutViewTest(TestCase):
 
