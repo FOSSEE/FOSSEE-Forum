@@ -203,6 +203,23 @@ class ModeratorHomeViewTest(TestCase):
         # Questions of all categories must be present
         self.assertEqual(len(response.context['questions']), 2)
 
+    def test_view_context_questions_super_moderator_hidden_category(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Log in the Super Moderator
+        self.client.login(username='super_mod', password='super_mod')
+        # Activating Moderator Panel
+        session = self.client.session
+        session['MODERATOR_ACTIVATED'] = True
+        session.save()
+        # Accessing the Page
+        response = self.client.get(reverse('website:moderator_home'))
+        self.assertTrue('questions' in response.context)
+        # Questions of all categories must be present
+        self.assertEqual(len(response.context['questions']), 1)
+
     def test_view_context_questions(self):
         # Log in the Moderator
         self.client.login(username='mod1', password='mod1')
@@ -217,6 +234,22 @@ class ModeratorHomeViewTest(TestCase):
         self.assertQuerysetEqual(response.context['questions'],
                                  ['<Question: {0} - TestCategory1 -  - TestQuestion1 - johndoe>'.format(question_id)])
 
+    def test_view_context_questions_hidden_category(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Log in the Moderator
+        self.client.login(username='mod1', password='mod1')
+        # Activating Moderator Panel
+        session = self.client.session
+        session['MODERATOR_ACTIVATED'] = True
+        session.save()
+        # Accessing the Page
+        response = self.client.get(reverse('website:moderator_home'))
+        self.assertTrue('questions' in response.context)
+        self.assertQuerysetEqual(response.context['questions'], [])
+
     def test_view_context_categories_super_moderator(self):
         # Log in the Super Moderator
         self.client.login(username='super_mod', password='super_mod')
@@ -230,6 +263,23 @@ class ModeratorHomeViewTest(TestCase):
         # All categories must be present
         self.assertEqual(len(response.context['categories']), 2)
 
+    def test_view_context_categories_super_moderator_hidden_category(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Log in the Super Moderator
+        self.client.login(username='super_mod', password='super_mod')
+        # Activating Moderator Panel
+        session = self.client.session
+        session['MODERATOR_ACTIVATED'] = True
+        session.save()
+        # Accessing the Page
+        response = self.client.get(reverse('website:moderator_home'))
+        self.assertTrue('categories' in response.context)
+        # All categories must be present
+        self.assertEqual(len(response.context['categories']), 1)
+
     def test_view_context_categories(self):
         # Log in the Moderator
         self.client.login(username='mod1', password='mod1')
@@ -241,6 +291,22 @@ class ModeratorHomeViewTest(TestCase):
         response = self.client.get(reverse('website:moderator_home'))
         self.assertTrue('categories' in response.context)
         self.assertQuerysetEqual(response.context['categories'], ['<FossCategory: TestCategory1>'])
+
+    def test_view_context_categories_hidden_category(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Log in the Moderator
+        self.client.login(username='mod1', password='mod1')
+        # Activating Moderator Panel
+        session = self.client.session
+        session['MODERATOR_ACTIVATED'] = True
+        session.save()
+        # Accessing the Page
+        response = self.client.get(reverse('website:moderator_home'))
+        self.assertTrue('categories' in response.context)
+        self.assertQuerysetEqual(response.context['categories'], [])
 
 class ModeratorQuestionsViewTest(TestCase):
 
@@ -330,7 +396,23 @@ class ModeratorQuestionsViewTest(TestCase):
         self.assertTrue('questions' in response.context)
         # All Questions of all categories must be present
         self.assertEqual(len(response.context['questions']), 3)
-        
+
+    def test_view_context_questions_super_moderator_hidden_category(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Log in the Moderator
+        self.client.login(username='super_mod', password='super_mod')
+        # Activating Moderator Panel
+        session = self.client.session
+        session['MODERATOR_ACTIVATED'] = True
+        session.save()
+        # Accessing the Page
+        response = self.client.get(reverse('website:moderator_questions'))
+        self.assertTrue('questions' in response.context)
+        # All Questions of all categories must be present
+        self.assertEqual(len(response.context['questions']), 1)
 
     def test_view_context_questions(self):
         # Log in the Moderator
@@ -347,6 +429,22 @@ class ModeratorQuestionsViewTest(TestCase):
         self.assertQuerysetEqual(response.context['questions'],
                                  ['<Question: {0} - TestCategory1 -  - TestQuestion2 - johndoe>'.format(question2_id),
                                   '<Question: {0} - TestCategory1 -  - TestQuestion1 - johndoe>'.format(question1_id)])
+
+    def test_view_context_questions_hidden_category(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Log in the Moderator
+        self.client.login(username='mod1', password='mod1')
+        # Activating Moderator Panel
+        session = self.client.session
+        session['MODERATOR_ACTIVATED'] = True
+        session.save()
+        # Accessing the Page
+        response = self.client.get(reverse('website:moderator_questions'))
+        self.assertTrue('questions' in response.context)
+        self.assertQuerysetEqual(response.context['questions'], [])
 
     def test_view_context_spam_questions(self):
         # Log in the Moderator
@@ -389,6 +487,23 @@ class ModeratorQuestionsViewTest(TestCase):
         # All categories must be present
         self.assertEqual(len(response.context['categories']), 2)
 
+    def test_view_context_categories_super_moderator_hidden_category(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Log in the Super Moderator
+        self.client.login(username='super_mod', password='super_mod')
+        # Activating Moderator Panel
+        session = self.client.session
+        session['MODERATOR_ACTIVATED'] = True
+        session.save()
+        # Accessing the Page
+        response = self.client.get(reverse('website:moderator_home'))
+        self.assertTrue('categories' in response.context)
+        # All categories must be present
+        self.assertEqual(len(response.context['categories']), 1)
+
     def test_view_context_categories(self):
         # Log in the Moderator
         self.client.login(username='mod1', password='mod1')
@@ -400,6 +515,22 @@ class ModeratorQuestionsViewTest(TestCase):
         response = self.client.get(reverse('website:moderator_home'))
         self.assertTrue('categories' in response.context)
         self.assertQuerysetEqual(response.context['categories'], ['<FossCategory: TestCategory1>'])
+
+    def test_view_context_categories_hidden_category(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Log in the Moderator
+        self.client.login(username='mod1', password='mod1')
+        # Activating Moderator Panel
+        session = self.client.session
+        session['MODERATOR_ACTIVATED'] = True
+        session.save()
+        # Accessing the Page
+        response = self.client.get(reverse('website:moderator_home'))
+        self.assertTrue('categories' in response.context)
+        self.assertQuerysetEqual(response.context['categories'], [])
 
 class ModeratorUnansweredViewTest(TestCase):
 
@@ -488,7 +619,23 @@ class ModeratorUnansweredViewTest(TestCase):
         # Questions of all categories must be present
         self.assertEqual(len(response.context['questions']), 2)
 
-    
+    def test_view_context_questions_super_moderator_hidden_category(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Log in the Super Moderator
+        self.client.login(username='super_mod', password='super_mod')
+        # Activating Moderator Panel
+        session = self.client.session
+        session['MODERATOR_ACTIVATED'] = True
+        session.save()
+        # Accessing the Page
+        response = self.client.get(reverse('website:moderator_unanswered'))
+        self.assertTrue('questions' in response.context)
+        # Questions of all categories must be present
+        self.assertEqual(len(response.context['questions']), 1)
+
     def test_view_context_questions(self):
         # Log in the Moderator
         self.client.login(username='mod1', password='mod1')
@@ -503,6 +650,22 @@ class ModeratorUnansweredViewTest(TestCase):
         self.assertQuerysetEqual(response.context['questions'],
                                  ['<Question: {0} - TestCategory1 -  - TestQuestion1 - johndoe>'.format(question1_id)])
 
+    def test_view_context_questions_hidden_category(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Log in the Moderator
+        self.client.login(username='mod1', password='mod1')
+        # Activating Moderator Panel
+        session = self.client.session
+        session['MODERATOR_ACTIVATED'] = True
+        session.save()
+        # Accessing the Page
+        response = self.client.get(reverse('website:moderator_unanswered'))
+        self.assertTrue('questions' in response.context)
+        self.assertQuerysetEqual(response.context['questions'], [])
+
     def test_view_context_categories_super_moderator(self):
         # Log in the Super Moderator
         self.client.login(username='super_mod', password='super_mod')
@@ -516,6 +679,23 @@ class ModeratorUnansweredViewTest(TestCase):
         # All categories must be present
         self.assertEqual(len(response.context['categories']), 2)
 
+    def test_view_context_categories_super_moderator_hidden_category(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Log in the Super Moderator
+        self.client.login(username='super_mod', password='super_mod')
+        # Activating Moderator Panel
+        session = self.client.session
+        session['MODERATOR_ACTIVATED'] = True
+        session.save()
+        # Accessing the Page
+        response = self.client.get(reverse('website:moderator_unanswered'))
+        self.assertTrue('categories' in response.context)
+        # All categories must be present
+        self.assertEqual(len(response.context['categories']), 1)
+
     def test_view_context_categories(self):
         # Log in the Moderator
         self.client.login(username='mod1', password='mod1')
@@ -527,3 +707,19 @@ class ModeratorUnansweredViewTest(TestCase):
         response = self.client.get(reverse('website:moderator_home'))
         self.assertTrue('categories' in response.context)
         self.assertQuerysetEqual(response.context['categories'], ['<FossCategory: TestCategory1>'])
+
+    def test_view_context_categories_hidden_category(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Log in the Moderator
+        self.client.login(username='mod1', password='mod1')
+        # Activating Moderator Panel
+        session = self.client.session
+        session['MODERATOR_ACTIVATED'] = True
+        session.save()
+        # Accessing the Page
+        response = self.client.get(reverse('website:moderator_home'))
+        self.assertTrue('categories' in response.context)
+        self.assertQuerysetEqual(response.context['categories'], [])
