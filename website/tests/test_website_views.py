@@ -57,14 +57,34 @@ class HomeViewTest(TestCase):
         question_id = Question.objects.get(title="TestQuestion1").id
         self.assertTrue('questions' in response.context)
         self.assertQuerysetEqual(response.context['questions'],
-                                    ['<Question: {0} - TestCategory1 -  - TestQuestion1 - johndoe>'.format(question_id)])
+                                 ['<Question: {0} - TestCategory1 -  - TestQuestion1 - johndoe>'.format(question_id)])
+
+    def test_view_context_questions_hidden_category(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Accessing the Page
+        response = self.client.get(reverse('website:home'))
+        self.assertTrue('questions' in response.context)
+        self.assertQuerysetEqual(response.context['questions'], [])
 
     def test_view_context_categories(self):
         # Accessing the Page
         response = self.client.get(reverse('website:home'))
         self.assertTrue('categories' in response.context)
         self.assertQuerysetEqual(response.context['categories'],
-                                    ['<FossCategory: TestCategory1>'])
+                                 ['<FossCategory: TestCategory1>'])
+
+    def test_view_context_categories_hidden_category(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Accessing the Page
+        response = self.client.get(reverse('website:home'))
+        self.assertTrue('categories' in response.context)
+        self.assertQuerysetEqual(response.context['categories'], [])
 
 class QuestionsViewTest(TestCase):
 
@@ -118,14 +138,34 @@ class QuestionsViewTest(TestCase):
         question_id = Question.objects.get(title="TestQuestion1").id
         self.assertTrue('questions' in response.context)
         self.assertQuerysetEqual(response.context['questions'],
-                                    ['<Question: {0} - TestCategory1 -  - TestQuestion1 - johndoe>'.format(question_id)])
-    
+                                 ['<Question: {0} - TestCategory1 -  - TestQuestion1 - johndoe>'.format(question_id)])
+
+    def test_view_context_questions_hidden_category(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Accessing the Page
+        response = self.client.get(reverse('website:questions'))
+        self.assertTrue('questions' in response.context)
+        self.assertQuerysetEqual(response.context['questions'], [])
+
     def test_view_context_categories(self):
         # Accessing the Page
         response = self.client.get(reverse('website:questions'))
         self.assertTrue('categories' in response.context)
         self.assertQuerysetEqual(response.context['categories'],
-                                    ['<FossCategory: TestCategory1>'])
+                                 ['<FossCategory: TestCategory1>'])
+
+    def test_view_context_categories_hidden_category(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Accessing the Page
+        response = self.client.get(reverse('website:questions'))
+        self.assertTrue('categories' in response.context)
+        self.assertQuerysetEqual(response.context['categories'], [])
 
 class GetQuestionViewTest(TestCase):
 
@@ -210,6 +250,17 @@ class GetQuestionViewTest(TestCase):
 
     def test_view_raise_404_while_accessing_spam_question(self):
         # Spam question
+        question = Question.objects.get(title="TestQuestion3")
+        # Access the Page
+        response = self.client.get(reverse('website:get_question', args=(question.id,)))
+        self.assertEqual(response.status_code, 404)
+
+    def test_view_raise_404_while_accessing_hidden_category_question(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Hidden category question
         question = Question.objects.get(title="TestQuestion3")
         # Access the Page
         response = self.client.get(reverse('website:get_question', args=(question.id,)))
@@ -511,6 +562,32 @@ class QuestionAnswerViewTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, '/question/{0}/'.format(question_id))
 
+    def test_view_raise_404_while_answering_hidden_category_question(self):
+        # Hide 'category1'
+        cat = FossCategory.objects.get(name='TestCategory')
+        cat.hidden = True
+        cat.save()
+        # Login the user
+        self.client.login(username='johndoe2', password='johndoe2')
+        # Hidden category question
+        question = Question.objects.get(title="TestQuestion")
+        # Access the Page
+        response = self.client.get(reverse('website:question_answer', args=(question.id,)))
+        self.assertEqual(response.status_code, 404)
+
+    def test_view_raise_404_while_answering_disabled_category_question(self):
+        # Hide 'category1'
+        cat = FossCategory.objects.get(name='TestCategory')
+        cat.disabled = True
+        cat.save()
+        # Login the user
+        self.client.login(username='johndoe2', password='johndoe2')
+        # Disabled category question
+        question = Question.objects.get(title="TestQuestion")
+        # Access the Page
+        response = self.client.get(reverse('website:question_answer', args=(question.id,)))
+        self.assertEqual(response.status_code, 404)
+
     def test_view_post_no_answer(self):
         self.client.login(username='johndoe2', password='johndoe2')
         question_id = Question.objects.get(title="TestQuestion").id
@@ -611,6 +688,32 @@ class AnswerCommentViewTest(TestCase):
         response = self.client.get(reverse('website:answer_comment', args=(answer.id,)))
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, '/question/{0}/#answer{1}'.format(answer.question.id, answer.id))
+
+    def test_view_raise_404_while_commenting_on_hidden_category_question(self):
+        # Hide 'category1'
+        cat = FossCategory.objects.get(name='TestCategory')
+        cat.hidden = True
+        cat.save()
+        # Login the user
+        self.client.login(username='johndoe2', password='johndoe2')
+        # Hidden category answer
+        answer = Answer.objects.get(body="TestAnswer")
+        # Access the Page
+        response = self.client.get(reverse('website:answer_comment', args=(answer.id,)))
+        self.assertEqual(response.status_code, 404)
+
+    def test_view_raise_404_while_commenting_on_disabled_category_question(self):
+        # Hide 'category1'
+        cat = FossCategory.objects.get(name='TestCategory')
+        cat.disabled = True
+        cat.save()
+        # Login the user
+        self.client.login(username='johndoe2', password='johndoe2')
+        # Hidden category answer
+        answer = Answer.objects.get(body="TestAnswer")
+        # Access the Page
+        response = self.client.get(reverse('website:answer_comment', args=(answer.id,)))
+        self.assertEqual(response.status_code, 404)
 
     def test_view_does_not_load(self):
         answer = Answer.objects.get(body="TestAnswer")
@@ -730,6 +833,32 @@ class EditQuestionViewTest(TestCase):
         response = self.client.get(reverse('website:edit_question', args=(question.id, )))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'website/templates/not-authorized.html')
+
+    def test_view_raise_404_while_editing_hidden_category_question(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Login the user
+        self.client.login(username='johndoe', password='johndoe')
+        # Hidden category question
+        question = Question.objects.get(title="TestQuestion")
+        # Access the Page
+        response = self.client.get(reverse('website:edit_question', args=(question.id,)))
+        self.assertEqual(response.status_code, 404)
+
+    def test_view_raise_404_while_editing_disabled_category_question(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.disabled = True
+        cat1.save()
+        # Login the user
+        self.client.login(username='johndoe', password='johndoe')
+        # Disabled category question
+        question = Question.objects.get(title="TestQuestion")
+        # Access the Page
+        response = self.client.get(reverse('website:edit_question', args=(question.id,)))
+        self.assertEqual(response.status_code, 404)
 
     def test_view_post_no_category(self):
         self.client.login(username='johndoe', password='johndoe')
@@ -918,6 +1047,34 @@ class AnswerUpdateViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'website/templates/get-requests-not-allowed.html')
 
+    def test_view_raise_404_while_updating_hidden_category_answer(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Login the user
+        self.client.login(username='johndoe', password='johndoe')
+        # Hidden category answer
+        answer_id = Answer.objects.get(body='TestAnswer').id
+        # Access the Page
+        response = self.client.post(reverse('website:answer_update'),
+                                    {'answer_id': answer_id, 'answer_body': 'TestAnswerBody'})
+        self.assertEqual(response.status_code, 404)
+
+    def test_view_raise_404_while_updating_disabled_category_answer(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.disabled = True
+        cat1.save()
+        # Login the user
+        self.client.login(username='johndoe', password='johndoe')
+        # Disabled category answer
+        answer_id = Answer.objects.get(body='TestAnswer').id
+        # Access the Page
+        response = self.client.post(reverse('website:answer_update'),
+                                    {'answer_id': answer_id, 'answer_body': 'TestAnswerBody'})
+        self.assertEqual(response.status_code, 404)
+
     def test_view_post_answer_no_exists(self):
         self.client.login(username="johndoe", password="johndoe")
         answer_id = Answer.objects.get(body='TestAnswer').id + 1
@@ -995,6 +1152,34 @@ class AnswerCommentUpdateViewTest(TestCase):
         response = self.client.get(reverse('website:answer_comment_update'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'website/templates/get-requests-not-allowed.html')
+
+    def test_view_raise_404_while_updating_hidden_category_comment(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Login the user
+        self.client.login(username='johndoe', password='johndoe')
+        # Hidden category comment
+        comment_id = AnswerComment.objects.get(body='TestComment').id
+        # Access the Page
+        response = self.client.post(reverse('website:answer_comment_update'),
+                                    {'comment_id': comment_id, 'comment_body': 'TestCommentBody'})
+        self.assertEqual(response.status_code, 404)
+
+    def test_view_raise_404_while_updating_disabled_category_comment(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.disabled = True
+        cat1.save()
+        # Login the user
+        self.client.login(username='johndoe', password='johndoe')
+        # Disabled category comment
+        comment_id = AnswerComment.objects.get(body='TestComment').id
+        # Access the Page
+        response = self.client.post(reverse('website:answer_comment_update'),
+                                    {'comment_id': comment_id, 'comment_body': 'TestCommentBody'})
+        self.assertEqual(response.status_code, 404)
 
     def test_view_post_comment_no_exists(self):
         self.client.login(username="johndoe", password="johndoe")
@@ -1076,6 +1261,32 @@ class QuestionDeleteViewTest(TestCase):
         question_id = Question.objects.get(title='TestQuestion').id
         response = self.client.post(reverse('website:question_delete', args=(question_id, )))
         self.assertTemplateUsed(response, 'website/templates/question-delete.html')
+
+    def test_view_raise_404_while_deleting_hidden_category_question(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Login the user
+        self.client.login(username='johndoe', password='johndoe')
+        # Hidden category question
+        question = Question.objects.get(title="TestQuestion")
+        # Access the Page
+        response = self.client.get(reverse('website:question_delete', args=(question.id,)))
+        self.assertEqual(response.status_code, 404)
+
+    def test_view_raise_404_while_deleting_disabled_category_question(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.disabled = True
+        cat1.save()
+        # Login the user
+        self.client.login(username='johndoe', password='johndoe')
+        # Disabled category question
+        question = Question.objects.get(title="TestQuestion")
+        # Access the Page
+        response = self.client.get(reverse('website:question_delete', args=(question.id,)))
+        self.assertEqual(response.status_code, 404)
 
     def test_view_raise_404_when_question_not_exists(self):
         self.client.login(username="johndoe", password="johndoe")
@@ -1166,6 +1377,32 @@ class AnswerDeleteViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'website/templates/not-authorized.html')
 
+    def test_view_raise_404_while_deleting_hidden_category_answer(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Login the user
+        self.client.login(username='johndoe', password='johndoe')
+        # Hidden category answer
+        answer_id = Answer.objects.get(body='TestAnswer').id
+        # Access the Page
+        response = self.client.get(reverse('website:answer_delete', args=(answer_id, )))
+        self.assertEqual(response.status_code, 404)
+
+    def test_view_raise_404_while_deleting_disabled_category_answer(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.disabled = True
+        cat1.save()
+        # Login the user
+        self.client.login(username='johndoe', password='johndoe')
+        # Disabled category answer
+        answer_id = Answer.objects.get(body='TestAnswer').id
+        # Access the Page
+        response = self.client.get(reverse('website:answer_delete', args=(answer_id, )))
+        self.assertEqual(response.status_code, 404)
+
     def test_view_shows_not_authorized_when_comment_exists(self):
         self.client.login(username='johndoe', password='johndoe')
         comment_uid = User.objects.get(username='johndoe2').id
@@ -1239,6 +1476,32 @@ class CommentDeleteViewTest(TestCase):
         response = self.client.get(reverse('website:comment_delete', args=(comment_id, )))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'website/templates/not-authorized.html')
+
+    def test_view_raise_404_while_deleting_hidden_category_comment(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Login the user
+        self.client.login(username='johndoe', password='johndoe')
+        # Hidden category comment
+        comment_id = AnswerComment.objects.get(body='TestAnswerComment').id
+        # Access the Page
+        response = self.client.post(reverse('website:comment_delete', args=(comment_id,)))
+        self.assertEqual(response.status_code, 404)
+
+    def test_view_raise_404_while_deleting_disabled_category_comment(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.disabled = True
+        cat1.save()
+        # Login the user
+        self.client.login(username='johndoe', password='johndoe')
+        # Disabled category comment
+        comment_id = AnswerComment.objects.get(body='TestAnswerComment').id
+        # Access the Page
+        response = self.client.post(reverse('website:comment_delete', args=(comment_id,)))
+        self.assertEqual(response.status_code, 404)
 
     def test_view_delete_comment(self):
         self.client.login(username='johndoe', password='johndoe')
@@ -1340,6 +1603,40 @@ class QuestionRestoreViewTest(TestCase):
         session['MODERATOR_ACTIVATED'] = True
         session.save()
         response = self.client.get(reverse('website:question_restore', args=(question.id, )))
+        self.assertEqual(response.status_code, 404)
+
+    def test_view_raise_404_while_restoring_hidden_category_question(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Log in the Moderator
+        self.client.login(username='mod1', password='mod1')
+        # Activating Moderator Panel
+        session = self.client.session
+        session['MODERATOR_ACTIVATED'] = True
+        session.save()
+        # Hidden category question
+        question = Question.objects.get(title="TestQuestion")
+        # Access the Page
+        response = self.client.get(reverse('website:question_restore', args=(question.id,)))
+        self.assertEqual(response.status_code, 404)
+
+    def test_view_raise_404_while_restoring_disabled_category_question(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.disabled = True
+        cat1.save()
+        # Log in the Moderator
+        self.client.login(username='mod1', password='mod1')
+        # Activating Moderator Panel
+        session = self.client.session
+        session['MODERATOR_ACTIVATED'] = True
+        session.save()
+        # Disabled category question
+        question = Question.objects.get(title="TestQuestion")
+        # Access the Page
+        response = self.client.get(reverse('website:question_restore', args=(question.id,)))
         self.assertEqual(response.status_code, 404)
 
     def test_view_if_moderator_not_authorized(self):
@@ -1459,6 +1756,40 @@ class AnswerRestoreViewTest(TestCase):
         session['MODERATOR_ACTIVATED'] = True
         session.save()
         response = self.client.get(reverse('website:answer_restore', args=(answer.id, )))
+        self.assertEqual(response.status_code, 404)
+
+    def test_view_raise_404_while_restoring_hidden_category_answer(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Log in the Moderator
+        self.client.login(username='mod1', password='mod1')
+        # Activating Moderator Panel
+        session = self.client.session
+        session['MODERATOR_ACTIVATED'] = True
+        session.save()
+        # Hidden category answer
+        answer_id = Answer.objects.get(body='TestAnswer').id
+        # Access the Page
+        response = self.client.get(reverse('website:answer_restore', args=(answer_id,)))
+        self.assertEqual(response.status_code, 404)
+
+    def test_view_raise_404_while_restoring_disabled_category_answer(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.disabled = True
+        cat1.save()
+        # Log in the Moderator
+        self.client.login(username='mod1', password='mod1')
+        # Activating Moderator Panel
+        session = self.client.session
+        session['MODERATOR_ACTIVATED'] = True
+        session.save()
+        # Disabled category answer
+        answer_id = Answer.objects.get(body='TestAnswer').id
+        # Access the Page
+        response = self.client.get(reverse('website:answer_restore', args=(answer_id,)))
         self.assertEqual(response.status_code, 404)
 
     def test_view_if_moderator_not_authorized(self):
@@ -1596,6 +1927,40 @@ class CommentRestoreViewTest(TestCase):
         session['MODERATOR_ACTIVATED'] = True
         session.save()
         response = self.client.get(reverse('website:comment_restore', args=(comment.id, )))
+        self.assertEqual(response.status_code, 404)
+
+    def test_view_raise_404_while_restoring_hidden_category_comment(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Log in the Moderator
+        self.client.login(username='mod1', password='mod1')
+        # Activating Moderator Panel
+        session = self.client.session
+        session['MODERATOR_ACTIVATED'] = True
+        session.save()
+        # Hidden category comment
+        comment_id = AnswerComment.objects.get(body='TestAnswerComment').id
+        # Access the Page
+        response = self.client.post(reverse('website:comment_restore', args=(comment_id,)))
+        self.assertEqual(response.status_code, 404)
+
+    def test_view_raise_404_while_restoring_disabled_category_comment(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.disabled = True
+        cat1.save()
+        # Log in the Moderator
+        self.client.login(username='mod1', password='mod1')
+        # Activating Moderator Panel
+        session = self.client.session
+        session['MODERATOR_ACTIVATED'] = True
+        session.save()
+        # Disabled category comment
+        comment_id = AnswerComment.objects.get(body='TestAnswerComment').id
+        # Access the Page
+        response = self.client.post(reverse('website:comment_restore', args=(comment_id,)))
         self.assertEqual(response.status_code, 404)
 
     def test_view_if_moderator_not_authorized(self):
@@ -1757,6 +2122,40 @@ class ApproveQuestionViewTest(TestCase):
         response = self.client.get(reverse('website:approve_spam_question', args=(question.id, )))
         self.assertEqual(response.status_code, 404)
 
+    def test_view_raise_404_while_approving_hidden_category_question(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Log in the Moderator
+        self.client.login(username='mod1', password='mod1')
+        # Activating Moderator Panel
+        session = self.client.session
+        session['MODERATOR_ACTIVATED'] = True
+        session.save()
+        # Hidden category question
+        question = Question.objects.get(title="TestQuestion")
+        # Access the Page
+        response = self.client.get(reverse('website:approve_spam_question', args=(question.id,)))
+        self.assertEqual(response.status_code, 404)
+
+    def test_view_raise_404_while_approving_disabled_category_question(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.disabled = True
+        cat1.save()
+        # Log in the Moderator
+        self.client.login(username='mod1', password='mod1')
+        # Activating Moderator Panel
+        session = self.client.session
+        session['MODERATOR_ACTIVATED'] = True
+        session.save()
+        # Disabled category question
+        question = Question.objects.get(title="TestQuestion")
+        # Access the Page
+        response = self.client.get(reverse('website:approve_spam_question', args=(question.id,)))
+        self.assertEqual(response.status_code, 404)
+
     def test_view_if_moderator_not_authorized(self):
         # Log in the Moderator
         self.client.login(username='mod2', password='mod2')
@@ -1836,6 +2235,34 @@ class MarkAnswerSpamViewTest(TestCase):
         response = self.client.get(reverse('website:mark_answer_spam', args=(answer.id, )))
         self.assertRedirects(response, '/question/{0}/#answer{1}'.format(question_id, answer.id))
 
+    def test_view_raise_404_while_spamming_hidden_category_answer(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Log in the Moderator
+        self.client.login(username='mod1', password='mod1')
+        # Hidden category answer
+        answer_id = Answer.objects.get(body='TestAnswer').id
+        # Access the Page
+        response = self.client.post(reverse('website:mark_answer_spam', args=(answer_id, )),
+                                 {'selector': 'spam'})
+        self.assertEqual(response.status_code, 404)
+
+    def test_view_raise_404_while_spamming_disabled_category_answer(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.disabled = True
+        cat1.save()
+        # Log in the Moderator
+        self.client.login(username='mod1', password='mod1')
+        # Disabled category answer
+        answer_id = Answer.objects.get(body='TestAnswer').id
+        # Access the Page
+        response = self.client.post(reverse('website:mark_answer_spam', args=(answer_id, )),
+                                 {'selector': 'spam'})
+        self.assertEqual(response.status_code, 404)
+
     def test_view_post_answer_spam(self):
         self.client.login(username='mod1', password='mod1')
         answer_id = Answer.objects.get(body='TestAnswer').id
@@ -1901,6 +2328,34 @@ class MarkCommentSpamViewTest(TestCase):
         response = self.client.get(reverse('website:mark_comment_spam', args=(comment.id, )))
         self.assertRedirects(response, '/question/{0}/#comm{1}'.format(question_id, comment.id))
 
+    def test_view_raise_404_while_spamming_hidden_category_comment(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.hidden = True
+        cat1.save()
+        # Log in the Moderator
+        self.client.login(username='mod1', password='mod1')
+        # Hidden category comment
+        comment_id = AnswerComment.objects.get(body='TestAnswerComment').id
+        # Access the Page
+        response = self.client.post(reverse('website:mark_comment_spam', args=(comment_id, )),
+                                 {'choice': 'non-spam'})
+        self.assertEqual(response.status_code, 404)
+
+    def test_view_raise_404_while_spamming_disabled_category_comment(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory1')
+        cat1.disabled = True
+        cat1.save()
+        # Log in the Moderator
+        self.client.login(username='mod1', password='mod1')
+        # Disabled category comment
+        comment_id = AnswerComment.objects.get(body='TestAnswerComment').id
+        # Access the Page
+        response = self.client.post(reverse('website:mark_comment_spam', args=(comment_id, )),
+                                 {'choice': 'non-spam'})
+        self.assertEqual(response.status_code, 404)
+
     def test_view_post_comment_spam(self):
         self.client.login(username='mod1', password='mod1')
         comment_id = AnswerComment.objects.get(body='TestAnswerComment').id
@@ -1962,6 +2417,15 @@ class SearchViewTest(TestCase):
         self.assertQuerysetEqual(response.context['categories'],
                                  ['<FossCategory: TestCategory>'])
 
+    def test_view_context_category_hidden_category(self):
+        # Hide 'category1'
+        cat1 = FossCategory.objects.get(name='TestCategory')
+        cat1.hidden = True
+        cat1.save()
+        response = self.client.get(reverse('website:search'))
+        self.assertTrue('categories' in response.context)
+        self.assertQuerysetEqual(response.context['categories'], [])
+
 class FilterViewTest(TestCase):
 
     @classmethod
@@ -2006,12 +2470,30 @@ class FilterViewTest(TestCase):
                                  ['<Question: {0} - TestCategory - TestSubCategory - TestQuestion2 - johndoe>'.format(question2_id),
                                   '<Question: {0} - TestCategory -  - TestQuestion - johndoe>'.format(question_id)])
 
+    def test_view_context_questions_by_category_hidden_category(self):
+        # Hide 'category1'
+        cat = FossCategory.objects.get(name='TestCategory')
+        cat.hidden = True
+        cat.save()
+        response = self.client.get(reverse('website:filter', args=('TestCategory', )))
+        self.assertTrue('questions' in response.context)
+        self.assertQuerysetEqual(response.context['questions'], [])
+
     def test_view_context_questions_by_category_tutorial(self):
         response = self.client.get(reverse('website:filter', args=('TestCategory', 'TestSubCategory', )))
         question2_id = Question.objects.get(title='TestQuestion2').id
         self.assertTrue('questions' in response.context)
         self.assertQuerysetEqual(response.context['questions'],
                                  ['<Question: {0} - TestCategory - TestSubCategory - TestQuestion2 - johndoe>'.format(question2_id)])
+
+    def test_view_context_questions_by_category_tutorial_hidden_category(self):
+        # Hide 'category1'
+        cat = FossCategory.objects.get(name='TestCategory')
+        cat.hidden = True
+        cat.save()
+        response = self.client.get(reverse('website:filter', args=('TestCategory', 'TestSubCategory', )))
+        self.assertTrue('questions' in response.context)
+        self.assertQuerysetEqual(response.context['questions'], [])
 
     def test_view_context_questions_by_category_moderator_activated(self):
         session = self.client.session
@@ -2279,6 +2761,16 @@ class AjaxKeywordSearchViewTest(TestCase):
         self.assertTrue('questions' in response.context)
         self.assertQuerysetEqual(response.context['questions'],
                                  ['<Question: {0} - TestCategory -  - TestQuestion - johndoe>'.format(question_id)])
+
+    def test_view_post_context_questions_hidden_category(self):
+        # Hide 'category1'
+        cat = FossCategory.objects.get(name='TestCategory')
+        cat.hidden = True
+        cat.save()
+        response = self.client.post(reverse('website:ajax_keyword_search'),
+                                    {'key':'Test'})
+        self.assertTrue('questions' in response.context)
+        self.assertQuerysetEqual(response.context['questions'], [])
 
     def test_view_loads_correct_template(self):
         question_id = Question.objects.get(title='TestQuestion').id
