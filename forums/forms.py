@@ -3,7 +3,7 @@ from builtins import object
 from django import forms
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.core.validators import RegexValidator, MaxLengthValidator, MinLengthValidator
 from website.models import Profile
 

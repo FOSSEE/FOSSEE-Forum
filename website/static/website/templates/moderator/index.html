@@ -7,8 +7,20 @@
 <link rel="stylesheet" href="{% static 'website/css/main.css' %}" type="text/css" media="screen" charset="utf-8" />
 
 {% block content %}
-  <script>
+{% if messages %}
+    {% for message in messages %}
+        {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+        <div class="alert alert-success h5">
+        {% else %}
+        <div class="alert alert-danger h5">
+        {% endif %}
+            <a class="close" data-dismiss="alert" aria-label="close" style="color: black;">&times;</a>
+            <b>{{ message }}</b>
+        </div>
+    {% endfor %}
+{% endif %}
 
+<script>
     $(document).ready(function()
     {
           var table = $("#myTable").DataTable({
@@ -22,8 +34,9 @@
                 table.column(1).search('').draw();
         });
     });
+</script>
 
-   </script>
+{% if categories %}
 <div id="carousel-container">
     <div class="carousel">
         {% for category in categories %}
@@ -46,6 +59,7 @@
         {% endfor %}
     </div>
 </div> <!-- /.carousel -->
+{% endif %}
 
 
 <div id="filter-container">

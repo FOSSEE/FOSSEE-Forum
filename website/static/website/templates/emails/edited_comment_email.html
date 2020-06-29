@@ -1,0 +1,16 @@
+A comment under the following question has been edited by {% if by_moderator %}a moderator{% else %}its author{% endif %} in the FOSSEE Forum: <br>
+<br>
+<b>Title: </b>{{ title }}<br>
+<b>Category: </b>{{ category }}<br>
+<b>Question: </b>
+
+{% autoescape off %}{{ body }}{% endautoescape %}
+
+<b>Link: </b><a href="{{ link }}">{{ link }}</a><br>
+<br>
+<br>
+Regards,<br>
+FOSSEE Team,<br>
+FOSSEE, IIT Bombay
+<br><br><br>
+<center><h6>*** This is an automatically generated email, please do not reply***</h6></center>

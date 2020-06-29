@@ -15,6 +15,8 @@ class FossCategory(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
     email = models.CharField(max_length=50)
+    disabled = models.BooleanField(default=False)
+    hidden = models.BooleanField(default=False)
     image = ResizedImageField(
         size=[
             800,
@@ -28,8 +30,10 @@ class FossCategory(models.Model):
 
 class ModeratorGroup(models.Model):
     group = models.OneToOneField(Group, on_delete=models.CASCADE)
-    category = models.ForeignKey(FossCategory, on_delete=models.CASCADE)
+    category = models.OneToOneField(FossCategory, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return self.group.name + " - " + self.category.name
 
 class AdvertiseBanner(models.Model):
     body = models.TextField(default='Null')
@@ -65,6 +69,7 @@ class Question(models.Model):
     num_votes = models.IntegerField(default=0)
     is_spam = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
+    notif_flag = models.IntegerField(default=0)
     image = ResizedImageField(
         size=[
             800,
@@ -95,6 +100,7 @@ class Answer(models.Model):
     num_votes = models.IntegerField(default=0)
     is_spam = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
+    notif_flag = models.IntegerField(default=0)
     image = ResizedImageField(
         size=[
             800,
@@ -125,7 +131,9 @@ class AnswerComment(models.Model):
     body = models.TextField(blank=False)
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
+    is_spam = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
+    notif_flag = models.IntegerField(default=0)
 
     def user(self):
         user = User.objects.get(id=self.uid)
@@ -134,11 +142,11 @@ class AnswerComment(models.Model):
 
 class Notification(models.Model):
 
-    uid = models.IntegerField()
-    qid = models.IntegerField()
+    uid = models.IntegerField()   # User id
+    qid = models.IntegerField()   # Question id
     pid = models.IntegerField(default=0)
-    aid = models.IntegerField(default=0)
-    cid = models.IntegerField(default=0)
+    aid = models.IntegerField(default=0)   # Answer id
+    cid = models.IntegerField(default=0)   # Comment id
     date_created = models.DateTimeField(auto_now_add=True)
 
 

@@ -1,35 +1,35 @@
 from django import template
 
-from website.models import Question, Answer, Notification
+from website.models import Question, Answer, AnswerComment, Notification
 
 register = template.Library()
 
-
+# Display the notifications of the user
+@register.inclusion_tag('website/templates/notify.html')
 def get_notification(nid):
     notification = Notification.objects.get(pk=nid)
     question = Question.objects.get(pk=notification.qid)
     answer = Answer.objects.get(pk=notification.aid)
+    comment = None
+    if notification.cid != 0:
+        comment = AnswerComment.objects.get(pk=notification.cid)
     context = {
         'notification': notification,
         'question': question,
         'answer': answer,
+        'comment': comment,
     }
     return context
 
 
-register.inclusion_tag('website/templates/notify.html')(get_notification)
-
-
+@register.simple_tag
 def notification_count(user_id):
     count = Notification.objects.filter(uid=user_id).count()
     return count
 
 
-register.simple_tag(notification_count)
-
 # retriving the latest post of a category
-
-
+@register.inclusion_tag('website/templates/latest_question.html')
 def latest_question(category):
     question = None
     try:
@@ -41,7 +41,3 @@ def latest_question(category):
         'question': question
     }
     return context
-
-
-register.inclusion_tag(
-    'website/templates/latest_question.html')(latest_question)

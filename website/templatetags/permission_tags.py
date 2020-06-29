@@ -2,8 +2,8 @@ from django import template
 
 register = template.Library()
 
-
-def can_edit(user, obj):
+@register.filter
+def is_author(user, obj):
     try:
         if user == obj.user or user.id == obj.uid:
             return True
@@ -13,9 +13,7 @@ def can_edit(user, obj):
         return False
 
 
-register.filter(can_edit)
-
-
+@register.filter
 def is_moderator(user):
     print(user, "---template---")
     try:
@@ -34,29 +32,20 @@ def is_moderator(user):
         return False
 
 
-register.filter(is_moderator)
-
-
+@register.filter
 def comment_id(answer):
     return "comment" + str(answer.id)
 
 
-register.filter(comment_id)
-
-
+@register.filter
 def havenot_comments(answer):
     return(not answer.answercomment_set.filter(is_active=True).exists())
 
 
-register.filter(havenot_comments)
-
-
+@register.filter
 def can_delete(answer, comment_id):
     comments = answer.answercomment_set.filter(is_active=True)
     for x in comments:
         if x.id > comment_id:
             return False
     return True
-
-
-register.filter(can_delete)

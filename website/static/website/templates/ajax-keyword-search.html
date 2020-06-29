@@ -1,4 +1,5 @@
 {% load helpers %}
+{% load count_tags %}
 
 {% if questions %}
 <br>
@@ -54,7 +55,7 @@
         </td>
 
         <td>
-            {{ question.answer_set.count }}
+            {% answer_count question %}
         </td>
 
         <td>

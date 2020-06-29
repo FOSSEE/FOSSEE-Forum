@@ -6,6 +6,20 @@
 {% endblock %}
 
 {% block content%}
+
+    {% if messages %}
+        {% for message in messages %}
+            {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+            <div class="alert alert-success h5">
+            {% else %}
+            <div class="alert alert-danger h5">
+            {% endif %}
+                <a class="close" data-dismiss="alert" aria-label="close" style="color: black;">&times;</a>
+                <b>{{ message }}</b>
+            </div>
+        {% endfor %}
+    {% endif %}
+
     <h4 class="pull-left">Notifications</h4>
     <a class="btn btn-xs btn-warning pull-right" href="{% url 'website:clear_notifications' %}" style="margin-top: 7px;">
         Clear All
