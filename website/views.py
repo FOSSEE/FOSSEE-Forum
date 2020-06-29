@@ -45,12 +45,13 @@ admins = (
 def account_credentials_defined(user):
     """
     Return True if the user has completed his Profile OR
-    if the user is a Moderator (Moderators don't need to complete their Profile).
+    if the user is a Moderator (Moderators don't need to complete their Profile)
     """
     return ((user.first_name and user.last_name) or is_moderator(user))
 
+
 def is_moderator(user, question=None):
-    """ 
+    """
     Return True if the user is a moderator of the category
     to which the question belongs, if question is provided.
     Return True if the user is a moderator of any category,
@@ -61,6 +62,7 @@ def is_moderator(user, question=None):
                 user.groups.filter(moderatorgroup=get_object_or_404(
                     ModeratorGroup, category=question.category)).exists())
     return user.groups.count() > 0
+
 
 def to_uids(question):
     """
@@ -78,6 +80,7 @@ def to_uids(question):
     mail_uids = set(mail_uids)
     return mail_uids
 
+
 def mod_uids(question=None):
     """
     Return a list of all moderators of the Question, is question is provided.
@@ -85,9 +88,9 @@ def mod_uids(question=None):
     """
     if question:
         mods = User.objects.filter(
-            Q(groups__moderatorgroup__category=question.category) | 
+            Q(groups__moderatorgroup__category=question.category) |
             Q(groups__name="forum_moderator")
-        )    
+        )
     else:
         mods = User.objects.filter(groups__isnull=False)
     uids = []
@@ -95,13 +98,15 @@ def mod_uids(question=None):
         uids.append(mod.id)
     return uids
 
+
 def get_user_email(uid):
     user = User.objects.get(id=uid)
     return user.email
 
+
 def send_email(subject, plain_message, html_message, from_email, to,
                bcc=None, cc=None, reply_to=None):
-    """ 
+    """
     Send Emails to Everyone in the 'to' list, 'bcc' list, and 'cc' list.
     The Email IDs of everyone in the 'to' list and 'cc' list will be
     visible to the recipents of the email.
@@ -124,8 +129,9 @@ def send_email(subject, plain_message, html_message, from_email, to,
     email.attach_alternative(html_message, "text/html")
     # if you are sending attachment with content id,
     # subtype must be 'related'.
-    # email.mixed_subtype = 'related'  
+    # email.mixed_subtype = 'related'
     email.send(fail_silently=True)
+
 
 def send_email_as_to(subject, plain_message, html_message,
                      from_email, to, reply_to=None):
@@ -148,20 +154,27 @@ def send_email_as_to(subject, plain_message, html_message,
         messages.append(email)
     connection.send_messages(messages)
 
+
 def can_delete_comment(answer, comment_id):
-    """Return True if there are no active comments after the comment to be deleted."""
+    """Return True if there are no active comments after the comment to be
+    deleted.
+    """
     comments = answer.answercomment_set.filter(is_active=True).all()
     for c in comments:
         if c.id > int(comment_id):
             return False
     return True
 
+
 def add_Spam(question_body, is_spam):
     """
-    Update the value of is_spam in DataSet if the question_body already exists in DataSet.
-    Add the question body and the corresponding value of is_spam in DataSet, otherwise.
+    Update the value of is_spam in DataSet if the question_body already exists
+    in DataSet. Add the question body and the corresponding value of is_spam in
+    DataSet, otherwise.
     """
-    xfile = openpyxl.load_workbook(settings.BASE_DIR + '/Spam_Filter_Data/DataSet.xlsx')
+    xfile = openpyxl.load_workbook(
+        settings.BASE_DIR +
+        '/Spam_Filter_Data/DataSet.xlsx')
     sheet = xfile['Data set']
     n = len(sheet['A']) + 1
     for i in range(2, n):
@@ -173,11 +186,13 @@ def add_Spam(question_body, is_spam):
     sheet['B%s' % n] = is_spam
     xfile.save('DataSet.xlsx')
 
+
 def send_remider_mail():
     if date.today().weekday() == 1 or date.today().weekday() == 3:
         # check in the database for last mail sent date
         try:
-            is_mail_sent = Scheduled_Auto_Mail.objects.get(pk=1, is_sent=1, is_active=1)
+            is_mail_sent = Scheduled_Auto_Mail.objects.get(
+                pk=1, is_sent=1, is_active=1)
             sent_date = is_mail_sent.mail_sent_date
         except Scheduled_Auto_Mail.DoesNotExist:
             sent_date = None
@@ -189,9 +204,11 @@ def send_remider_mail():
         else:
             a = Cron()
             a.unanswered_notification()
-            Scheduled_Auto_Mail.objects.get_or_create(
-                id=1, defaults=dict(mail_sent_date=date_string, is_sent=1, is_active=1))
-            Scheduled_Auto_Mail.objects.filter(is_sent=1).update(mail_sent_date=date_string)
+            Scheduled_Auto_Mail.objects.get_or_create(id=1, defaults=dict(
+                mail_sent_date=date_string, is_sent=1, is_active=1))
+            Scheduled_Auto_Mail.objects.filter(
+                is_sent=1).update(
+                mail_sent_date=date_string)
             print("***** New Notification Mail sent *****")
             a.train_spam_filter()
     else:
@@ -268,14 +285,23 @@ def questions(request):
 def get_question(request, question_id=None, pretty_url=None):
     """Show the details of the Question, its Answers and Comments under it."""
     if request.session.get('MODERATOR_ACTIVATED', False):
-        if is_moderator(request.user, get_object_or_404(Question, id=question_id)):
-            question = get_object_or_404(Question, id=question_id, category__hidden=False)
+        if is_moderator(
+            request.user,
+            get_object_or_404(
+                Question,
+                id=question_id)):
+            question = get_object_or_404(
+                Question, id=question_id, category__hidden=False)
             answers = question.answer_set.all()
         else:
             return render(request, 'website/templates/not-authorized.html')
     else:
         # Spam Questions should be accessible to its Author only.
-        question = get_object_or_404(Question, id=question_id, is_active=True, category__hidden=False)
+        question = get_object_or_404(
+            Question,
+            id=question_id,
+            is_active=True,
+            category__hidden=False)
         if question.user != request.user and question.is_spam:
             raise Http404
         answers = question.answer_set.filter(is_active=True).all()
@@ -288,13 +314,15 @@ def get_question(request, question_id=None, pretty_url=None):
     ans_count = len(answers)  # Includes Spam Answers
     form = AnswerQuestionForm()
     thisuserupvote = question.userUpVotes.filter(id=request.user.id).count()
-    thisuserdownvote = question.userDownVotes.filter(id=request.user.id).count()
+    thisuserdownvote = question.userDownVotes.filter(
+        id=request.user.id).count()
 
     ans_votes = []
     for vote in answers:
         net_ans_count = vote.num_votes
         ans_votes.append([vote.userUpVotes.filter(id=request.user.id).count(
-        ), vote.userDownVotes.filter(id=request.user.id).count(), net_ans_count])
+        ), vote.userDownVotes.filter(id=request.user.id).count(),
+            net_ans_count])
 
     main_list = list(zip(answers, ans_votes))
     context = {
@@ -411,8 +439,13 @@ def new_question(request):
 @user_passes_test(account_credentials_defined, login_url='/accounts/profile/')
 def question_answer(request, question_id):
     """Post an answer to a question asked om the forum."""
-    question = get_object_or_404(Question, id=question_id, is_active=True, is_spam=False,
-                                 category__hidden=False, category__disabled=False)
+    question = get_object_or_404(
+        Question,
+        id=question_id,
+        is_active=True,
+        is_spam=False,
+        category__hidden=False,
+        category__disabled=False)
 
     if request.method == 'POST':
         form = AnswerQuestionForm(request.POST, request.FILES)
@@ -442,9 +475,11 @@ def question_answer(request, question_id):
 
         else:
             if 'body' in form.errors.as_data():
-                messages.error(request, form.errors['body'].as_data()[0].message)
+                messages.error(
+                    request, form.errors['body'].as_data()[0].message)
             if 'image' in form.errors.as_data():
-                messages.error(request, form.errors['image'].as_data()[0].message)
+                messages.error(
+                    request, form.errors['image'].as_data()[0].message)
 
     return HttpResponseRedirect('/question/{0}/'.format(question_id))
 
@@ -453,7 +488,11 @@ def question_answer(request, question_id):
 @user_passes_test(account_credentials_defined, login_url='/accounts/profile/')
 def answer_comment(request, answer_id):
     """Post a comment on an answer to a question asked on the forum."""
-    answer = get_object_or_404(Answer, id=answer_id, is_active=True, is_spam=False)
+    answer = get_object_or_404(
+        Answer,
+        id=answer_id,
+        is_active=True,
+        is_spam=False)
     question = answer.question
 
     if question.category.hidden or question.category.disabled:
@@ -464,7 +503,8 @@ def answer_comment(request, answer_id):
 
         if form.is_valid():
             body = request.POST['body']
-            comment = AnswerComment(uid=request.user.id, answer=answer, body=body)
+            comment = AnswerComment(
+                uid=request.user.id, answer=answer, body=body)
             if (predict(comment.body) == "Spam"):
                 comment.is_spam = True
             comment.notif_flag = 1
@@ -480,10 +520,12 @@ def answer_comment(request, answer_id):
 
         else:
             if 'body' in form.errors.as_data():
-                messages.error(request, form.errors['body'].as_data()[0].message)
+                messages.error(
+                    request, form.errors['body'].as_data()[0].message)
             return HttpResponseRedirect('/question/{0}/'.format(question.id))
 
-    return HttpResponseRedirect('/question/{0}/#answer{1}'.format(question.id, answer_id))
+    return HttpResponseRedirect(
+        '/question/{0}/#answer{1}'.format(question.id, answer_id))
 
 
 # Edit a question on forums, notification is sent to mailing list
@@ -496,12 +538,18 @@ def edit_question(request, question_id):
     user = request.user
     context['SITE_KEY'] = settings.GOOGLE_RECAPTCHA_SITE_KEY
     # all_category = FossCategory.objects.all()
-    question = get_object_or_404(Question, id=question_id, is_active=True,
-                                 category__hidden=False, category__disabled=False)
+    question = get_object_or_404(
+        Question,
+        id=question_id,
+        is_active=True,
+        category__hidden=False,
+        category__disabled=False)
 
     # To prevent random user from manually entering the link and editing
-    if ((request.user.id != question.user.id or question.answer_set.filter(is_active=True).count() > 0) and 
-            (not is_moderator(request.user, question) or not request.session.get('MODERATOR_ACTIVATED', False))):
+    if ((request.user.id != question.user.id or question.answer_set
+         .filter(is_active=True).count() > 0) and (
+            not is_moderator(request.user, question) or not
+            request.session.get('MODERATOR_ACTIVATED', False))):
         return render(request, 'website/templates/not-authorized.html')
 
     if (request.method == 'POST'):
@@ -528,7 +576,9 @@ def edit_question(request, question_id):
                     context['category'] = category
                     context['tutorial'] = tutorial
                     context['form'] = form
-                    return render(request, 'website/templates/edit-question.html', context)
+                    return render(
+                        request, 'website/templates/edit-question.html',
+                        context)
 
                 question.sub_category = ""
 
@@ -555,7 +605,10 @@ def edit_question(request, question_id):
             # Sending Notifications
             if question.notif_flag == 0:
                 # A Non-Spam Question is Edited
-                if not (request.session.get('MODERATOR_ACTIVATED', False) and question.is_spam):
+                if not (
+                    request.session.get(
+                        'MODERATOR_ACTIVATED',
+                        False) and question.is_spam):
                     # Question not marked as spam by a Moderator during edit
                     question.notif_flag = 2
                     question.save()
@@ -587,7 +640,10 @@ def edit_question(request, question_id):
             context['category'] = category
             context['tutorial'] = tutorial
             context['form'] = form
-            return render(request, 'website/templates/edit-question.html', context)
+            return render(
+                request,
+                'website/templates/edit-question.html',
+                context)
 
     else:
         form = NewQuestionForm(instance=question)
@@ -613,7 +669,10 @@ def answer_update(request):
         comments = AnswerComment.objects.filter(
             answer=answer, is_active=True).exclude(uid=answer.uid)
 
-        if ((is_moderator(request.user, question) and request.session.get('MODERATOR_ACTIVATED', False)) or
+        if ((is_moderator(request.user,
+                          question) and request.session.get(
+            'MODERATOR_ACTIVATED',
+            False)) or
                 (request.user.id == answer.uid and not comments.exists())):
             answer.body = str(body)
             answer.is_spam = False
@@ -665,8 +724,10 @@ def answer_comment_update(request):
         if question.category.hidden or question.category.disabled:
             raise Http404
 
-        if ((is_moderator(request.user, question) and request.session.get('MODERATOR_ACTIVATED', False)) or
-                (request.user.id == comment.uid and can_delete_comment(comment.answer, cid))):
+        if ((is_moderator(request.user, question)
+             and request.session.get('MODERATOR_ACTIVATED', False)) or
+                (request.user.id == comment.uid
+                 and can_delete_comment(comment.answer, cid))):
             comment.body = str(body)
             comment.is_spam = False
             if (not request.session.get('MODERATOR_ACTIVATED', False) and
@@ -709,12 +770,19 @@ def answer_comment_update(request):
 @login_required
 def question_delete(request, question_id):
     """Delete question asked on the forum."""
-    question = get_object_or_404(Question, id=question_id, is_active=True,
-                                 category__hidden=False, category__disabled=False)
+    question = get_object_or_404(
+        Question,
+        id=question_id,
+        is_active=True,
+        category__hidden=False,
+        category__disabled=False)
 
     # To prevent random user from manually entering the link and deleting
-    if ((request.user.id != question.user.id or question.answer_set.filter(is_active=True).count() > 0) and 
-            (not is_moderator(request.user, question) or not request.session.get('MODERATOR_ACTIVATED', False))):
+    if ((request.user.id != question.user.id
+         or question.answer_set.filter(is_active=True).count() > 0)
+        and (
+            not is_moderator(request.user, question)
+            or not request.session.get('MODERATOR_ACTIVATED', False))):
         return render(request, 'website/templates/not-authorized.html')
 
     if (request.method == "POST"):
@@ -729,7 +797,7 @@ def question_delete(request, question_id):
 
         return render(request, 'website/templates/question-delete.html',
                       {'title': question.title})
-    
+
     # Question can only be deleted by sending POST requests
     # and not by GET requests (directly accessing the link)
     return render(request, 'website/templates/get-requests-not-allowed.html')
@@ -749,9 +817,12 @@ def answer_delete(request, answer_id):
     comments = AnswerComment.objects.filter(
         answer=answer, is_active=True).exclude(uid=answer.uid)
 
-    # The second statement in if condition excludes comments made by Answer's author.
-    if ((request.user.id != answer.uid or comments.exists()) and
-            (not is_moderator(request.user, question) or not request.session.get('MODERATOR_ACTIVATED', False))):
+    # The second statement in if condition excludes comments made by Answer's
+    # author.
+    if ((request.user.id != answer.uid or comments.exists())
+        and (not is_moderator(
+            request.user, question) or
+            not request.session.get('MODERATOR_ACTIVATED', False))):
         return render(request, 'website/templates/not-authorized.html')
 
     if (request.method == "POST"):
@@ -775,6 +846,7 @@ def answer_delete(request, answer_id):
     # and not by GET requests (directly accessing the link)
     return render(request, 'website/templates/get-requests-not-allowed.html')
 
+
 @login_required
 def comment_delete(request, comment_id):
     """Delete the comment and send emails to the concerned."""
@@ -784,8 +856,10 @@ def comment_delete(request, comment_id):
     if question.category.hidden or question.category.disabled:
         raise Http404
 
-    if ((request.user.id != comment.uid or not can_delete_comment(comment.answer, comment_id)) and
-            (not is_moderator(request.user, question) or not request.session.get('MODERATOR_ACTIVATED', False))):
+    if ((request.user.id != comment.uid
+         or not can_delete_comment(comment.answer, comment_id)) and (
+            not is_moderator(request.user, question)
+            or not request.session.get('MODERATOR_ACTIVATED', False))):
         return render(request, 'website/templates/not-authorized.html')
 
     if request.method == 'POST':
@@ -814,10 +888,18 @@ def comment_delete(request, comment_id):
 @user_passes_test(is_moderator)
 def question_restore(request, question_id):
     """Restore a Question."""
-    question = get_object_or_404(Question, id=question_id, is_active=False,
-                                 category__hidden=False, category__disabled=False)
+    question = get_object_or_404(
+        Question,
+        id=question_id,
+        is_active=False,
+        category__hidden=False,
+        category__disabled=False)
 
-    if not is_moderator(request.user, question) or not request.session.get('MODERATOR_ACTIVATED', False):
+    if not is_moderator(
+        request.user,
+        question) or not request.session.get(
+        'MODERATOR_ACTIVATED',
+            False):
         return render(request, 'website/templates/not-authorized.html')
 
     question.is_active = True
@@ -837,18 +919,25 @@ def answer_restore(request, answer_id):
     if question.category.hidden or question.category.disabled:
         raise Http404
 
-    if not is_moderator(request.user, question) or not request.session.get('MODERATOR_ACTIVATED', False):
+    if not is_moderator(
+        request.user,
+        question) or not request.session.get(
+        'MODERATOR_ACTIVATED',
+            False):
         return render(request, 'website/templates/not-authorized.html')
 
     if not question.is_active:
-        messages.error(request, "Answer can only be restored when its question is not deleted.")
+        messages.error(
+            request,
+            "Answer can only be restored when its question is not deleted.")
         return HttpResponseRedirect('/question/{0}/'.format(question.id))
 
     answer.is_active = True
     answer.save()
 
     messages.success(request, "Answer Restored Successfully!")
-    return HttpResponseRedirect('/question/{0}/#answer{1}'.format(question.id, answer.id))
+    return HttpResponseRedirect(
+        '/question/{0}/#answer{1}'.format(question.id, answer.id))
 
 
 @login_required
@@ -867,14 +956,17 @@ def comment_restore(request, comment_id):
         return render(request, 'website/templates/not-authorized.html')
 
     if not comment.answer.is_active:
-        messages.error(request, "Comment can only be restored when its answer is not deleted.")
+        messages.error(
+            request,
+            "Comment can only be restored when its answer is not deleted.")
         return HttpResponseRedirect('/question/{0}/'.format(question.id))
 
     comment.is_active = True
     comment.save()
 
     messages.success(request, "Comment Restored Successfully!")
-    return HttpResponseRedirect('/question/{0}/#comm{1}'.format(question.id, comment.id))
+    return HttpResponseRedirect(
+        '/question/{0}/#comm{1}'.format(question.id, comment.id))
 
 
 # View to approve question marked as spam
@@ -917,7 +1009,8 @@ def mark_answer_spam(request, answer_id):
                 answer.save()
                 # Send Spam Classification Notification to Author
                 send_spam_answer_notification(request.user, answer)
-                messages.success(request, "Answer marked successfully as Spam!")
+                messages.success(
+                    request, "Answer marked successfully as Spam!")
         else:
             if answer.is_spam:
                 answer.is_spam = False
@@ -926,8 +1019,10 @@ def mark_answer_spam(request, answer_id):
                 send_answer_approve_notification(answer)
                 # Send Pending Notifications (by the name of author)
                 send_answer_notification(answer.user(), answer)
-                messages.success(request, "Answer marked successfully as Not-Spam!")
-    return HttpResponseRedirect('/question/{0}/#answer{1}'.format(question.id, answer.id))
+                messages.success(
+                    request, "Answer marked successfully as Not-Spam!")
+    return HttpResponseRedirect(
+        '/question/{0}/#answer{1}'.format(question.id, answer.id))
 
 
 # View to mark comment as spam/non-spam
@@ -956,8 +1051,10 @@ def mark_comment_spam(request, comment_id):
             send_comment_approve_notification(comment)
             # Send Pending Notifications (by the name of author)
             send_comment_notification(comment.user(), comment)
-            messages.success(request, "Comment marked successfully as Not-Spam!")
-    return HttpResponseRedirect('/question/{0}/#comm{1}'.format(question.id, comment.id))
+            messages.success(
+                request, "Comment marked successfully as Not-Spam!")
+    return HttpResponseRedirect(
+        '/question/{0}/#comm{1}'.format(question.id, comment.id))
 
 
 def search(request):
@@ -1033,7 +1130,8 @@ def clear_notifications(request):
         return HttpResponseRedirect('/moderator/')
 
     Notification.objects.filter(uid=request.user.id).delete()
-    return HttpResponseRedirect("/user/{0}/notifications/".format(request.user.id))
+    return HttpResponseRedirect(
+        "/user/{0}/notifications/".format(request.user.id))
 
 
 # MODERATOR SECTION
@@ -1047,7 +1145,8 @@ def moderator_home(request):
 
     # If user is a super moderator
     if (request.user.groups.filter(name="forum_moderator").exists()):
-        questions = Question.objects.filter(category__hidden=False).order_by('-date_created')
+        questions = Question.objects.filter(
+            category__hidden=False).order_by('-date_created')
         categories = FossCategory.objects.filter(hidden=False).order_by('name')
 
     else:
@@ -1085,7 +1184,8 @@ def moderator_questions(request):
     # If user is a super moderator
     if (request.user.groups.filter(name="forum_moderator").exists()):
         categories = FossCategory.objects.filter(hidden=False).order_by('name')
-        questions = Question.objects.filter(category__hidden=False).order_by('-date_created')
+        questions = Question.objects.filter(
+            category__hidden=False).order_by('-date_created')
         if ('spam' in request.GET):
             questions = questions.filter(is_spam=True)
         elif ('non-spam' in request.GET):
@@ -1116,13 +1216,19 @@ def moderator_questions(request):
         'categories': categories,
         'questions': questions,
     }
-    return render(request, 'website/templates/moderator/questions.html', context)
+    return render(
+        request,
+        'website/templates/moderator/questions.html',
+        context)
 
 
 @login_required
 @user_passes_test(is_moderator)
 def moderator_unanswered(request):
-    """Display all the Unanswered Questions belonging to the Moderator's Categories."""
+    """
+    Display all the Unanswered Questions belonging to the Moderator's
+    Categories.
+    """
     if not request.session.get('MODERATOR_ACTIVATED', False):
         return HttpResponseRedirect('/')
 
@@ -1142,8 +1248,10 @@ def moderator_unanswered(request):
             if category.hidden:
                 continue
             categories.append(category)
-            questions.extend(Question.objects.filter(
-                category__name=category.name, is_active=True).order_by('-date_created'))
+            questions.extend(
+                Question.objects.filter(
+                    category__name=category.name,
+                    is_active=True).order_by('-date_created'))
         questions.sort(
             key=lambda question: question.date_created,
             reverse=True,
@@ -1152,7 +1260,10 @@ def moderator_unanswered(request):
         'categories': categories,
         'questions': questions,
     }
-    return render(request, 'website/templates/moderator/unanswered.html', context)
+    return render(
+        request,
+        'website/templates/moderator/unanswered.html',
+        context)
 
 
 @login_required
@@ -1176,15 +1287,20 @@ def ajax_tutorials(request):
     if request.method == 'POST':
         category = request.POST.get('category')
         tutorials = SubFossCategory.objects.filter(parent_id=category)
-        if tutorials.exists(): 
+        if tutorials.exists():
             context = {
                 'tutorials': tutorials,
             }
-            return render(request, 'website/templates/ajax-tutorials.html', context)
+            return render(
+                request,
+                'website/templates/ajax-tutorials.html',
+                context)
         else:
             return HttpResponse('No sub-category in category.')
     else:
-        return render(request, 'website/templates/get-requests-not-allowed.html')
+        return render(
+            request,
+            'website/templates/get-requests-not-allowed.html')
 
 
 @login_required
@@ -1206,7 +1322,9 @@ def ajax_notification_remove(request):
             return HttpResponse('Notification not found.')
 
     else:
-        return render(request, 'website/templates/get-requests-not-allowed.html')
+        return render(
+            request,
+            'website/templates/get-requests-not-allowed.html')
 
 
 @csrf_exempt
@@ -1233,7 +1351,9 @@ def ajax_keyword_search(request):
             'website/templates/ajax-keyword-search.html',
             context)
     else:
-        return render(request, 'website/templates/get-requests-not-allowed.html')
+        return render(
+            request,
+            'website/templates/get-requests-not-allowed.html')
 
 
 # return number of votes and initial votes
@@ -1284,7 +1404,8 @@ def ajax_vote_post(request):
         else:
             return HttpResponse("Error: Bad Action.")
 
-        num_votes = cur_post.userUpVotes.count() - cur_post.userDownVotes.count()
+        num_votes = cur_post.userUpVotes.count() - cur_post\
+            .userDownVotes.count()
         cur_post.num_votes = num_votes
         cur_post.save()
         return HttpResponse(num_votes)
@@ -1341,7 +1462,9 @@ def ajax_ans_vote_post(request):
         else:
             return HttpResponse(initial_votes)
 
-        num_votes = cur_post.userUpVotes.count() - cur_post.userDownVotes.count()
+        num_votes = cur_post.userUpVotes.count() - cur_post\
+            .userDownVotes.count()
+
         cur_post.num_votes = num_votes
         cur_post.save()
         return HttpResponse(num_votes)
@@ -1352,35 +1475,43 @@ def ajax_ans_vote_post(request):
 
 # ALL NOTIFICATIONS BELOW
 
-def send_question_notification(user, question, previous_title=None, delete_reason=None):
+def send_question_notification(
+        user,
+        question,
+        previous_title=None,
+        delete_reason=None):
     # Values of flag:
     # 0 --> No Pending Notifications, 1 --> Recently Added,
     # 2 --> Recently Updated,  3 --> Recently Deleted.
     flag = question.notif_flag
     # Question Added Recently
     if flag == 1:
-        subject = "FOSSEE Forums - {0} - New Question".format(question.category)
+        subject = "FOSSEE Forums - {0} - New Question".format(
+            question.category)
         from_email = settings.SENDER_EMAIL
         to = [question.category.email]
-        html_message = render_to_string('website/templates/emails/new_question_email.html', {
-            'title': question.title,
-            'category': question.category,
-            'body': question.body,
-            'link': settings.DOMAIN_NAME + '/question/' + str(question.id),
-        })
+        html_message = render_to_string(
+            'website/templates/emails/new_question_email.html', {
+                'title': question.title,
+                'category': question.category,
+                'body': question.body,
+                'link': settings.DOMAIN_NAME + '/question/' + str(question.id),
+            })
         plain_message = strip_tags(html_message)
         send_email(subject, plain_message, html_message, from_email, to)
     # Question Edited Recently
     elif flag == 2:
-        subject = "FOSSEE Forums - {0} - Question Edited".format(question.category)
+        subject = "FOSSEE Forums - {0} - Question Edited".format(
+            question.category)
         from_email = settings.SENDER_EMAIL
-        html_message = render_to_string('website/templates/emails/edited_question_email.html', {
-            'title': question.title,
-            'previous_title': previous_title,
-            'category': question.category,
-            'body': question.body,
-            'link': settings.DOMAIN_NAME + '/question/' + str(question.id),
-        })
+        html_message = render_to_string(
+            'website/templates/emails/edited_question_email.html', {
+                'title': question.title,
+                'previous_title': previous_title,
+                'category': question.category,
+                'body': question.body,
+                'link': settings.DOMAIN_NAME + '/question/' + str(question.id),
+            })
         plain_message = strip_tags(html_message)
         to = [question.category.email, settings.FORUM_NOTIFICATION]
 
@@ -1394,15 +1525,18 @@ def send_question_notification(user, question, previous_title=None, delete_reaso
     # Question Deleted Recently
     # No need to send any notif if deleted by author
     elif flag == 3 and question.user != user:
-        subject = "FOSSEE Forums - {0} - Question Deleted".format(question.category)
+        subject = "FOSSEE Forums - {0} - Question Deleted".format(
+            question.category)
         from_email = settings.SENDER_EMAIL
         to = []
-        html_message = render_to_string('website/templates/emails/deleted_question_email.html', {
-            'title': question.title,
-            'category': question.category,
-            'body': question.body,
-            'reason': delete_reason,
-        })
+        html_message = render_to_string(
+            'website/templates/emails/deleted_question_email.html',
+            {
+                'title': question.title,
+                'category': question.category,
+                'body': question.body,
+                'reason': delete_reason,
+            })
         plain_message = strip_tags(html_message)
         # If Spam Question is deleted, send mail to question author only
         if question.is_spam:
@@ -1417,17 +1551,20 @@ def send_question_notification(user, question, previous_title=None, delete_reaso
     question.notif_flag = 0
     question.save()
 
+
 def send_answer_notification(user, answer, delete_reason=None):
     flag = answer.notif_flag
     question = answer.question
     # Answer Added Recently
     if flag == 1:
         from_email = settings.SENDER_EMAIL
-        html_message = render_to_string('website/templates/emails/new_answer_email.html', {
-            'title': question.title,
-            'category': question.category,
-            'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#answer" + str(answer.id),
-        })
+        html_message = render_to_string(
+            'website/templates/emails/new_answer_email.html', {
+                'title': question.title,
+                'category': question.category,
+                'link': settings.DOMAIN_NAME + '/question/' +
+                str(question.id) + "#answer" + str(answer.id),
+            })
         plain_message = strip_tags(html_message)
 
         not_to_notify = [user.id]
@@ -1435,10 +1572,13 @@ def send_answer_notification(user, answer, delete_reason=None):
         # Notifying the Question Author
         # if question.user.id not in not_to_notify and answer.is_spam == False:
         if question.user.id not in not_to_notify:
-            notification = Notification(uid=question.user.id, qid=question.id, aid=answer.id)
+            notification = Notification(
+                uid=question.user.id, qid=question.id, aid=answer.id)
             notification.save()
 
-            subject = "FOSSEE Forums - {0} - Your question has been Answered".format(question.category)
+            subject = "FOSSEE Forums - {0} - Your question has been Answered"\
+                .format(
+                    question.category)
             to = [question.user.email]
             send_email(subject, plain_message, html_message, from_email, to)
 
@@ -1448,10 +1588,12 @@ def send_answer_notification(user, answer, delete_reason=None):
         mail_uids = to_uids(question)
         mail_uids.difference_update(set(not_to_notify))
 
-        subject = "FOSSEE Forums - {0} - Question has been Answered".format(question.category)
+        subject = "FOSSEE Forums - {0} - Question has been Answered".format(
+            question.category)
         to = []
         for mail_uid in mail_uids:
-            notification = Notification(uid=mail_uid, qid=question.id, aid=answer.id)
+            notification = Notification(
+                uid=mail_uid, qid=question.id, aid=answer.id)
             notification.save()
             # Appending user email in 'to' list
             to.append(get_user_email(mail_uid))
@@ -1460,41 +1602,57 @@ def send_answer_notification(user, answer, delete_reason=None):
         send_email_as_to(subject, plain_message, html_message, from_email, to)
     # Answer Edited Recently
     elif flag == 2:
-        subject = "FOSSEE Forums - {0} - Answer Edited".format(question.category)
+        subject = "FOSSEE Forums - {0} - Answer Edited".format(
+            question.category)
         from_email = settings.SENDER_EMAIL
         to = []
 
         if answer.uid == user.id:
             # Answer edited by Answer Author
-            html_message = render_to_string('website/templates/emails/edited_answer_email.html', {
-                'title': question.title,
-                'category': question.category,
-                'body': question.body,
-                'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#answer" + str(answer.id),
-            })
+            html_message = render_to_string(
+                'website/templates/emails/edited_answer_email.html', {
+                    'title': question.title,
+                    'category': question.category,
+                    'body': question.body,
+                    'link': settings.DOMAIN_NAME + '/question/' +
+                    str(question.id) + "#answer" + str(answer.id),
+                })
             plain_message = strip_tags(html_message)
 
             to.append(question.user.email)
-            send_email_as_to(subject, plain_message, html_message, from_email, to)
+            send_email_as_to(
+                subject,
+                plain_message,
+                html_message,
+                from_email,
+                to)
         else:
             # Answer edited by a Moderator
-            html_message = render_to_string('website/templates/emails/edited_answer_email.html', {
-                'title': question.title,
-                'category': question.category,
-                'body': question.body,
-                'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#answer" + str(answer.id),
-                'by_moderator': True,
-            })
+            html_message = render_to_string(
+                'website/templates/emails/edited_answer_email.html', {
+                    'title': question.title,
+                    'category': question.category,
+                    'body': question.body,
+                    'link': settings.DOMAIN_NAME + '/question/' + str(question.id)
+                    + "#answer" + str(answer.id),
+                    'by_moderator': True,
+                })
             plain_message = strip_tags(html_message)
 
             mail_uids = to_uids(question)
             for uid in mail_uids:
                 to.append(get_user_email(uid))
 
-            send_email_as_to(subject, plain_message, html_message, from_email, to)
+            send_email_as_to(
+                subject,
+                plain_message,
+                html_message,
+                from_email,
+                to)
     # Answer deleted recently
     elif flag == 3:
-        subject = "FOSSEE Forums - {0} - Answer Deleted".format(question.category)
+        subject = "FOSSEE Forums - {0} - Answer Deleted".format(
+            question.category)
         from_email = settings.SENDER_EMAIL
         to = [question.user.email]
 
@@ -1502,42 +1660,59 @@ def send_answer_notification(user, answer, delete_reason=None):
             # Answer deleted by Answer Author
             # Don't send mail if spam answer is deleted by author
             if not answer.is_spam:
-                html_message = render_to_string('website/templates/emails/deleted_answer_email.html', {
+                html_message = render_to_string(
+                    'website/templates/emails/deleted_answer_email.html',
+                    {
+                        'title': question.title,
+                        'category': question.category,
+                        'body': question.body,
+                        'answer': answer.body,
+                    })
+                plain_message = strip_tags(html_message)
+
+                to.append(question.category.email)
+                send_email_as_to(
+                    subject,
+                    plain_message,
+                    html_message,
+                    from_email,
+                    to)
+        else:
+            # Answer deleted by a Moderator
+            html_message = render_to_string(
+                'website/templates/emails/deleted_answer_email.html',
+                {
                     'title': question.title,
                     'category': question.category,
                     'body': question.body,
                     'answer': answer.body,
+                    'reason': delete_reason,
+                    'by_moderator': True,
                 })
-                plain_message = strip_tags(html_message)
-
-                to.append(question.category.email)
-                send_email_as_to(subject, plain_message, html_message, from_email, to)
-        else:
-            # Answer deleted by a Moderator
-            html_message = render_to_string('website/templates/emails/deleted_answer_email.html', {
-                'title': question.title,
-                'category': question.category,
-                'body': question.body,
-                'answer': answer.body,
-                'reason': delete_reason,
-                'by_moderator': True,
-            })
             plain_message = strip_tags(html_message)
 
             if answer.is_spam:
-                # Send mail to Answer Author only if spam answer deleted by moderator
+                # Send mail to Answer Author only if spam answer deleted by
+                # moderator
                 to = [get_user_email(answer.uid)]
             else:
                 to.append(get_user_email(answer.uid))
-                for comment in AnswerComment.objects.filter(answer=answer, is_active=True):
+                for comment in AnswerComment.objects.filter(
+                        answer=answer, is_active=True):
                     to.append(get_user_email(comment.uid))
                 to = list(set(to))   # Removing Duplicates
 
-            send_email_as_to(subject, plain_message, html_message, from_email, to)
+            send_email_as_to(
+                subject,
+                plain_message,
+                html_message,
+                from_email,
+                to)
 
     # Updating notif flag after sending mails according to the previous flag.
     answer.notif_flag = 0
     answer.save()
+
 
 def send_comment_notification(user, comment, delete_reason=None):
     flag = comment.notif_flag
@@ -1550,16 +1725,24 @@ def send_comment_notification(user, comment, delete_reason=None):
 
         # Notifying the Question Author
         if question.user.id not in not_to_notify:
-            notification = Notification(uid=question.user.id, qid=question.id, aid=answer.id, cid=comment.id)
+            notification = Notification(
+                uid=question.user.id,
+                qid=question.id,
+                aid=answer.id,
+                cid=comment.id)
             notification.save()
 
-            subject = "FOSSEE Forums - {0} - New Comment under your Question".format(question.category)
+            subject = "FOSSEE Forums - {0} - New Comment under your Question"\
+                .format(
+                    question.category)
             to = [question.user.email]
-            html_message = render_to_string('website/templates/emails/new_comment_email.html', {
-                'title': question.title,
-                'category': question.category,
-                'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#comm" + str(comment.id),
-            })
+            html_message = render_to_string(
+                'website/templates/emails/new_comment_email.html', {
+                    'title': question.title,
+                    'category': question.category,
+                    'link': settings.DOMAIN_NAME + '/question/' +
+                    str(question.id) + "#comm" + str(comment.id),
+                })
             plain_message = strip_tags(html_message)
             send_email(subject, plain_message, html_message, from_email, to)
 
@@ -1567,38 +1750,55 @@ def send_comment_notification(user, comment, delete_reason=None):
 
         # Notifying the Answer Author
         if answer.uid not in not_to_notify:
-            notification = Notification(uid=answer.uid, qid=question.id, aid=answer.id, cid=comment.id)
+            notification = Notification(
+                uid=answer.uid,
+                qid=question.id,
+                aid=answer.id,
+                cid=comment.id)
             notification.save()
 
-            subject = "FOSSEE Forums - {0} - New Comment on your answer".format(question.category)
+            subject = "FOSSEE Forums - {0} - New Comment on your answer".format(
+                question.category)
             to = [get_user_email(answer.uid)]
-            html_message = render_to_string('website/templates/emails/new_comment_email.html', {
-                'title': question.title,
-                'category': question.category,
-                'answer': answer.body,
-                'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#comm" + str(comment.id),
-            })
+            html_message = render_to_string(
+                'website/templates/emails/new_comment_email.html', {
+                    'title': question.title,
+                    'category': question.category,
+                    'answer': answer.body,
+                    'link': settings.DOMAIN_NAME + '/question/' +
+                    str(question.id) + "#comm" + str(comment.id),
+                })
             plain_message = strip_tags(html_message)
             send_email(subject, plain_message, html_message, from_email, to)
 
             not_to_notify.append(answer.uid)
 
         # Notifying the Last Comment Author
-        answer_comments = AnswerComment.objects.filter(answer=answer, is_active=True).exclude(uid=user.id).order_by('-date_created')
-        if answer_comments.exists() and answer_comments[0].uid not in not_to_notify:
+        answer_comments = AnswerComment.objects.filter(
+            answer=answer, is_active=True).exclude(
+            uid=user.id).order_by('-date_created')
+        if answer_comments.exists(
+        ) and answer_comments[0].uid not in not_to_notify:
             last_comment = answer_comments[0]
 
-            notification = Notification(uid=last_comment.uid, qid=question.id, aid=answer.id, cid=comment.id)
+            notification = Notification(
+                uid=last_comment.uid,
+                qid=question.id,
+                aid=answer.id,
+                cid=comment.id)
             notification.save()
 
-            subject = "FOSSEE Forums - {0} - Your Comment has a Reply".format(question.category)
+            subject = "FOSSEE Forums - {0} - Your Comment has a Reply".format(
+                question.category)
             to = [get_user_email(last_comment.uid)]
-            html_message = render_to_string('website/templates/emails/new_comment_email.html', {
-                'title': question.title,
-                'category': question.category,
-                'last_comment': last_comment.body,
-                'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#comm" + str(comment.id), 
-            })
+            html_message = render_to_string(
+                'website/templates/emails/new_comment_email.html', {
+                    'title': question.title,
+                    'category': question.category,
+                    'last_comment': last_comment.body,
+                    'link': settings.DOMAIN_NAME + '/question/' +
+                    str(question.id) + "#comm" + str(comment.id),
+                })
             plain_message = strip_tags(html_message)
             send_email(subject, plain_message, html_message, from_email, to)
 
@@ -1607,52 +1807,69 @@ def send_comment_notification(user, comment, delete_reason=None):
         # Notifying all other users in the thread
         mail_uids = to_uids(question)
         mail_uids.difference_update(set(not_to_notify))
-        
-        subject = "FOSSEE Forums - {0} - New Comment under the Question".format(question.category)
-        html_message = render_to_string('website/templates/emails/new_comment_email.html', {
-            'title': question.title,
-            'category': question.category,
-            'body': question.body,
-            'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#comm" + str(comment.id),
-        })
+
+        subject = "FOSSEE Forums - {0} - New Comment under the Question".format(
+            question.category)
+        html_message = render_to_string(
+            'website/templates/emails/new_comment_email.html', {
+                'title': question.title,
+                'category': question.category,
+                'body': question.body,
+                'link': settings.DOMAIN_NAME + '/question/' +
+                str(question.id) + "#comm" + str(comment.id),
+            })
         plain_message = strip_tags(html_message)
 
         to = []
         for mail_uid in mail_uids:
-            notification = Notification(uid=mail_uid, qid=question.id, aid=answer.id, cid=comment.id)
+            notification = Notification(
+                uid=mail_uid,
+                qid=question.id,
+                aid=answer.id,
+                cid=comment.id)
             notification.save()
-            # Appending user email in 'to' list                
+            # Appending user email in 'to' list
             to.append(get_user_email(mail_uid))
 
         # Sending Email to everyone in 'to' list individually
         send_email_as_to(subject, plain_message, html_message, from_email, to)
     # Comment Edited Recently
     if flag == 2:
-        subject = "FOSSEE Forums - {0} - Comment Edited".format(question.category)
+        subject = "FOSSEE Forums - {0} - Comment Edited".format(
+            question.category)
         from_email = settings.SENDER_EMAIL
         to = []
 
         if comment.uid == user.id:
             # Comment edited by Comment Author
-            html_message = render_to_string('website/templates/emails/edited_comment_email.html', {
-                'title': question.title,
-                'category': question.category,
-                'body': question.body,
-                'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#comm" + str(comment.id),
-            })
+            html_message = render_to_string(
+                'website/templates/emails/edited_comment_email.html', {
+                    'title': question.title,
+                    'category': question.category,
+                    'body': question.body,
+                    'link': settings.DOMAIN_NAME + '/question/' +
+                    str(question.id) + "#comm" + str(comment.id),
+                })
             plain_message = strip_tags(html_message)
 
             to.append(get_user_email(answer.uid))
-            send_email_as_to(subject, plain_message, html_message, from_email, to)
+            send_email_as_to(
+                subject,
+                plain_message,
+                html_message,
+                from_email,
+                to)
         else:
             # Comment edited by a Moderator
-            html_message = render_to_string('website/templates/emails/edited_comment_email.html', {
-                'title': question.title,
-                'category': question.category,
-                'body': question.body,
-                'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#comm" + str(comment.id),
-                'by_moderator': True,
-            })
+            html_message = render_to_string(
+                'website/templates/emails/edited_comment_email.html', {
+                    'title': question.title,
+                    'category': question.category,
+                    'body': question.body,
+                    'link': settings.DOMAIN_NAME + '/question/' +
+                    str(question.id) + "#comm" + str(comment.id),
+                    'by_moderator': True,
+                })
             plain_message = strip_tags(html_message)
 
             mail_uids = to_uids(question)
@@ -1660,11 +1877,17 @@ def send_comment_notification(user, comment, delete_reason=None):
             for uid in mail_uids:
                 to.append(get_user_email(uid))
 
-            send_email_as_to(subject, plain_message, html_message, from_email, to)
-            
+            send_email_as_to(
+                subject,
+                plain_message,
+                html_message,
+                from_email,
+                to)
+
     # Comment Deleted Recently
     elif flag == 3:
-        subject = "FOSSEE Forums - {0} - Comment Deleted".format(question.category)
+        subject = "FOSSEE Forums - {0} - Comment Deleted".format(
+            question.category)
         from_email = settings.SENDER_EMAIL
         to = []
 
@@ -1672,54 +1895,72 @@ def send_comment_notification(user, comment, delete_reason=None):
             # Comment Deleted by Comment Author
             # Don't send mail if spam comment is deleted by author
             if not comment.is_spam:
-                html_message = render_to_string('website/templates/emails/deleted_comment_email.html', {
+                html_message = render_to_string(
+                    'website/templates/emails/deleted_comment_email.html',
+                    {
+                        'title': question.title,
+                        'category': question.category,
+                        'body': question.body,
+                        'answer': answer.body,
+                        'comment': comment.body,
+                    })
+                plain_message = strip_tags(html_message)
+
+                to.append(get_user_email(answer.uid))
+                send_email_as_to(
+                    subject,
+                    plain_message,
+                    html_message,
+                    from_email,
+                    to)
+
+        else:
+            # Comment deleted by a Moderator
+            html_message = render_to_string(
+                'website/templates/emails/deleted_comment_email.html',
+                {
                     'title': question.title,
                     'category': question.category,
                     'body': question.body,
                     'answer': answer.body,
                     'comment': comment.body,
+                    'reason': delete_reason,
+                    'by_moderator': True,
                 })
-                plain_message = strip_tags(html_message)
-
-                to.append(get_user_email(answer.uid))
-                send_email_as_to(subject, plain_message, html_message, from_email, to)
-
-        else:
-            # Comment deleted by a Moderator
-            html_message = render_to_string('website/templates/emails/deleted_comment_email.html', {
-                'title': question.title,
-                'category': question.category,
-                'body': question.body,
-                'answer': answer.body,
-                'comment': comment.body,
-                'reason': delete_reason,
-                'by_moderator': True,
-            })
             plain_message = strip_tags(html_message)
 
             if comment.is_spam:
-                # Send mail to Comment Author only if spam comment deleted by moderator
+                # Send mail to Comment Author only if spam comment deleted by
+                # moderator
                 to = [get_user_email(comment.uid)]
             else:
                 mail_uids = to_uids(question)
                 for uid in mail_uids:
                     to.append(get_user_email(uid))
 
-            send_email_as_to(subject, plain_message, html_message, from_email, to)
+            send_email_as_to(
+                subject,
+                plain_message,
+                html_message,
+                from_email,
+                to)
 
     # Updating notif flag after sending mails according to the previous flag.
     comment.notif_flag = 0
     comment.save()
 
+
 def send_spam_question_notification(user, question):
-    subject = "FOSSEE Forums - {0} - Question Classified as Spam".format(question.category)
+    subject = "FOSSEE Forums - {0} - Question Classified as Spam".format(
+        question.category)
     from_email = settings.SENDER_EMAIL
-    html_message = render_to_string('website/templates/emails/spam_question_email.html', {
-        'title': question.title,
-        'category': question.category,
-        'body': question.body,
-        'link': settings.DOMAIN_NAME + '/question/' + str(question.id),
-    })
+    html_message = render_to_string(
+        'website/templates/emails/spam_question_email.html', {
+            'title': question.title,
+            'category': question.category,
+            'body': question.body,
+            'link': settings.DOMAIN_NAME + '/question/' + str(question.id),
+        })
     plain_message = strip_tags(html_message)
 
     if question.user != user:
@@ -1735,18 +1976,22 @@ def send_spam_question_notification(user, question):
 
     send_email_as_to(subject, plain_message, html_message, from_email, to)
 
+
 def send_spam_answer_notification(user, answer):
     question = answer.question
 
-    subject = "FOSSEE Forums - {0} - Answer Classified as Spam".format(question.category)
+    subject = "FOSSEE Forums - {0} - Answer Classified as Spam".format(
+        question.category)
     from_email = settings.SENDER_EMAIL
-    html_message = render_to_string('website/templates/emails/spam_answer_email.html', {
-        'title': question.title,
-        'category': question.category,
-        'body': question.body,
-        'answer': answer.body,
-        'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#answer" + str(answer.id),
-    })
+    html_message = render_to_string(
+        'website/templates/emails/spam_answer_email.html', {
+            'title': question.title,
+            'category': question.category,
+            'body': question.body,
+            'answer': answer.body,
+            'link': settings.DOMAIN_NAME + '/question/' +
+            str(question.id) + "#answer" + str(answer.id),
+        })
     plain_message = strip_tags(html_message)
 
     if answer.uid != user.id:
@@ -1762,20 +2007,24 @@ def send_spam_answer_notification(user, answer):
 
     send_email_as_to(subject, plain_message, html_message, from_email, to)
 
+
 def send_spam_comment_notification(user, comment):
     answer = comment.answer
     question = answer.question
 
-    subject = "FOSSEE Forums - {0} - Comment Classified as Spam".format(question.category)
+    subject = "FOSSEE Forums - {0} - Comment Classified as Spam".format(
+        question.category)
     from_email = settings.SENDER_EMAIL
-    html_message = render_to_string('website/templates/emails/spam_comment_email.html', {
-        'title': question.title,
-        'category': question.category,
-        'body': question.body,
-        'answer': answer.body,
-        'comment': comment.body,
-        'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#comm" + str(comment.id),
-    })
+    html_message = render_to_string(
+        'website/templates/emails/spam_comment_email.html', {
+            'title': question.title,
+            'category': question.category,
+            'body': question.body,
+            'answer': answer.body,
+            'comment': comment.body,
+            'link': settings.DOMAIN_NAME + '/question/' +
+            str(question.id) + "#comm" + str(comment.id),
+        })
     plain_message = strip_tags(html_message)
 
     if comment.uid != user.id:
@@ -1789,20 +2038,24 @@ def send_spam_comment_notification(user, comment):
         for uid in uids:
             to.append(get_user_email(uid))
 
-    send_email_as_to(subject, plain_message, html_message, from_email, to)    
+    send_email_as_to(subject, plain_message, html_message, from_email, to)
+
 
 def send_question_approve_notification(question):
-    subject = "FOSSEE Forums - {0} - Question Approved".format(question.category)
+    subject = "FOSSEE Forums - {0} - Question Approved".format(
+        question.category)
     to = [question.user.email]
     from_email = settings.SENDER_EMAIL
-    html_message = render_to_string('website/templates/emails/approved_question_email.html', {
-        'title': question.title,
-        'category': question.category,
-        'body': question.body,
-        'link': settings.DOMAIN_NAME + '/question/' + str(question.id),
-    })
+    html_message = render_to_string(
+        'website/templates/emails/approved_question_email.html', {
+            'title': question.title,
+            'category': question.category,
+            'body': question.body,
+            'link': settings.DOMAIN_NAME + '/question/' + str(question.id),
+        })
     plain_message = strip_tags(html_message)
     send_email(subject, plain_message, html_message, from_email, to)
+
 
 def send_answer_approve_notification(answer):
     question = answer.question
@@ -1810,30 +2063,36 @@ def send_answer_approve_notification(answer):
     subject = "FOSSEE Forums - {0} - Answer Approved".format(question.category)
     to = [get_user_email(answer.uid)]
     from_email = settings.SENDER_EMAIL
-    html_message = render_to_string('website/templates/emails/approved_answer_email.html', {
-        'title': question.title,
-        'category': question.category,
-        'body': question.body,
-        'answer': answer.body,
-        'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#answer" + str(answer.id),
-    })
+    html_message = render_to_string(
+        'website/templates/emails/approved_answer_email.html', {
+            'title': question.title,
+            'category': question.category,
+            'body': question.body,
+            'answer': answer.body,
+            'link': settings.DOMAIN_NAME + '/question/' +
+            str(question.id) + "#answer" + str(answer.id),
+        })
     plain_message = strip_tags(html_message)
     send_email(subject, plain_message, html_message, from_email, to)
+
 
 def send_comment_approve_notification(comment):
     answer = comment.answer
     question = answer.question
 
-    subject = "FOSSEE Forums - {0} - Comment Approved".format(question.category)
+    subject = "FOSSEE Forums - {0} - Comment Approved".format(
+        question.category)
     to = [get_user_email(comment.uid)]
     from_email = settings.SENDER_EMAIL
-    html_message = render_to_string('website/templates/emails/approved_comment_email.html', {
-        'title': question.title,
-        'category': question.category,
-        'body': question.body,
-        'answer': answer.body,
-        'comment': comment.body,
-        'link': settings.DOMAIN_NAME + '/question/' + str(question.id) + "#comm" + str(comment.id),
-    })
+    html_message = render_to_string(
+        'website/templates/emails/approved_comment_email.html', {
+            'title': question.title,
+            'category': question.category,
+            'body': question.body,
+            'answer': answer.body,
+            'comment': comment.body,
+            'link': settings.DOMAIN_NAME + '/question/' +
+            str(question.id) + "#comm" + str(comment.id),
+        })
     plain_message = strip_tags(html_message)
     send_email(subject, plain_message, html_message, from_email, to)

@@ -15,10 +15,8 @@ def is_author(user, obj):
 
 @register.filter
 def is_moderator(user):
-    print(user, "---template---")
     try:
         if user.groups.count() > 0:
-            print(user.groups.count(), "====")
             return True
         else:
             print("------------")
@@ -26,7 +24,7 @@ def is_moderator(user):
             print("------------")
             return False
     except BaseException as e:
-        print("------------")
+        print("------Error------")
         print(e)
         print("------------")
         return False

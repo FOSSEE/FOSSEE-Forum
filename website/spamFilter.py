@@ -5,7 +5,8 @@ import numpy as np
 from django.conf import settings
 from .cleanText import clean_string
 from sklearn.svm import LinearSVC
-from sklearn.metrics import confusion_matrix, f1_score, precision_score, recall_score
+from sklearn.metrics import (confusion_matrix, f1_score, precision_score,
+                             recall_score)
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from website.models import Question, Answer, AnswerComment
 from forums.local import TRAIN_SPAMFILTER
@@ -60,9 +61,11 @@ def store():
 
     return xData, yData
 
-    # # NOTE: to train data on the entire dataset, simply return xData and yData
-    # # Splitting the data like this is to obtain test cases and calculate the F-score of the learning algorithm
-    # xTrain, xTest, yTrain, yTest = train_test_split(xData, yData, test_size = 0.2, random_state = 42)
+    # NOTE: to train data on the entire dataset, simply return xData and yData
+    # Splitting the data like this is to obtain test cases and calculate the
+    # F-score of the learning algorithm
+    # xTrain, xTest, yTrain, yTest = train_test_split(xData, yData,
+    # test_size = 0.2, random_state = 42)
     # return xTrain, xTest, yTrain, yTest
 
 # Train the data when server checks happening

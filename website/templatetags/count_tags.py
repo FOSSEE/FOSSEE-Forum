@@ -8,24 +8,36 @@ register = template.Library()
 @register.simple_tag
 def category_question_count(category):
     """Return the number of active and non-spam questions in the category."""
-    category_question_count = Question.objects.filter(category=category, is_active=True, is_spam=False).count()
+    category_question_count = Question.objects.filter(
+        category=category, is_active=True, is_spam=False).count()
     return category_question_count
+
 
 @register.simple_tag
 def answer_count(question):
     """Return the number of active and non-spam answers to a question."""
     return question.answer_set.filter(is_active=True, is_spam=False).count()
 
+
 @register.simple_tag
 def total_question_count():
-    """Return total number of active and non-spam questions of unhidden categories on forum."""
-    count = Question.objects.filter(is_active=True, is_spam=False, category__hidden=False).count()
+    """
+    Return total number of active and non-spam questions of unhidden
+    categories on forum.
+    """
+    count = Question.objects.filter(is_active=True, is_spam=False,
+                                    category__hidden=False).count()
     return count
+
 
 @register.simple_tag
 def total_answer_count():
-    """Return total number of active and non-spam answers in unhidden categories on forum."""
-    count = Answer.objects.filter(is_active=True, is_spam=False, question__category__hidden=False).count()
+    """
+    Return total number of active and non-spam answers in unhidden
+    categories on forum.
+    """
+    count = Answer.objects.filter(is_active=True, is_spam=False,
+                                  question__category__hidden=False).count()
     return count
 
 
@@ -59,6 +71,7 @@ def get_range(value, arg=''):
 def inc(value, arg=1):
     return value + int(arg)
 
+
 @register.filter
 def dec(value, arg=1):
     return value - int(arg)
@@ -69,13 +82,16 @@ def dec(value, arg=1):
 def add(value, arg=0):
     return value + int(arg)
 
+
 @register.filter
 def sub(value, arg=0):
     return value - int(arg)
 
+
 @register.filter
 def mul(value, arg=1):
     return value * int(arg)
+
 
 @register.filter
 def div(value, arg=1):

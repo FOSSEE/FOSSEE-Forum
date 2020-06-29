@@ -17,7 +17,8 @@ class NewQuestionForm(forms.ModelForm):
     category = forms.ModelChoiceField(
         widget=forms.Select(
             attrs={}),
-        queryset=FossCategory.objects.filter(hidden=False, disabled=False).order_by('name'),
+        queryset=FossCategory.objects.filter(hidden=False, disabled=False)
+        .order_by('name'),
         empty_label="Select a Foss category",
         required=True,
         error_messages={
@@ -129,7 +130,9 @@ class AnswerQuestionForm(forms.ModelForm):
 
     body = forms.CharField(widget=CKEditorWidget(),
                            required=True,
-                           error_messages={'required': 'Answer field cannot be empty.'}
+                           error_messages={
+                           'required': 'Answer field cannot be empty.'
+                           }
                            )
 
     image = forms.ImageField(
@@ -191,7 +194,8 @@ class AnswerCommentForm(forms.Form):
         body = body.replace('</p>', '')
 
         if body.isspace():
-            raise forms.ValidationError("Comment body cannot have spaces only.")
+            raise forms.ValidationError(
+                "Comment body cannot have spaces only.")
 
         temp = BeautifulSoup(body, 'html.parser').get_text()
         if (temp.isspace() or temp == ''):

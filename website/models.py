@@ -8,6 +8,7 @@ from ckeditor.fields import RichTextField
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 
+
 class FossCategory(models.Model):
 
     name = models.CharField(max_length=100, default='None', blank=True)
@@ -23,7 +24,7 @@ class FossCategory(models.Model):
             800],
         upload_to="images/fossCategory/",
         blank=True)
-    
+
     def __str__(self):
         return self.name
 
@@ -34,6 +35,7 @@ class ModeratorGroup(models.Model):
 
     def __str__(self):
         return self.group.name + " - " + self.category.name
+
 
 class AdvertiseBanner(models.Model):
     body = models.TextField(default='Null')
@@ -79,7 +81,8 @@ class Question(models.Model):
 
     def __str__(self):
         return '{0} - {1} - {2} - {3} - {4}'.format(
-            self.id, self.category.name, self.sub_category, self.title, self.user)
+            self.id, self.category.name, self.sub_category, self.title,
+            self.user)
 
     class Meta(object):
 
@@ -154,6 +157,7 @@ class Scheduled_Auto_Mail(models.Model):
     mail_sent_date = models.CharField(max_length=255)
     is_sent = models.BooleanField(default=True)
     is_active = models.BooleanField(default=True)
+
 
 class Profile(models.Model):
 

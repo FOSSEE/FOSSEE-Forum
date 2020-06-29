@@ -1,4 +1,5 @@
-from website.models import Question, Answer, AnswerComment, FossCategory, Profile, ModeratorGroup
+from website.models import (Question, Answer, AnswerComment, FossCategory,
+                            Profile, ModeratorGroup)
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.admin import GroupAdmin as BaseGroupAdmin
