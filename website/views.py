@@ -11,7 +11,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, User
 from django.core import mail
 from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
@@ -35,9 +35,11 @@ from .spamFilter import predict, train
 from .templatetags.helpers import prettify
 
 User = get_user_model()
-admins = (
-    9, 4376, 4915, 14595, 12329, 22467, 5518, 30705
-)
+admins = User.objects.filter(is_superuser=True).values_list('id')
+print(admins)
+#admins = (
+#    9, 4376, 4915, 14595, 12329, 22467, 5518, 30705
+#)
 
 
 # NON-VIEWS FUNCTIONS
@@ -172,19 +174,18 @@ def add_Spam(question_body, is_spam):
     in DataSet. Add the question body and the corresponding value of is_spam in
     DataSet, otherwise.
     """
-    xfile = openpyxl.load_workbook(
-        settings.BASE_DIR +
-        '/Spam_Filter_Data/DataSet.xlsx')
+    file_location = settings.BASE_DIR + '/Spam_Filter_Data/DataSet.xlsx'
+    xfile = openpyxl.load_workbook(file_location)
     sheet = xfile['Data set']
     n = len(sheet['A']) + 1
     for i in range(2, n):
         if(question_body == str(sheet.cell(row=i, column=1).value)):
             sheet.cell(row=i, column=2).value = is_spam
-            xfile.save('DataSet.xlsx')
+            xfile.save(file_location)
             return
     sheet['A%s' % n] = question_body
     sheet['B%s' % n] = is_spam
-    xfile.save('DataSet.xlsx')
+    xfile.save(file_location)
 
 
 def send_remider_mail():

@@ -17,6 +17,9 @@ def store():
 
     # Add data from Excel file
     file_location = settings.BASE_DIR + '/Spam_Filter_Data/DataSet.xlsx'
+    print("--- spam filter dataseet location ---")
+    print(file_location)
+    print("---")
     workBookOld = openpyxl.load_workbook(file_location)
     dataSheetOld = workBookOld['Data set']
 
