@@ -548,8 +548,6 @@ a.delete:hover, a.delete:focus, a.delete:active, a.delete-comment:hover, a.delet
 
 
 /* CKEditor Width Fix */
-@media screen and (max-width: 1199px){
-    .django-ckeditor-widget, .django-ckeditor-widget .cke {
-        width: 100% !important;
-    }
+.django-ckeditor-widget, .django-ckeditor-widget .cke {
+    width: 100% !important;
 }
