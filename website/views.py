@@ -36,10 +36,6 @@ from .templatetags.helpers import prettify
 
 User = get_user_model()
 admins = User.objects.filter(is_superuser=True).values_list('id')
-print(admins)
-#admins = (
-#    9, 4376, 4915, 14595, 12329, 22467, 5518, 30705
-#)
 
 
 # NON-VIEWS FUNCTIONS
@@ -168,7 +164,7 @@ def can_delete_comment(answer, comment_id):
     return True
 
 
-def add_Spam(question_body, is_spam):
+def process_Spam(content_body, is_spam):
     """
     Update the value of is_spam in DataSet if the question_body already exists
     in DataSet. Add the question body and the corresponding value of is_spam in
@@ -179,11 +175,11 @@ def add_Spam(question_body, is_spam):
     sheet = xfile['Data set']
     n = len(sheet['A']) + 1
     for i in range(2, n):
-        if(question_body == str(sheet.cell(row=i, column=1).value)):
+        if(content_body == str(sheet.cell(row=i, column=1).value)):
             sheet.cell(row=i, column=2).value = is_spam
             xfile.save(file_location)
             return
-    sheet['A%s' % n] = question_body
+    sheet['A%s' % n] = content_body
     sheet['B%s' % n] = is_spam
     xfile.save(file_location)
 
@@ -590,7 +586,7 @@ def edit_question(request, question_id):
             question.is_spam = cleaned_data['is_spam']
 
             if question.is_spam != change_spam:
-                add_Spam(question.body, question.is_spam)
+                process_Spam(question.body, question.is_spam)
 
             question.views = 1
             question.save()
@@ -680,6 +676,7 @@ def answer_update(request):
             if (not request.session.get('MODERATOR_ACTIVATED', False)
                     and predict(answer.body) == "Spam"):
                 answer.is_spam = True
+                process_Spam(answer.body,answer.is_spam)
             answer.save()
 
             # SENDING NOTIFICATIONS
@@ -734,6 +731,7 @@ def answer_comment_update(request):
             if (not request.session.get('MODERATOR_ACTIVATED', False) and
                     predict(comment.body) == "Spam"):
                 comment.is_spam = True
+                process_Spam(comment.body,comment.is_spam)
             comment.save()
 
             # SENDING NOTIFICATIONS
@@ -982,6 +980,7 @@ def approve_spam_question(request, question_id):
             request.session.get('MODERATOR_ACTIVATED', False)):
         question.is_spam = False
         question.save()
+        process_Spam(question.body,question.is_spam)
         # Send Approval Notification to Author
         send_question_approve_notification(question)
         # Send Pending Notifications
@@ -1008,6 +1007,7 @@ def mark_answer_spam(request, answer_id):
             if not answer.is_spam:
                 answer.is_spam = True
                 answer.save()
+                process_Spam(answer.body, answer.is_spam)
                 # Send Spam Classification Notification to Author
                 send_spam_answer_notification(request.user, answer)
                 messages.success(
@@ -1016,6 +1016,7 @@ def mark_answer_spam(request, answer_id):
             if answer.is_spam:
                 answer.is_spam = False
                 answer.save()
+                process_Spam(answer.body, answer.is_spam)
                 # Send Approval Notification to Author
                 send_answer_approve_notification(answer)
                 # Send Pending Notifications (by the name of author)
@@ -1042,12 +1043,14 @@ def mark_comment_spam(request, comment_id):
         if choice == "spam":
             comment.is_spam = True
             comment.save()
+            process_Spam(comment.body, comment.is_spam)
             # Send Spam Classification Notification to Author
             send_spam_comment_notification(request.user, comment)
             messages.success(request, "Comment marked successfully as Spam!")
         else:
             comment.is_spam = False
             comment.save()
+            process_Spam(comment.body, comment.is_spam)
             # Send Approval Notification to Author
             send_comment_approve_notification(comment)
             # Send Pending Notifications (by the name of author)
