@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from website.models import FossCategory, Question
 from website.forms import NewQuestionForm, AnswerQuestionForm, AnswerCommentForm
 from forums.forms import *
@@ -128,7 +128,7 @@ class AnswerQuestionFormTest(TestCase):
     def test_body_error_required(self):
         form = AnswerQuestionForm()
         self.assertEqual(form.fields['body'].error_messages['required'],\
-                            'Answer field required')
+                         'Answer field cannot be empty.')
 
     def test_image_help_text(self):
         form = AnswerQuestionForm()
@@ -170,8 +170,8 @@ class AnswerCommentFormTest(TestCase):
 
     def test_body_error_required(self):
         form = AnswerCommentForm()
-        self.assertEqual(form.fields['body'].error_messages['required'],\
-                            'Comment field required')
+        self.assertEqual(form.fields['body'].error_messages['required'],
+                         'Comment body cannot be empty.')
 
     def test_body_is_space(self):
         body = '         '

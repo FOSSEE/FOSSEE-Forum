@@ -13,6 +13,18 @@
 <div class="headerlogin"><h2>Register</h2></div>
 <div class="login">       
         <br>
+        {% if messages %}
+            {% for message in messages %}
+                {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+                <div class="alert alert-success h5">
+                {% else %}
+                <div class="alert alert-danger h5">
+                {% endif %}
+                    <a class="close" data-dismiss="alert" aria-label="close" style="color: black;">&times;</a>
+                    <b>{{ message }}</b>
+                </div>
+            {% endfor %}
+        {% endif %}
         <p> The activation link of the account will be sent to the Email id provided.</p>
         <br>
         <form id="logForm" method="post" class="form-horizontal">{% csrf_token %}

@@ -1,0 +1,23 @@
+The following comment has been deleted by {% if by_moderator %}a moderator{% else %}its author{% endif %} in the FOSSEE Forum: <br>
+<br>
+<b>Question Title: </b>{{ title }}<br>
+<b>Category: </b>{{ category }}<br>
+<b>Question: </b>
+
+{% autoescape off %}{{ body }}{% endautoescape %}
+
+<b>Answer: </b>
+
+{% autoescape off %}{{ answer }}{% endautoescape %}
+
+<b>Comment: </b>
+
+{% autoescape off %}{{ comment }}{% endautoescape %}
+
+{% if by_moderator %}<b>Moderator Comments: </b>{{ reason }}<br><br>{% endif %}
+<br>
+Regards,<br>
+FOSSEE Team,<br>
+FOSSEE, IIT Bombay
+<br><br><br>
+<center><h6>*** This is an automatically generated email, please do not reply***</h6></center>

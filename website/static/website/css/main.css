@@ -101,7 +101,7 @@ body {
 }
 #content .editable {
     padding: 15px 5px 15px 5px;
-    background: #fafafa;
+    background: #fafafa !important;
 }
 #content .question .title a{
     padding: 0 0 7px 0;
@@ -264,23 +264,33 @@ table .question a{
 }
 .comments .add-comment {
     margin: 2px;
-    padding: 1px 2px;
-    color: #0000ff;
-    background: #f5f5f5;
+    background: rgb(70, 184, 218) none repeat scroll 0% 0%;
+    color: rgb(255, 255, 255);
+    border-radius: 3px;
+    padding: 5px 12px;
+    display: inline;
+    cursor: pointer;
+    text-decoration: none;
 }
 .comments .cancel-comment {
     display: none;
     margin: 2px;
-    padding: 1px 2px;
+    border-radius: 3px;
+    padding: 5px 12px;
     color: #ffffff;
     background: #d34836;
+    cursor: pointer;
+    text-decoration: none;
 }
 .comments .post-comment {
     display: none;
     margin: 2px;
-    padding: 1px 2px;
+    border-radius: 3px;
+    padding: 5px 12px;
     color: #ffffff;
     background: #42B449;
+    cursor: pointer;
+    text-decoration: none;
 }
 #footer-wrapper {
    max-width: 85%;
@@ -496,18 +506,22 @@ a.delete, a.restore {
     border-color: #cc0000;
 }
 
-a.delete-comment, a.restore-comment, a.edit-comment, a.save-comment {
+a.delete-comment, a.restore-comment, a.edit-comment, a.save-comment, a.cancel-edit-comment {
     background-color: #e01d27;
     border-color: #cc0000;
     display: none;
 }
 
-a.delete:hover, a.delete:focus, a.delete:active, a.delete-comment:hover, a.delete-comment:focus, a.delete-comment:active, a.restore-comment:hover, a.restore-comment:focus, a.restore-comment:active, a.edit-comment:hover, a.edit-comment:focus, a.edit-comment:active, a.save-comment:hover, a.save-comment:focus, a.save-comment:active {
+a.spam-comment {
+    display: none;
+}
+
+a.delete:hover, a.delete:focus, a.delete:active, a.delete-comment:hover, a.delete-comment:focus, a.delete-comment:active, a.restore-comment:hover, a.restore-comment:focus, a.restore-comment:active, a.edit-comment:hover, a.edit-comment:focus, a.edit-comment:active, a.save-comment:hover, a.save-comment:focus, a.save-comment:active, a.cancel-edit-comment:hover, a.cancel-edit-comment:focus, a.cancel-edit-comment:active {
     background-color: #b30000;
     border-color: #cc0000;
 }
 
-.comment:hover a.delete-comment, a.delete-comment:hover, .comment:hover a.restore-comment, a.restore-comment:hover, .comment:hover a.edit-comment, a.edit-comment:hover, .comment:hover a.save-comment, a.save-comment:hover {
+.comment:hover a.delete-comment, a.delete-comment:hover, .comment:hover a.restore-comment, a.restore-comment:hover, .comment:hover a.edit-comment, a.edit-comment:hover, .comment:hover a.save-comment, a.save-comment:hover, .comment:hover a.cancel-edit-comment, a.cancel-edit-comment:hover, .comment:hover a.spam-comment, a.spam-comment:hover {
     display: inline-block;
 }
 
@@ -521,7 +535,7 @@ a.delete:hover, a.delete:focus, a.delete:active, a.delete-comment:hover, a.delet
   -o-filter: blur(5px);
   -ms-filter: blur(5px);
   filter: blur(5px);
-  background-color: #ccc;
+  /* background-color: #ccc; */
   pointer-events:none;
     -webkit-touch-callout: none; /* iOS Safari */
     -webkit-user-select: none; /* Safari */
@@ -532,4 +546,8 @@ a.delete:hover, a.delete:focus, a.delete:active, a.delete-comment:hover, a.delet
                           supported by Chrome, Opera and Firefox */
 }
 
+
+/* CKEditor Width Fix */
+.django-ckeditor-widget, .django-ckeditor-widget .cke {
+    width: 100% !important;
 }

@@ -1,17 +1,15 @@
 <div class="notification">
     
     {% if notification.cid != 0 and notification.aid != 0 %}
-    <small>
-        <a class="rmc" data-nid="{{ notification.id }}" href="{% url 'website:get_question' answer.question.id %}#comment{{ answer.id }}">New <strong>Comment</strong> on  <strong>"{{ question.title }}"</strong></a>
-    </small>
+        <a class="rmc" data-nid="{{ notification.id }}" href="{% url 'website:get_question' answer.question.id %}#comm{{ comment.id }}"><small>New <strong>Comment</strong> on  <strong>"{{ question.title }}"</strong></small></a>
     
     {% elif notification.cid == 0  %}
     	
-        <a class="rmc" data-nid="{{ notification.id }}" href="{% url 'website:get_question' answer.question.id %}#answer{{ answer.id }}"+ >New <strong>Answer</strong> on <strong>"{{ question.title }}"</strong></a>
+        <a class="rmc" data-nid="{{ notification.id }}" href="{% url 'website:get_question' answer.question.id %}#answer{{ answer.id }}" >New <strong>Answer</strong> on <strong>"{{ question.title }}"</strong></a>
     {% endif %}
 
 
-    <a class="remove" data-nid="{{ notification.id }}" href= "">
+    <a class="remove" data-nid="{{ notification.id }}" href="javascript:void(0);">
         <span class="glyphicon glyphicon-remove-circle"></span>
     </a>
 </div> <!-- /.notification -->

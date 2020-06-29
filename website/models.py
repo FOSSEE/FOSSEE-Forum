@@ -8,6 +8,7 @@ from ckeditor.fields import RichTextField
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 
+
 class FossCategory(models.Model):
 
     name = models.CharField(max_length=100, default='None', blank=True)
@@ -15,20 +16,25 @@ class FossCategory(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
     email = models.CharField(max_length=50)
+    disabled = models.BooleanField(default=False)
+    hidden = models.BooleanField(default=False)
     image = ResizedImageField(
         size=[
             800,
             800],
         upload_to="images/fossCategory/",
         blank=True)
-    
+
     def __str__(self):
         return self.name
 
 
 class ModeratorGroup(models.Model):
     group = models.OneToOneField(Group, on_delete=models.CASCADE)
-    category = models.ForeignKey(FossCategory, on_delete=models.CASCADE)
+    category = models.OneToOneField(FossCategory, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.group.name + " - " + self.category.name
 
 
 class AdvertiseBanner(models.Model):
@@ -65,6 +71,7 @@ class Question(models.Model):
     num_votes = models.IntegerField(default=0)
     is_spam = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
+    notif_flag = models.IntegerField(default=0)
     image = ResizedImageField(
         size=[
             800,
@@ -74,7 +81,8 @@ class Question(models.Model):
 
     def __str__(self):
         return '{0} - {1} - {2} - {3} - {4}'.format(
-            self.id, self.category.name, self.sub_category, self.title, self.user)
+            self.id, self.category.name, self.sub_category, self.title,
+            self.user)
 
     class Meta(object):
 
@@ -95,6 +103,7 @@ class Answer(models.Model):
     num_votes = models.IntegerField(default=0)
     is_spam = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
+    notif_flag = models.IntegerField(default=0)
     image = ResizedImageField(
         size=[
             800,
@@ -125,7 +134,9 @@ class AnswerComment(models.Model):
     body = models.TextField(blank=False)
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
+    is_spam = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
+    notif_flag = models.IntegerField(default=0)
 
     def user(self):
         user = User.objects.get(id=self.uid)
@@ -134,11 +145,11 @@ class AnswerComment(models.Model):
 
 class Notification(models.Model):
 
-    uid = models.IntegerField()
-    qid = models.IntegerField()
+    uid = models.IntegerField()   # User id
+    qid = models.IntegerField()   # Question id
     pid = models.IntegerField(default=0)
-    aid = models.IntegerField(default=0)
-    cid = models.IntegerField(default=0)
+    aid = models.IntegerField(default=0)   # Answer id
+    cid = models.IntegerField(default=0)   # Comment id
     date_created = models.DateTimeField(auto_now_add=True)
 
 
@@ -146,6 +157,7 @@ class Scheduled_Auto_Mail(models.Model):
     mail_sent_date = models.CharField(max_length=255)
     is_sent = models.BooleanField(default=True)
     is_active = models.BooleanField(default=True)
+
 
 class Profile(models.Model):
 

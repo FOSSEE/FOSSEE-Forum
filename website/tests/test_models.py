@@ -82,11 +82,11 @@ class NotificationModelTest(TestCase):
         Notification.objects.create(uid=1, qid=1)
 
     def test_default_aid(self):
-        notification = Notification.objects.get(id=1)
+        notification = Notification.objects.get(uid=1)
         self.assertEqual(notification.aid, 0)
     
     def test_default_cid(self):
-        notification = Notification.objects.get(id=1)
+        notification = Notification.objects.get(uid=1)
         self.assertEqual(notification.cid, 0)
 
 class QuestionModelTest(TestCase):

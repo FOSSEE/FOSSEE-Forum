@@ -10,6 +10,6 @@
 <h3>URL cannot handle GET requests.</h3>
 <br>
 <h4>
-	Please check the URL address or <a href='/'>go to home page</a>.
+	Please check the URL address or {% if MODERATOR_ACTIVATED %}<a href='/moderator/'>{% else %}<a href='/'>{% endif %}go to home page</a>.
 </h4>
 {% endblock %}

@@ -4,27 +4,45 @@ from website.models import Question, Answer
 
 register = template.Library()
 
-# Counts the number of questions in <category>
-
-
+# Question/Answer Count
+@register.simple_tag
 def category_question_count(category):
+    """Return the number of active and non-spam questions in the category."""
     category_question_count = Question.objects.filter(
-        category=category, is_active=True).count()
+        category=category, is_active=True, is_spam=False).count()
     return category_question_count
 
 
-register.simple_tag(category_question_count)
-
-# Count the number of an active answers of a question
-
+@register.simple_tag
 def answer_count(question):
-    return question.answer_set.filter(is_active=True).count()
+    """Return the number of active and non-spam answers to a question."""
+    return question.answer_set.filter(is_active=True, is_spam=False).count()
 
-register.simple_tag(answer_count)
+
+@register.simple_tag
+def total_question_count():
+    """
+    Return total number of active and non-spam questions of unhidden
+    categories on forum.
+    """
+    count = Question.objects.filter(is_active=True, is_spam=False,
+                                    category__hidden=False).count()
+    return count
+
+
+@register.simple_tag
+def total_answer_count():
+    """
+    Return total number of active and non-spam answers in unhidden
+    categories on forum.
+    """
+    count = Answer.objects.filter(is_active=True, is_spam=False,
+                                  question__category__hidden=False).count()
+    return count
+
 
 # Implementing range(x) function in templates
-
-
+@register.filter
 def get_range(value, arg=''):
     args = arg.split(', ')
     n = len(args)
@@ -48,79 +66,39 @@ def get_range(value, arg=''):
     return list(range(start, limit, step))
 
 
-register.filter('get_range', get_range)
-
 # Implementing increment and decrement functions
-
-
+@register.filter
 def inc(value, arg=1):
     return value + int(arg)
 
 
-register.filter('inc', inc)
-
-
+@register.filter
 def dec(value, arg=1):
     return value - int(arg)
 
 
-register.filter('dec', dec)
-
 # Implementing calculator for templates
-
-
+@register.filter
 def add(value, arg=0):
     return value + int(arg)
 
 
-register.filter('add', add)
-
-
+@register.filter
 def sub(value, arg=0):
     return value - int(arg)
 
 
-register.filter('sub', sub)
-
-
+@register.filter
 def mul(value, arg=1):
     return value * int(arg)
 
 
-register.filter('mul', mul)
-
-
+@register.filter
 def div(value, arg=1):
     return value / arg
 
 
-register.filter('div', div)
-
-# retriving total number of questions
-
-
-def total_question_count():
-    count = Question.objects.filter(is_active=True).count()
-    return count
-
-
-register.simple_tag(total_question_count)
-
-# retriving total number of answers
-
-
-def total_answer_count():
-    count = Answer.objects.filter(is_active=True).count()
-    return count
-
-
-register.simple_tag(total_answer_count)
-
 # Get length of array
-
-
+@register.simple_tag
 def length(array):
     return len(array)
-
-
-register.simple_tag(length)

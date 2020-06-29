@@ -4,6 +4,7 @@ $(document).ready(function() {
      * set the dom variables
     */
     $answer_edit = $('.answer .edit');
+    $answer_cancel = $('.answer .cancel');
     $answer_save = $(".answer .save");
 
     $answer_edit.click(function(e) {
@@ -12,7 +13,18 @@ $(document).ready(function() {
         $("#"+id+"1").show();
         $("#"+id+"2").hide();
         $(this).hide();
-        $(this).next().show();
+        $(this).siblings(".cancel").show();
+        $(this).siblings(".save").show();
+    });
+
+    $answer_cancel.click(function(e) {
+        var target = $(this).data("target");
+        var id = $(this).data("id");
+        $("#"+id+"1").hide();
+        $("#"+id+"2").show();
+        $(this).hide();
+        $(this).siblings(".save").hide();
+        $(this).siblings(".edit").show();
     });
 
     $answer_save.click(function() {
@@ -27,13 +39,24 @@ $(document).ready(function() {
      */
 
     $edit_comment = $(".edit-comment");
+    $cancel_edit_comment = $(".cancel-edit-comment")
     $save_comment = $(".save-comment");
     $edit_comment.click(function(e){
         $(this).hide();
         var id = $(this).attr('data-id');
-        $("#com"+id).show();
+        $("#com"+id).attr('style', '');
         $("#cbody"+id).hide();
-        $("#editor"+id).show();
+        $("#ceditor"+id).show();
+        $("#can-ed-com"+id).attr('style', '');
+    });
+
+    $cancel_edit_comment.click(function(e) {
+        $(this).hide();
+        var id = $(this).attr('data-id');
+        $("#com"+id).hide();
+        $("#cbody"+id).show();
+        $("#ceditor"+id).hide();
+        $("#ed-com"+id).attr('style', '');
     });
 
     $save_comment.click(function(e){
