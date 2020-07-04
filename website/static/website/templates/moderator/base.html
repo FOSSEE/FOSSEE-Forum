@@ -50,27 +50,6 @@
                         <!-- Collect the nav links, forms, and other content for toggling -->
                         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                             <ul class="nav navbar-nav navbar-right">
-
-                              <li>
-                                <a onclick="retrain_spam_filter()" style="cursor: pointer;">
-                                    Re-train Spam Filter
-                                </a>
-                              </li>
-
-                              <li>
-                                <a onclick="user_panel()" style="cursor: pointer;">
-                                    User Panel
-                                </a>
-                                <script type="text/javascript">
-                                    function user_panel(){
-                                        window.location.replace("{% url 'website:moderator_deactivate' %}?next={{ request.path }}");
-                                    }
-                                    function retrain_spam_filter(){
-                                        window.location.replace("{% url 'website:train_spam_filter' %}?next={{ request.path }}")
-                                    }
-                                </script>
-                              </li>
-
                               <li class="dropdown">
 
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">
@@ -90,6 +69,25 @@
                                     </li>
                                 </ul>
 
+                              </li>
+                              <li>
+                                <a onclick="retrain_spam_filter()" style="cursor: pointer;">
+                                    Re-train Spam Filter
+                                </a>
+                              </li>
+                              <li>
+                                <a class="btn-primary" onclick="user_panel()" style="cursor: pointer;">
+                                    User Dashboard
+                                </a>
+                                <script type="text/javascript">
+                                    function user_panel(){
+                                        alert("You are switching to user dashboard");
+                                        window.location.replace("{% url 'website:moderator_deactivate' %}?next={{ request.path }}");
+                                    }
+                                    function retrain_spam_filter(){
+                                        window.location.replace("{% url 'website:train_spam_filter' %}?next={{ request.path }}")
+                                    }
+                                </script>
                               </li>
                               <li class="dropdown">
 
@@ -134,7 +132,7 @@
                 </a>
                 <div class="cc">
                     <a class="cc-logo" rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">
-                        <img src="/static/website/images/cc-logo-88x31.png" alt="CC logo">
+                        <img src="/static/website/images/88x31.png" alt="CC logo">
                     </a> This forum by FOSSEE at <a href="http://www.iitb.ac.in" target="_blank">IIT Bombay</a> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Creative Commons Attribution-ShareAlike 4.0 International License</a>
                 </div> 
             </div> <!-- /#footer-inner -->
