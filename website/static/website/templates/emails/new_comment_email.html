@@ -10,12 +10,12 @@ A new comment has been posted under the following question in the FOSSEE Forum:<
 <b>Your Answer: </b>
 
 {% autoescape off %}{{ answer }}{% endautoescape %}
-{% elif last_comment %}
-<b>Your Comment: </b>
 
+{% elif last_comment %}
+<br><b>Your Comment: </b>
 {% autoescape off %}{{ last_comment }}{% endautoescape %}
 {% endif %}
-<b>Link: </b><a href="{{ link }}">{{ link }}</a><br>
+<br><b>Link: </b><a href="{{ link }}">{{ link }}</a><br>
 <br>
 <br>
 Regards,<br>
