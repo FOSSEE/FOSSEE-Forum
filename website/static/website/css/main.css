@@ -516,12 +516,12 @@ a.spam-comment {
     display: none;
 }
 
-a.delete:hover, a.delete:focus, a.delete:active, a.delete-comment:hover, a.delete-comment:focus, a.delete-comment:active, a.restore-comment:hover, a.restore-comment:focus, a.restore-comment:active, a.edit-comment:hover, a.edit-comment:focus, a.edit-comment:active, a.save-comment:hover, a.save-comment:focus, a.save-comment:active, a.cancel-edit-comment:hover, a.cancel-edit-comment:focus, a.cancel-edit-comment:active {
+a.delete, a.delete:focus, a.delete:active, a.delete-comment, a.delete-comment:focus, a.delete-comment:active, a.restore-comment, a.restore-comment:focus, a.restore-comment:active, a.edit-comment, a.edit-comment:focus, a.edit-comment:active, a.save-comment, a.save-comment:focus, a.save-comment:active, a.cancel-edit-comment, a.cancel-edit-comment:focus, a.cancel-edit-comment:active {
     background-color: #b30000;
     border-color: #cc0000;
 }
 
-.comment:hover a.delete-comment, a.delete-comment:hover, .comment:hover a.restore-comment, a.restore-comment:hover, .comment:hover a.edit-comment, a.edit-comment:hover, .comment:hover a.save-comment, a.save-comment:hover, .comment:hover a.cancel-edit-comment, a.cancel-edit-comment:hover, .comment:hover a.spam-comment, a.spam-comment:hover {
+.comment a.delete-comment, a.delete-comment, .comment a.restore-comment, a.restore-comment, .comment a.edit-comment, a.edit-comment, .comment a.save-comment, a.save-comment, .comment a.cancel-edit-comment, a.cancel-edit-comment, .comment a.spam-comment, a.spam-comment {
     display: inline-block;
 }
 
