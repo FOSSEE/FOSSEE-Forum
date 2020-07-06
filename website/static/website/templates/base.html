@@ -76,13 +76,15 @@
                                 {% if user.is_authenticated %}
                                 {% if user|is_moderator %}
                                 <li>
-                                    <a onclick="moderator()" style="cursor: pointer;"  class="btn-danger">Moderator Dashboard</a>
+                                    <a onclick="moderator()" style="cursor: pointer;"  class="btn-danger">Switch to Moderator Dashboard</a>
                                 </li>
                                 <script type="text/javascript">
                                     function moderator() {
-                                        alert("You are switching to moderator dashboard");
+                                        if(confirm("Are you sure switch to Moderator Dashboard?")){
                                         window.location.replace(
                                             "{% url 'website:moderator_activate' %}?next={{ request.path }}");
+                                        }else{
+                                        }
                                     }
                                 </script>
                                 {% endif %}
