@@ -81,8 +81,10 @@
                                 </a>
                                 <script type="text/javascript">
                                     function user_panel(){
-                                        alert("You are switching to user dashboard");
+                                       if(confirm("Are you sure switch to User Dashboard?")){
                                         window.location.replace("{% url 'website:moderator_deactivate' %}?next={{ request.path }}");
+                                    }else{
+                                    }
                                     }
                                     function retrain_spam_filter(){
                                         window.location.replace("{% url 'website:train_spam_filter' %}?next={{ request.path }}")
