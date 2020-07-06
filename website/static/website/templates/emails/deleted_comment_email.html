@@ -9,11 +9,11 @@ The following comment has been deleted by {% if by_moderator %}a moderator{% els
 <b>Answer: </b>
 
 {% autoescape off %}{{ answer }}{% endautoescape %}
-
+<br>
 <b>Comment: </b>
 
 {% autoescape off %}{{ comment }}{% endautoescape %}
-
+<br>
 {% if by_moderator %}<b>Moderator Comments: </b>{{ reason }}<br><br>{% endif %}
 <br>
 Regards,<br>
