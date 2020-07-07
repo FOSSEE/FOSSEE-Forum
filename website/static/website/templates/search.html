@@ -79,9 +79,8 @@
             dataType: "html",
             success: function(data) {
                 $keyword_search_results.html(data);
-                console.log(data);
                 data = $("#myTable").DataTable({
-                  // 'sPaginationType': "scrolling"
+                  "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]]
                 });
             }
         });
