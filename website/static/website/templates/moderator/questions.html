@@ -13,6 +13,7 @@
 	    $(document).ready(function()
 		{
 		var table = $("#myTable").DataTable({
+            "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]]
           });
         $('#category').change(function(e){
             var selectedCategory = $(this).children("option:selected").val();

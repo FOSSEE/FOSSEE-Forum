@@ -74,6 +74,17 @@
                                     </a>
                                 </li>
                                 {% if user.is_authenticated %}
+                                <li>
+                                    <a href="{% url 'website:user_notifications' user.id %}">
+                                        Notifications
+                                        <span class="badge" style="background:#ec0b16; color:#ffffff;">
+                                            {% load notify %}
+                                            {% notification_count user.id %}
+                                        </span>
+                                    </a>
+                                </li>
+                                {% endif %}
+                                {% if user.is_authenticated %}
                                 {% if user|is_moderator %}
                                 <li>
                                     <a onclick="moderator()" style="cursor: pointer;"  class="btn-danger">Switch to Moderator Dashboard</a>
@@ -143,7 +154,7 @@
                 <div class="cc">
                     <a class="cc-logo" rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"
                         target="_blank">
-                        <img src="/static/website/images/88x31.png" alt="CC logo">
+                        <img src="{% static 'website/images/88x31.png' %}" alt="CC logo">
                     </a> This forum by FOSSEE at <a href="http://www.iitb.ac.in" target="_blank">IIT Bombay</a> is
                     licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"
                         target="_blank">Creative Commons Attribution-ShareAlike 4.0 International License</a>

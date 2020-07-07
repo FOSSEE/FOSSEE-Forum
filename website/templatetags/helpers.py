@@ -20,7 +20,7 @@ def prettify(string):
 # Getting only the 100 most recent questions
 @register.filter
 def get_recent_questions(questions):
-    return questions[:100]
+    return questions
 
 # Concatenating two strings in template
 @register.filter

@@ -237,7 +237,7 @@
                 {% endif %}
                 {% if answer.is_active and not question.category.disabled %}
                 <a data-toggle="modal" data-target="#detailsModal{{ answer.id }}" href="#">
-                    <span class="glyphicon glyphicon-edit"></span>
+                    <span class="glyphicon glyphicon-edit"></span> <span class="btn-xs btn-danger">Mark answer as spam/not spam</span>
                 </a>
                 {% endif %}
             {% endif %}
