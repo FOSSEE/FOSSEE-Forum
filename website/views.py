@@ -1,6 +1,8 @@
 # standard library
 from builtins import str, zip
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
+from django.utils import timezone
+
 
 # third-party
 import openpyxl
@@ -199,6 +201,7 @@ def send_remider_mail():
             print("***** Mail already sent on ", sent_date, " *****")
             pass
         else:
+            auto_clean_spam()
             a = Cron()
             a.unanswered_notification()
             Scheduled_Auto_Mail.objects.get_or_create(id=1, defaults=dict(
@@ -2100,3 +2103,53 @@ def send_comment_approve_notification(comment):
         })
     plain_message = strip_tags(html_message)
     send_email(subject, plain_message, html_message, from_email, to)
+
+
+def auto_clean_spam():
+    current_date = timezone.now().isoformat()
+    days_before = (timezone.now()-timedelta(days=30)).isoformat()
+    # filter spam questions
+    questions = Question.objects.filter(
+        is_spam=True, is_active=True, date_created__lte=days_before
+    ).order_by('date_created').values()
+    question_count = 0
+    for x in questions:
+        Question.objects.filter(
+                id=x['id']).update(
+                is_active=False)
+        question_count += 1
+        print("Deleted 30 days old spam question")
+    answers = Answer.objects.filter(
+        is_spam=True, is_active=True, date_created__lte=days_before
+    ).order_by('date_created').values()
+    answer_count = 0
+    for y in answers:
+        Answer.objects.filter(
+                id=y['id']).update(
+                is_active=False)
+        answer_count += 1
+        print("Deleted 30 days old spam answers")
+    answerscommnet = AnswerComment.objects.filter(
+        is_spam=True, is_active=True, date_created__lte=days_before
+    ).order_by('date_created').values()
+    commentcount = 0
+    for z in answerscommnet:
+        AnswerComment.objects.filter(
+                id=z['id']).update(
+                is_active=False)
+        commentcount = 0
+        print("Deleted 30 days old spam answers comment")
+
+    if question_count > 0 or answer_count > 0 or commentcount > 0 :
+        subject = "FOSSEE Forums - 30 days old spam question/answer/"\
+                  "comment deleted"
+        to = [settings.BCC_EMAIL_ID]
+        from_email = settings.SENDER_EMAIL
+        html_message = render_to_string(
+            'website/templates/emails/old_spam_deleted_email.html', {
+                'question': question_count,
+                'answer': answer_count,
+                'comment': commentcount
+            })
+        plain_message = strip_tags(html_message)
+        send_email(subject, plain_message, html_message, from_email, to)
