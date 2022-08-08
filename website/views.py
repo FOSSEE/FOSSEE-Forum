@@ -697,6 +697,24 @@ def add_Spam(question_body, is_spam):
     sheet['B%s' % n] = is_spam
     xfile.save('DataSet.xlsx')
 
+# View for closing question
+@login_required
+def toggle_close_question(request, question_id):
+    question = get_object_or_404(Question, id=question_id, is_active=True)
+    title = question.title
+    # To prevent random user from manually entering the link and deleting
+    if ((request.user.id != question.user.id or question.answer_set.filter(
+            is_active=True).count() > 0) and (not is_moderator(request.user, question) or not settings.MODERATOR_ACTIVATED)):
+        return render(request, 'website/templates/not-authorized.html')
+
+
+    if question.is_answering_closed:
+        question.is_answering_closed = False
+    else:
+        question.is_answering_closed = True
+    question.save()
+    return HttpResponseRedirect('/question/{0}/'.format(question_id))
+
 # View for deleting question, notification is sent to mailing list
 # team@fossee.in
 @login_required

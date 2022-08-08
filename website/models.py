@@ -65,6 +65,7 @@ class Question(models.Model):
     num_votes = models.IntegerField(default=0)
     is_spam = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
+    is_answering_closed = models.BooleanField(default=False)
     image = ResizedImageField(
         size=[
             800,

@@ -102,6 +102,7 @@
                     <th>Answers</th>
                     <th>Spam</th>
                     <th>Deleted</th>
+                    <th>Answering Closed</th>
                 </tr> 
             </thead>
             
@@ -141,11 +142,13 @@
                     <td>
                         {{ question.is_active|yesno:"No, Yes" }}
                     </td>
+                    <td>
+                        {{ question.is_answering_closed|yesno:"Yes, No" }}
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody> 
         </table>
-
 
     </div> <!-- /.panel-body -->
 </div> <!-- /.panel -->

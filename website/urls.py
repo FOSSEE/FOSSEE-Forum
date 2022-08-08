@@ -19,6 +19,10 @@ urlpatterns = [
         views.edit_question,
         name='edit_question'),
     path(
+        'question/toggle_close/<int:question_id>/',
+        views.toggle_close_question,
+        name='toggle_close_question'),
+    path(
         'question-answer/<int:question_id>/',
         views.question_answer,
         name='question_answer'),
