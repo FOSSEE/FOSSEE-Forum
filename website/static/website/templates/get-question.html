@@ -471,53 +471,57 @@
 
 {% if not MODERATOR_ACTIVATED and not question.is_spam and not question.category.disabled %}
 {% if user.is_authenticated %}
-<form action="{% url 'website:question_answer' question.id %}" method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    {% with WIDGET_ERROR_CLASS='field_error' %}
 
-    <div class="row">
-        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            {{ form.body.errors }}
-            <div class="form-group">
-                {% render_field form.question value=question.id %}
-                <label for="id_body">
-                    <h4><u>Your Answer:</u></h4>
-                </label>
-                <br>
-                {% render_field form.body class+="form-control body" id="editor1" %}
-                <br>
-                <br>
-                <label for="id_image">Upload an image:</label>
-                {% render_field form.image %}
+    {% if not question.is_answering_closed %}
+        <form action="{% url 'website:question_answer' question.id %}" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% with WIDGET_ERROR_CLASS='field_error' %}
+
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    {{ form.body.errors }}
+                    <div class="form-group">
+                        {% render_field form.question value=question.id %}
+                        <label for="id_body">
+                            <h4><u>Your Answer:</u></h4>
+                        </label>
+                        <br>
+                        {% render_field form.body class+="form-control body" id="editor1" %}
+                        <br>
+                        <br>
+                        <label for="id_image">Upload an image:</label>
+                        {% render_field form.image %}
+                    </div>
+                </div>
             </div>
+            {% endwith %}
+
+            <script src='https://www.google.com/recaptcha/api.js'></script>
+
+            <div class="g-recaptcha" data-sitekey="{{ SITE_KEY }}" data-callback="enableBtn"></div>
+
+            <script type="text/javascript">
+                function enableBtn() {
+                    document.getElementById("submit_answer").disabled = false;
+                }
+
+                function changeText() {
+                    document.getElementById("submit_answer").value = "Submitting...";
+                    alert("Thank you for answering. It will be published after moderator approval");
+                    return validate_dd();
+                }
+            </script>
+            <div style="color:red">{{ error }}</div>
+            <br>
+
+            <input id="submit_answer" class="btn btn-sm btn-info" onclick="changeText()" type="submit" value="Submit Answer"
+                disabled>
+        </form>
+    {% else %}
+        <div class="row">
+            This question is closed to new answers
         </div>
-    </div>
-
-
-    {% endwith %}
-
-    <script src='https://www.google.com/recaptcha/api.js'></script>
-
-    <div class="g-recaptcha" data-sitekey="{{ SITE_KEY }}" data-callback="enableBtn"></div>
-
-    <script type="text/javascript">
-        function enableBtn() {
-            document.getElementById("submit_answer").disabled = false;
-        }
-
-        function changeText() {
-            document.getElementById("submit_answer").value = "Submitting...";
-            alert("Thank you for answering. It will be published after moderator approval");
-            return validate_dd();
-        }
-    </script>
-    <div style="color:red">{{ error }}</div>
-    <br>
-
-    <input id="submit_answer" class="btn btn-sm btn-info" onclick="changeText()" type="submit" value="Submit Answer"
-        disabled>
-</form>
-
+    {% endif %}
 {% else %}
 <h4>
     <a class="btn btn-xs btn-success"
