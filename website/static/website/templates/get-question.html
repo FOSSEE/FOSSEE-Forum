@@ -111,6 +111,7 @@
             {% endif %}
 
             <span class="modify">
+<<<<<<< HEAD
                 {% if not question.category.disabled %}
                     {% if user|is_author:question and not ans_count or MODERATOR_ACTIVATED %}
                     {% if question.is_active %}
@@ -122,6 +123,11 @@
                     {% else %}
                     <a class="restore btn btn-xs btn-info"
                         href="{% url 'website:question_restore' question.id %}">Restore</a>
+                    {% endif %}
+                    {% if question.is_answering_closed %}
+                    <a class="btn btn-xs btn-info" href="{% url 'website:toggle_close_question' question.id %}">Open</a>
+                    {% else %}
+                    <a class="btn btn-xs btn-warning" href="{% url 'website:toggle_close_question' question.id %}">Close</a>
                     {% endif %}
                     {% endif %}
                 {% endif %}
@@ -183,6 +189,7 @@
         <div class="answer {{blur}} {% if user|is_author:answer %}editable {% endif %}"
             id="answer{{answer.id}}" style="margin-left: 63px;">
             <div class="body" id="body{{ answer.id }}" style="padding-bottom: 12px; padding-top: 15px">
+<<<<<<< HEAD
                 {% if not question.category.disabled %}
                     {% if MODERATOR_ACTIVATED or user|is_author:answer and answer|havenot_comments %}
                     <form id="form{{ answer.id }}" method="POST" action="{% url 'website:answer_update' %}">
@@ -195,6 +202,16 @@
                         </div>
                     </form>
                     {% endif %}
+=======
+                {% if MODERATOR_ACTIVATED or user|can_edit:answer and answer|havenot_comments and question.is_answering_closed %}
+                <form id="form{{ answer.id }}" method="POST" action="{% url 'website:ajax_answer_update' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="answer_id" value="{{ answer.id }}">
+                    <div class="edit-answer" id="ans{{ answer.id }}1">
+                        {% render_field form.body class+="form-control body" name="answer_body" id=answer.id %}
+                    </div>
+                </form>
+>>>>>>> 72103fc... Add close/open button to get-question template
                 {% endif %}
 
                 <div id="ans{{ answer.id }}2">{{ answer.body| safe }}</div>
@@ -469,7 +486,10 @@
 </div> <!-- /.row -->
 {% endfor %}
 
+<<<<<<< HEAD
 {% if not MODERATOR_ACTIVATED and not question.is_spam and not question.category.disabled %}
+=======
+>>>>>>> 72103fc... Add close/open button to get-question template
 {% if user.is_authenticated %}
 
     {% if not question.is_answering_closed %}
@@ -528,7 +548,6 @@
         href="{% url 'user_login'%}?next={{ request.get_full_path|urlencode }}"><b>Log-in</b></a> to answer to this
     question.
 </h4>
-{% endif %}
 {% endif %}
 
 <!-- Modal to delete question -->
