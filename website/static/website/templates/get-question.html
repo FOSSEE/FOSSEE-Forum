@@ -104,6 +104,11 @@
                 <a class="restore btn btn-xs btn-info"
                     href="{% url 'website:question_restore' question.id %}">Restore</a>
                 {% endif %}
+                {% if question.is_answering_closed %}
+                <a class="btn btn-xs btn-info" href="{% url 'website:toggle_close_question' question.id %}">Open</a>
+                {% else %}
+                <a class="btn btn-xs btn-warning" href="{% url 'website:toggle_close_question' question.id %}">Close</a>
+                {% endif %}
                 {% endif %}
             </span>
 
@@ -158,7 +163,7 @@
         <div class="answer {% if MODERATOR_ACTIVATED or user|can_edit:answer %}editable {% else %} {% if answer.is_spam %}blur {% endif %}{% endif %}"
             id="answer{{answer.id}}" style="margin-left: 63px;">
             <div class="body" id="body{{ answer.id }}" style="padding-bottom: 12px; padding-top: 15px">
-                {% if MODERATOR_ACTIVATED or user|can_edit:answer and answer|havenot_comments %}
+                {% if MODERATOR_ACTIVATED or user|can_edit:answer and answer|havenot_comments and question.is_answering_closed %}
                 <form id="form{{ answer.id }}" method="POST" action="{% url 'website:ajax_answer_update' %}">
                     {% csrf_token %}
                     <input type="hidden" name="answer_id" value="{{ answer.id }}">
@@ -405,7 +410,6 @@
 </div> <!-- /.row -->
 {% endfor %}
 
-{% if not MODERATOR_ACTIVATED %}
 {% if user.is_authenticated %}
 
     {% if not question.is_answering_closed %}
@@ -464,7 +468,6 @@
         href="{% url 'user_login'%}?next={{ request.get_full_path|urlencode }}"><b>Log-in</b></a> to answer to this
     question.
 </h4>
-{% endif %}
 {% endif %}
 
 <!-- Modal to delete question -->
