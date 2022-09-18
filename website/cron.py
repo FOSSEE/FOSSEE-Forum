@@ -25,7 +25,9 @@ class Cron(object):
         try:
             weekago = DT.date.today() - DT.timedelta(days=6)
             questions = Question.objects\
-                .filter(date_created__lte=weekago, is_spam=0)
+                .filter(date_created__lte=weekago, is_spam=0,
+                    is_answering_closed=False
+                )
         except Exception as e:
             print("No questions found")
         category_count = FossCategory.objects.count()
