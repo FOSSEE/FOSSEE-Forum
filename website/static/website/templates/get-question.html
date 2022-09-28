@@ -189,9 +189,8 @@
         <div class="answer {{blur}} {% if user|is_author:answer %}editable {% endif %}"
             id="answer{{answer.id}}" style="margin-left: 63px;">
             <div class="body" id="body{{ answer.id }}" style="padding-bottom: 12px; padding-top: 15px">
-<<<<<<< HEAD
                 {% if not question.category.disabled %}
-                    {% if MODERATOR_ACTIVATED or user|is_author:answer and answer|havenot_comments %}
+                    {% if MODERATOR_ACTIVATED or user|is_author:answer and answer|havenot_comments and question.is_answering_closed%}
                     <form id="form{{ answer.id }}" method="POST" action="{% url 'website:answer_update' %}">
                         {% csrf_token %}
                         <input type="hidden" name="answer_id" value="{{ answer.id }}">
@@ -202,16 +201,6 @@
                         </div>
                     </form>
                     {% endif %}
-=======
-                {% if MODERATOR_ACTIVATED or user|can_edit:answer and answer|havenot_comments and question.is_answering_closed %}
-                <form id="form{{ answer.id }}" method="POST" action="{% url 'website:ajax_answer_update' %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="answer_id" value="{{ answer.id }}">
-                    <div class="edit-answer" id="ans{{ answer.id }}1">
-                        {% render_field form.body class+="form-control body" name="answer_body" id=answer.id %}
-                    </div>
-                </form>
->>>>>>> 72103fc... Add close/open button to get-question template
                 {% endif %}
 
                 <div id="ans{{ answer.id }}2">{{ answer.body| safe }}</div>
@@ -486,10 +475,8 @@
 </div> <!-- /.row -->
 {% endfor %}
 
-<<<<<<< HEAD
 {% if not MODERATOR_ACTIVATED and not question.is_spam and not question.category.disabled %}
-=======
->>>>>>> 72103fc... Add close/open button to get-question template
+get-question template
 {% if user.is_authenticated %}
 
     {% if not question.is_answering_closed %}
