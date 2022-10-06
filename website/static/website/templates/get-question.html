@@ -111,7 +111,6 @@
             {% endif %}
 
             <span class="modify">
-<<<<<<< HEAD
                 {% if not question.category.disabled %}
                     {% if user|is_author:question and not ans_count or MODERATOR_ACTIVATED %}
                     {% if question.is_active %}
@@ -476,7 +475,6 @@
 {% endfor %}
 
 {% if not MODERATOR_ACTIVATED and not question.is_spam and not question.category.disabled %}
-get-question template
 {% if user.is_authenticated %}
 
     {% if not question.is_answering_closed %}
