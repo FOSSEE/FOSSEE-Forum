@@ -774,7 +774,7 @@ def toggle_close_question(request, question_id):
     title = question.title
     # To prevent random user from manually entering the link and deleting
     if ((request.user.id != question.user.id or question.answer_set.filter(
-            is_active=True).count() > 0) and (not is_moderator(request.user, question) or not settings.MODERATOR_ACTIVATED)):
+            is_active=True).count() > 0) and (not is_moderator(request.user, question))):
         return render(request, 'website/templates/not-authorized.html')
 
 
