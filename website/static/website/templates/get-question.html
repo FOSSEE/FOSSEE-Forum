@@ -474,6 +474,13 @@
 </div> <!-- /.row -->
 {% endfor %}
 
+{% if question.is_answering_closed %}
+    <div>
+        <br>
+        <h3>This question is closed to new answers</h3>
+    </div>
+{% endif %}
+
 {% if not MODERATOR_ACTIVATED and not question.is_spam and not question.category.disabled %}
 {% if user.is_authenticated %}
 
@@ -522,11 +529,6 @@
             <input id="submit_answer" class="btn btn-sm btn-info" onclick="changeText()" type="submit" value="Submit Answer"
                 disabled>
         </form>
-    {% else %}
-        <div>
-            <br>
-            <h3>This question is closed to new answers</h3>
-        </div>
     {% endif %}
 {% else %}
 <h4>
