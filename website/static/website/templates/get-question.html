@@ -531,11 +531,12 @@
         </form>
     {% endif %}
 {% else %}
-<h4>
-    <a class="btn btn-xs btn-success"
-        href="{% url 'user_login'%}?next={{ request.get_full_path|urlencode }}"><b>Log-in</b></a> to answer to this
-    question.
-</h4>
+    {% if not question.is_answering_closed %}
+        <h4>
+            <a class="btn btn-xs btn-success"
+                href="{% url 'user_login'%}?next={{ request.get_full_path|urlencode }}"><b>Log-in</b></a> to answer to this question.
+        </h4>
+    {% endif %}
 {% endif %}
 {% endif %}
 
