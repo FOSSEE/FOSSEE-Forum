@@ -767,6 +767,24 @@ def answer_comment_update(request):
     return render(request, 'website/templates/get-requests-not-allowed.html')
 
 
+# View for closing question
+@login_required
+def toggle_close_question(request, question_id):
+    question = get_object_or_404(Question, id=question_id, is_active=True)
+    title = question.title
+    # To prevent random user from manually entering the link and deleting
+    if ((request.user.id != question.user.id or question.answer_set.filter(
+            is_active=True).count() > 0) and (not is_moderator(request.user, question))):
+        return render(request, 'website/templates/not-authorized.html')
+
+
+    if question.is_answering_closed:
+        question.is_answering_closed = False
+    else:
+        question.is_answering_closed = True
+    question.save()
+    return HttpResponseRedirect('/question/{0}/'.format(question_id))
+
 # View for deleting question, notification is sent to mailing list
 # team@fossee.in
 @login_required

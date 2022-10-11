@@ -12,7 +12,7 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('questions/', views.questions, name='questions'),
     path('question/<int:question_id>/', views.get_question, name='get_question'),
-
+    path('question/toggle_close/<int:question_id>/', views.toggle_close_question, name='toggle_close_question'),
     path('new-question/', views.new_question, name='new_question'),
     path('question-answer/<int:question_id>/', views.question_answer, name='question_answer'),
     path('answer-comment/<int:answer_id>/', views.answer_comment, name='answer_comment'),

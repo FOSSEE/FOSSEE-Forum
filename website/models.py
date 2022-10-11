@@ -72,6 +72,7 @@ class Question(models.Model):
     is_spam = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     notif_flag = models.IntegerField(default=0)
+    is_answering_closed = models.BooleanField(default=False)
     image = ResizedImageField(
         size=[
             800,
