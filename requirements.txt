@@ -5,7 +5,7 @@ beautifulsoup4==4.6.0
 certifi==2018.10.15
 chardet==3.0.4
 decorator==4.3.0
-Django==3.0.6
+Django==3.1.14
 django-antispam==1.0.1
 django-appconf==1.0.2
 django-ckeditor==5.9.0
