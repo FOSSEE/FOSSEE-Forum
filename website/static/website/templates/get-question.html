@@ -429,37 +429,41 @@
                 <!-- Add New Comment -->
                 <!-- Only Authenticated users are allowed to post comments -->
                 {% if user.is_authenticated %} 
-                    {% if not MODERATOR_ACTIVATED %}
+                    {% if not question.is_answering_closed %}
+                        {% if not MODERATOR_ACTIVATED %}
+                            {% if not question.category.disabled %}
+                            <form id="comment_form{{ answer.id }}" method="post" action="{% url 'website:answer_comment' answer.id %}">
+                                {% csrf_token %}
+                                <div class="new-comment" id="comment{{ answer.id }}1">
+                                    {% render_field form.body class+="form-control body" id=answer|comment_id %}
+                                </div>
+                            </form>
+                            <a class="add-comment {% if answer.is_spam %}blur{% endif %}"
+                                data-target="comment{{ answer.id }}" id="comment{{ answer.id }}">
+                                <small>Add Comment</small>
+                            </a>
+                            {% endif %}
+                            {% if answer.is_spam and not user|is_author:answer %}
+                            <div class="text-danger" style="margin-top: 10px;">Oops! Looks like spam! Waiting for moderator approval</div>
+                            {% endif %}
+                        {% endif %}
+                        <a class="post-comment" data-target="comment{{ answer.id }}" data-aid="comment{{ answer.id }}"
+                            data-form="comment_form{{ answer.id }}" onclick="submit_btn()">
+                            <small>Post Comment</small>
+                        </a>
+                        <a class="cancel-comment" data-target="comment{{ answer.id }}">
+                            <small>Cancel Comment</small>
+                        </a>
+                    {% endif %}
+                {% else %}
+                    {% if not question.is_answering_closed %}
                         {% if not question.category.disabled %}
-                        <form id="comment_form{{ answer.id }}" method="post" action="{% url 'website:answer_comment' answer.id %}">
-                            {% csrf_token %}
-                            <div class="new-comment" id="comment{{ answer.id }}1">
-                                {% render_field form.body class+="form-control body" id=answer|comment_id %}
-                            </div>
-                        </form>
-                        <a class="add-comment {% if answer.is_spam %}blur{% endif %}"
-                            data-target="comment{{ answer.id }}" id="comment{{ answer.id }}">
-                            <small>Add Comment</small>
+                        <a class="btn btn-xs btn-success vs {% if answer.is_spam %}blur{% endif %}" 
+                            href="{% url 'user_login'%}?next={{ request.get_full_path|urlencode }}"
+                            style="padding-top: 2px !important;">
+                            Login to add comment
                         </a>
                         {% endif %}
-                        {% if answer.is_spam and not user|is_author:answer %}
-                        <div class="text-danger" style="margin-top: 10px;">Oops! Looks like spam! Waiting for moderator approval</div>
-                        {% endif %}
-                    {% endif %}
-                <a class="post-comment" data-target="comment{{ answer.id }}" data-aid="comment{{ answer.id }}"
-                    data-form="comment_form{{ answer.id }}" onclick="submit_btn()">
-                    <small>Post Comment</small>
-                </a>
-                <a class="cancel-comment" data-target="comment{{ answer.id }}">
-                    <small>Cancel Comment</small>
-                </a>
-                {% else %}
-                    {% if not question.category.disabled %}
-                    <a class="btn btn-xs btn-success vs {% if answer.is_spam %}blur{% endif %}" 
-                        href="{% url 'user_login'%}?next={{ request.get_full_path|urlencode }}"
-                        style="padding-top: 2px !important;">
-                        Login to add comment
-                    </a>
                     {% endif %}
                     {% if answer.is_spam %}
                     <div class="text-danger" style="margin-top: 10px;">Oops! Looks like spam! Waiting for moderator approval</div>
