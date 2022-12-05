@@ -456,12 +456,14 @@
                         </a>
                     {% endif %}
                 {% else %}
-                    {% if not question.category.disabled %}
-                    <a class="btn btn-xs btn-success vs {% if answer.is_spam %}blur{% endif %}" 
-                        href="{% url 'user_login'%}?next={{ request.get_full_path|urlencode }}"
-                        style="padding-top: 2px !important;">
-                        Login to add comment
-                    </a>
+                    {% if not question.is_answering_closed %}
+                        {% if not question.category.disabled %}
+                        <a class="btn btn-xs btn-success vs {% if answer.is_spam %}blur{% endif %}" 
+                            href="{% url 'user_login'%}?next={{ request.get_full_path|urlencode }}"
+                            style="padding-top: 2px !important;">
+                            Login to add comment
+                        </a>
+                        {% endif %}
                     {% endif %}
                     {% if answer.is_spam %}
                     <div class="text-danger" style="margin-top: 10px;">Oops! Looks like spam! Waiting for moderator approval</div>
