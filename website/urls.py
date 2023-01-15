@@ -39,6 +39,7 @@ urlpatterns = [
     
     path('user/<int:user_id>/notifications/', views.user_notifications, name='user_notifications'),
     path('clear-notifications/', views.clear_notifications, name='clear_notifications'),
+    path('ban_user/<int:user_id>', views.ban_user, name='ban_user'),
 
 
     # Moderator Panel
