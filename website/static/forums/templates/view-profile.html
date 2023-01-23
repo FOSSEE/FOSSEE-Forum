@@ -15,7 +15,6 @@
 {% block content %}
 
 <br>
-BBBBBBBBBBBBBBBBBBBBBBBBB
 {% if messages %}
     {% for message in messages %}
         {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
@@ -235,7 +234,7 @@ BBBBBBBBBBBBBBBBBBBBBBBBB
 
         </div>
     </div>
-    {% if MODERATOR_ACTIVATED %}
+    {% if MODERATOR_ACTIVATED and profile.user.active %}
         <div class="col-lg-3">
             <a class="btn btn-block btn-primary" href="{% url 'website:ban_user' profile.user.id %}" style="margin-top: 18px;">Ban User</a>
         </div>
