@@ -34,7 +34,7 @@
 <br><br>
 
 <div class="col-lg-12 ">
-    {% if not profile.user.active %}
+    {% if not profile.user.is_active %}
         <div class="alert alert-warning">
             This user is banned and will be unable to participate in forum discussions
         </div>
@@ -234,7 +234,7 @@
 
         </div>
     </div>
-    {% if MODERATOR_ACTIVATED and profile.user.active %}
+    {% if MODERATOR_ACTIVATED and profile.user.is_active %}
         <div class="col-lg-3">
             <a class="btn btn-block btn-primary" href="{% url 'website:ban_user' profile.user.id %}" style="margin-top: 18px;">Ban User</a>
         </div>
