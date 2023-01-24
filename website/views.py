@@ -1081,7 +1081,6 @@ def mark_comment_spam(request, comment_id):
     return HttpResponseRedirect(
         '/question/{0}/#comm{1}'.format(question.id, comment.id))
 
-
 def search(request):
     """Render 'Search Questions by Category' Page."""
     if request.session.get('MODERATOR_ACTIVATED', False):
@@ -2171,3 +2170,11 @@ def auto_clean_spam():
             })
         plain_message = strip_tags(html_message)
         send_email(subject, plain_message, html_message, from_email, to)
+
+@login_required
+@user_passes_test(is_moderator)
+def ban_user(request, user_id):
+    user = User.objects.get(id=user_id)
+    user.is_active = False
+    user.save()
+    return HttpResponseRedirect("/accounts/view-profile/{0}/".format(user.id))
