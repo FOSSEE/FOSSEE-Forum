@@ -4,6 +4,8 @@ import nltk
 
 
 def clean_string(myString):
+    if not myString:
+        return ''
 
     # convert text to lowercase
     myString = myString.lower()
