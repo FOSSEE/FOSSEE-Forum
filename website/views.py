@@ -187,32 +187,33 @@ def process_Spam(content_body, is_spam):
 
 
 def send_remider_mail():
-    if date.today().weekday() == 1 or date.today().weekday() == 3:
-        # check in the database for last mail sent date
-        try:
-            is_mail_sent = Scheduled_Auto_Mail.objects.get(
-                pk=1, is_sent=1, is_active=1)
-            sent_date = is_mail_sent.mail_sent_date
-        except Scheduled_Auto_Mail.DoesNotExist:
-            sent_date = None
-        now = datetime.now()
-        date_string = now.strftime("%Y-%m-%d")
-        if sent_date == date_string:
-            print("***** Mail already sent on ", sent_date, " *****")
-            pass
-        else:
-            auto_clean_spam()
-            a = Cron()
-            a.unanswered_notification()
-            Scheduled_Auto_Mail.objects.get_or_create(id=1, defaults=dict(
-                mail_sent_date=date_string, is_sent=1, is_active=1))
-            Scheduled_Auto_Mail.objects.filter(
-                is_sent=1).update(
-                mail_sent_date=date_string)
-            print("***** New Notification Mail sent *****")
-            a.train_spam_filter()
-    else:
-        print("***** Mail not sent *****")
+    pass
+    # if date.today().weekday() == 1 or date.today().weekday() == 3:
+    #     # check in the database for last mail sent date
+    #     try:
+    #         is_mail_sent = Scheduled_Auto_Mail.objects.get(
+    #             pk=1, is_sent=1, is_active=1)
+    #         sent_date = is_mail_sent.mail_sent_date
+    #     except Scheduled_Auto_Mail.DoesNotExist:
+    #         sent_date = None
+    #     now = datetime.now()
+    #     date_string = now.strftime("%Y-%m-%d")
+    #     if sent_date == date_string:
+    #         print("***** Mail already sent on ", sent_date, " *****")
+    #         pass
+    #     else:
+    #         auto_clean_spam()
+    #         a = Cron()
+    #         a.unanswered_notification()
+    #         Scheduled_Auto_Mail.objects.get_or_create(id=1, defaults=dict(
+    #             mail_sent_date=date_string, is_sent=1, is_active=1))
+    #         Scheduled_Auto_Mail.objects.filter(
+    #             is_sent=1).update(
+    #             mail_sent_date=date_string)
+    #         print("***** New Notification Mail sent *****")
+    #         a.train_spam_filter()
+    # else:
+    #     print("***** Mail not sent *****")
 
 
 # VIEWS FUNCTIONS
